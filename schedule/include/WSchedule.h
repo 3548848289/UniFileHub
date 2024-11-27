@@ -4,7 +4,20 @@
 #include <QWidget>
 #include <QListWidget>
 #include <QTimer>
-#include "../manager/include/DBSQlite.h"
+#include <QString>
+#include <QObject>
+#include <QStringLiteral>
+#include <QDesktopServices>
+#include <QUrl>
+#include <QListWidgetItem>
+#include <QTimer>
+#include <QMessageBox>
+
+#include "FileItemWidget.h"
+#include "../../manager/include/DBSQlite.h"
+#include "../LmsgNotify/notifymanager.h"
+// #include "Notify.h"
+
 
 class DatabaseManager;
 
@@ -17,7 +30,7 @@ class WSchedule : public QWidget
     Q_OBJECT
 
 public:
-    explicit WSchedule(DBSQlite *db, QWidget *parent = nullptr);
+    explicit WSchedule(DBSQlite *dbsqlite, QWidget *parent = nullptr);
     ~WSchedule();
 
 signals:
@@ -45,7 +58,9 @@ private:
 
     QTimer *expirationTimer;
     Ui::WSchedule *ui;
-    DBSQlite *db;
+    DBSQlite *dbsqlite;
+    NotifyManager *manager;
+
 };
 
 #endif // WSCHEDULE_H
