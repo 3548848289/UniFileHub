@@ -1,7 +1,7 @@
 #ifndef TABHANDLEIMG_H
 #define TABHANDLEIMG_H
 
-#include "../main/include/TabAbstract.h"
+#include "../../main/include/TabAbstract.h"
 #include "PixItem.h"
 #include <QGraphicsView>
 #include <QGraphicsScene>

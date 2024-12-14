@@ -24,7 +24,7 @@ add_subdirectory(UserInfo)
 add_subdirectory(EmailService)
 add_subdirectory(DisposeAbstract/DisposeTXT)
 add_subdirectory(DisposeAbstract/DisposeCSV)
-add_subdirectory(DisposeAbstract/DisposeIMG)
+add_subdirectory(ImageDispose)
 add_subdirectory(main)
 
 # 添加 SimpleMail 库（已经在 email/CMakeLists.txt 中处理）
@@ -50,7 +50,7 @@ target_link_libraries(SmartDesk PRIVATE
     mytxt_email
     mytxt_txt
     mytxt_csv
-    mytxt_img
+    mytxt_draw
     mytxt_manager
     SimpleMail::Core     # 链接 SimpleMail 核心库
     Qt${QT_VERSION_MAJOR}::Widgets

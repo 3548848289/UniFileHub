@@ -15,9 +15,9 @@
 #include <string>
 #include <QInputDialog>
 #include <QDebug>
-#include <QNetworkInterface>
+#include <QtNetwork/QNetworkInterface>
 #include <QSplitter>
-#include "TabAbstract.h"
+#include "../../main/include/TabAbstract.h"
 #include "ControlWidCSV.h"
 #include "../../manager/include/myJson.h"
 

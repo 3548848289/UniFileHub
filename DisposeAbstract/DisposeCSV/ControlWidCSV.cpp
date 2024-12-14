@@ -1,5 +1,5 @@
-#include "include/ControlWidCSV.h"
-#include "ui/ui_ControlWidCSV.h"
+#include "ControlWidCSV.h"
+#include "ui_ControlWidCSV.h"
 
 ControlWidCSV::ControlWidCSV(QWidget *parent)
     : QWidget(parent), ui(new Ui::ControlWidCSV) {

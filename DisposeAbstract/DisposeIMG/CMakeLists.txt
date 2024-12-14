@@ -11,14 +11,14 @@ set(SCHEDULE_HEADERS
 )
 
 
-qt_add_library(mytxt_draw STATIC
+qt_add_library(mytxt_img STATIC
     ${SCHEDULE_SOURCES}
     ${SCHEDULE_HEADERS}
     ControlFrame.ui
 )
 
-target_link_libraries(mytxt_draw PRIVATE
+target_link_libraries(mytxt_img PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
 )
 
-target_include_directories(mytxt_draw PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(mytxt_img PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

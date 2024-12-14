@@ -1,7 +1,7 @@
 #ifndef TABHANDLETXT_H
 #define TABHANDLETXT_H
 
-#include "TabAbstract.h"
+#include "../../main/include/TabAbstract.h"
 #include <QTextEdit>
 #include <QFile>
 #include <QTextStream>
