@@ -1,6 +1,6 @@
 
-#ifndef FILEBACKUP_H
-#define FILEBACKUP_H
+#ifndef FILEBACKUPWID_H
+#define FILEBACKUPWID_H
 
 #include <QDialog>
 #include <QFile>
@@ -9,29 +9,30 @@
 #include <QDir>
 #include <QMessageBox>
 #include <QDebug>
+#include <QSettings>
 
 namespace Ui {
-class FileBackup;
+class FileBackupWid;
 }
 
-class FileBackup : public QDialog
+class FileBackupWid : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit FileBackup(const QString &filePath, QWidget *parent = nullptr);  // 修改构造函数
+    explicit FileBackupWid(const QString &filePath, QWidget *parent = nullptr);  // 修改构造函数
     QString getBackupFilePath() const;
-    ~FileBackup();
+    ~FileBackupWid();
 
 private slots:
 
     void on_save_clicked();
 
 private:
-    Ui::FileBackup *ui;
+    Ui::FileBackupWid *ui;
     bool backupFile(const QString &filePath, const QString &fileName);
     QString m_backupFilePath; // 存储备份路径
     QString m_filePath;  // 用于保存传入的 filePath
 };
 
-#endif // FILEBACKUP_H
+#endif // FILEBACKUPWID_H

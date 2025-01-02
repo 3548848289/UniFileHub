@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>FileBackup</class>
- <widget class="QDialog" name="FileBackup">
+ <class>FileBackupWid</class>
+ <widget class="QDialog" name="FileBackupWid">
   <property name="geometry">
    <rect>
     <x>0</x>

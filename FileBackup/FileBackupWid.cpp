@@ -1,33 +1,35 @@
-#include "include/FileBackup.h"
-#include "ui/ui_FileBackup.h"
+#include "include/FileBackupWid.h"
+#include "ui/ui_FileBackupWid.h"
 
-FileBackup::FileBackup(const QString &filePath, QWidget *parent) :QDialog(parent),ui(new Ui::FileBackup), m_filePath(filePath)
+FileBackupWid::FileBackupWid(const QString &filePath, QWidget *parent) :QDialog(parent),ui(new Ui::FileBackupWid), m_filePath(filePath)
 {
     ui->setupUi(this);
 
     QString timeStamp = QDateTime::currentDateTime().toString("yyyyMMddHHmmss");
     QString backupFileName = QFileInfo(filePath).baseName() + timeStamp + "." + QFileInfo(filePath).suffix();
 
-    QString appDir = QCoreApplication::applicationDirPath();
-    QString backupDir = appDir + "/../user";
+
+    QSettings settings("settings.ini", QSettings::IniFormat);
+    QString backupDir = settings.value("BackupDir", "D:/CxxProgram/SmartDesk/.build/user").toString();
+
     qDebug() << backupDir;
     ui->edit_path->setText(backupDir);
     ui->edit_name->setText(backupFileName);
 }
 
-QString FileBackup::getBackupFilePath() const {
+QString FileBackupWid::getBackupFilePath() const {
     return m_backupFilePath;
 }
 
 
 
-FileBackup::~FileBackup()
+FileBackupWid::~FileBackupWid()
 {
     delete ui;
 }
 
 
-bool FileBackup::backupFile(const QString &filePath, const QString &fileName)
+bool FileBackupWid::backupFile(const QString &filePath, const QString &fileName)
 {
     QString backupDir = ui->edit_path->text();
     QDir dir(backupDir);
@@ -47,7 +49,7 @@ bool FileBackup::backupFile(const QString &filePath, const QString &fileName)
     }
 }
 
-void FileBackup::on_save_clicked()
+void FileBackupWid::on_save_clicked()
 {
     QString fileName = ui->edit_name->text();
     if (backupFile(m_filePath, fileName)) {
