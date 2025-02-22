@@ -1,25 +1,27 @@
-#ifndef DLFROMNET_H
-#define DLFROMNET_H
+#ifndef DOWNLOADVIEW_H
+#define DOWNLOADVIEW_H
 
 #include <QFile>
 #include <QDir>
 #include <QWidget>
 #include <QMessageBox>
 #include <QDesktopServices>
+#include <QFileDialog>
+#include <QMessageBox>
 
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>
 
 QT_BEGIN_NAMESPACE
-namespace Ui {class DLfromNet;}
+namespace Ui {class DownloadView;}
 QT_END_NAMESPACE
-class downLoad : public QWidget
+class DownloadView : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit downLoad(QWidget *parent = nullptr);
-    ~downLoad();
+    explicit DownloadView(QWidget *parent = nullptr);
+    ~DownloadView();
 
 signals:
     void fileDownloaded(const QString &fileName, const QByteArray &fileContent);
@@ -37,7 +39,7 @@ private:
     QNetworkAccessManager networkManager;
     QNetworkReply *reply;
     QFile *downloadedFile;
-    Ui::DLfromNet *ui;
+    Ui::DownloadView *ui;
 };
 
-#endif // DLFROMNET_H
+#endif // DOWNLOADVIEW_H

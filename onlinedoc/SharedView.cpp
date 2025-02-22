@@ -1,15 +1,15 @@
-#include "./include/csvLinkServer2.h"
-#include "ui/ui_csvLinkServer2.h"
+#include "./include/SharedView.h"
+#include "ui/ui_SharedView.h"
 #include "EditedLog.h"
 
-csvLinkServer::csvLinkServer(QWidget *parent): QWidget(parent),ui(new Ui::csvLinkServer2),
+SharedView::SharedView(QWidget *parent): QWidget(parent),ui(new Ui::SharedView),
     tcpSocket(new QTcpSocket(this)),serverManager(ServerManager::instance()),
     dbservice(dbService::instance("../SmartDesk.db"))
 {
     ui->setupUi(this);
 }
 
-csvLinkServer::~csvLinkServer()
+SharedView::~SharedView()
 {
     delete ui;
     tcpSocket->disconnect();
@@ -17,11 +17,11 @@ csvLinkServer::~csvLinkServer()
     delete tcpSocket;
 }
 
-void csvLinkServer::bindTab(TabHandleCSV *eTableTab)
+void SharedView::bindTab(TabHandleCSV *eTableTab)
 {
     m_tableTab = eTableTab;
 
-    connect(m_tableTab, &TabHandleCSV::dataToSend, this, &csvLinkServer::sendDataToServer);
+    connect(m_tableTab, &TabHandleCSV::dataToSend, this, &SharedView::sendDataToServer);
 
     connect(tcpSocket, &QTcpSocket::connected, this, []() {
         qDebug() << "Connected to server.";
@@ -29,10 +29,10 @@ void csvLinkServer::bindTab(TabHandleCSV *eTableTab)
     connect(tcpSocket, &QTcpSocket::disconnected, this, []() {
         qDebug() << "Disconnected from server.";
     });
-    connect(tcpSocket, &QTcpSocket::readyRead, this, &csvLinkServer::on_readyRead);
+    connect(tcpSocket, &QTcpSocket::readyRead, this, &SharedView::on_readyRead);
 }
 
-void csvLinkServer::on_readyRead()
+void SharedView::on_readyRead()
 {
     QByteArray data = tcpSocket->readAll();
     QString fixedData = QString::fromUtf8(data).replace("\\\\u", "\\u");
@@ -67,12 +67,12 @@ void csvLinkServer::on_readyRead()
     }
 }
 
-void csvLinkServer::on_disconnected()
+void SharedView::on_disconnected()
 {
     QMessageBox::information(this, tr("Disconnected"), tr("Disconnected from server"));
 }
 
-void csvLinkServer::sendDataToServer(const QString &data)
+void SharedView::sendDataToServer(const QString &data)
 {
     if (tcpSocket->isOpen())
     {
@@ -82,7 +82,7 @@ void csvLinkServer::sendDataToServer(const QString &data)
 }
 
 
-void csvLinkServer::on_sendmsgEdit_clicked()
+void SharedView::on_sendmsgEdit_clicked()
 {
     QString message = ui->msgEdit->text();
     if (!message.isEmpty()) {
@@ -91,7 +91,7 @@ void csvLinkServer::on_sendmsgEdit_clicked()
     }
 }
 
-void csvLinkServer::on_linkserverBtn_clicked()
+void SharedView::on_linkserverBtn_clicked()
 {
 
     QString serverIp = "192.168.188.236";
@@ -114,7 +114,7 @@ void csvLinkServer::on_linkserverBtn_clicked()
     }
 }
 
-void csvLinkServer::on_closeserverBtn_clicked()
+void SharedView::on_closeserverBtn_clicked()
 {
     m_tableTab->setLinkStatus(false);
     if (tcpSocket->state() == QAbstractSocket::ConnectedState) {
@@ -132,29 +132,7 @@ void csvLinkServer::on_closeserverBtn_clicked()
     }
 }
 
-void csvLinkServer::on_tableWidget_itemClicked(QTableWidgetItem *item)
-{
-    on_linkserverBtn_clicked();
-    int row = item->row();
-    QTableWidgetItem *firstColumnItem = ui->tableWidget->item(row, 0);
-    QString filePath;
-    if (firstColumnItem)
-    {
-        filePath = firstColumnItem->text();
-        qDebug() << "First column text: " << filePath;
-    }
-
-    QString jsonString = myJson::constructJson(localIp, "read", -1, -1, filePath);
-    qDebug() << "Sending JSON data to server: " << jsonString;
-    QByteArray data = jsonString.toUtf8();
-    tcpSocket->write(data);
-    ui->msgEdit->clear();
-    emit filePathSent();
-}
-
-
-
-void csvLinkServer::on_passwdEdit_editingFinished()
+void SharedView::on_passwdEdit_editingFinished()
 {
     QString shareToken = ui->passwdEdit->text();
     if (shareToken.isEmpty()) {
@@ -165,26 +143,37 @@ void csvLinkServer::on_passwdEdit_editingFinished()
     QStringList files = dbservice.dbOnline().getSharedFilesByShareToken(shareToken);
 
     if (!files.isEmpty()) {
-        ui->tableWidget->clear();
-        ui->tableWidget->setRowCount(files.size());
-        ui->tableWidget->setColumnCount(1);
-        ui->tableWidget->setHorizontalHeaderLabels(QStringList() << tr("远程文件名"));
+        ui->listWidget->clear();  // 清空现有的列表项
 
-        for (int i = 0; i < files.size(); ++i) {
-            QStringList fileInfo = files[i].split(" ");
+        for (const QString &file : files) {
+            QStringList fileInfo = file.split(" ");
             if (fileInfo.size() >= 1) {
-                ui->tableWidget->setItem(i, 0, new QTableWidgetItem(fileInfo[0]));
+                ui->listWidget->addItem(fileInfo[0]);  // 添加文件名到列表
             }
         }
-        ui->tableWidget->resizeColumnsToContents();
     } else {
         QMessageBox::warning(this, tr("警告"), tr("未找到对应的共享文件！"));
     }
 }
 
 
+void SharedView::on_listWidget_itemClicked(QListWidgetItem *item)
+{
+    on_linkserverBtn_clicked();
+    int row = ui->listWidget->row(item);  // 获取当前项的行号
+    QString filePath = item->text();  // 获取项的文本内容
+    qDebug() << "Selected file path: " << filePath;
 
-void csvLinkServer::on_buildBtn_clicked()
+    QString jsonString = myJson::constructJson(localIp, "read", -1, -1, filePath);
+    qDebug() << "Sending JSON data to server: " << jsonString;
+    QByteArray data = jsonString.toUtf8();
+    tcpSocket->write(data);
+    ui->msgEdit->clear();
+    emit filePathSent();
+}
+
+
+void SharedView::on_buildBtn_clicked()
 {
     QString filePath = QFileDialog::getOpenFileName(this, tr("选择文件"), "", tr("All Files (*)"));
     if (filePath.isEmpty()) {
@@ -206,4 +195,5 @@ void csvLinkServer::on_buildBtn_clicked()
     else
         QMessageBox::warning(this, tr("警告"), tr("文件上传失败！"));
 }
+
 

@@ -1,19 +1,23 @@
-#include "./include/DLfromNet.h"
-#include "ui/ui_DLfromNet.h"
+#include "./include/DownloadView.h"
+#include "ui/ui_DownloadView.h"
 
-downLoad::downLoad(QWidget *parent) :QWidget(parent),
-    ui(new Ui::DLfromNet),reply(nullptr),downloadedFile(nullptr){
+DownloadView::DownloadView(QWidget *parent) :QWidget(parent),
+    ui(new Ui::DownloadView),reply(nullptr),downloadedFile(nullptr){
 
     ui->setupUi(this);
     ui->editURL->setClearButtonEnabled(true);
+
+    QString curPath = QDir::currentPath();
+    QDir dir(curPath);
+    ui->editPath->setText(curPath + "/");
 }
 
-downLoad::~downLoad()
+DownloadView::~DownloadView()
 {
     delete ui;
 }
 
-void downLoad::do_finished()
+void DownloadView::do_finished()
 {
     QFileInfo fileInfo(downloadedFile->fileName());
 
@@ -38,25 +42,29 @@ void downLoad::do_finished()
     ui->btnDownload->setEnabled(true);
 }
 
-void downLoad::do_readyRead()
+void DownloadView::do_readyRead()
 {
     downloadedFile->write(reply->readAll());
 }
 
-void downLoad::do_downloadProgress(qint64 bytesRead, qint64 totalBytes)
+void DownloadView::do_downloadProgress(qint64 bytesRead, qint64 totalBytes)
 {
     ui->progressBar->setMaximum(totalBytes);
     ui->progressBar->setValue(bytesRead);
 }
 
-void downLoad::on_btnDefaultPath_clicked()
+
+void DownloadView::on_btnDefaultPath_clicked()
 {
-    QString curPath = QDir::currentPath();
-    QDir dir(curPath);
-    ui->editPath->setText(curPath + "/");
+    QString defaultPath = QCoreApplication::applicationDirPath();
+    QString directory = QFileDialog::getExistingDirectory(
+        this, tr("选择文件夹"), defaultPath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+    if (directory.isEmpty())
+        return;
+    ui->editPath->setText(directory);
 }
 
-void downLoad::on_btnDownload_clicked()
+void DownloadView::on_btnDownload_clicked()
 {
     QString urlSpec = ui->editURL->text().trimmed();
     if (urlSpec.isEmpty())
@@ -97,7 +105,7 @@ void downLoad::on_btnDownload_clicked()
 }
 
 
-void downLoad::on_editURL_textChanged(const QString &arg1)
+void DownloadView::on_editURL_textChanged(const QString &arg1)
 {
     Q_UNUSED(arg1);
     ui->progressBar->setMaximum(100);
