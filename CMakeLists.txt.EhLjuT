@@ -50,7 +50,6 @@ target_link_libraries(SmartDesk PRIVATE
     mytxt_img
     mytxt_manager
     mytxt_morefunction
-    mytxt_clipboard
     SimpleMail::Core
     Qt${QT_VERSION_MAJOR}::Widgets
 )
