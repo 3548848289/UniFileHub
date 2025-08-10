@@ -8,8 +8,8 @@
 #include <QFont>
 #include <QStyleFactory>
 #include "mainwindow.h"
-#include "../../Setting/include/SettingManager.h"
 #include <QStyleHints>
+#include "../../Setting/include/SettingManager.h"
 int main(int argc, char *argv[]) {
 
     int font_size = SettingManager::Instance().all_setting_font_size();
