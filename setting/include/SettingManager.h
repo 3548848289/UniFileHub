@@ -46,6 +46,7 @@ public:
     QString serverconfig_ip3();
     QString serverconfig_ip4();
     QString file_backup_IP();
+    int all_setting_theme();
 private:
     SettingManager();
     ~SettingManager();

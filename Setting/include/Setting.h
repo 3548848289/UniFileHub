@@ -11,6 +11,7 @@
 #include <QStandardPaths>
 #include <QMessageBox>
 #include <QProcess>
+#include <QStyleHints>
 
 namespace Ui {
 class Setting;
@@ -28,6 +29,8 @@ private slots:
     void on_treeWidget_itemClicked(QTreeWidgetItem *item, int column);
     void on_file_system_Btn_clicked();
     void on_file_backup_Btn_clicked();
+
+    void on_all_setting_comboBox_currentIndexChanged(int index);
 
 private:
     Ui::Setting *ui;

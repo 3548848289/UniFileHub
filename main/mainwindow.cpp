@@ -100,10 +100,7 @@ void MainWindow::initConnect() {
         createNewTab([]() { return new TabHandleXLSX(""); }, "New XLSX Tab");
     });
 
-    connect(ui->actionshe, &QAction::triggered, this, [this]() {
-        Setting *setting = new Setting();
-        setting->show();
-    });
+    connect(ui->actionshe, &QAction::triggered, this, &MainWindow::showSetting);
 
     connect(ui->actionh1, &QAction::triggered, this, [this]() {
         int currentIndex = tabWidget->currentIndex();
@@ -205,6 +202,12 @@ void MainWindow::showUserInfoDialog() {
         if (reply == QMessageBox::Yes)
             widgetfunc->on_pushButton_8_clicked();
     }
+}
+
+void MainWindow::showSetting()
+{
+    Setting *setting = new Setting();
+    setting->show();
 }
 
 void MainWindow::on_actionopen_triggered()

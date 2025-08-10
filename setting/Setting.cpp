@@ -44,6 +44,8 @@ void Setting::closeEvent(QCloseEvent *event) {
 
 void Setting::loadSettings() {
     ui->all_setting_spinBox->setValue(settings.value("all_setting/font_size", 12).toInt());
+    ui->all_setting_comboBox->setCurrentIndex(settings.value("all_setting/theme", 0).toInt());
+
     ui->all_setting_checkBox->setChecked(settings.value("all_setting/fenableray", true).toBool());
     ui->file_system_lineEdit->setText(settings.value("file_system/file_system_dir").toString());
     ui->file_see_spinBox->setValue(settings.value("file_see/font_size", 12).toInt());
@@ -84,6 +86,7 @@ void Setting::loadSettings() {
 
 void Setting::saveSettings() {
     settings.setValue("all_setting/font_size", ui->all_setting_spinBox->value());
+    settings.setValue("all_setting/theme", ui->all_setting_comboBox->currentIndex());
     settings.setValue("all_setting/fenableray", ui->all_setting_checkBox->isChecked());
 
     QString filesystemDir = ui->file_system_lineEdit->text();
@@ -166,5 +169,11 @@ void Setting::on_file_backup_Btn_clicked()
         selectedDir.replace("\\", "/");
         ui->file_backup_lineEdit1->setText(selectedDir);
     }
+}
+
+
+void Setting::on_all_setting_comboBox_currentIndexChanged(int index)
+{
+
 }
 

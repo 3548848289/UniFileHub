@@ -46,6 +46,9 @@ public:
 signals:
     void showUserInfo();
 
+public slots:
+    void showSetting();
+
 private slots:
     void on_actionopen_triggered();
     void on_actionsave_triggered();

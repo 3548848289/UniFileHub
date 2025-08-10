@@ -7,6 +7,11 @@ SettingManager::~SettingManager() {}
 int SettingManager::all_setting_font_size() {
     return settings.value("all_setting/font_size", 12).toInt();
 }
+
+int SettingManager::all_setting_theme() {
+    return settings.value("all_setting/theme", "0").toInt();
+}
+
 bool SettingManager::all_setting_fenable_tray() {
     return settings.value("all_setting/fenableray", true).toBool();
 }
