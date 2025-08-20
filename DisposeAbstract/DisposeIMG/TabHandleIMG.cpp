@@ -5,13 +5,12 @@
 #include <QtSvg/QSvgRenderer>
 
 TabHandleIMG::TabHandleIMG(const QString& filePath, QWidget *parent)
-    : TabAbstract(filePath, parent), angle(0), scaleValue(0.5), shearValue(0), translateValue(0)
+    : TabAbstract(filePath, parent), angle(0), scaleValue(1), shearValue(0), translateValue(0)
 {
     QSplitter* splitter = new QSplitter(Qt::Vertical, this);
     scene = new QGraphicsScene;
     view = new QGraphicsView;
     view->setScene(scene);
-    view->setMinimumSize(200, 200);
     view->installEventFilter(this);
 
     controlFrame = new ControlFrame(this);
@@ -33,13 +32,28 @@ TabHandleIMG::TabHandleIMG(const QString& filePath, QWidget *parent)
 }
 
 
-
 void TabHandleIMG::loadFromFile(const QString &fileName)
 {
-    scene->clear();  // 每次都清空，防止图像叠加
+    scene->clear();
 
     QFileInfo fileInfo(fileName);
     QString suffix = fileInfo.suffix().toLower();
+
+    auto fitItemInView = [this](QGraphicsItem* item) {
+        if (!item) return;
+        scene->setSceneRect(item->boundingRect());
+        item->setPos(0, 0);
+        QTimer::singleShot(0, this, [this, item]() {
+            view->fitInView(item, Qt::KeepAspectRatio);
+
+            QTimer::singleShot(0, this, [this]() {
+                double scaleFactor = view->transform().m11();
+                int sliderVal = static_cast<int>(scaleFactor * 50.0);
+                controlFrame->setScaleSliderValue(sliderVal);
+            });
+
+        });
+    };
 
     if (suffix == "svg") {
         QGraphicsSvgItem* svgItem = new QGraphicsSvgItem(fileName);
@@ -48,11 +62,8 @@ void TabHandleIMG::loadFromFile(const QString &fileName)
             delete svgItem;
             return;
         }
-
         scene->addItem(svgItem);
-        scene->setSceneRect(svgItem->boundingRect());
-        svgItem->setPos(0, 0);
-        view->fitInView(svgItem, Qt::KeepAspectRatio);
+        fitItemInView(svgItem);
     } else {
         QPixmap* pixmap = new QPixmap(fileName);
         if (pixmap->isNull()) {
@@ -60,14 +71,12 @@ void TabHandleIMG::loadFromFile(const QString &fileName)
             delete pixmap;
             return;
         }
-
         pixItem = new PixItem(pixmap);
         scene->addItem(pixItem);
-        scene->setSceneRect(pixItem->boundingRect());
-        pixItem->setPos(0, 0);
-        view->fitInView(pixItem, Qt::KeepAspectRatio);
+        fitItemInView(pixItem);
     }
 }
+
 
 
 void TabHandleIMG::saveToFile(const QString &fileName) {
@@ -140,6 +149,13 @@ void TabHandleIMG::addTextToImage(const QString &text, const QPointF &position) 
     setContentModified(true);
 }
 
+void TabHandleIMG::resizeEvent(QResizeEvent *event)
+{
+    QWidget::resizeEvent(event);
+    if (view && scene && !scene->items().isEmpty()) {
+        view->fitInView(scene->sceneRect(), Qt::KeepAspectRatio);
+    }
+}
 
 bool TabHandleIMG::eventFilter(QObject* watched, QEvent* event)
 {

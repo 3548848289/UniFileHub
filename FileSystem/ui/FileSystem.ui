@@ -18,7 +18,7 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
-    <layout class="QVBoxLayout" name="verticalLayout" stretch="1,13">
+    <layout class="QVBoxLayout" name="verticalLayout" stretch="1,13,0">
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout" stretch="7,1">
        <property name="spacing">
@@ -88,6 +88,9 @@ QPushButton {
         </sizepolicy>
        </property>
       </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_2"/>
      </item>
     </layout>
    </item>

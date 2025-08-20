@@ -5,8 +5,8 @@ project(SmartDesk VERSION 0.1 LANGUAGES CXX)
 
 
 # 查找 Qt 库 (仅在主目录调用一次)
-find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets Sql Network Svg SvgWidgets)
-find_package(Qt6 REQUIRED COMPONENTS Widgets Sql Network Svg SvgWidgets)
+find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets Sql Network Svg SvgWidgets Multimedia MultimediaWidgets)
+find_package(Qt6 REQUIRED COMPONENTS Widgets Sql Network Svg SvgWidgets Multimedia MultimediaWidgets)
 
 # 启用自动处理 Qt 的 uic, moc, 和 rcc
 set(CMAKE_AUTOUIC ON)
@@ -28,6 +28,7 @@ add_subdirectory(DisposeAbstract/DisposeTXT)
 add_subdirectory(DisposeAbstract/DisposeCSV)
 add_subdirectory(DisposeAbstract/DisposeIMG)
 add_subdirectory(DisposeAbstract/DisposeXLSX)
+add_subdirectory(DisposeAbstract/DisposeVideo)
 add_subdirectory(main)
 
 
@@ -65,6 +66,7 @@ target_link_libraries(SmartDesk PRIVATE
     mytxt_csv
     mytxt_img
     mytxt_xlsx
+    mytxt_video
     mytxt_manager
     mytxt_morefunction
     mytxt_clipboard

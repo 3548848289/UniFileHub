@@ -9,6 +9,7 @@
 #include <QMouseEvent>
 #include <QEvent>
 #include <QLineEdit>
+#include <QTimer>
 #include <QInputDialog>
 #include <QtSvgWidgets/QGraphicsSvgItem>
 #include "../../main/include/TabAbstract.h"
@@ -37,6 +38,7 @@ public slots:
     void onTextAdded(const QString &text, const QPointF &position);
 
 protected:
+    void resizeEvent(QResizeEvent *event);
     bool eventFilter(QObject *watched, QEvent *event);
 private:
     void updateTransformations(int angle, qreal scale, qreal shear, qreal translate);

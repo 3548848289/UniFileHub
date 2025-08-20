@@ -22,6 +22,7 @@
 #include "../../DisposeAbstract/DisposeCSV/TabHandleCSV.h"
 #include "../../DisposeAbstract/DisposeIMG/include/TabHandleIMG.h"
 #include "../../DisposeAbstract/DisposeXLSX/TabHandleXLSX.h"
+#include "../../DisposeAbstract/DisposeVideo/TabHandleVideo.h"
 #include "../../DisposeAbstract/DisposeCSV/ControlWidCSV.h"
 #include "../../DisposeAbstract/DisposeIMG/include/ControlFrame.h"
 #include "../../OnlineDoc/include/WOnlineDoc.h"

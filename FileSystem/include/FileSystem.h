@@ -8,6 +8,7 @@
 #include <QFileDialog>
 #include <QStandardPaths>
 #include "TagItemDelegate.h"
+#include "QBreadcrumbBar.h"
 #include "../../manager/include/dbService.h"
 #include "../../manager/include/ServerManager.h"
 #include "../../Setting/include/SettingManager.h"
@@ -44,6 +45,8 @@ private:
     Ui::FileSystem *ui;
     QFileSystemModel *fileSystemModel;
     TagItemDelegate *tagItemdelegate;
+    QBreadcrumbBar* breadcrumb;
+
     QString curfilePath;
     QString currentDir;
 

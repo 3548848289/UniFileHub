@@ -44,6 +44,26 @@ FileSystem::FileSystem(QWidget *parent)
         emit filebackuplistOpened();
     });
 
+    // 创建面包屑控件
+    breadcrumb = new QBreadcrumbBar(this);
+    breadcrumb->setPath(currentDir.split(QDir::separator()));
+
+    // 加到 UI 里 horizontalLayout_2
+    ui->horizontalLayout_2->addWidget(breadcrumb);
+
+    // 信号连接：点击面包屑 → 切换目录
+    connect(breadcrumb, &QBreadcrumbBar::pathClicked, this,
+            [this](int index, const QString &part) {
+                QString newPath;
+                // 拼接路径
+                QStringList parts = breadcrumb->currentParts.mid(0, index + 1);
+                newPath = QDir(parts.join(QDir::separator())).absolutePath();
+
+                ui->treeView->setRootIndex(fileSystemModel->index(newPath));
+                ui->pathLineEdit->setText(newPath);
+                breadcrumb->setPath(parts); // 同步更新面包屑
+            });
+
 }
 
 

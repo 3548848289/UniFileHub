@@ -19,6 +19,7 @@ public:
     ControlFrame(QWidget *parent = nullptr);
     ~ControlFrame();  // 需要定义析构函数来清理 UI
 
+    void setScaleSliderValue(int value);
 signals:
     void rotateChanged(int value);
     void scaleChanged(int value);

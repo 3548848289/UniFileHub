@@ -2,13 +2,15 @@ set(FILETAG_SOURCES
     FileSystem.cpp
     TagItemDelegate.cpp
     # FileContextMenu.cpp
-
+    QBreadcrumbBar.cpp
 )
 
 set(FILETAG_HEADERS
 
     include/FileSystem.h
     include/TagItemDelegate.h
+    include/QBreadcrumbBar.h
+
     # include/FileContextMenu.h
 )
 

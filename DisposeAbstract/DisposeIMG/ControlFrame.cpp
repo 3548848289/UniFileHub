@@ -23,6 +23,15 @@ void ControlFrame::setupConnections()
     connect(ui->translateSlider, &QSlider::valueChanged, this, &ControlFrame::translateChanged);
 }
 
+void ControlFrame::setScaleSliderValue(int value)
+{
+    if (value < ui->scaleSlider->minimum())
+        value = ui->scaleSlider->minimum();
+    if (value > ui->scaleSlider->maximum())
+        value = ui->scaleSlider->maximum();
+
+    ui->scaleSlider->setValue(value);
+}
 
 void ControlFrame::on_exportButton_clicked()
 {

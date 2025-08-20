@@ -295,7 +295,7 @@ TabAbstract* MainWindow::createTabByFileName(const QString &fileName)
 {
     if (fileName.endsWith(".txt", Qt::CaseInsensitive) || fileName.endsWith(".cpp", Qt::CaseInsensitive) ||
         fileName.endsWith(".qrc", Qt::CaseInsensitive) || fileName.endsWith(".ini", Qt::CaseInsensitive) ||
-        fileName.endsWith(".h", Qt::CaseInsensitive)) {
+        fileName.endsWith(".h", Qt::CaseInsensitive)   || fileName.endsWith(".json", Qt::CaseInsensitive)) {
         return new TextTab(fileName);
     }
     else if (fileName.endsWith(".csv", Qt::CaseInsensitive)) {
@@ -308,6 +308,9 @@ TabAbstract* MainWindow::createTabByFileName(const QString &fileName)
             fileName.endsWith(".jpeg", Qt::CaseInsensitive) || fileName.endsWith(".bmp", Qt::CaseInsensitive)||
             fileName.endsWith(".svg", Qt::CaseInsensitive)   ) {
         return new TabHandleIMG(fileName);
+    }
+    else if(fileName.endsWith(".mp4", Qt::CaseInsensitive)) {
+        return new TabHandleVideo(fileName);
     }
     else {
         qDebug() << "Unsupported file type:" << fileName;
