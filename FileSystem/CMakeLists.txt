@@ -2,14 +2,14 @@ set(FILETAG_SOURCES
     FileSystem.cpp
     TagItemDelegate.cpp
     # FileContextMenu.cpp
-    QBreadcrumbBar.cpp
+
 )
 
 set(FILETAG_HEADERS
 
     include/FileSystem.h
     include/TagItemDelegate.h
-    include/QBreadcrumbBar.h
+
 
     # include/FileContextMenu.h
 )
@@ -28,9 +28,12 @@ qt_add_library(mytxt_filetag
 
 target_link_libraries(mytxt_filetag PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
+    QFileSystemBreadcrumbBar::QFileSystemBreadcrumbBar
 )
 
 target_include_directories(mytxt_filetag PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/../Resources/ThirdParty/QFileSystemBreadcrumbBar
+
 )

@@ -94,20 +94,23 @@ void ScheduleWid::checkExpiration() {
         QDateTime expDate = file.expirationDate;
 
         if (expDate.isValid() && QDateTime::currentDateTime().secsTo(expDate) <= reminderTime) {
-            QVariantMap data;
-            data["tag"] = file.tagName;
-            data["annotation"] = file.annotation;
-            data["expirationDate"] = file.expirationDate;
+            // 只有当文件还未过期时才执行提醒
+            if (QDateTime::currentDateTime() < expDate) {
+                QVariantMap data;
+                data["tag"] = file.tagName;
+                data["annotation"] = file.annotation;
+                data["expirationDate"] = file.expirationDate;
 
-            const QString allDetails = QString("标签: %1\n\n备注: %2\n\n到期时间: %3")
-                .arg(data.value("tag").toString()) .arg(data.value("annotation").toString())
-                .arg(data.value("expirationDate").toString());
+                const QString allDetails = QString("标签: %1\n\n备注: %2\n\n到期时间: %3")
+                                               .arg(data.value("tag").toString()) .arg(data.value("annotation").toString())
+                                               .arg(data.value("expirationDate").toString());
 
-            if (reminderType == "弹窗提醒")
-                manager->notify("到期提醒", path, data);
-            else if (reminderType == "邮件提醒") {
-                qDebug() << "邮件提醒";
-                sendemail->sendEmailWithData(path, allDetails, QStringList());
+                if (reminderType == "弹窗提醒")
+                    manager->notify("到期提醒", path, data);
+                else if (reminderType == "邮件提醒") {
+                    qDebug() << "邮件提醒";
+                    sendemail->sendEmailWithData(path, allDetails, QStringList());
+                }
             }
         }
     }

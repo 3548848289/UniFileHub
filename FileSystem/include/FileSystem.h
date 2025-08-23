@@ -8,11 +8,10 @@
 #include <QFileDialog>
 #include <QStandardPaths>
 #include "TagItemDelegate.h"
-#include "QBreadcrumbBar.h"
 #include "../../manager/include/dbService.h"
 #include "../../manager/include/ServerManager.h"
 #include "../../Setting/include/SettingManager.h"
-
+#include "../../Resources/ThirdParty/QFileSystemBreadcrumbBar/QFileSystemBreadcrumbBar.h"
 namespace Ui {
 class FileSystem;
 }
@@ -28,9 +27,7 @@ public:
 
 private slots:
     void onItemClicked(const QModelIndex &index);
-    void on_goButton_clicked();
-
-    void on_pathLineEdit_editingFinished();
+    // void on_goButton_clicked();
 
 signals:
     void fileOpened(const QString &filePath);
@@ -45,12 +42,12 @@ private:
     Ui::FileSystem *ui;
     QFileSystemModel *fileSystemModel;
     TagItemDelegate *tagItemdelegate;
-    QBreadcrumbBar* breadcrumb;
+    QFileSystemBreadcrumbBar* breadcrumb;
 
     QString curfilePath;
     QString currentDir;
 
-    void changePath(QString path);
+    void changePath(const QString& path);
 };
 
 #endif // FILESYSTEM_H

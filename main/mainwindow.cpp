@@ -81,7 +81,7 @@ void MainWindow::initConnect() {
 
 
     connect(ui->actionhelp, &QAction::triggered, this, [this]() {
-        openFile("help.txt");
+        openFile(":/conf/help.txt");
     });
 
     connect(ui->actiondownload, &QAction::triggered, this, [this]() {
@@ -176,7 +176,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     initCoreWidgets();
     initConnect();
     initMemubarLayout();
-    openFile("help.txt");
+    openFile(":/conf/help.txt");
     recentFilesManager->populateRecentFilesMenu(ui->recentFile);
 }
 
@@ -210,6 +210,35 @@ void MainWindow::showSetting()
     setting->show();
 }
 
+int MainWindow::addTab(TabAbstract* tab, const QString& displayName, const QString& filePath)
+{
+    int index = tabWidget->addTab(tab, displayName);
+    tabWidget->setCurrentIndex(index);
+
+    connect(tab, &TabAbstract::contentModified, this, [this, tab]() {
+        int i = tabWidget->indexOf(tab);
+        if (i >= 0 && !tabWidget->tabText(i).endsWith("*")) {
+            tabWidget->setTabText(i, tabWidget->tabText(i) + "*");
+        }
+    });
+
+    connect(tab, &TabAbstract::contentSaved, this, [this, tab]() {
+        int i = tabWidget->indexOf(tab);
+        if (i >= 0) {
+            QString name = QFileInfo(tab->getCurrentFilePath()).fileName();
+            tabWidget->setTabText(i, name);
+            // 保存成功后把路径插入 fileTabMap
+            fileTabMap[tab->getCurrentFilePath()] = i;
+        }
+    });
+
+    if (!filePath.isEmpty())
+        fileTabMap[filePath] = index;
+
+    return index;
+}
+
+
 void MainWindow::on_actionopen_triggered()
 {
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), "",
@@ -228,28 +257,20 @@ void MainWindow::openFile(const QString &filePath)
     }
 
     TabAbstract* newTab = createTabByFileName(filePath);
-    if (newTab) {
-        newTab->loadFromFile(filePath);
-        QFileInfo fileInfo(filePath);
-        QString baseName = fileInfo.fileName();
-
-        int newIndex = tabWidget->addTab(newTab, baseName);
-        connect(newTab, &TabAbstract::contentModified, this, [this, newIndex, baseName]() {
-            if (!tabWidget->tabText(newIndex).endsWith("*"))
-                tabWidget->setTabText(newIndex, baseName + "*");
-        });
-        connect(newTab, &TabAbstract::contentSaved, this, [this, newIndex, baseName]() {
-            tabWidget->setTabText(newIndex, QFileInfo(baseName).fileName());
-        });
-
-        fileTabMap.insert(filePath, newIndex);
-        tabWidget->setCurrentIndex(newIndex);
-
-        recentFilesManager->addFile(filePath);
-        recentFilesManager->populateRecentFilesMenu(ui->recentFile);
-    } else
+    if (!newTab) {
         QMessageBox::warning(this, tr("错误"), tr("不支持的文件类型"));
+        return;
+    }
+
+    newTab->loadFromFile(filePath);
+    QString baseName = QFileInfo(filePath).fileName();
+
+    addTab(newTab, baseName, filePath);
+
+    recentFilesManager->addFile(filePath);
+    recentFilesManager->populateRecentFilesMenu(ui->recentFile);
 }
+
 
 void MainWindow::on_actionsave_triggered()
 {
@@ -271,24 +292,14 @@ void MainWindow::on_actionsave_triggered()
         if (currentFilePath.isEmpty())
             return;
     }
-    currentTab->fileSave();
     currentTab->setCurrentFilePath(currentFilePath);
+    currentTab->fileSave();
 }
 
 void MainWindow::createNewTab(std::function<TabAbstract*()> tabFactory, const QString &tabName)
 {
     TabAbstract* newTab = tabFactory();
-    int index = tabWidget->addTab(newTab, tabName);
-
-    connect(newTab, &TabAbstract::contentModified, this, [this, index, tabName]() {
-        if (!tabWidget->tabText(index).endsWith("*")) {
-            tabWidget->setTabText(index, tabName + "*");
-        }
-    });
-
-    connect(newTab, &TabAbstract::contentSaved, this, [this, index, tabName]() {
-        tabWidget->setTabText(index, QFileInfo(tabName).fileName());
-    });
+    addTab(newTab, tabName, QString());  // 空路径，新建文件
 }
 
 TabAbstract* MainWindow::createTabByFileName(const QString &fileName)

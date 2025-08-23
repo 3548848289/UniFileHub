@@ -86,6 +86,7 @@ private:
     T* getCurrentTab();
     void closeTab(int index);
     void onTabContextMenuRequested(const QPoint &pos);
+    int addTab(TabAbstract *tab, const QString &displayName, const QString &filePath);
 };
 
 #endif // MAINWINDOW_H

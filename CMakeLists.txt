@@ -7,6 +7,8 @@ project(SmartDesk VERSION 0.1 LANGUAGES CXX)
 # 查找 Qt 库 (仅在主目录调用一次)
 find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets Sql Network Svg SvgWidgets Multimedia MultimediaWidgets)
 find_package(Qt6 REQUIRED COMPONENTS Widgets Sql Network Svg SvgWidgets Multimedia MultimediaWidgets)
+# set(Qt6_DIR "D:/QT6/6.8.0/android_arm64_v8a/lib/cmake/Qt6")
+# find_package(Qt6 COMPONENTS Core Gui Widgets Quick REQUIRED)
 
 # 启用自动处理 Qt 的 uic, moc, 和 rcc
 set(CMAKE_AUTOUIC ON)
@@ -41,6 +43,9 @@ add_subdirectory(Resources/ThirdParty/QXlsx/
 add_subdirectory(Resources/ThirdParty/LmsgNotify/
     ${CMAKE_CURRENT_BINARY_DIR}/Resources/ThirdParty/LmsgNotify)
 
+add_subdirectory(Resources/ThirdParty/QFileSystemBreadcrumbBar/
+    ${CMAKE_CURRENT_BINARY_DIR}/Resources/ThirdParty/QFileSystemBreadcrumbBar)
+
 qt_add_resources(RESOURCES
     Resources/res.qrc
 )
@@ -49,8 +54,9 @@ if(WIN32)
     set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_SOURCE_DIR}/Resources/SmartDeskIcon.rc")
 endif()
 
-qt_add_executable(SmartDesk WIN32 ${RESOURCES} ${APP_ICON_RESOURCE_WINDOWS})
-
+qt_add_executable(SmartDesk WIN32 ${RESOURCES} ${APP_ICON_RESOURCE_WINDOWS}
+    android/AndroidManifest.xml android/build.gradle android/res/values/libs.xml android/res/xml/qtprovider_paths.xml android/gradle/wrapper/gradle-wrapper.jar android/gradle/wrapper/gradle-wrapper.properties android/gradle.properties android/gradlew android/gradlew.bat
+)
 
 
 target_link_libraries(SmartDesk PRIVATE
@@ -73,7 +79,10 @@ target_link_libraries(SmartDesk PRIVATE
     SimpleMail::Core
     QXlsx::QXlsx
     LmsgNotify::LmsgNotify
-    Qt${QT_VERSION_MAJOR}::Widgets
+    Qt6::Core
+    Qt6::Gui
+    Qt6::Widgets
+    Qt6::Quick
 )
 
 # 安装规则

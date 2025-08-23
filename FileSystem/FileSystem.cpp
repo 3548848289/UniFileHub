@@ -28,7 +28,7 @@ FileSystem::FileSystem(QWidget *parent)
     }
     ui->treeView->setRootIndex(fileSystemModel->index(currentDir));
 
-    ui->pathLineEdit->setText(currentDir);
+    // ui->pathLineEdit->setText(currentDir);
 
     tagItemdelegate = new TagItemDelegate(this, serverManager);
     ui->treeView->setItemDelegate(tagItemdelegate);
@@ -45,25 +45,24 @@ FileSystem::FileSystem(QWidget *parent)
     });
 
     // 创建面包屑控件
-    breadcrumb = new QBreadcrumbBar(this);
-    breadcrumb->setPath(currentDir.split(QDir::separator()));
+    breadcrumb = new QFileSystemBreadcrumbBar();
+    breadcrumb->setPath(currentDir);
 
-    // 加到 UI 里 horizontalLayout_2
-    ui->horizontalLayout_2->addWidget(breadcrumb);
+    ui->horizontalLayout->addWidget(breadcrumb);
+    // 捕捉信号
+    connect(breadcrumb, &QFileSystemBreadcrumbBar::pathClicked, [this](int index, const QString& name) {
+        if(name != "")
+            changePath(name);
+    });
 
-    // 信号连接：点击面包屑 → 切换目录
-    connect(breadcrumb, &QBreadcrumbBar::pathClicked, this,
-            [this](int index, const QString &part) {
-                QString newPath;
-                // 拼接路径
-                QStringList parts = breadcrumb->currentParts.mid(0, index + 1);
-                newPath = QDir(parts.join(QDir::separator())).absolutePath();
-
-                ui->treeView->setRootIndex(fileSystemModel->index(newPath));
-                ui->pathLineEdit->setText(newPath);
-                breadcrumb->setPath(parts); // 同步更新面包屑
-            });
-
+    connect(breadcrumb, &QFileSystemBreadcrumbBar::fileClicked,
+            [](const QString& path) {
+                qDebug() << "File clicked:" << path;
+    });
+    connect(breadcrumb, &QFileSystemBreadcrumbBar::pathEdited, [this](const QString& path){
+        if(path != "")
+            changePath(path);
+    });
 }
 
 
@@ -82,19 +81,15 @@ void FileSystem::onItemClicked(const QModelIndex &index) {
     emit fileOpened(curfilePath);
 }
 
-void FileSystem::on_goButton_clicked() {
-    QString selectedDir = QFileDialog::getExistingDirectory(this, "选择目录");
-    if (!selectedDir.isEmpty()) {
-        ui->pathLineEdit->setText(selectedDir);
-        changePath(selectedDir);
-    }
-}
+// void FileSystem::on_goButton_clicked() {
+//     QString selectedDir = QFileDialog::getExistingDirectory(this, "选择目录");
+//     if (!selectedDir.isEmpty()) {
+//         // ui->pathLineEdit->setText(selectedDir);
+//         changePath(selectedDir);
+//     }
+// }
 
-void FileSystem::on_pathLineEdit_editingFinished() {
-    changePath(ui->pathLineEdit->text());
-}
-
-void FileSystem::changePath(QString path){
+void FileSystem::changePath(const QString& path){
     QFileInfo fileInfo(path);
     if (fileInfo.exists() && fileInfo.isDir())
         ui->treeView->setRootIndex(fileSystemModel->index(path));
