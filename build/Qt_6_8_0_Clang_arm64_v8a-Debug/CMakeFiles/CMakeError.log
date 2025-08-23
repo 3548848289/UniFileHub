@@ -1,0 +1,34 @@
+Performing C++ SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: D:/CxxProgram/SmartDesk/build/Qt_6_8_0_Clang_arm64_v8a-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):D:/QT6/Tools/Ninja/ninja.exe cmTC_ec442 && [1/2] Building CXX object CMakeFiles/cmTC_ec442.dir/src.cxx.o
+[31mFAILED: [0mCMakeFiles/cmTC_ec442.dir/src.cxx.o 
+D:\Android\Android_sdk\ndk\26.1.10909125\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android23 --sysroot=D:/Android/Android_sdk/ndk/26.1.10909125/toolchains/llvm/prebuilt/windows-x86_64/sysroot -DCMAKE_HAVE_LIBC_PTHREAD  -DQT_QML_DEBUG   -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security -fexceptions -frtti -stdlib=libc++  -O2 -g -DNDEBUG -fPIE -fcolor-diagnostics -MD -MT CMakeFiles/cmTC_ec442.dir/src.cxx.o -MF CMakeFiles\cmTC_ec442.dir\src.cxx.o.d -o CMakeFiles/cmTC_ec442.dir/src.cxx.o -c D:/CxxProgram/SmartDesk/build/Qt_6_8_0_Clang_arm64_v8a-Debug/CMakeFiles/CMakeTmp/src.cxx
+D:/CxxProgram/SmartDesk/build/Qt_6_8_0_Clang_arm64_v8a-Debug/CMakeFiles/CMakeTmp/src.cxx:13:3: error: use of undeclared identifier 'pthread_cancel'
+  pthread_cancel(thread);
+  ^
+1 error generated.
+ninja: build stopped: subcommand failed.
+
+
+Source file was:
+#include <pthread.h>
+
+static void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_cancel(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+

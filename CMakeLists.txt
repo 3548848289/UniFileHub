@@ -54,10 +54,6 @@ if(WIN32)
     set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_SOURCE_DIR}/Resources/SmartDeskIcon.rc")
 endif()
 
-qt_add_executable(SmartDesk WIN32 ${RESOURCES} ${APP_ICON_RESOURCE_WINDOWS}
-    android/AndroidManifest.xml android/build.gradle android/res/values/libs.xml android/res/xml/qtprovider_paths.xml android/gradle/wrapper/gradle-wrapper.jar android/gradle/wrapper/gradle-wrapper.properties android/gradle.properties android/gradlew android/gradlew.bat
-)
-
 
 target_link_libraries(SmartDesk PRIVATE
     mytxt_main
@@ -79,10 +75,6 @@ target_link_libraries(SmartDesk PRIVATE
     SimpleMail::Core
     QXlsx::QXlsx
     LmsgNotify::LmsgNotify
-    Qt6::Core
-    Qt6::Gui
-    Qt6::Widgets
-    Qt6::Quick
 )
 
 # 安装规则
