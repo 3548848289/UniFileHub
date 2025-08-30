@@ -14,7 +14,17 @@ qt_add_library(mytxt_clipboard STATIC
     ${SETTING_SOURCES}
     ${SETTING_HEADERS}
     ${SETTING_UIS}
-    TestFile.h TestFile.cpp
+    ClipboardItem.h
+    TextClipboardItem.h
+    TextClipboard.cpp
+    ImageClipboardItem.h
+    ImageClipboardItem.cpp
+    fileclipboarditem.h fileclipboarditem.cpp
+    FileClipboardItem.h
+    FileClipboardItem.cpp
+    clipboarditemfactory.h clipboarditemfactory.cpp
+    filetypedetector.h filetypedetector.cpp
+    imagepreviewdialog.h imagepreviewdialog.cpp
 )
 
 target_link_libraries(mytxt_clipboard PRIVATE
