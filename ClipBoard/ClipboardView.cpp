@@ -1,5 +1,6 @@
 #include "ClipboardView.h"
 #include "ui_ClipboardView.h"
+
 #include <QBuffer>
 #include <QByteArray>
 #include <QImageReader>
@@ -8,6 +9,117 @@
 #include <QMessageBox>
 #include <QFileInfo>
 #include <QUrl>
+#include <QMenu>
+#include <QAction>
+#include <QDesktopServices>
+#include <QStandardPaths>
+#include <QVariant>
+#include <QGuiApplication>
+
+// 初始化支持的图片格式
+QStringList FileClipboardItem::s_supportedImageFormats = {"jpg", "jpeg", "png", "bmp", "gif", "tiff", "webp"};
+
+// 文本剪贴板项实现
+QListWidgetItem* TextClipboardItem::createListWidgetItem() const {
+    QListWidgetItem* item = new QListWidgetItem(m_text);
+    item->setData(Qt::UserRole, QVariant::fromValue<quintptr>(reinterpret_cast<quintptr>(this)));
+    item->setData(Qt::UserRole + 1, "text");
+    item->setToolTip(m_text);
+    item->setTextAlignment(Qt::AlignTop);
+    return item;
+}
+
+void TextClipboardItem::copyToClipboard(QClipboard* clipboard) const {
+    clipboard->setText(m_text);
+}
+
+// 图片剪贴板项实现
+ImageClipboardItem::ImageClipboardItem(const QPixmap& pixmap)
+    : ClipboardItem(Image), m_pixmap(pixmap) {
+    QBuffer buffer(&m_data);
+    buffer.open(QIODevice::WriteOnly);
+    m_pixmap.save(&buffer, "PNG");
+}
+
+ImageClipboardItem::ImageClipboardItem(const QByteArray& data)
+    : ClipboardItem(Image), m_data(data) {
+    m_pixmap.loadFromData(data, "PNG");
+}
+
+QListWidgetItem* ImageClipboardItem::createListWidgetItem() const {
+    QListWidgetItem* item = new QListWidgetItem();
+    item->setIcon(QIcon(m_pixmap.scaled(80, 60, Qt::KeepAspectRatio, Qt::SmoothTransformation)));
+    item->setText(QString("[图片] %1x%2").arg(m_pixmap.width()).arg(m_pixmap.height()));
+    item->setData(Qt::UserRole, QVariant::fromValue<quintptr>(reinterpret_cast<quintptr>(this)));
+    item->setData(Qt::UserRole + 1, "image");
+    item->setToolTip("双击复制图片 | 右键预览");
+    item->setTextAlignment(Qt::AlignVCenter);
+    return item;
+}
+
+void ImageClipboardItem::copyToClipboard(QClipboard* clipboard) const {
+    QMimeData* mimeData = new QMimeData();
+    mimeData->setImageData(m_pixmap);
+    clipboard->setMimeData(mimeData);
+}
+
+QString ImageClipboardItem::serialize() const {
+    return "IMAGE_DATA:" + m_data.toBase64();
+}
+
+// 文件剪贴板项实现
+FileClipboardItem::FileClipboardItem(const QStringList& filePaths)
+    : ClipboardItem(File), m_filePaths(filePaths) {}
+
+QListWidgetItem* FileClipboardItem::createListWidgetItem() const {
+    QListWidgetItem* item = new QListWidgetItem();
+
+    // 设置显示文本
+    QString displayText;
+    if (m_filePaths.size() == 1) {
+        QFileInfo fileInfo(m_filePaths.first());
+        displayText = QString("[文件] %1").arg(fileInfo.fileName());
+    } else {
+        displayText = QString("[多个文件] 共 %1 个文件").arg(m_filePaths.size());
+    }
+    item->setText(displayText);
+
+    // 如果是图片文件，显示缩略图
+    if (m_filePaths.size() == 1 && isImageFile()) {
+        QPixmap pixmap(m_filePaths.first());
+        item->setIcon(QIcon(pixmap.scaled(80, 60, Qt::KeepAspectRatio, Qt::SmoothTransformation)));
+    } else {
+        item->setIcon(QIcon::fromTheme("document", QIcon(":/icons/file.png")));
+    }
+
+    item->setData(Qt::UserRole, QVariant::fromValue<quintptr>(reinterpret_cast<quintptr>(this)));
+    item->setData(Qt::UserRole + 1, "file");
+    item->setToolTip(displayText);
+    item->setTextAlignment(Qt::AlignVCenter);
+
+    return item;
+}
+
+void FileClipboardItem::copyToClipboard(QClipboard* clipboard) const {
+    QMimeData* mimeData = new QMimeData();
+    QList<QUrl> urls;
+
+    for (const QString& path : m_filePaths) {
+        urls.append(QUrl::fromLocalFile(path));
+    }
+
+    mimeData->setUrls(urls);
+    clipboard->setMimeData(mimeData);
+}
+
+QString FileClipboardItem::serialize() const {
+    return "FILE_DATA:" + m_filePaths.join(";");
+}
+
+bool FileClipboardItem::isImageFile() const {
+    if (m_filePaths.size() != 1) return false;
+    return FileTypeDetector::isImageFile(m_filePaths.first());
+}
 
 // 图片预览对话框实现
 ImagePreviewDialog::ImagePreviewDialog(const QPixmap& pixmap, QWidget *parent)
@@ -15,26 +127,76 @@ ImagePreviewDialog::ImagePreviewDialog(const QPixmap& pixmap, QWidget *parent)
     setWindowTitle("图片预览");
     setMinimumSize(600, 400);
 
-    QLabel *label = new QLabel(this);
-    label->setPixmap(pixmap);
-    label->setScaledContents(false);
-    label->setAlignment(Qt::AlignCenter);
+    m_imageLabel = new QLabel(this);
+    m_imageLabel->setPixmap(pixmap);
+    m_imageLabel->setScaledContents(false);
+    m_imageLabel->setAlignment(Qt::AlignCenter);
 
-    QScrollArea *scrollArea = new QScrollArea(this);
-    scrollArea->setWidget(label);
-    scrollArea->setWidgetResizable(true);
+    m_scrollArea = new QScrollArea(this);
+    m_scrollArea->setWidget(m_imageLabel);
+    m_scrollArea->setWidgetResizable(true);
 
     QVBoxLayout *layout = new QVBoxLayout(this);
-    layout->addWidget(scrollArea);
+    layout->addWidget(m_scrollArea);
     setLayout(layout);
 }
 
-// ClipboardView类实现
-ClipboardView::ClipboardView(QWidget *parent) : QWidget(parent),
-    ui(new Ui::ClipboardView), dbservice(dbService::instance("./SmartDesk.db")){
-    ui->setupUi(this);
+// 文件类型检测工具类实现
+bool FileTypeDetector::isImageFile(const QString& path) {
+    if (path.isEmpty()) return false;
 
-    // 配置列表控件
+    QString localPath = toLocalPath(path);
+    QFileInfo fileInfo(localPath);
+
+    if (!fileInfo.exists() || !fileInfo.isFile()) return false;
+
+    QString ext = getFileExtension(localPath);
+    return FileClipboardItem::s_supportedImageFormats.contains(ext);
+}
+
+QString FileTypeDetector::getFileExtension(const QString& path) {
+    QFileInfo fileInfo(toLocalPath(path));
+    return fileInfo.suffix().toLower();
+}
+
+QString FileTypeDetector::toLocalPath(const QString& path) {
+    if (path.startsWith("file://")) {
+        QUrl url(path);
+        if (url.isLocalFile()) {
+            return url.toLocalFile();
+        }
+    }
+    return path;
+}
+
+bool FileTypeDetector::fileExists(const QString& path) {
+    QFileInfo fileInfo(toLocalPath(path));
+    return fileInfo.exists() && fileInfo.isFile();
+}
+
+// ClipboardView类实现
+ClipboardView::ClipboardView(QWidget *parent)
+    : QWidget(parent), ui(new Ui::ClipboardView),
+    m_dbService(dbService::instance("./SmartDesk.db")),
+    m_initialItemCount(0), m_currentRightClickedItem(nullptr) {
+    ui->setupUi(this);
+    initializeListWidget();
+
+    // 初始化剪贴板
+    m_clipboard = QGuiApplication::clipboard();
+    connect(m_clipboard, &QClipboard::dataChanged, this, &ClipboardView::onClipboardChanged);
+
+    // 加载历史记录
+    loadHistory();
+    m_initialItemCount = ui->listWidget->count();
+}
+
+ClipboardView::~ClipboardView() {
+    on_saveButton_clicked();
+    delete ui;
+}
+
+void ClipboardView::initializeListWidget() {
     ui->listWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
     ui->listWidget->setWordWrap(true);
     ui->listWidget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
@@ -42,292 +204,237 @@ ClipboardView::ClipboardView(QWidget *parent) : QWidget(parent),
     ui->listWidget->scrollToBottom();
     ui->listWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->listWidget->setIconSize(QSize(80, 60));
+}
 
-    // 初始化剪贴板
-    clipboard = QGuiApplication::clipboard();
-    connect(clipboard, &QClipboard::dataChanged, this, &ClipboardView::onClipboardChanged);
-
-    // 加载历史记录
+void ClipboardView::loadHistory() {
     int hours = SettingManager::Instance().clip_board_hours();
-    QList<QString> items = dbservice.dbClip().loadRecentHistory(hours);
+    QList<QString> items = m_dbService.dbClip().loadRecentHistory(hours);
+
     for (const QString &content : items) {
         if (content.startsWith("IMAGE_DATA:")) {
             QByteArray imageData = QByteArray::fromBase64(content.mid(10).toUtf8());
-            QPixmap pixmap;
-            if (pixmap.loadFromData(imageData)) {
-                addImageItem(pixmap);
-            }
-        } else if (isImageFile(content)) {
-            // 如果是图片路径，加载图片
-            QPixmap pixmap(content);
-            if (!pixmap.isNull()) {
-                addImageItem(pixmap);
-            } else {
-                // 图片不存在，添加路径作为文本
-                addTextItem(content);
-            }
-        } else {
-            addTextItem(content);
+            m_clipboardItems.push_back(std::make_unique<ImageClipboardItem>(imageData));
         }
-    }
-    initialItemCount = ui->listWidget->count();
-}
-
-ClipboardView::~ClipboardView()
-{
-    on_saveButton_clicked();
-    delete ui;
-}
-
-// 检查路径是否为有效的图片文件
-bool ClipboardView::isImageFile(const QString& path)
-{
-    if (path.isEmpty()) return false;
-
-    // 支持的图片格式
-    QStringList imageFormats = {"jpg", "jpeg", "png", "bmp", "gif", "tiff", "webp"};
-
-    // 处理URL格式（如file:///开头）
-    QString localPath = path;
-    if (path.startsWith("file://")) {
-        QUrl url(path);
-        if (url.isLocalFile()) {
-            localPath = url.toLocalFile();
+        else if (content.startsWith("FILE_DATA:")) {
+            QStringList filePaths = content.mid(10).split(";");
+            m_clipboardItems.push_back(std::make_unique<FileClipboardItem>(filePaths));
         }
-    }
-
-    QFileInfo fileInfo(localPath);
-    if (!fileInfo.exists() || !fileInfo.isFile()) return false;
-
-    // 检查文件扩展名
-    QString ext = fileInfo.suffix().toLower();
-    return imageFormats.contains(ext);
-}
-
-// 从路径加载图片
-QPixmap ClipboardView::loadImageFromPath(const QString& path)
-{
-    if (!isImageFile(path)) return QPixmap();
-
-    QString localPath = path;
-    if (path.startsWith("file://")) {
-        QUrl url(path);
-        if (url.isLocalFile()) {
-            localPath = url.toLocalFile();
-        }
-    }
-
-    QPixmap pixmap;
-    if (pixmap.load(localPath)) {
-        return pixmap;
-    }
-    return QPixmap();
-}
-
-// 处理剪贴板变化
-void ClipboardView::onClipboardChanged()
-{
-    const QMimeData *mimeData = clipboard->mimeData();
-
-    // 优先处理图片数据
-    if(mimeData->hasImage()) {
-        QVariant imageData = mimeData->imageData();
-        if (imageData.canConvert<QPixmap>()) {
-            QPixmap pixmap = imageData.value<QPixmap>();
-            if (!pixmap.isNull()) {
-                addImageItem(pixmap);
-                return; // 处理完图片就返回，避免重复处理
-            }
-        }
-    }
-
-    // 处理文本（可能是图片路径）
-    if(mimeData->hasText()) {
-        QString text = mimeData->text();
-        if (!text.isEmpty() && !text.trimmed().isEmpty()) {
+        else {
             // 检查是否是图片文件路径
-            if (isImageFile(text)) {
-                QPixmap pixmap = loadImageFromPath(text);
+            if (FileTypeDetector::isImageFile(content)) {
+                QPixmap pixmap(FileTypeDetector::toLocalPath(content));
                 if (!pixmap.isNull()) {
-                    addImageItem(pixmap);
-                    return;
+                    m_clipboardItems.push_back(std::make_unique<ImageClipboardItem>(pixmap));
+                } else {
+                    m_clipboardItems.push_back(std::make_unique<TextClipboardItem>(content));
                 }
+            } else {
+                m_clipboardItems.push_back(std::make_unique<TextClipboardItem>(content));
             }
-            // 如果不是图片路径，作为文本处理
-            addTextItem(text);
         }
     }
 
-    // 处理文件URL（从文件管理器复制的图片）
-    if(mimeData->hasUrls() && mimeData->urls().count() == 1) {
-        QUrl url = mimeData->urls().first();
-        if (url.isLocalFile()) {
-            QString filePath = url.toLocalFile();
-            if (isImageFile(filePath)) {
-                QPixmap pixmap(filePath);
-                if (!pixmap.isNull()) {
-                    addImageItem(pixmap);
-                }
-            }
-        }
+    // 将加载的项添加到列表
+    for (const auto& item : m_clipboardItems) {
+        ui->listWidget->addItem(item->createListWidgetItem());
     }
 }
 
-// 添加文本项到列表
-void ClipboardView::addTextItem(const QString& text)
-{
+void ClipboardView::addClipboardItem(std::unique_ptr<ClipboardItem> item) {
     // 检查重复
-    for(int i = 0; i < ui->listWidget->count(); i++) {
-        if(ui->listWidget->item(i)->data(Qt::UserRole + 1).toString() == "text" &&
-            ui->listWidget->item(i)->data(Qt::UserRole).toString() == text) {
+    for (const auto& existingItem : m_clipboardItems) {
+        if (existingItem->serialize() == item->serialize()) {
             return;
         }
     }
 
-    QListWidgetItem *item = new QListWidgetItem(text);
-    item->setData(Qt::UserRole, text);
-    item->setData(Qt::UserRole + 1, "text");
-    item->setToolTip(text);
-    item->setTextAlignment(Qt::AlignTop);
-    ui->listWidget->insertItem(0, item);
+    // 添加到集合
+    m_clipboardItems.push_back(std::move(item));
+
+    // 添加到列表控件，插入到最前面
+    ui->listWidget->insertItem(0, m_clipboardItems.back()->createListWidgetItem());
 }
 
-// 添加图片项到列表
-void ClipboardView::addImageItem(const QPixmap& pixmap)
-{
-    // 转换图片数据为字节数组
-    QByteArray byteArray;
-    QBuffer buffer(&byteArray);
-    buffer.open(QIODevice::WriteOnly);
-    pixmap.save(&buffer, "PNG");
-
-    // 创建列表项
-    QListWidgetItem *item = new QListWidgetItem();
-    item->setIcon(QIcon(pixmap.scaled(80, 60, Qt::KeepAspectRatio, Qt::SmoothTransformation)));
-    item->setText(QString("[图片] %1x%2").arg(pixmap.width()).arg(pixmap.height()));
-    item->setData(Qt::UserRole, byteArray); // 存储图片二进制数据
-    item->setData(Qt::UserRole + 1, "image");
-    item->setToolTip("双击复制图片 | 右键预览");
-    item->setTextAlignment(Qt::AlignVCenter);
-
-    ui->listWidget->insertItem(0, item);
+ClipboardItem* ClipboardView::findItemForListWidgetItem(QListWidgetItem* listItem) {
+    if (!listItem) return nullptr;
+    quintptr addr = listItem->data(Qt::UserRole).value<quintptr>();
+    return reinterpret_cast<ClipboardItem*>(addr);
 }
 
-// 复制选中项到剪贴板
-void ClipboardView::copyItem()
-{
-    if (!currentRightClickedItem) return;
 
-    QString type = currentRightClickedItem->data(Qt::UserRole + 1).toString();
+void ClipboardView::onClipboardChanged() {
+    const QMimeData *mimeData = m_clipboard->mimeData();
 
-    if (type == "text") {
-        // 检查文本是否是图片路径，如果是则复制图片而不是路径
-        QString text = currentRightClickedItem->data(Qt::UserRole).toString();
-        if (isImageFile(text)) {
-            QPixmap pixmap = loadImageFromPath(text);
-            if (!pixmap.isNull()) {
-                QMimeData *mimeData = new QMimeData();
-                mimeData->setImageData(pixmap);
-                clipboard->setMimeData(mimeData);
-                return;
+    // 处理文件URL（支持多个文件）
+    if (mimeData->hasUrls() && !mimeData->urls().isEmpty()) {
+        QStringList filePaths;
+        for (const QUrl& url : mimeData->urls()) {
+            if (url.isLocalFile()) {
+                filePaths.append(url.toLocalFile());
             }
         }
-        // 不是图片路径，正常复制文本
-        clipboard->setText(text);
-    }
-    else if (type == "image") {
-        // 从存储的二进制数据加载图片
-        QByteArray byteArray = currentRightClickedItem->data(Qt::UserRole).toByteArray();
-        QPixmap pixmap;
-        if (pixmap.loadFromData(byteArray, "PNG")) {
-            QMimeData *mimeData = new QMimeData();
-            mimeData->setImageData(pixmap);
-            clipboard->setMimeData(mimeData);
-        } else {
-            QMessageBox::warning(this, "错误", "图片数据损坏，无法复制");
+
+        if (!filePaths.isEmpty()) {
+            addClipboardItem(std::make_unique<FileClipboardItem>(filePaths));
+            return;
         }
     }
-}
 
-// 其他函数保持不变...
-void ClipboardView::previewImage()
-{
-    if (!currentRightClickedItem) return;
+    // 处理图片数据
 
-    QString type = currentRightClickedItem->data(Qt::UserRole + 1).toString();
-    if (type == "image") {
-        QByteArray byteArray = currentRightClickedItem->data(Qt::UserRole).toByteArray();
+    if (mimeData->hasImage()) {
+        const QVariant imageVar = mimeData->imageData();
         QPixmap pixmap;
-        if (pixmap.loadFromData(byteArray, "PNG")) {
-            ImagePreviewDialog* dialog = new ImagePreviewDialog(pixmap, this);
-            dialog->exec();
-            delete dialog;
-        } else {
-            QMessageBox::warning(this, "错误", "无法加载图片");
-        }
-    }
-    // 支持预览文本中的图片路径
-    else if (type == "text") {
-        QString text = currentRightClickedItem->data(Qt::UserRole).toString();
-        if (isImageFile(text)) {
-            QPixmap pixmap = loadImageFromPath(text);
-            if (!pixmap.isNull()) {
-                ImagePreviewDialog* dialog = new ImagePreviewDialog(pixmap, this);
-                dialog->exec();
-                delete dialog;
-            } else {
-                QMessageBox::warning(this, "错误", "无法加载图片文件");
+
+        if (imageVar.canConvert<QImage>()) {
+            QImage img = imageVar.value<QImage>();
+            if (!img.isNull()) {
+                pixmap = QPixmap::fromImage(img);
             }
+        } else if (imageVar.canConvert<QPixmap>()) {
+            pixmap = imageVar.value<QPixmap>();
+        }
+
+        if (!pixmap.isNull()) {
+            addClipboardItem(std::make_unique<ImageClipboardItem>(pixmap));
+            return;
+        }
+    }
+
+
+    // 处理文本
+    if (mimeData->hasText()) {
+        QString text = mimeData->text();
+        if (!text.isEmpty() && !text.trimmed().isEmpty()) {
+            addClipboardItem(std::make_unique<TextClipboardItem>(text));
         }
     }
 }
 
-void ClipboardView::on_clearButton_clicked()
-{
-    ui->listWidget->clear();
-}
+void ClipboardView::copyItem() {
+    if (!m_currentRightClickedItem) return;
 
-void ClipboardView::on_saveButton_clicked()
-{
-    int successCount = 0;
-    for (int i = initialItemCount; i < ui->listWidget->count(); ++i) {
-        QListWidgetItem *item = ui->listWidget->item(i);
-        QString type = item->data(Qt::UserRole + 1).toString();
-
-        if (type == "text") {
-            QString content = item->data(Qt::UserRole).toString();
-            if (dbservice.dbClip().setHistory(content))
-                successCount++;
-        }
-        else if (type == "image") {
-            QByteArray byteArray = item->data(Qt::UserRole).toByteArray();
-            QString base64Data = "IMAGE_DATA:" + byteArray.toBase64();
-            if (dbservice.dbClip().setHistory(base64Data))
-                successCount++;
-        }
+    ClipboardItem* item = findItemForListWidgetItem(m_currentRightClickedItem);
+    if (item) {
+        item->copyToClipboard(m_clipboard);
     }
 }
 
-void ClipboardView::on_listWidget_itemDoubleClicked(QListWidgetItem *item)
-{
+void ClipboardView::previewImage() {
+    if (!m_currentRightClickedItem) return;
+
+    ClipboardItem* item = findItemForListWidgetItem(m_currentRightClickedItem);
     if (!item) return;
 
-    currentRightClickedItem = item;
+    QPixmap pixmap;
+
+    if (item->type() == ClipboardItem::Image) {
+        auto* imageItem = static_cast<ImageClipboardItem*>(item);
+        pixmap = imageItem->pixmap();
+    }
+    else if (item->type() == ClipboardItem::File) {
+        auto* fileItem = static_cast<FileClipboardItem*>(item);
+        if (fileItem->isImageFile()) {
+            pixmap.load(fileItem->filePaths().first());
+        }
+    }
+    else if (item->type() == ClipboardItem::Text) {
+        auto* textItem = static_cast<TextClipboardItem*>(item);
+        QString path = textItem->text();
+        if (FileTypeDetector::isImageFile(path)) {
+            pixmap.load(FileTypeDetector::toLocalPath(path));
+        }
+    }
+
+    if (!pixmap.isNull()) {
+        ImagePreviewDialog dialog(pixmap, this);
+        dialog.exec();
+    } else {
+        QMessageBox::warning(this, "错误", "无法加载图片");
+    }
+}
+
+void ClipboardView::openFileLocation() {
+    if (!m_currentRightClickedItem) return;
+
+    ClipboardItem* item = findItemForListWidgetItem(m_currentRightClickedItem);
+    if (!item || item->type() != ClipboardItem::File) return;
+
+    auto* fileItem = static_cast<FileClipboardItem*>(item);
+    if (!fileItem->filePaths().isEmpty()) {
+        QFileInfo fileInfo(fileItem->filePaths().first());
+        QDesktopServices::openUrl(QUrl::fromLocalFile(fileInfo.path()));
+    }
+}
+
+void ClipboardView::deleteItem() {
+    QList<QListWidgetItem *> selectedItems = ui->listWidget->selectedItems();
+    for (QListWidgetItem *item : selectedItems) {
+        // 先取出关联的 ClipboardItem*
+        ClipboardItem* clipboardItem = findItemForListWidgetItem(item);
+
+        // 再从列表移除
+        int row = ui->listWidget->row(item);
+        QListWidgetItem* taken = ui->listWidget->takeItem(row);
+        delete taken; // 删除 UI item
+
+        // 从容器中移除实际对象
+        if (clipboardItem) {
+            auto it = std::find_if(m_clipboardItems.begin(), m_clipboardItems.end(),
+                                   [clipboardItem](const std::unique_ptr<ClipboardItem>& ptr) {
+                                       return ptr.get() == clipboardItem;
+                                   });
+            if (it != m_clipboardItems.end()) {
+                m_clipboardItems.erase(it);
+            }
+        }
+    }
+    m_currentRightClickedItem = nullptr;
+}
+
+void ClipboardView::on_clearButton_clicked() {
+    ui->listWidget->clear();
+    m_clipboardItems.clear();
+}
+
+void ClipboardView::on_saveButton_clicked() {
+    int successCount = 0;
+    // 只保存新添加的项目
+    for (size_t i = m_initialItemCount; i < m_clipboardItems.size(); ++i) {
+        const auto& item = m_clipboardItems[i];
+        if (m_dbService.dbClip().setHistory(item->serialize())) {
+            successCount++;
+        }
+    }
+}
+
+void ClipboardView::on_listWidget_itemDoubleClicked(QListWidgetItem *item) {
+    if (!item) return;
+    m_currentRightClickedItem = item;
     copyItem();
 }
 
-void ClipboardView::on_listWidget_customContextMenuRequested(const QPoint &pos)
-{
-    currentRightClickedItem = ui->listWidget->itemAt(pos);
-    if (!currentRightClickedItem) return;
+void ClipboardView::on_listWidget_customContextMenuRequested(const QPoint &pos) {
+    m_currentRightClickedItem = ui->listWidget->itemAt(pos);
+    if (!m_currentRightClickedItem) return;
+
+    ClipboardItem* item = findItemForListWidgetItem(m_currentRightClickedItem);
+    if (!item) return;
 
     QMenu menu(this);
     QAction *copyAction = menu.addAction("复制到剪贴板");
 
-    QString type = currentRightClickedItem->data(Qt::UserRole + 1).toString();
-    if (type == "image" || (type == "text" && isImageFile(currentRightClickedItem->data(Qt::UserRole).toString()))) {
+    // 根据项目类型添加特定操作
+    if (item->type() == ClipboardItem::Image ||
+        (item->type() == ClipboardItem::File && static_cast<FileClipboardItem*>(item)->isImageFile()) ||
+        (item->type() == ClipboardItem::Text && FileTypeDetector::isImageFile(static_cast<TextClipboardItem*>(item)->text()))) {
         QAction *previewAction = menu.addAction("预览图片");
         connect(previewAction, &QAction::triggered, this, &ClipboardView::previewImage);
+    }
+
+    if (item->type() == ClipboardItem::File) {
+        QAction *openLocationAction = menu.addAction("打开文件位置");
+        connect(openLocationAction, &QAction::triggered, this, &ClipboardView::openFileLocation);
     }
 
     QAction *deleteAction = menu.addAction("删除");
@@ -336,15 +443,6 @@ void ClipboardView::on_listWidget_customContextMenuRequested(const QPoint &pos)
     connect(deleteAction, &QAction::triggered, this, &ClipboardView::deleteItem);
 
     menu.exec(ui->listWidget->mapToGlobal(pos));
-}
-
-void ClipboardView::deleteItem()
-{
-    QList<QListWidgetItem *> selectedItems = ui->listWidget->selectedItems();
-    for (QListWidgetItem *item : selectedItems) {
-        delete ui->listWidget->takeItem(ui->listWidget->row(item));
-    }
-    currentRightClickedItem = nullptr;
 }
 
 #include "ClipboardView.moc"
