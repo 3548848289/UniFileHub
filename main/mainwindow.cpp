@@ -13,6 +13,8 @@ void MainWindow::initCoreWidgets() {
     tabWidget = new QTabWidget(this);
     tabWidget->setTabsClosable(true);
     tabWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+    tabManager = new TabManager(tabWidget, this);
+
     connect(tabWidget, &QTabWidget::customContextMenuRequested, this, &MainWindow::onTabContextMenuRequested);
     file_system = new FileSystem(this);
     file_backup_view = new FileBackupView(this);
@@ -43,14 +45,13 @@ void MainWindow::initConnect() {
         ui->stackedWidget->setCurrentWidget(schedule_wid); });
 
     connect(widgetfunc, &WidgetFunctional::sendEmailForm, this, [this](SendEmail *form) {
-        int newIndex = tabWidget->addTab(form, QLatin1String("Email"));
+        int newIndex = tabManager->addWidgetTab(form, "Email"); // 通过 TabManager 添加
         form->show();
         tabWidget->setCurrentIndex(newIndex);
         ui->stackedWidget->setCurrentWidget(file_system);
     });
-
     connect(widgetfunc, &WidgetFunctional::showClipboard, this, [this](ClipboardView* clipboard) {
-        int newIndex = tabWidget->addTab(clipboard, QString("剪贴板"));
+        int newIndex = tabManager->addWidgetTab(clipboard, "剪贴板"); // 通过 TabManager 添加
         clipboard->show();
         tabWidget->setCurrentIndex(newIndex);
         ui->stackedWidget->setCurrentWidget(file_system);
@@ -64,7 +65,7 @@ void MainWindow::initConnect() {
         } else {
             QMessageBox::StandardButton reply;
             reply = QMessageBox::warning(this, "无效的文件类型",
-                "当前文件不是图片文件，是不是选取图片打开。",QMessageBox::Yes | QMessageBox::No);
+                                         "当前文件不是图片文件，是不是选取图片打开。", QMessageBox::Yes | QMessageBox::No);
             if (reply == QMessageBox::Yes)
                 on_actionopen_triggered();
             else
@@ -72,16 +73,16 @@ void MainWindow::initConnect() {
         }
     });
 
+
     connect(loginButton, &QPushButton::clicked, this, &MainWindow::showUserInfoDialog);
 
-    connect(tabWidget, &QTabWidget::tabCloseRequested, this, [this](int index) {
-        qDebug() << "Tab close requested at index: " << index;
-        on_actionclose_triggered();
-    });
+    // connect(tabWidget, &QTabWidget::tabCloseRequested, this, [this](int index) {
+    //     tabManager->closeTab(index);  // 只用 index，不用 currentIndex
+    // });
 
 
     connect(ui->actionhelp, &QAction::triggered, this, [this]() {
-        openFile(":/conf/help.txt");
+        tabManager->openFile(":/conf/help.txt");
     });
 
     connect(ui->actiondownload, &QAction::triggered, this, [this]() {
@@ -89,15 +90,15 @@ void MainWindow::initConnect() {
     });
 
     connect(ui->actiontxt_file, &QAction::triggered, this, [this]() {
-        createNewTab([]() { return new TextTab(""); }, "New Text Tab");
+        tabManager->createNewTab([]() { return new TextTab(""); }, "New Text Tab");
     });
 
     connect(ui->actionscv_file, &QAction::triggered, this, [this]() {
-        createNewTab([]() { return new TabHandleCSV(""); }, "New CSV Tab");
+        tabManager->createNewTab([]() { return new TabHandleCSV(""); }, "New CSV Tab");
     });
 
     connect(ui->actionxlsx_file, &QAction::triggered, this, [this]() {
-        createNewTab([]() { return new TabHandleXLSX(""); }, "New XLSX Tab");
+        tabManager->createNewTab([]() { return new TabHandleXLSX(""); }, "New XLSX Tab");
     });
 
     connect(ui->actionshe, &QAction::triggered, this, &MainWindow::showSetting);
@@ -118,10 +119,10 @@ void MainWindow::initConnect() {
 
     connect(wonlinedoc->shared_view, &SharedView::filePathSent, this, &MainWindow::handleFilePathSent);
     connect(wonlinedoc->download_view, &DownloadView::fileDownloaded, this, &MainWindow::handleFileDownload);
-    connect(recentFilesManager, &RecentFilesManager::fileOpened, this, &MainWindow::openFile);
-    connect(file_system, &FileSystem::fileOpened, this, &MainWindow::openFile);
-    connect(schedule_wid, &ScheduleWid::fileClicked, this, &MainWindow::openFile);
-    connect(file_backup_view, &FileBackupView::s_fileopen, this, &MainWindow::openFile);
+    connect(recentFilesManager, &RecentFilesManager::fileOpened, tabManager, &TabManager::openFile);
+    connect(file_system, &FileSystem::fileOpened, tabManager, &TabManager::openFile);
+    connect(schedule_wid, &ScheduleWid::fileClicked, tabManager, &TabManager::openFile);
+    connect(file_backup_view, &FileBackupView::s_fileopen, tabManager, &TabManager::openFile);
 
     connect(file_system, &FileSystem::tagopened, this, [=]{
         ui->stackedWidget->setCurrentWidget(schedule_wid);
@@ -176,7 +177,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     initCoreWidgets();
     initConnect();
     initMemubarLayout();
-    openFile(":/conf/help.txt");
+    tabManager->openFile(":/conf/help.txt");
     recentFilesManager->populateRecentFilesMenu(ui->recentFile);
 }
 
@@ -210,33 +211,6 @@ void MainWindow::showSetting()
     setting->show();
 }
 
-int MainWindow::addTab(TabAbstract* tab, const QString& displayName, const QString& filePath)
-{
-    int index = tabWidget->addTab(tab, displayName);
-    tabWidget->setCurrentIndex(index);
-
-    connect(tab, &TabAbstract::contentModified, this, [this, tab]() {
-        int i = tabWidget->indexOf(tab);
-        if (i >= 0 && !tabWidget->tabText(i).endsWith("*")) {
-            tabWidget->setTabText(i, tabWidget->tabText(i) + "*");
-        }
-    });
-
-    connect(tab, &TabAbstract::contentSaved, this, [this, tab]() {
-        int i = tabWidget->indexOf(tab);
-        if (i >= 0) {
-            QString name = QFileInfo(tab->getCurrentFilePath()).fileName();
-            tabWidget->setTabText(i, name);
-            // 保存成功后把路径插入 fileTabMap
-            fileTabMap[tab->getCurrentFilePath()] = i;
-        }
-    });
-
-    if (!filePath.isEmpty())
-        fileTabMap[filePath] = index;
-
-    return index;
-}
 
 
 void MainWindow::on_actionopen_triggered()
@@ -245,171 +219,31 @@ void MainWindow::on_actionopen_triggered()
         tr("All Files (*);;CSV Files (*.csv);;Text Files (*.txt)"));
     if (fileName.isEmpty())
         return;
-    openFile(fileName);
+    tabManager->openFile(fileName);
 }
-
-void MainWindow::openFile(const QString &filePath)
-{
-    if (fileTabMap.contains(filePath)) {
-        int existingIndex = fileTabMap[filePath];
-        tabWidget->setCurrentIndex(existingIndex);
-        return;
-    }
-
-    TabAbstract* newTab = createTabByFileName(filePath);
-    if (!newTab) {
-        QMessageBox::warning(this, tr("错误"), tr("不支持的文件类型"));
-        return;
-    }
-
-    newTab->loadFromFile(filePath);
-    QString baseName = QFileInfo(filePath).fileName();
-
-    addTab(newTab, baseName, filePath);
-
-    recentFilesManager->addFile(filePath);
-    recentFilesManager->populateRecentFilesMenu(ui->recentFile);
-}
-
 
 void MainWindow::on_actionsave_triggered()
 {
-    auto currentTab = getCurrentTab<TabAbstract>();
-    if (!currentTab) return;
-
-    QString currentFilePath = currentTab->getCurrentFilePath();
-
-    if (currentFilePath.isEmpty()) {
-        QString fileFilter;
-        if (dynamic_cast<TextTab*>(currentTab))
-            fileFilter = tr("Text Files (*.txt);;All Files (*)");
-        else if (dynamic_cast<TabHandleCSV*>(currentTab))
-            fileFilter = tr("CSV Files (*.csv);;All Files (*)");
-        else
-            fileFilter = tr("All Files (*)");
-
-        currentFilePath = QFileDialog::getSaveFileName(this, tr("Save File"), "", fileFilter);
-        if (currentFilePath.isEmpty())
-            return;
-    }
-    currentTab->setCurrentFilePath(currentFilePath);
-    currentTab->fileSave();
-}
-
-void MainWindow::createNewTab(std::function<TabAbstract*()> tabFactory, const QString &tabName)
-{
-    TabAbstract* newTab = tabFactory();
-    addTab(newTab, tabName, QString());  // 空路径，新建文件
-}
-
-TabAbstract* MainWindow::createTabByFileName(const QString &fileName)
-{
-    QString ext = QFileInfo(fileName).suffix().toLower();
-    auto it = tabFactories.find(ext);
-    if (it != tabFactories.end()) {
-        return it.value()(fileName);
-    }
-
-    QMessageBox::StandardButton reply = QMessageBox::question(
-        this, "不受支持的文件类型",
-        "该文件类型不受支持。是否以文本方式打开？",
-        QMessageBox::Yes | QMessageBox::No);
-
-    return (reply == QMessageBox::Yes) ? new TextTab(fileName) : nullptr;
+    tabManager->saveCurrentTab(this);
 }
 
 void MainWindow::on_actionclose_triggered()
 {
     int currentIndex = tabWidget->currentIndex();
     if (currentIndex >= 0) {
-        QWidget *widget = tabWidget->widget(currentIndex);
-
-        if (!widget) {
-            qDebug() << "No widget found at current index.";
-            return;
-        }
-        if (dynamic_cast<SendEmail*>(widget)) {
-            SendEmail *sendEmailTab = qobject_cast<SendEmail*>(widget);
-            tabWidget->removeTab(currentIndex);
-            delete sendEmailTab;
-            return;
-        }
-        if (dynamic_cast<ClipboardView*>(widget)) {
-            ClipboardView* clipboard = qobject_cast<ClipboardView*>(widget);
-            tabWidget->removeTab(currentIndex);
-            return;
-        }
-        TabAbstract *tab = qobject_cast<TabAbstract*>(widget);
-        if (tab) {
-            if (tab->confirmClose())
-            {
-                QString filePath = tab->getCurrentFilePath();
-                fileTabMap.remove(filePath);
-                tabWidget->removeTab(currentIndex);
-                tab->deleteLater();
-            }
-            else
-                qDebug() << "Tab close canceled by user.";
-        }
+        tabManager->closeTab(currentIndex);
     }
-    else
-        qDebug() << "No tab to close.";
 }
 
 void MainWindow::handleFileDownload(const QString &fileName, const QByteArray &fileContent)
 {
-    TabAbstract* newTab = createTabByFileName(fileName);
-    if (newTab) {
-        newTab->loadFromInternet(fileContent);
-        tabWidget->addTab(newTab, fileName);
-    } else
-        QMessageBox::warning(this, tr("错误"), tr("不支持的文件类型"));
+    tabManager->openFileFromMemory(fileName, fileContent);
 }
 
 void MainWindow::handleFilePathSent()
 {
-    createNewTab([]() { return new TabHandleCSV(""); }, "共享文档");
-    int lastIndex = tabWidget->count() - 1;
-    tabWidget->setCurrentIndex(lastIndex);
-
-    auto currentTab = getCurrentTab<TabHandleCSV>();
-    currentTab->setLinkStatus(true);
-    wonlinedoc->shared_view->bindTab(currentTab);
+    tabManager->openSharedCSVTab(wonlinedoc->shared_view);
 }
-
-void MainWindow::on_actionfind_triggered()
-{
-    auto currentTab = getCurrentTab<TabAbstract>();
-    TabHandleCSV* csvTab = qobject_cast<TabHandleCSV*>(currentTab);
-    if (csvTab) {
-        findDialog = new FindDialog(this);
-
-        connect(findDialog, &FindDialog::findAll, csvTab, &TabHandleCSV::findAll);
-        connect(findDialog, &FindDialog::findNext, csvTab, &TabHandleCSV::findNext);
-        connect(findDialog, &FindDialog::dialogClosed, csvTab, &TabHandleCSV::clearHighlight);
-
-        findDialog->show();
-        findDialog->raise();
-        findDialog->activateWindow();
-    }
-    else {
-        TextTab* textTab = qobject_cast<TextTab*>(currentTab);
-        if (textTab) {
-            findDialog = new FindDialog(this);
-
-            connect(findDialog, &FindDialog::findAll, textTab, &TextTab::findAll);
-            connect(findDialog, &FindDialog::findNext, textTab, &TextTab::findNext);
-            connect(findDialog, &FindDialog::dialogClosed, textTab, &TextTab::clearHighlight);
-
-            findDialog->show();
-            findDialog->raise();
-            findDialog->activateWindow();
-        } else {
-            QMessageBox::information(this, tr("未开放"), tr("当前txx，csv文件开放查找功能"));
-        }
-    }
-}
-
 
 void MainWindow::onTabContextMenuRequested(const QPoint &pos) {
     int tabIndex = tabWidget->tabBar()->tabAt(pos);
@@ -424,40 +258,17 @@ void MainWindow::onTabContextMenuRequested(const QPoint &pos) {
     if (!selectedAction) return;
 
     if (selectedAction == closeCurrent) {
-        closeTab(tabIndex);
+        tabManager->closeTab(tabIndex);  // 用点击的 tabIndex
     } else if (selectedAction == closeOthers) {
         for (int i = tabWidget->count() - 1; i >= 0; --i) {
             if (i != tabIndex)
-                closeTab(i);
+                tabManager->closeTab(i);
         }
     } else if (selectedAction == closeAll) {
         for (int i = tabWidget->count() - 1; i >= 0; --i) {
-            closeTab(i);
+            tabManager->closeTab(i);
         }
     }
+
 }
 
-void MainWindow::closeTab(int index) {
-    QWidget *widget = tabWidget->widget(index);
-    auto *tab = qobject_cast<TabAbstract*>(widget);
-    if (tab && tab->confirmClose()) {
-        tabWidget->removeTab(index);
-        QString filePath = tab->getCurrentFilePath();
-        fileTabMap.remove(filePath);
-        tab->deleteLater(); // 避免内存泄漏
-    }
-}
-
-
-
-
-template<typename T>
-T* MainWindow::getCurrentTab()
-{
-    QWidget* currentWidget = tabWidget->widget(currentIndex);
-    T* currentTab = qobject_cast<T*>(currentWidget);
-    if (!currentTab) {
-        QMessageBox::warning(this, tr("错误"), tr("当前页签是无效的"));
-    }
-    return currentTab;
-}

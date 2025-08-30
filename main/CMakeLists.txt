@@ -8,13 +8,17 @@ set(MAIN_SOURCES
     RecentFilesManager.cpp
     WidgetFunctional.cpp
     FindDialog.cpp
+    TabManager.cpp
+    TabFactory.cpp
+
 
     include/mainwindow.h
     include/TabAbstract.h
     include/RecentFilesManager.h
     include/WidgetFunctional.h
-
     include/FindDialog.h
+    include/TabFactory.h
+    include/TabManager.h
 
     ui/WidgetFunctional.ui
     ui/mainwindow.ui

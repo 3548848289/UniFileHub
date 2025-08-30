@@ -66,7 +66,7 @@ private:
     DInfo *dinfo;
     MoreFunction * more_function;
     ClipboardView* clipboard;
-
+    SendEmail * form;
     Ui::WidgetFunctional *ui;
 };
 

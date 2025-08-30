@@ -40,7 +40,6 @@ void WidgetFunctional::on_pushButton_5_clicked()
 
 void WidgetFunctional::on_pushButton_6_clicked()
 {
-    SendEmail *form = new SendEmail();
     emit sendEmailForm(form);
 }
 
@@ -115,6 +114,7 @@ WidgetFunctional::WidgetFunctional(QWidget *parent)
     );
 
     // ui->pushButton_7->hide(); //暂时不隐藏
+    form = new SendEmail();
     clipboard = new ClipboardView();
 }
 
