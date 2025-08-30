@@ -4,11 +4,8 @@ cmake_minimum_required(VERSION 3.5)
 project(SmartDesk VERSION 0.1 LANGUAGES CXX)
 
 
-# 查找 Qt 库 (仅在主目录调用一次)
-find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets Sql Network Svg SvgWidgets Multimedia MultimediaWidgets)
+find_package(QT NAMES Qt6 REQUIRED COMPONENT    S Widgets Sql Network Svg SvgWidgets Multimedia MultimediaWidgets)
 find_package(Qt6 REQUIRED COMPONENTS Widgets Sql Network Svg SvgWidgets Multimedia MultimediaWidgets)
-# set(Qt6_DIR "D:/QT6/6.8.0/android_arm64_v8a/lib/cmake/Qt6")
-# find_package(Qt6 COMPONENTS Core Gui Widgets Quick REQUIRED)
 
 # 启用自动处理 Qt 的 uic, moc, 和 rcc
 set(CMAKE_AUTOUIC ON)
@@ -54,6 +51,9 @@ if(WIN32)
     set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_SOURCE_DIR}/Resources/SmartDeskIcon.rc")
 endif()
 
+qt_add_executable(SmartDesk WIN32 ${RESOURCES} ${APP_ICON_RESOURCE_WINDOWS})
+
+
 
 target_link_libraries(SmartDesk PRIVATE
     mytxt_main
@@ -75,6 +75,7 @@ target_link_libraries(SmartDesk PRIVATE
     SimpleMail::Core
     QXlsx::QXlsx
     LmsgNotify::LmsgNotify
+    Qt${QT_VERSION_MAJOR}::Widgets
 )
 
 # 安装规则

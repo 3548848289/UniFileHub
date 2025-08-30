@@ -68,20 +68,23 @@ void TabHandleCSV::setContent(const QString &text)
     if (rows.isEmpty())
         return;
 
-    int rowCount = rows.size();
-    int colCount = rows.first().split(',').size();
+    // 取出第一行作为表头
+    QStringList headers = rows.first().split(',');
+    int colCount = headers.size();
+    int rowCount = rows.size() - 1; // 除掉表头行
 
     tableWidget->setColumnCount(colCount);
     tableWidget->setRowCount(rowCount);
+    tableWidget->setHorizontalHeaderLabels(headers);
 
-    for (int i = 0; i < rowCount; ++i) {
+    // 填充数据（从第二行开始）
+    for (int i = 1; i < rows.size(); ++i) {
         QStringList cols = rows[i].split(',');
         for (int j = 0; j < colCount; ++j) {
             QString value = (j < cols.size()) ? cols[j] : "";
-            tableWidget->setItem(i, j, new QTableWidgetItem(value));
+            tableWidget->setItem(i - 1, j, new QTableWidgetItem(value));
         }
     }
-
 }
 
 void TabHandleCSV::loadFromFile(const QString &fileName)
@@ -147,27 +150,26 @@ QString TabHandleCSV::toCSV() const
     int rowCount = tableWidget->rowCount();
     int colCount = tableWidget->columnCount();
 
-    for (int i = 0; i < rowCount; ++i) {
-        for (int j = 0; j < colCount; ++j) {
-            if (j > 0)
-                csvText += ',';
+    // --- 先输出表头 ---
+    QStringList headers;
+    for (int j = 0; j < colCount; ++j) {
+        headers << tableWidget->horizontalHeaderItem(j)->text();
+    }
+    csvText += headers.join(',') + '\n';
 
+    // --- 再输出数据 ---
+    for (int i = 0; i < rowCount; ++i) {
+        QStringList rowValues;
+        for (int j = 0; j < colCount; ++j) {
             QTableWidgetItem *item = tableWidget->item(i, j);
-            if (item) {
-                QString cellText = item->text();
-                // // 若内容包含逗号或引号，需要转义为 CSV 合法格式
-                // if (cellText.contains(',') || cellText.contains('"')) {
-                //     cellText.replace("\"", "\"\"");  // 转义引号
-                //     cellText = "\"" + cellText + "\"";  // 加上外层引号
-                // }
-                csvText += cellText;
-            }
+            rowValues << (item ? item->text() : "");
         }
-        csvText += '\n';
+        csvText += rowValues.join(',') + '\n';
     }
 
     return csvText;
 }
+
 
 
 void TabHandleCSV::adjustItem(QTableWidgetItem *item)

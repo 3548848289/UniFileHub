@@ -304,29 +304,18 @@ void MainWindow::createNewTab(std::function<TabAbstract*()> tabFactory, const QS
 
 TabAbstract* MainWindow::createTabByFileName(const QString &fileName)
 {
-    if (fileName.endsWith(".txt", Qt::CaseInsensitive) || fileName.endsWith(".cpp", Qt::CaseInsensitive) ||
-        fileName.endsWith(".qrc", Qt::CaseInsensitive) || fileName.endsWith(".ini", Qt::CaseInsensitive) ||
-        fileName.endsWith(".h", Qt::CaseInsensitive)   || fileName.endsWith(".json", Qt::CaseInsensitive)) {
-        return new TextTab(fileName);
+    QString ext = QFileInfo(fileName).suffix().toLower();
+    auto it = tabFactories.find(ext);
+    if (it != tabFactories.end()) {
+        return it.value()(fileName);
     }
-    else if (fileName.endsWith(".csv", Qt::CaseInsensitive)) {
-        return new TabHandleCSV(fileName);
-    }
-    else if(fileName.endsWith(".xlsx", Qt::CaseInsensitive)) {
-        return new TabHandleXLSX(fileName);
-    }
-    else if(fileName.endsWith(".png", Qt::CaseInsensitive) || fileName.endsWith(".jpg", Qt::CaseInsensitive) ||
-            fileName.endsWith(".jpeg", Qt::CaseInsensitive) || fileName.endsWith(".bmp", Qt::CaseInsensitive)||
-            fileName.endsWith(".svg", Qt::CaseInsensitive)   ) {
-        return new TabHandleIMG(fileName);
-    }
-    else if(fileName.endsWith(".mp4", Qt::CaseInsensitive)) {
-        return new TabHandleVideo(fileName);
-    }
-    else {
-        qDebug() << "Unsupported file type:" << fileName;
-        return nullptr;
-    }
+
+    QMessageBox::StandardButton reply = QMessageBox::question(
+        this, "不受支持的文件类型",
+        "该文件类型不受支持。是否以文本方式打开？",
+        QMessageBox::Yes | QMessageBox::No);
+
+    return (reply == QMessageBox::Yes) ? new TextTab(fileName) : nullptr;
 }
 
 void MainWindow::on_actionclose_triggered()
@@ -458,6 +447,8 @@ void MainWindow::closeTab(int index) {
         tab->deleteLater(); // 避免内存泄漏
     }
 }
+
+
 
 
 template<typename T>
