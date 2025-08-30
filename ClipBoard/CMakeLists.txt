@@ -1,30 +1,38 @@
 set(SETTING_SOURCES
+
+    ClipboardItem/CliText.cpp
+    ClipboardItem/CliImage.cpp
+    ClipboardItem/CliFile.cpp
+    ClipboardItemFactory.cpp
+
+    FiletypeDetector.cpp
+    ImagePreviewDialog.cpp
+
     ClipboardView.cpp
 )
 
 set(SETTING_HEADERS
-    ClipboardView.h
+    include/ClipboardItem/ClipboardItem.h
+    include/ClipboardItem/CliText.h
+    include/ClipboardItem/CliImage.h
+    include/ClipboardItem/CliFile.h
+    include/ClipboardItemFactory.h
+
+    include/FiletypeDetector.h
+    include/ImagePreviewDialog.h
+
+    include/ClipboardView.h
 )
 
 set(SETTING_UIS
-    ClipboardView.ui
+    ui/ClipboardView.ui
 )
 
 qt_add_library(mytxt_clipboard STATIC
     ${SETTING_SOURCES}
     ${SETTING_HEADERS}
     ${SETTING_UIS}
-    ClipboardItem.h
-    TextClipboardItem.h
-    TextClipboard.cpp
-    ImageClipboardItem.h
-    ImageClipboardItem.cpp
-    fileclipboarditem.h fileclipboarditem.cpp
-    FileClipboardItem.h
-    FileClipboardItem.cpp
-    clipboarditemfactory.h clipboarditemfactory.cpp
-    filetypedetector.h filetypedetector.cpp
-    imagepreviewdialog.h imagepreviewdialog.cpp
+
 )
 
 target_link_libraries(mytxt_clipboard PRIVATE

@@ -23,5 +23,4 @@ target_link_libraries(QFileSystemBreadcrumbBar PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
 )
 
-# 给库定义一个别名用于引用
 add_library(QFileSystemBreadcrumbBar::QFileSystemBreadcrumbBar ALIAS QFileSystemBreadcrumbBar)

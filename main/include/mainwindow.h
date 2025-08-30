@@ -55,7 +55,6 @@ private slots:
     void on_actionopen_triggered();
     void on_actionsave_triggered();
     void on_actionclose_triggered();
-    void on_actionfind_triggered();
     void handleFileDownload(const QString &fileName, const QByteArray &fileContent);
     void handleFilePathSent();
     void showUserInfoDialog();

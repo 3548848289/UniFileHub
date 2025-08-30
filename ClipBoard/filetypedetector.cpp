@@ -1,10 +1,12 @@
-#include "FileTypeDetector.h"
-#include "FileClipboardItem.h"
+#include "include/FileTypeDetector.h"
+#include "include/ClipboardItem/CliFile.h"
 #include <QUrl>
 #include <QFileInfo>
 
 // 判断是否为图片文件：路径存在 + 扩展名在支持列表中
 bool FileTypeDetector::isImageFile(const QString& path) {
+    return false;
+
     if (path.isEmpty()) return false;
 
     QString localPath = toLocalPath(path);
@@ -15,7 +17,8 @@ bool FileTypeDetector::isImageFile(const QString& path) {
 
     // 再检查扩展名是否在支持的图片格式列表中
     QString ext = getFileExtension(localPath);
-    return FileClipboardItem::s_supportedImageFormats.contains(ext);
+    return CliFile::s_supportedImageFormats.contains(ext);
+
 }
 
 // 获取小写扩展名（如"png"而非"PNG"）

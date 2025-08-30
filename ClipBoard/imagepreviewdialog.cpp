@@ -1,4 +1,4 @@
-#include "ImagePreviewDialog.h"
+#include "include/ImagePreviewDialog.h"
 #include <QVBoxLayout>
 #include <Qt>
 

@@ -42,13 +42,13 @@ void TabManager::closeTab(int index) {
 
     if (auto* sendEmailTab = qobject_cast<SendEmail*>(widget)) {
         tabWidget->removeTab(index);
-        sendEmailTab->deleteLater();
+        // sendEmailTab->deleteLater();
         return;
     }
 
     if (auto* clipboard = qobject_cast<ClipboardView*>(widget)) {
         tabWidget->removeTab(index);
-        clipboard->deleteLater();
+        // clipboard->deleteLater();
         return;
     }
 

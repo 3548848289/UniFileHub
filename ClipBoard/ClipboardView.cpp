@@ -1,8 +1,8 @@
-#include "ClipboardView.h"
-#include "ui_ClipboardView.h"
-#include "ClipboardItemFactory.h"
-#include "ImagePreviewDialog.h"
-#include "FileTypeDetector.h"
+#include "include/ClipboardView.h"
+#include "ui/ui_ClipboardView.h"
+#include "include/ClipboardItemFactory.h"
+#include "include/ImagePreviewDialog.h"
+#include "include/FileTypeDetector.h"
 #include <QGuiApplication>
 #include <QMimeData>
 #include <QMessageBox>
@@ -14,47 +14,69 @@
 #include <Qt>
 #include <algorithm>
 
-// 构造函数：初始化UI、剪贴板、数据库服务
 ClipboardView::ClipboardView(QWidget *parent)
     : QWidget(parent), ui(new Ui::ClipboardView),
-    m_dbService(dbService::instance("./SmartDesk.db")), // 数据库单例
+    m_dbService(dbService::instance("./SmartDesk.db")),
     m_initialItemCount(0), m_currentRightClickedItem(nullptr) {
     ui->setupUi(this);
+
+    // ui->listWidget
+
+
+
     initializeListWidget();
 
-    // 绑定剪贴板数据变化信号（系统剪贴板更新时触发）
     m_clipboard = QGuiApplication::clipboard();
     connect(m_clipboard, &QClipboard::dataChanged, this, &ClipboardView::onClipboardChanged);
 
-    // 加载历史记录（通过工厂类创建项）
     loadHistory();
     m_initialItemCount = ui->listWidget->count(); // 记录初始项数（后续只保存新增项）
 }
 
-// 析构函数：保存未保存的项 + 释放UI
 ClipboardView::~ClipboardView() {
-    on_saveButton_clicked(); // 退出时自动保存新增项
+    on_saveButton_clicked();
     delete ui;
 }
 
-// 初始化列表控件：设置滚动、选择模式、右键菜单等
 void ClipboardView::initializeListWidget() {
-    ui->listWidget->setSelectionMode(QAbstractItemView::ExtendedSelection); // 支持多选
-    ui->listWidget->setWordWrap(true); // 自动换行
-    ui->listWidget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn); // 始终显示垂直滚动条
-    ui->listWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel); // 像素级滚动
-    ui->listWidget->scrollToBottom(); // 默认滚动到底部
-    ui->listWidget->setContextMenuPolicy(Qt::CustomContextMenu); // 启用自定义右键菜单
+    ui->listWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    ui->listWidget->setWordWrap(true);
+    ui->listWidget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    ui->listWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+    ui->listWidget->scrollToBottom();
+    ui->listWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->listWidget->setIconSize(QSize(80, 60)); // 图标尺寸（图片/文件缩略图）
+    ui->listWidget->setStyleSheet(R"(
+    /* 普通状态 */
+    QListWidget::item {
+        border: 1px solid gray;
+        margin: 1px;
+        padding: 2px;
+        background-color: white;   /* 普通背景色 */
+        color: black;              /* 普通文字颜色 */
+    }
+
+    /* 鼠标悬停 */
+    QListWidget::item:hover {
+        background-color: #444444; /* 深灰色悬停 */
+        color: white;              /* 悬停文字为白色 */
+    }
+
+    /* 选中状态 */
+    QListWidget::item:selected {
+        background-color: #3399FF; /* 选中蓝色 */
+        color: white;              /* 选中白色文字 */
+    }
+)");
+
+
 }
 
 // 加载历史记录：从数据库读取 → 工厂类创建项 → 添加到UI
 void ClipboardView::loadHistory() {
-    // 从配置获取历史保留时长（小时）
     int hours = SettingManager::Instance().clip_board_hours();
     QList<QString> serializedItems = m_dbService.dbClip().loadRecentHistory(hours);
 
-    // 遍历序列化字符串，通过工厂类创建对应ClipboardItem
     for (const QString& serialized : serializedItems) {
         std::unique_ptr<ClipboardItem> item =
             ClipboardItemFactory::createFromSerializedString(serialized);
@@ -63,7 +85,6 @@ void ClipboardView::loadHistory() {
         }
     }
 
-    // 将创建的项添加到UI列表
     for (const auto& item : m_clipboardItems) {
         ui->listWidget->addItem(item->createListWidgetItem());
     }
@@ -73,18 +94,15 @@ void ClipboardView::loadHistory() {
 void ClipboardView::addClipboardItem(std::unique_ptr<ClipboardItem> item) {
     if (!item) return;
 
-    // 去重：比较序列化结果（避免重复添加相同项）
     QString newItemSerialized = item->serialize();
     for (const auto& existing : m_clipboardItems) {
         if (existing->serialize() == newItemSerialized) {
-            return; // 重复项，不添加
+            return;
         }
     }
 
-    // 加入集合（智能指针自动管理内存）
     m_clipboardItems.push_back(std::move(item));
 
-    // 插入到UI列表最前面（最新项显示在顶部）
     ui->listWidget->insertItem(0, m_clipboardItems.back()->createListWidgetItem());
 }
 
@@ -132,19 +150,19 @@ void ClipboardView::previewImage() {
     // 根据项类型获取图片
     switch (item->type()) {
     case ClipboardItemType::Image: {
-        auto* imageItem = static_cast<ImageClipboardItem*>(item);
+        auto* imageItem = static_cast<CliImage*>(item);
         previewPixmap = imageItem->pixmap();
         break;
     }
     case ClipboardItemType::File: {
-        auto* fileItem = static_cast<FileClipboardItem*>(item);
+        auto* fileItem = static_cast<CliFile*>(item);
         if (fileItem->isImageFile()) {
             previewPixmap.load(fileItem->filePaths().first());
         }
         break;
     }
     case ClipboardItemType::Text: {
-        auto* textItem = static_cast<TextClipboardItem*>(item);
+        auto* textItem = static_cast<CliText*>(item);
         QString path = textItem->text();
         if (FileTypeDetector::isImageFile(path)) {
             previewPixmap.load(FileTypeDetector::toLocalPath(path));
@@ -169,7 +187,7 @@ void ClipboardView::openFileLocation() {
     ClipboardItem* item = findItemForListWidgetItem(m_currentRightClickedItem);
     if (!item || item->type() != ClipboardItemType::File) return;
 
-    auto* fileItem = static_cast<FileClipboardItem*>(item);
+    auto* fileItem = static_cast<CliFile*>(item);
     if (fileItem->filePaths().isEmpty()) return;
 
     // 获取第一个文件的目录路径，通过桌面服务打开
@@ -237,7 +255,6 @@ void ClipboardView::on_listWidget_customContextMenuRequested(const QPoint &pos) 
     ClipboardItem* item = findItemForListWidgetItem(m_currentRightClickedItem);
     if (!item) return;
 
-    // 创建右键菜单
     QMenu menu(this);
     QAction *copyAction = menu.addAction("复制到剪贴板");
 
@@ -246,35 +263,27 @@ void ClipboardView::on_listWidget_customContextMenuRequested(const QPoint &pos) 
     if (item->type() == ClipboardItemType::Image) {
         canPreview = true;
     } else if (item->type() == ClipboardItemType::File) {
-        auto* fileItem = static_cast<FileClipboardItem*>(item);
+        auto* fileItem = static_cast<CliFile*>(item);
         canPreview = fileItem->isImageFile();
     } else if (item->type() == ClipboardItemType::Text) {
-        auto* textItem = static_cast<TextClipboardItem*>(item);
+        auto* textItem = static_cast<CliText*>(item);
         canPreview = FileTypeDetector::isImageFile(textItem->text());
     }
 
-    // 图片预览动作
     if (canPreview) {
         QAction *previewAction = menu.addAction("预览图片");
         connect(previewAction, &QAction::triggered, this, &ClipboardView::previewImage);
     }
 
-    // 文件位置动作（仅文件项）
     if (item->type() == ClipboardItemType::File) {
         QAction *openLocationAction = menu.addAction("打开文件位置");
         connect(openLocationAction, &QAction::triggered, this, &ClipboardView::openFileLocation);
     }
 
-    // 删除动作
     QAction *deleteAction = menu.addAction("删除");
 
-    // 绑定动作与槽函数
     connect(copyAction, &QAction::triggered, this, &ClipboardView::copyItem);
     connect(deleteAction, &QAction::triggered, this, &ClipboardView::deleteItem);
 
-    // 显示菜单
     menu.exec(ui->listWidget->mapToGlobal(pos));
 }
-
-// 确保Qt元对象系统能识别此类（用于信号槽）
-#include "ClipboardView.moc"

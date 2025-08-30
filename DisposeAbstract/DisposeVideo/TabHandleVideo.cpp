@@ -49,6 +49,7 @@ void TabHandleVideo::setContent(const QString &text)
 
 QString TabHandleVideo::getContent() const
 {
+
 }
 
 void TabHandleVideo::loadFromFile(const QString &fileName)

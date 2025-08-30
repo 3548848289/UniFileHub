@@ -1,5 +1,5 @@
-#include "ClipboardItemFactory.h"
-#include "FileTypeDetector.h"
+#include "include/ClipboardItemFactory.h"
+#include "include/FileTypeDetector.h"
 #include <QMimeData>
 #include <QUrl>
 #include <QVariant>
@@ -20,7 +20,7 @@ std::unique_ptr<ClipboardItem> ClipboardItemFactory::createFromMimeData(const QM
             }
         }
         if (!filePaths.isEmpty()) {
-            return std::make_unique<FileClipboardItem>(filePaths);
+            return std::make_unique<CliFile>(filePaths);
         }
     }
 
@@ -36,7 +36,7 @@ std::unique_ptr<ClipboardItem> ClipboardItemFactory::createFromMimeData(const QM
         }
 
         if (!pixmap.isNull()) {
-            return std::make_unique<ImageClipboardItem>(pixmap);
+            return std::make_unique<CliImage>(pixmap);
         }
     }
 
@@ -48,11 +48,11 @@ std::unique_ptr<ClipboardItem> ClipboardItemFactory::createFromMimeData(const QM
             if (FileTypeDetector::isImageFile(text)) {
                 QPixmap pixmap(FileTypeDetector::toLocalPath(text));
                 if (!pixmap.isNull()) {
-                    return std::make_unique<ImageClipboardItem>(pixmap);
+                    return std::make_unique<CliImage>(pixmap);
                 }
             }
             // 普通文本 → 创建Text项
-            return std::make_unique<TextClipboardItem>(text);
+            return std::make_unique<CliText>(text);
         }
     }
 
@@ -61,18 +61,22 @@ std::unique_ptr<ClipboardItem> ClipboardItemFactory::createFromMimeData(const QM
 
 // 根据序列化字符串创建对应项（用于加载历史记录）
 std::unique_ptr<ClipboardItem> ClipboardItemFactory::createFromSerializedString(const QString& serialized) {
+    // qDebug() << "Serialized string:" << serialized;
+
     // 1. 图片数据（前缀：IMAGE_DATA:）
     if (serialized.startsWith("IMAGE_DATA:")) {
         QByteArray imageData = QByteArray::fromBase64(serialized.mid(10).toUtf8());
-        return std::make_unique<ImageClipboardItem>(imageData);
+        return std::make_unique<CliImage>(imageData);
     }
 
     // 2. 文件数据（前缀：FILE_DATA:）
     if (serialized.startsWith("FILE_DATA:")) {
         QStringList filePaths = serialized.mid(10).split(";");
-        return std::make_unique<FileClipboardItem>(filePaths);
+        return std::make_unique<CliFile>(filePaths);
     }
 
     // 3. 文本数据（无前缀）
     // 检查文本是否为图片路径 → 是则创建Image项，否则创建Text
+    return std::make_unique<CliText>(serialized);
+
 }

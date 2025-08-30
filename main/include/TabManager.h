@@ -10,7 +10,7 @@
 #include "TabFactory.h"
 #include "../../OnlineDoc/include/WOnlineDoc.h"
 #include "../../EmailService/SendEmail.h"
-#include "../../ClipBoard/ClipboardView.h"
+#include "../../ClipBoard/include/ClipboardView.h"
 class TabManager : public QObject {
     Q_OBJECT
 
