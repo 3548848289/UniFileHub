@@ -14,8 +14,10 @@
 class TabManager : public QObject {
     Q_OBJECT
 
-public slots:
+signals:
+    void fileOpened(const QString& filePath);
 
+public slots:
     void openFile(const QString& filePath);
 public:
     explicit TabManager(QTabWidget* parentTabWidget, QObject* parent = nullptr);

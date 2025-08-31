@@ -36,7 +36,7 @@ QListWidgetItem* CliFile::createListWidgetItem() const {
         item->setIcon(QIcon(pixmap.scaled(80, 60, Qt::KeepAspectRatio, Qt::SmoothTransformation)));
     } else {
         // 非图片文件：使用默认文件图标
-        item->setIcon(QIcon::fromTheme("document", QIcon(":/icons/file.png")));
+        item->setIcon(QIcon::fromTheme("document", QIcon("://usedimage/history.svg")));
     }
 
     item->setData(Qt::UserRole, QVariant::fromValue<quintptr>(reinterpret_cast<quintptr>(this)));

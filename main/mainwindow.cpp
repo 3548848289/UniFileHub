@@ -119,7 +119,11 @@ void MainWindow::initConnect() {
 
     connect(wonlinedoc->shared_view, &SharedView::filePathSent, this, &MainWindow::handleFilePathSent);
     connect(wonlinedoc->download_view, &DownloadView::fileDownloaded, this, &MainWindow::handleFileDownload);
+
     connect(recentFilesManager, &RecentFilesManager::fileOpened, tabManager, &TabManager::openFile);
+    connect(tabManager, &TabManager::fileOpened,recentFilesManager, &RecentFilesManager::addFile);
+
+
     connect(file_system, &FileSystem::fileOpened, tabManager, &TabManager::openFile);
     connect(schedule_wid, &ScheduleWid::fileClicked, tabManager, &TabManager::openFile);
     connect(file_backup_view, &FileBackupView::s_fileopen, tabManager, &TabManager::openFile);

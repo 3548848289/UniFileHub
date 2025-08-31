@@ -6,27 +6,27 @@
 #include <QSettings>
 #include <QAction>
 #include <QMenu>
+#include <QFileInfo>
 #include "../../Setting/include/SettingManager.h"
 
-class RecentFilesManager : public QObject
-{
+class RecentFilesManager : public QObject {
     Q_OBJECT
-
 public:
     explicit RecentFilesManager(QObject *parent = nullptr);
     ~RecentFilesManager();
 
     void addFile(const QString &filePath);
-    void loadHistory();
-    void saveHistory();
     void populateRecentFilesMenu(QMenu *menu);
-
 signals:
     void fileOpened(const QString &filePath);
 
 private:
-    QStringList fileHistory;
-    const int maxRecentFiles = 10; // Maximum number of recent files to keep
-};
+    void loadHistory();
+    void saveHistory();
+    void updateMenu();
 
+    QStringList fileHistory;
+    QMenu* recentMenu = nullptr;
+    const int maxRecentFiles = 10;
+};
 #endif // RECENTFILESMANAGER_H

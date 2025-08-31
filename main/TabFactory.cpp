@@ -44,6 +44,8 @@ const QMap<QString, std::function<TabAbstract*(const QString&)>> TabFactory::fac
     { "webp",  [](const QString& f){ return new TabHandleIMG(f); } },
     { "tiff",  [](const QString& f){ return new TabHandleIMG(f); } },
     { "ico",   [](const QString& f){ return new TabHandleIMG(f); } },
+    { "psd",  [](const QString& f){ return new TabHandleIMG(f); } },
+    { "ai",   [](const QString& f){ return new TabHandleIMG(f); } },
 
     // --- 视频类 ---
     { "mp4",   [](const QString& f){ return new TabHandleVideo(f); } },

@@ -46,28 +46,24 @@ void ClipboardView::initializeListWidget() {
     ui->listWidget->scrollToBottom();
     ui->listWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->listWidget->setIconSize(QSize(80, 60)); // 图标尺寸（图片/文件缩略图）
-    ui->listWidget->setStyleSheet(R"(
-    /* 普通状态 */
-    QListWidget::item {
-        border: 1px solid gray;
-        margin: 1px;
-        padding: 2px;
-        background-color: white;   /* 普通背景色 */
-        color: black;              /* 普通文字颜色 */
-    }
+    ui->listWidget->setStyleSheet(
+        R"(
+            QListWidget::item {
+                border: 1px solid lightgray;
+                padding: 5px;
+                margin: 2px;
+            }
 
-    /* 鼠标悬停 */
-    QListWidget::item:hover {
-        background-color: #444444; /* 深灰色悬停 */
-        color: white;              /* 悬停文字为白色 */
-    }
+            QListWidget::item:selected {
+                background-color: #a8c5f7;
+                color: black;
+            }
 
-    /* 选中状态 */
-    QListWidget::item:selected {
-        background-color: #3399FF; /* 选中蓝色 */
-        color: white;              /* 选中白色文字 */
-    }
-)");
+            QListWidget::item:hover {
+                background-color: #e0e0e0;
+            }
+        )"
+    );
 
 
 }

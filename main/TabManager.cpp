@@ -79,6 +79,9 @@ void TabManager::openFile(const QString& filePath) {
     newTab->loadFromFile(filePath);
     QString baseName = QFileInfo(filePath).fileName();
     addTab(newTab, baseName, filePath);
+
+    emit fileOpened(filePath);
+
 }
 
 void TabManager::createNewTab(std::function<TabAbstract*()> tabFactory, const QString& tabName) {
