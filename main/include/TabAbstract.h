@@ -9,6 +9,7 @@
 #include <QMessageBox>
 #include <QJsonObject>
 #include <QJsonDocument>
+#include "FindDialog.h"
 
 class TabAbstract : public QWidget
 {
@@ -34,6 +35,11 @@ public:
     virtual void setCurrentFilePath(const QString& path) {
         currentFilePath = path;
     }
+
+    void markModified() { setContentModified(true); }
+    void clearModified() { setContentModified(false); }
+    FindDialog* getFindDialog() { return findDialog; }
+    void setFindDialog(FindDialog* dialog) { findDialog = dialog; }
 
     void fileSave() {
         if (currentFilePath.isEmpty()) {
@@ -77,6 +83,7 @@ protected:
     QString currentFilePath;
     bool isModified;
     bool isShowControl;
+    FindDialog* findDialog = nullptr;
 
     void setContentModified(bool modified) {
         if (isModified != modified) {

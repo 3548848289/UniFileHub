@@ -6,6 +6,7 @@
 #include <QSettings>
 #include <QAction>
 #include <QMenu>
+#include <QMessageBox>
 #include <QFileInfo>
 #include "../../Setting/include/SettingManager.h"
 

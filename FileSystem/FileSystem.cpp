@@ -44,6 +44,10 @@ FileSystem::FileSystem(QWidget *parent)
         emit filebackuplistOpened();
     });
 
+    connect(tagItemdelegate, &TagItemDelegate::deleteFileRequested, this, [this](const QString &filePath) {
+        emit deleteFileRequested(filePath);
+    });
+
     // 创建面包屑控件
     breadcrumb = new QFileSystemBreadcrumbBar();
     breadcrumb->setPath(currentDir);

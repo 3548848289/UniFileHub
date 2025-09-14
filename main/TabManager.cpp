@@ -72,7 +72,7 @@ void TabManager::openFile(const QString& filePath) {
 
     TabAbstract* newTab = TabFactory::create(filePath);
     if (!newTab) {
-        QMessageBox::warning(nullptr, QObject::tr("错误"), QObject::tr("不支持的文件类型"));
+        // QMessageBox::warning(nullptr, QObject::tr("错误"), QObject::tr("不支持的文件类型"));
         return;
     }
 
@@ -83,6 +83,21 @@ void TabManager::openFile(const QString& filePath) {
     emit fileOpened(filePath);
 
 }
+
+void TabManager::deleteFile(const QString& filePath) {
+    if (!fileTabMap.contains(filePath))
+        return;
+
+    int index = fileTabMap[filePath];
+    if (index < 0 || index >= tabWidget->count())
+        return;
+
+    if (auto* tab = qobject_cast<TabAbstract*>(tabWidget->widget(index))) {
+        tab->markModified();
+    }
+}
+
+
 
 void TabManager::createNewTab(std::function<TabAbstract*()> tabFactory, const QString& tabName) {
     TabAbstract* newTab = tabFactory();
@@ -121,8 +136,9 @@ void TabManager::saveCurrentTab(QWidget *parent)
         currentFilePath = QFileDialog::getSaveFileName(parent, QObject::tr("Save File"), "", fileFilter);
         if (currentFilePath.isEmpty())
             return;
-
         currentTab->setCurrentFilePath(currentFilePath);
+        emit fileOpened(currentFilePath);
+
     }
 
     currentTab->fileSave();
@@ -154,30 +170,37 @@ void TabManager::openSharedCSVTab(SharedView* sharedView)
     sharedView->bindTab(csvTab);
 }
 
+// TabManager.cpp
 void TabManager::findInCurrentTab(QWidget* parent)
 {
-    // auto currentTab = getCurrentTab<TabAbstract>();
-    // if (!currentTab) return;
+    auto currentTab = getCurrentTab<TabAbstract>();
+    if (!currentTab) return;
 
-    // findDialog = new FindDialog(parent);
+    if (!currentTab->getFindDialog()) {
+        FindDialog* dialog = new FindDialog(parent);
+        currentTab->setFindDialog(dialog);
 
-    // if (auto csvTab = qobject_cast<TabHandleCSV*>(currentTab)) {
-    //     connect(findDialog, &FindDialog::findAll, csvTab, &TabHandleCSV::findAll);
-    //     connect(findDialog, &FindDialog::findNext, csvTab, &TabHandleCSV::findNext);
-    //     connect(findDialog, &FindDialog::dialogClosed, csvTab, &TabHandleCSV::clearHighlight);
-    // } else if (auto textTab = qobject_cast<TextTab*>(currentTab)) {
-    //     connect(findDialog, &FindDialog::findAll, textTab, &TextTab::findAll);
-    //     connect(findDialog, &FindDialog::findNext, textTab, &TextTab::findNext);
-    //     connect(findDialog, &FindDialog::dialogClosed, textTab, &TextTab::clearHighlight);
-    // } else {
-    //     QMessageBox::information(parent, QObject::tr("未开放"), QObject::tr("当前仅支持 txt/csv 文件查找"));
-    //     delete findDialog;
-    //     return;
-    // }
+        if (auto csvTab = qobject_cast<TabHandleCSV*>(currentTab)) {
+            connect(dialog, &FindDialog::findAll, csvTab, &TabHandleCSV::findAll);
+            connect(dialog, &FindDialog::findNext, csvTab, &TabHandleCSV::findNext);
+            connect(dialog, &FindDialog::dialogClosed, csvTab, &TabHandleCSV::clearHighlight);
+        } else if (auto textTab = qobject_cast<TextTab*>(currentTab)) {
+            connect(dialog, &FindDialog::findAll, textTab, &TextTab::findAll);
+            connect(dialog, &FindDialog::findNext, textTab, &TextTab::findNext);
+            connect(dialog, &FindDialog::dialogClosed, textTab, &TextTab::clearHighlight);
+        } else {
+            QMessageBox::information(parent, QObject::tr("未开放"),
+                                     QObject::tr("当前仅支持 txt/csv 文件查找"));
+            delete dialog;
+            currentTab->setFindDialog(nullptr);
+            return;
+        }
+    }
 
-    // findDialog->show();
-    // findDialog->raise();
-    // findDialog->activateWindow();
+    currentTab->getFindDialog()->show();
+    currentTab->getFindDialog()->raise();
+    currentTab->getFindDialog()->activateWindow();
+
 }
 
 

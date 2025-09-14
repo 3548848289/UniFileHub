@@ -59,6 +59,8 @@ private slots:
     void handleFilePathSent();
     void showUserInfoDialog();
 
+    void on_actionfind_triggered();
+
 private:
     Ui::MainWindow *ui;
     int currentIndex = 0;
@@ -82,6 +84,7 @@ private:
     void initConnect();
     void initMemubarLayout();
     void onTabContextMenuRequested(const QPoint &pos);
+    void togglePanel(QWidget *target);
 };
 
 #endif // MAINWINDOW_H

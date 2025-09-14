@@ -13,6 +13,8 @@ void MainWindow::initCoreWidgets() {
     tabWidget = new QTabWidget(this);
     tabWidget->setTabsClosable(true);
     tabWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+    tabWidget->tabBar()->setMovable(true);
+
     tabManager = new TabManager(tabWidget, this);
 
     connect(tabWidget, &QTabWidget::customContextMenuRequested, this, &MainWindow::onTabContextMenuRequested);
@@ -33,16 +35,17 @@ void MainWindow::initCoreWidgets() {
 
 void MainWindow::initConnect() {
     connect(widgetfunc, &WidgetFunctional::showFiletag, this, [this] {
-        ui->stackedWidget->setCurrentWidget(file_system); });
-
+        togglePanel(file_system);
+    });
     connect(widgetfunc, &WidgetFunctional::showFilebackup, this, [this] {
-        ui->stackedWidget->setCurrentWidget(file_backup_view); });
-
+        togglePanel(file_backup_view);
+    });
     connect(widgetfunc, &WidgetFunctional::showwOnlinedoc, this, [this] {
-        ui->stackedWidget->setCurrentWidget(wonlinedoc); });
-
+        togglePanel(wonlinedoc);
+    });
     connect(widgetfunc, &WidgetFunctional::showWSchedule, this, [this] {
-        ui->stackedWidget->setCurrentWidget(schedule_wid); });
+        togglePanel(schedule_wid);
+    });
 
     connect(widgetfunc, &WidgetFunctional::sendEmailForm, this, [this](SendEmail *form) {
         int newIndex = tabManager->addWidgetTab(form, "Email"); // 通过 TabManager 添加
@@ -87,13 +90,14 @@ void MainWindow::initConnect() {
 
     connect(ui->actiondownload, &QAction::triggered, this, [this]() {
         ui->stackedWidget->setCurrentWidget(wonlinedoc);
+        wonlinedoc->setCurrentTabIndex(1);
     });
 
     connect(ui->actiontxt_file, &QAction::triggered, this, [this]() {
         tabManager->createNewTab([]() { return new TextTab(""); }, "New Text Tab");
     });
 
-    connect(ui->actionscv_file, &QAction::triggered, this, [this]() {
+    connect(ui->actioncsv_file, &QAction::triggered, this, [this]() {
         tabManager->createNewTab([]() { return new TabHandleCSV(""); }, "New CSV Tab");
     });
 
@@ -125,6 +129,7 @@ void MainWindow::initConnect() {
 
 
     connect(file_system, &FileSystem::fileOpened, tabManager, &TabManager::openFile);
+    connect(file_system, &FileSystem::deleteFileRequested, tabManager, &TabManager::deleteFile);
     connect(schedule_wid, &ScheduleWid::fileClicked, tabManager, &TabManager::openFile);
     connect(file_backup_view, &FileBackupView::s_fileopen, tabManager, &TabManager::openFile);
 
@@ -137,15 +142,17 @@ void MainWindow::initConnect() {
 }
 
 void MainWindow::initMemubarLayout() {
-    QSplitter *horizontalSplitter = new QSplitter(Qt::Horizontal);
+    QSplitter *horizontalSplitter = new QSplitter(Qt::Horizontal);    
     horizontalSplitter->addWidget(widgetfunc);
-    horizontalSplitter->addWidget(tabWidget);
+    widgetfunc->setFixedWidth(60);
+
     horizontalSplitter->addWidget(ui->combinedWidget);
+    horizontalSplitter->addWidget(tabWidget);
     horizontalSplitter->setStretchFactor(0, 0);
     horizontalSplitter->setStretchFactor(1, 1);
     horizontalSplitter->setStretchFactor(2, 3);
     setCentralWidget(horizontalSplitter);
-    QList<int> sizes = {60, 550, 390};
+    QList<int> sizes = {60, 340, 600};
     horizontalSplitter->setSizes(sizes);
 
 
@@ -189,6 +196,20 @@ MainWindow::~MainWindow()
 {
     delete ui;
 }
+
+void MainWindow::togglePanel(QWidget* target) {
+    if (ui->stackedWidget->currentWidget() == target && ui->stackedWidget->isVisible()) {
+        ui->stackedWidget->hide();
+        QList<int> sizes = {60, 0, 900}; // 第二块设成 0 宽度
+        qobject_cast<QSplitter*>(centralWidget())->setSizes(sizes);
+    } else {
+        ui->stackedWidget->show();
+        ui->stackedWidget->setCurrentWidget(target);
+        QList<int> sizes = {60, 340, 600}; // 恢复
+        qobject_cast<QSplitter*>(centralWidget())->setSizes(sizes);
+    }
+}
+
 
 void MainWindow::showUserInfoDialog() {
     DInfo *dinfo = widgetfunc->getDInfo();
@@ -276,3 +297,9 @@ void MainWindow::onTabContextMenuRequested(const QPoint &pos) {
 
 }
 
+void MainWindow::on_actionfind_triggered()
+{
+    if (tabManager) {
+        tabManager->findInCurrentTab(this); // this 作为 parent，保证对话框弹在主窗口上
+    }
+}

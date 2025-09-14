@@ -46,6 +46,9 @@
            <property name="leftMargin">
             <number>0</number>
            </property>
+           <property name="topMargin">
+            <number>2</number>
+           </property>
            <property name="bottomMargin">
             <number>0</number>
            </property>
@@ -53,16 +56,6 @@
             <number>4</number>
            </property>
            <item row="0" column="0">
-            <widget class="QLabel" name="label">
-             <property name="styleSheet">
-              <string notr="true"/>
-             </property>
-             <property name="text">
-              <string>当前界面</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0">
             <widget class="QStackedWidget" name="stackedWidget"/>
            </item>
           </layout>
@@ -92,7 +85,7 @@
       <string>新建</string>
      </property>
      <addaction name="actiontxt_file"/>
-     <addaction name="actionscv_file"/>
+     <addaction name="actioncsv_file"/>
      <addaction name="actionxlsx_file"/>
     </widget>
     <widget class="QMenu" name="recentFile">
@@ -218,12 +211,15 @@
     <string>Ctrl+N, Ctrl+T</string>
    </property>
   </action>
-  <action name="actionscv_file">
+  <action name="actioncsv_file">
    <property name="icon">
     <iconset theme="QIcon::ThemeIcon::DocumentNew"/>
    </property>
    <property name="text">
-    <string>scv文件</string>
+    <string>csv文件</string>
+   </property>
+   <property name="toolTip">
+    <string>csv文件</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+N, Ctrl+C</string>

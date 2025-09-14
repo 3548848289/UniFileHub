@@ -2,6 +2,7 @@
 #define TABMANAGER_H
 
 #include <QTabWidget>
+#include <QTabBar>
 #include <QMap>
 #include <QMessageBox>
 #include <QFileInfo>
@@ -11,6 +12,9 @@
 #include "../../OnlineDoc/include/WOnlineDoc.h"
 #include "../../EmailService/SendEmail.h"
 #include "../../ClipBoard/include/ClipboardView.h"
+#include "FindDialog.h"
+
+
 class TabManager : public QObject {
     Q_OBJECT
 
@@ -19,6 +23,7 @@ signals:
 
 public slots:
     void openFile(const QString& filePath);
+    void deleteFile(const QString& filePath);
 public:
     explicit TabManager(QTabWidget* parentTabWidget, QObject* parent = nullptr);
 
@@ -38,6 +43,7 @@ public:
     int addWidgetTab(QWidget *widget, const QString &displayName);
 private:
     TabAbstract* createTabByFileName(const QString& fileName);
+    // FindDialog* findDialog;
     QTabWidget* tabWidget;
     QMap<QString, int> fileTabMap;
 };

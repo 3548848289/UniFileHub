@@ -58,8 +58,19 @@ void RecentFilesManager::updateMenu() {
         QAction *action = new QAction(filePath, recentMenu);
         action->setToolTip(filePath);
         connect(action, &QAction::triggered, this, [this, filePath]() {
-            emit fileOpened(filePath);
+            if (QFile::exists(filePath)) {
+                emit fileOpened(filePath);
+            } else {
+                QMessageBox::warning(
+                    nullptr,tr(""),tr("文件 %1 已不存在，可能已被清理").arg(filePath)
+                );
+                fileHistory.removeAll(filePath);
+                saveHistory();
+
+                updateMenu();
+            }
         });
+
         recentMenu->addAction(action);
     }
 }

@@ -12,6 +12,11 @@ WOnlineDoc::WOnlineDoc(QWidget *parent) : QWidget(parent), ui(new Ui::WOnlineDoc
     ui->tabWidget->addTab(download_view, "网络资源下载");
 }
 
+void WOnlineDoc::setCurrentTabIndex(int index) {
+    if (index >= 0 && index < ui->tabWidget->count()) {
+        ui->tabWidget->setCurrentIndex(index);
+    }
+}
 
 WOnlineDoc::~WOnlineDoc()
 {

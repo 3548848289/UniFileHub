@@ -21,6 +21,7 @@ public:
     SharedView* shared_view;
 
 
+    void setCurrentTabIndex(int index);
 private:
     Ui::WOnlineDoc *ui;
 };
