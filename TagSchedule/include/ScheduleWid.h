@@ -11,6 +11,7 @@
 #include <QListWidgetItem>
 #include <QTimer>
 #include <QMessageBox>
+#include <QFile>
 
 #include "TagList.h"
 #include "../../Setting/include/SettingManager.h"

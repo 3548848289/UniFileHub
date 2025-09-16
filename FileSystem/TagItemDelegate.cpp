@@ -110,24 +110,39 @@ void TagItemDelegate::onOpenFileTriggered(QAbstractItemModel *model, const QMode
 
 void TagItemDelegate::onDeleteFileTriggered(QAbstractItemModel *model, const QModelIndex &index) {
     QString filePath = model->data(index, QFileSystemModel::FilePathRole).toString();
+
     QMessageBox msgBox;
-    msgBox.setWindowTitle("删除文件");
-    msgBox.setText("你确定要删除这个文件吗?");
+    msgBox.setWindowTitle("删除文件/文件夹");
+    msgBox.setText("你确定要删除这个文件或文件夹吗?");
     msgBox.setWindowIcon(QIcon::fromTheme("utilities-system-monitor"));
     msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
     msgBox.setDefaultButton(QMessageBox::No);
 
     int ret = msgBox.exec();
     if (ret == QMessageBox::Yes) {
-        QFile file(filePath);
-        if (file.remove()) {
+        QFileInfo fileInfo(filePath);
+        bool success = false;
+
+        if (fileInfo.isDir()) {
+            // 删除文件夹（递归）
+            QDir dir(filePath);
+            success = dir.removeRecursively();
+        } else {
+            // 删除单个文件
+            QFile file(filePath);
+            success = file.remove();
+        }
+
+        if (success) {
             model->removeRow(index.row());
         } else {
-            qWarning() << "删除文件失败:" << filePath << "错误:" << file.errorString();
+            QMessageBox::warning(nullptr, "删除失败",
+                                 QString("无法删除: %1\n可能没有删除权限").arg(filePath));
         }
         emit deleteFileRequested(filePath);
     }
 }
+
 
 void TagItemDelegate::onCommitTriggered(QAbstractItemModel *model, const QModelIndex &index) {
     QString filePath = model->data(index, QFileSystemModel::FilePathRole).toString();
@@ -166,6 +181,8 @@ void TagItemDelegate::addTag(const QAbstractItemModel *model, const QModelIndex 
         }
 
         emit TagUpdated();
+        m_tagsCache[filePath] = true;   // 强制更新缓存
+
     }
 }
 

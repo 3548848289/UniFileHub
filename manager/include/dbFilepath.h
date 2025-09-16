@@ -16,11 +16,13 @@
     "SELECT id FROM FilePaths WHERE file_path = :filePath"
 
 #define SEARCHFILES \
-    "SELECT fp.file_path, t.tag_name, fp.expiration_date, t.annotation " \
-    "FROM FilePaths fp " \
-    "LEFT JOIN Tags t ON fp.id = t.file_id " \
-    "WHERE fp.file_path LIKE :keyword " \
-    "OR t.tag_name LIKE :keyword"
+    "SELECT fp.file_path, t.tag_name, fp.expiration_date, a.annotation " \
+        "FROM FilePaths fp " \
+        "LEFT JOIN Tags t ON fp.id = t.file_id " \
+        "LEFT JOIN Annotations a ON fp.id = a.file_id " \
+        "WHERE fp.file_path LIKE :keyword " \
+        "OR t.tag_name LIKE :keyword " \
+        "OR a.annotation LIKE :keyword"
 
 #define GETALLFILEPATHS \
     "SELECT file_path FROM FilePaths"

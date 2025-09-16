@@ -34,9 +34,16 @@ FileSystem::FileSystem(QWidget *parent)
     ui->treeView->setItemDelegate(tagItemdelegate);
 
     connect(ui->treeView, &QTreeView::clicked, this, &FileSystem::onItemClicked);
+
+    connect(tagItemdelegate, &TagItemDelegate::openFileRequested, this, [=](const QString &filePath){
+        emit fileOpened(filePath);
+    });
+
+
     connect(tagItemdelegate, &TagItemDelegate::TagUpdated, this, [=](){
         ui->treeView->update();
     });
+
     connect(tagItemdelegate, &TagItemDelegate::tagbutClicked, this, [this](const QModelIndex &index) {
         emit tagopened();
     });
@@ -85,13 +92,7 @@ void FileSystem::onItemClicked(const QModelIndex &index) {
     emit fileOpened(curfilePath);
 }
 
-// void FileSystem::on_goButton_clicked() {
-//     QString selectedDir = QFileDialog::getExistingDirectory(this, "选择目录");
-//     if (!selectedDir.isEmpty()) {
-//         // ui->pathLineEdit->setText(selectedDir);
-//         changePath(selectedDir);
-//     }
-// }
+
 
 void FileSystem::changePath(const QString& path){
     QFileInfo fileInfo(path);

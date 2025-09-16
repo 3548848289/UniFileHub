@@ -44,13 +44,20 @@ ScheduleWid::~ScheduleWid()
     delete ui;
 }
 
+
 void ScheduleWid::onItemClicked(QListWidgetItem *item) {
     TagList *widget = qobject_cast<TagList *>(ui->listWidget->itemWidget(item));
     if (widget) {
         QString path = widget->getFilePath();
-        emit fileClicked(path);
+        if (QFile::exists(path)) {
+            emit fileClicked(path);
+        } else {
+            QMessageBox::warning(this, tr("文件不存在"),
+                                 tr("文件已被移动或删除：\n%1").arg(path));
+        }
     }
 }
+
 
 void ScheduleWid::loadTags() {
     ui->comboBox->clear();
