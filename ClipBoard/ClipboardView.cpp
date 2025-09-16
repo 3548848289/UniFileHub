@@ -12,7 +12,10 @@
 #include <QUrl>
 #include <QVariant>
 #include <Qt>
+#include<QToolTip>
 #include <algorithm>
+#include<QMouseEvent>
+
 
 ClipboardView::ClipboardView(QWidget *parent)
     : QWidget(parent), ui(new Ui::ClipboardView),
@@ -26,6 +29,18 @@ ClipboardView::ClipboardView(QWidget *parent)
 
     initializeListWidget();
 
+    m_imagePreviewLabel = new QLabel(this);
+    // 设置窗口标志：悬浮窗（无标题栏）、置顶、始终在最前
+    m_imagePreviewLabel->setWindowFlags(Qt::ToolTip | Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
+    // 设置样式：白色背景、灰色边框、内边距（模拟预览窗口）
+    m_imagePreviewLabel->setStyleSheet("background-color: white; border: 1px solid #cccccc; padding: 5px;");
+    // 设置图片对齐方式（居中）
+    m_imagePreviewLabel->setAlignment(Qt::AlignCenter);
+    // 限制最大预览尺寸（避免窗口过大）
+    m_imagePreviewLabel->setMaximumSize(400, 300);
+    // 初始隐藏
+    m_imagePreviewLabel->hide();
+
     m_clipboard = QGuiApplication::clipboard();
     connect(m_clipboard, &QClipboard::dataChanged, this, &ClipboardView::onClipboardChanged);
 
@@ -35,6 +50,7 @@ ClipboardView::ClipboardView(QWidget *parent)
 
 ClipboardView::~ClipboardView() {
     on_saveButton_clicked();
+    delete m_imagePreviewLabel;
     delete ui;
 }
 
@@ -64,7 +80,9 @@ void ClipboardView::initializeListWidget() {
             }
         )"
     );
-
+    ui->listWidget->setMouseTracking(true);
+    connect(ui->listWidget, &QListWidget::itemEntered,
+            this, &ClipboardView::onItemEntered);
 
 }
 
@@ -282,4 +300,140 @@ void ClipboardView::on_listWidget_customContextMenuRequested(const QPoint &pos) 
     connect(deleteAction, &QAction::triggered, this, &ClipboardView::deleteItem);
 
     menu.exec(ui->listWidget->mapToGlobal(pos));
+}
+
+void ClipboardView::onItemEntered(QListWidgetItem *item) {
+    if (!item) {
+        QToolTip::hideText();  // 无项时隐藏提示
+        return;
+    }
+
+    // 1. 根据列表项找到对应的 ClipboardItem
+    ClipboardItem* clipboardItem = findItemForListWidgetItem(item);
+    if (!clipboardItem) {
+        QToolTip::hideText();
+        return;
+    }
+
+    // 2. 隐藏之前可能残留的提示（避免冲突）
+    QToolTip::hideText();
+
+    // 3. 按类型构建提示文本（重点处理文件类型）
+    QString tooltipText;
+    switch (clipboardItem->type()) {
+    // --------------------------
+    // 重点：文件类型项 - 显示完整路径
+    // --------------------------
+    case ClipboardItemType::File: {
+        CliFile* fileItem = static_cast<CliFile*>(clipboardItem);
+        const QList<QString>& allFilePaths = fileItem->filePaths();
+
+        if (allFilePaths.isEmpty()) {
+            tooltipText = "空文件列表";
+        } else if (allFilePaths.size() == 1) {
+            // 单个文件：直接显示完整路径（标注“文件”/“文件夹”）
+            QString fullPath = allFilePaths.first();
+            QFileInfo fileInfo(fullPath);
+            if (fileInfo.isDir()) {
+                tooltipText = QString("文件夹路径:\n%1").arg(fullPath);
+            } else {
+                tooltipText = QString("文件路径:\n%1").arg(fullPath);
+            }
+        } else {
+            // 多个文件：按列表显示每个文件的完整路径
+            tooltipText = QString("多文件路径（共%1个）:\n").arg(allFilePaths.size());
+            for (const QString& path : allFilePaths) {
+                tooltipText += "- " + path + "\n";  // 每个路径前加“-”区分
+            }
+            // 移除最后一个多余的换行符
+            tooltipText.chop(1);
+        }
+        break;
+    }
+
+        // --------------------------
+        // 其他类型项：保持原有逻辑（如文本、图片）
+        // --------------------------
+    case ClipboardItemType::Text: {
+        CliText* textItem = static_cast<CliText*>(clipboardItem);
+        // 长文本仍截取显示，悬停显示完整文本（保持原需求）
+        tooltipText = textItem->text();
+        break;
+    }
+    case ClipboardItemType::Image: {
+        CliImage* imageItem = static_cast<CliImage*>(clipboardItem);
+        // 图片项显示尺寸信息（如之前需求）
+        tooltipText = QString("图片尺寸: %1 × %2 像素")
+                          .arg(imageItem->pixmap().width())
+                          .arg(imageItem->pixmap().height());
+        break;
+    }
+    default:
+        tooltipText = "未知类型";
+    }
+
+    // 4. 显示提示：在鼠标位置，关联列表项，10秒后自动消失（避免长期残留）
+    QToolTip::showText(
+        QCursor::pos(),                // 提示显示在鼠标位置
+        tooltipText,                   // 完整文件路径/其他提示文本
+        ui->listWidget,                // 关联列表控件（随列表移动）
+        ui->listWidget->visualItemRect(item),  // 关联当前列表项
+        300000 );
+}
+
+// 辅助函数：检查项是否为图片类型，并加载图片到预览 Label
+bool ClipboardView::loadImageToPreviewLabel(ClipboardItem* clipboardItem) {
+    if (!clipboardItem) return false;
+
+    QPixmap previewPixmap;
+    // 根据项类型加载图片
+    switch (clipboardItem->type()) {
+    case ClipboardItemType::Image: {
+        auto* imageItem = static_cast<CliImage*>(clipboardItem);
+        previewPixmap = imageItem->pixmap();
+        break;
+    }
+    case ClipboardItemType::File: {
+        auto* fileItem = static_cast<CliFile*>(clipboardItem);
+        if (fileItem->filePaths().size() == 1 && fileItem->isImageFile()) {
+            previewPixmap.load(fileItem->filePaths().first());
+        }
+        break;
+    }
+    default:
+        return false; // 非图片类型，返回失败
+    }
+
+    // 若图片有效，缩放后显示到 Label
+    if (!previewPixmap.isNull()) {
+        // 保持比例缩放（减去内边距 10px）
+        QPixmap scaledPix = previewPixmap.scaled(
+            m_imagePreviewLabel->maximumWidth() - 10,
+            m_imagePreviewLabel->maximumHeight() - 10,
+            Qt::KeepAspectRatio,    // 保持宽高比
+            Qt::SmoothTransformation // 平滑缩放（避免模糊）
+            );
+        m_imagePreviewLabel->setPixmap(scaledPix);
+        // 调整 Label 大小为图片实际大小（加内边距）
+        m_imagePreviewLabel->resize(scaledPix.width() + 10, scaledPix.height() + 10);
+        return true;
+    }
+    return false;
+}
+
+void ClipboardView::leaveEvent(QEvent *event) {
+    m_imagePreviewLabel->hide();
+    QToolTip::hideText();
+    QWidget::leaveEvent(event); // 调用父类事件（避免阻断）
+}
+
+// 鼠标在列表内移动时，若当前位置无项（空白区域），隐藏预览
+void ClipboardView::mouseMoveEvent(QMouseEvent *event) {
+    // 检查鼠标是否在某个列表项上
+    QListWidgetItem* currentItem = ui->listWidget->itemAt(ui->listWidget->mapFromParent(event->pos()));
+    if (!currentItem) {
+        m_imagePreviewLabel->hide();
+        QToolTip::hideText();
+    }
+    QWidget::mouseMoveEvent(event); // 调用父类事件
 }

@@ -8,13 +8,19 @@ CliText::CliText(const QString& text)
 
 // 创建列表项：显示文本、设置类型标识和tooltip
 QListWidgetItem* CliText::createListWidgetItem() const {
-    QListWidgetItem* item = new QListWidgetItem(m_text);
-    // 存储指针（用于后续关联）
-    item->setData(Qt::UserRole, QVariant::fromValue<quintptr>(reinterpret_cast<quintptr>(this)));
-    // 存储类型标识
-    item->setData(Qt::UserRole + 1, "text");
-    item->setToolTip(m_text);
-    item->setTextAlignment(Qt::AlignTop);
+    QListWidgetItem* item = new QListWidgetItem;
+
+    // 设置缩略文本（例如前100个字符）
+    QString displayText = m_text;
+    if (displayText.length() > 100) {
+        displayText = displayText.left(100) + "...";
+    }
+    item->setText(displayText);
+
+
+    // 存储指针地址用于查找
+    item->setData(Qt::UserRole, QVariant::fromValue<quintptr>(
+                                    reinterpret_cast<quintptr>(this)));
     return item;
 }
 
