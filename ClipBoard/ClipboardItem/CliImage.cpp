@@ -28,7 +28,10 @@ QListWidgetItem* CliImage::createListWidgetItem() const {
     item->setText(QString("[图片] %1x%2").arg(m_pixmap.width()).arg(m_pixmap.height()));
     item->setData(Qt::UserRole, QVariant::fromValue<quintptr>(reinterpret_cast<quintptr>(this)));
     item->setData(Qt::UserRole + 1, "image");
-    item->setToolTip("双击复制图片 | 右键预览");
+    item->setToolTip(QString("<img src='%1' width='%2'/>")
+                         .arg(savePixmapToTempFile(m_pixmap))
+                         .arg(400));
+
     item->setTextAlignment(Qt::AlignVCenter);
     return item;
 }
@@ -43,4 +46,25 @@ void CliImage::copyToClipboard(QClipboard* clipboard) const {
 // 序列化：前缀标识 + Base64编码（避免二进制数据问题）
 QString CliImage::serialize() const {
     return "IMAGE_DATA:" + m_data.toBase64();
+}
+
+QString CliImage::savePixmapToTempFile(const QPixmap& pixmap) const {
+    QPixmap scaled = pixmap.scaled(1000, 1000, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+
+    QTemporaryFile tempFile(QDir::tempPath() + "/img_XXXXXX.png");
+    tempFile.setAutoRemove(false);
+    if (tempFile.open()) {
+        scaled.save(&tempFile, "PNG");
+        m_tempImageFiles.append(tempFile.fileName());
+        return tempFile.fileName();
+    }
+    return QString();
+}
+
+CliImage::~CliImage() {
+    // 析构时清理所有临时文件
+    for (const QString& f : m_tempImageFiles) {
+        QFile::remove(f);
+    }
+    m_tempImageFiles.clear();
 }
