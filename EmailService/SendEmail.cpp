@@ -26,7 +26,7 @@ SendEmail::SendEmail(QWidget *parent): QWidget(parent), ui(new Ui::SendEmail)
     ui->security->setCurrentIndex(m_settings.value("EmailConfig/ssl").toInt());
     ui->sender->setText(m_settings.value("EmailConfig/sender").toString());
     ui->recipients->setText(m_settings.value("EmailConfig/received").toString());
-
+    ui->security->setCurrentIndex(1);
     for (int i = 0; i < ui->gridLayout->count(); ++i) {
         QLayoutItem *item = ui->gridLayout->itemAt(i);
         if (item) {
@@ -75,13 +75,20 @@ void SendEmail::on_sendEmail_clicked()
         message.addTo(EmailAddress{to});
     }
     message.addPart(std::make_shared<MimeHtml>(ui->texteditor->toHtml()));
+
     for (int i = 0; i < ui->attachments->count(); ++i) {
         QString fullFilePath = ui->attachments->item(i)->data(Qt::UserRole).toString();
-        message.addPart(std::make_shared<MimeAttachment>(
-            std::make_shared<QFile>(fullFilePath)));
-    }
+        QFile *file = new QFile(fullFilePath);
 
-    sendMailAsync(message);
+        if (!file->exists() || !file->open(QIODevice::ReadOnly)) {
+            delete file;
+            QMessageBox::warning(this, "该文件发送出错",
+                    QString("该文件可能已被删除:\n%1").arg(fullFilePath));
+            continue;
+        }
+        message.addPart(std::make_shared<MimeAttachment>(std::shared_ptr<QFile>(file)));
+    }
+    sendMailAsync(message);    
 }
 
 void SendEmail::sendEmailWithData(const QString &subject, const QString &bodyHtml,
@@ -104,7 +111,6 @@ void SendEmail::sendEmailWithData(const QString &subject, const QString &bodyHtm
     sendMailAsync(message);
 }
 
-
 void SendEmail::sendMailAsync(const MimeMessage &msg)
 {
     const QString host = ui->host->text();
@@ -112,24 +118,15 @@ void SendEmail::sendMailAsync(const MimeMessage &msg)
     const Server::ConnectionType ct =
         ui->security->currentIndex() == 0 ? Server::TcpConnection :
             ui->security->currentIndex() == 1 ? Server::SslConnection : Server::TlsConnection;
-    Server *server = nullptr;
-    for (auto srv : m_aServers) {
-        if (srv->host() == host && srv->port() == port && srv->connectionType() == ct) {
-            server = srv;
-            break;
-        }
-    }
 
-    if (!server) {
-        server = new Server(this);
-        connect(server, &Server::sslErrors, this, [](const QList<QSslError> &errors) {
-            qDebug() << "Server SSL errors" << errors.size();
-        });
-        server->setHost(host);
-        server->setPort(port);
-        server->setConnectionType(ct);
-        m_aServers.push_back(server);
-    }
+    // 每次都新建，不要复用
+    Server *server = new Server(this);
+    connect(server, &Server::sslErrors, this, [](const QList<QSslError> &errors) {
+        qDebug() << "Server SSL errors" << errors.size();
+    });
+    server->setHost(host);
+    server->setPort(port);
+    server->setConnectionType(ct);
 
     const QString user = ui->username->text();
     if (!user.isEmpty()) {
@@ -141,15 +138,15 @@ void SendEmail::sendMailAsync(const MimeMessage &msg)
     ServerReply *reply = server->sendMail(msg);
     connect(reply, &ServerReply::finished, this, [=] {
         qDebug() << "ServerReply finished" << reply->error() << reply->responseText();
-        reply->deleteLater();
-        if (reply->error()) {
-            errorMessage(QLatin1String("Mail sending failed:\n") + reply->responseText());
-        } else {
-            QTimer::singleShot(0, this, [=]() {
-                QMessageBox::information(this, "邮件提醒", "发送成功！");
-            });
 
+        if (reply->error()) {
+            errorMessage(QStringLiteral("Mail sending failed:\n") + reply->responseText());
+        } else {
+            QMessageBox::information(this, "邮件提醒", "发送成功！");
         }
+
+        reply->deleteLater();
+        server->deleteLater(); // 用完销毁
     });
 }
 
