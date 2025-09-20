@@ -6,23 +6,30 @@
 CliText::CliText(const QString& text)
     : ClipboardItem(ClipboardItemType::Text), m_text(text) {}
 
-// 创建列表项：显示文本、设置类型标识和tooltip
+
+
+// 创建列表项：显示文本（限制行数）、设置类型标识和tooltip
 QListWidgetItem* CliText::createListWidgetItem() const {
     QListWidgetItem* item = new QListWidgetItem;
 
-    // 设置缩略文本（例如前100个字符）
-    QString displayText = m_text;
-    if (displayText.length() > 100) {
-        displayText = displayText.left(100) + "...";
+    const int maxLines = 8;
+    QStringList lines = m_text.split('\n');
+    QString displayText;
+
+    if (lines.size() > maxLines) {
+        displayText = lines.mid(0, maxLines).join("\n") + "\n...";
+    } else {
+        displayText = m_text;
     }
+
     item->setText(displayText);
+    item->setData(Qt::UserRole, QVariant::fromValue<quintptr>(reinterpret_cast<quintptr>(this)));
+    item->setToolTip(m_text);
+    item->setTextAlignment(Qt::AlignTop);
 
-
-    // 存储指针地址用于查找
-    item->setData(Qt::UserRole, QVariant::fromValue<quintptr>(
-                                    reinterpret_cast<quintptr>(this)));
     return item;
 }
+
 
 // 复制文本到剪贴板
 void CliText::copyToClipboard(QClipboard* clipboard) const {
