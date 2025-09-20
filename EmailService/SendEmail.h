@@ -5,6 +5,7 @@
 #include <QWidget>
 #include <QMenu>
 #include <QTimer>
+#include <QString>
 #include <QQueue>
 namespace SimpleMail { class MimeMessage; class Server; }
 namespace Ui { class SendEmail; }

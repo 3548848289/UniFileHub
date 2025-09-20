@@ -30,21 +30,27 @@ QListWidgetItem* CliFile::createListWidgetItem() const {
     }
     item->setText(displayText);
 
-    // 单文件且为图片：显示缩略图
-    if (m_filePaths.size() == 1 && isImageFile()) {
-        QPixmap pixmap(m_filePaths.first());
-        item->setIcon(QIcon(pixmap.scaled(80, 60, Qt::KeepAspectRatio, Qt::SmoothTransformation)));
+    // 统一使用默认文件图标，不生成图片缩略图
+    item->setIcon(QIcon::fromTheme("document", QIcon("://usedimage/history.svg")));
+
+    // 设置 ToolTip
+    if (m_filePaths.size() > 1) {
+        // 多文件显示每个文件路径
+        QString toolTip;
+        for (const auto& path : m_filePaths) {
+            toolTip += path + "\n";
+        }
+        item->setToolTip(toolTip.trimmed());
     } else {
-        // 非图片文件：使用默认文件图标
-        item->setIcon(QIcon::fromTheme("document", QIcon("://usedimage/history.svg")));
+        item->setToolTip(displayText);
     }
 
     item->setData(Qt::UserRole, QVariant::fromValue<quintptr>(reinterpret_cast<quintptr>(this)));
     item->setData(Qt::UserRole + 1, "file");
-    item->setToolTip(displayText);
     item->setTextAlignment(Qt::AlignVCenter);
     return item;
 }
+
 
 // 复制文件到剪贴板（通过URL列表传递）
 void CliFile::copyToClipboard(QClipboard* clipboard) const {
