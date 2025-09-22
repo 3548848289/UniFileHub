@@ -24,10 +24,15 @@ QListWidgetItem* CliFile::createListWidgetItem() const {
     // 单文件：显示文件名；多文件：显示数量
     if (m_filePaths.size() == 1) {
         QFileInfo fileInfo(m_filePaths.first());
-        displayText = QString("[文件] %1").arg(fileInfo.fileName());
+        if (fileInfo.isDir()) {
+            displayText = QString("[文件夹] %1").arg(fileInfo.fileName());
+        } else {
+            displayText = QString("[文件] %1").arg(fileInfo.fileName());
+        }
     } else {
-        displayText = QString("[多个文件] 共 %1 个文件").arg(m_filePaths.size());
+        displayText = QString("[多个项目] 共 %1 个").arg(m_filePaths.size());
     }
+
     item->setText(displayText);
 
     // 统一使用默认文件图标，不生成图片缩略图
@@ -35,14 +40,20 @@ QListWidgetItem* CliFile::createListWidgetItem() const {
 
     // 设置 ToolTip
     if (m_filePaths.size() > 1) {
-        // 多文件显示每个文件路径
+        // 多文件/文件夹显示每个路径
         QString toolTip;
         for (const auto& path : m_filePaths) {
             toolTip += path + "\n";
         }
         item->setToolTip(toolTip.trimmed());
     } else {
-        item->setToolTip(displayText);
+        QFileInfo info(m_filePaths.first());
+        if (info.isDir()) {
+            // 单个文件夹显示完整路径
+            item->setToolTip(m_filePaths.first());
+        } else {
+            item->setToolTip(displayText);
+        }
     }
 
     item->setData(Qt::UserRole, QVariant::fromValue<quintptr>(reinterpret_cast<quintptr>(this)));
@@ -75,3 +86,9 @@ bool CliFile::isImageFile() const {
     if (m_filePaths.size() != 1) return false;
     return FileTypeDetector::isImageFile(m_filePaths.first());
 }
+
+bool CliFile::isDirectory(const QString& path) const {
+    QFileInfo info(path);
+    return info.exists() && info.isDir();
+}
+

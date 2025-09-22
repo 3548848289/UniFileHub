@@ -4,11 +4,14 @@ set(SETTING_SOURCES
     ClipboardItem/CliImage.cpp
     ClipboardItem/CliFile.cpp
     ClipboardItemFactory.cpp
+    ClipboardHistoryManager.cpp
 
     FiletypeDetector.cpp
     ImagePreviewDialog.cpp
 
     ClipboardView.cpp
+    ClipboardMenuBuilder.cpp
+    ClipboardMonitor.cpp
 )
 
 set(SETTING_HEADERS
@@ -22,6 +25,10 @@ set(SETTING_HEADERS
     include/ImagePreviewDialog.h
 
     include/ClipboardView.h
+    include/ClipboardHistoryManager.h
+    include/ClipboardMenuBuilder.h
+    include/ClipboardMonitor.h
+
 )
 
 set(SETTING_UIS
