@@ -29,17 +29,42 @@ ClipboardView::ClipboardView(QWidget *parent)
     m_clipboardMonitor = new ClipboardMonitor(this);
     connect(m_clipboardMonitor, &ClipboardMonitor::newItemCaptured,
             this, [this](ClipboardItem* rawItem) {
-                std::unique_ptr<ClipboardItem> item(rawItem); // 接回 unique_ptr
+                std::unique_ptr<ClipboardItem> item(rawItem);
                 if (item && m_historyManager.addItem(std::move(item))) {
-                    ui->listWidget->insertItem(0, m_historyManager.items().back()->createListWidgetItem());
+                    insertNewItem(m_historyManager.items().back().get());
                 }
-    });
+            });
 
 
     int hours = SettingManager::Instance().clip_board_hours();
     m_historyManager.loadHistory(hours);
     refreshUI();
 }
+
+void ClipboardView::insertNewItem(ClipboardItem* newItem) {
+    QListWidgetItem* listItem = newItem->createListWidgetItem();
+    quintptr addr = reinterpret_cast<quintptr>(newItem);
+    listItem->setData(Qt::UserRole, QVariant::fromValue<quintptr>(addr));
+
+    if (newItem->isPinned()) {
+        // pinned 直接插到最前
+        ui->listWidget->insertItem(0, listItem);
+    } else {
+        // 找到最后一个 pinned 项的位置，在它后面插入
+        int insertRow = 0;
+        for (int i = 0; i < ui->listWidget->count(); ++i) {
+            QListWidgetItem* it = ui->listWidget->item(i);
+            ClipboardItem* ci = findItemForListWidgetItem(it);
+            if (ci && ci->isPinned()) {
+                insertRow = i + 1;
+            } else {
+                break;
+            }
+        }
+        ui->listWidget->insertItem(insertRow, listItem);
+    }
+}
+
 
 ClipboardView::~ClipboardView() {
     on_saveButton_clicked();
@@ -75,18 +100,37 @@ void ClipboardView::initializeListWidget() {
     ui->listWidget->setMouseTracking(true);
 }
 
-// 将 historyManager.items() 刷到 listWidget，并在 UserRole 中存储对应 ClipboardItem*（quintptr）
 void ClipboardView::refreshUI() {
     ui->listWidget->clear();
+
+    // 先显示置顶项，再显示普通项
+    std::vector<ClipboardItem*> pinnedItems;
+    std::vector<ClipboardItem*> normalItems;
+
     for (const auto& uptr : m_historyManager.items()) {
-        // createListWidgetItem() 应由 ClipboardItem 实现并返回一个新的 QListWidgetItem*
-        QListWidgetItem* listItem = uptr->createListWidgetItem();
-        // 把真实对象地址存入 UserRole，后面用 findItemForListWidgetItem 取回
-        quintptr addr = reinterpret_cast<quintptr>(uptr.get());
-        listItem->setData(Qt::UserRole, QVariant::fromValue<quintptr>(addr));
-        ui->listWidget->addItem(listItem);
+        if (uptr->isPinned())
+            pinnedItems.push_back(uptr.get());
+        else
+            normalItems.push_back(uptr.get());
     }
+
+    auto addToListWidget = [this](ClipboardItem* item) {
+        QListWidgetItem* listItem = item->createListWidgetItem();
+        quintptr addr = reinterpret_cast<quintptr>(item);
+        listItem->setData(Qt::UserRole, QVariant::fromValue<quintptr>(addr));
+        if (item->isPinned()) {
+            QIcon pinIcon(":/usedimage/pin.svg");
+            QPixmap pixmap = pinIcon.pixmap(QSize(16, 16)); // 指定小图尺寸
+            listItem->setIcon(QIcon(pixmap));
+        }
+
+        ui->listWidget->addItem(listItem);
+    };
+
+    for (auto* item : pinnedItems) addToListWidget(item);
+    for (auto* item : normalItems) addToListWidget(item);
 }
+
 
 // 根据 list item 的 UserRole 去取对应 ClipboardItem*
 ClipboardItem* ClipboardView::findItemForListWidgetItem(QListWidgetItem* listItem) {
@@ -151,6 +195,29 @@ void ClipboardView::openFileLocation() {
     QDesktopServices::openUrl(QUrl::fromLocalFile(fileInfo.path()));
 }
 
+void ClipboardView::pinItem() {
+    if (!m_currentRightClickedItem) return;
+    ClipboardItem* item = findItemForListWidgetItem(m_currentRightClickedItem);
+    if (!item) return;
+
+    if (!item->isPinned()) {
+        // 置顶：先设置标志，再在 history 中把它移动到最前
+        item->setPinned(true);
+
+        m_historyManager.moveToPinnedFront(item);
+        m_historyManager.updatePinnedStatus(item);
+
+    } else {
+        // 取消置顶：仅清除标志（保留在现有位置）
+        item->setPinned(false);
+        m_historyManager.updatePinnedStatus(item);
+        // 可选：如果你想取消置顶后把它移到普通区的最前/最后，可在这里调用对应函数
+    }
+
+    refreshUI();  // 刷新 UI（会按 m_items 顺序：先 pinned 再普通）
+}
+
+
 void ClipboardView::deleteItem() {
     QList<QListWidgetItem*> selectedItems = ui->listWidget->selectedItems();
     for (QListWidgetItem* listItem : selectedItems) {
@@ -178,6 +245,10 @@ void ClipboardView::on_listWidget_itemDoubleClicked(QListWidgetItem *item) {
     if (!item) return;
     m_currentRightClickedItem = item;
     copyItem();
+
+    if (auto w = this->window()) {
+        w->showMinimized();
+    }
 }
 
 
@@ -191,11 +262,12 @@ void ClipboardView::on_listWidget_customContextMenuRequested(const QPoint &pos) 
     ClipboardMenuBuilder builder;
 
     QMenu* menu = builder.buildMenu(item,
-        [this]{ copyItem(); },
-        [this]{ previewImage(); },
-        [this]{ openFileLocation(); },
-        [this]{ deleteItem(); }
-    );
+                                    [this]{ copyItem(); },
+                                    [this]{ previewImage(); },
+                                    [this]{ openFileLocation(); },
+                                    [this]{ deleteItem(); },
+                                    [this]{ pinItem(); }   // 新增
+                                    );
 
     if (menu) {
         menu->exec(ui->listWidget->mapToGlobal(pos));

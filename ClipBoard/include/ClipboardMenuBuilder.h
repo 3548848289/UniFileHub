@@ -19,7 +19,8 @@ public:
         std::function<void()> copyCallback,
         std::function<void()> previewCallback,
         std::function<void()> openLocationCallback,
-        std::function<void()> deleteCallback
+        std::function<void()> deleteCallback,
+        std::function<void()> pinCallback
         );
 };
 

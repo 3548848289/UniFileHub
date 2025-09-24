@@ -28,6 +28,8 @@ public:
     // 获取当前项
     const std::vector<std::unique_ptr<ClipboardItem>>& items() const { return m_items; }
 
+    void moveToPinnedFront(ClipboardItem *item);
+    void updatePinnedStatus(ClipboardItem *item);
 private:
     dbService& m_dbService;
     std::vector<std::unique_ptr<ClipboardItem>> m_items;

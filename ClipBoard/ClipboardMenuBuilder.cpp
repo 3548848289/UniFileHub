@@ -1,13 +1,14 @@
 #include "include/ClipboardMenuBuilder.h"
 #include <QAction>
 
-
 QMenu* ClipboardMenuBuilder::buildMenu(
     ClipboardItem* item,
     std::function<void()> copyCallback,
     std::function<void()> previewCallback,
     std::function<void()> openLocationCallback,
-    std::function<void()> deleteCallback)
+    std::function<void()> deleteCallback,
+    std::function<void()> pinCallback   // 新增参数
+    )
 {
     if (!item) return nullptr;
 
@@ -27,7 +28,6 @@ QMenu* ClipboardMenuBuilder::buildMenu(
         auto* textItem = static_cast<CliText*>(item);
         canPreview = FileTypeDetector::isImageFile(textItem->text());
     }
-
     if (canPreview && previewCallback) {
         QAction* previewAction = menu->addAction("预览图片");
         QObject::connect(previewAction, &QAction::triggered, [previewCallback]{ previewCallback(); });
@@ -37,6 +37,12 @@ QMenu* ClipboardMenuBuilder::buildMenu(
     if (item->type() == ClipboardItemType::File && openLocationCallback) {
         QAction* openLocationAction = menu->addAction("打开文件位置");
         QObject::connect(openLocationAction, &QAction::triggered, [openLocationCallback]{ openLocationCallback(); });
+    }
+
+    // === 新增：置顶/取消置顶 ===
+    if (pinCallback) {
+        QAction* pinAction = menu->addAction(item->isPinned() ? "取消置顶" : "置顶");
+        QObject::connect(pinAction, &QAction::triggered, [pinCallback]{ pinCallback(); });
     }
 
     // 删除

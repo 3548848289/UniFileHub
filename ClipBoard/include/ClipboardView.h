@@ -34,6 +34,8 @@ private slots:
     void deleteItem();
     void openFileLocation();
 
+    void pinItem();   // 置顶/取消置顶
+
 private:
     Ui::ClipboardView *ui;
     ClipboardMonitor* m_clipboardMonitor;
@@ -42,6 +44,7 @@ private:
     QLabel *m_imagePreviewLabel;
 
     void initializeListWidget();
+    void insertNewItem(ClipboardItem *newItem);
     void refreshUI(); // 从 historyManager 刷新 UI
     ClipboardItem* findItemForListWidgetItem(QListWidgetItem* listItem);
 };

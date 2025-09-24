@@ -21,7 +21,7 @@ bool connectToRunningInstance() {
         socket.write("show");
         socket.flush();
         socket.waitForBytesWritten(100);
-        return true; // 已有实例在运行
+        return true;
     }
     return false;
 }
@@ -101,7 +101,12 @@ int main(int argc, char *argv[]) {
     Qt::ColorScheme scheme = static_cast<Qt::ColorScheme>(themeIndex);
 
     qApp->styleHints()->setColorScheme(scheme);
-    QApplication::setQuitOnLastWindowClosed(false);
+
+    if (SettingManager::Instance().all_setting_fenable_tray()) {
+        QApplication::setQuitOnLastWindowClosed(false);
+    } else {
+        QApplication::setQuitOnLastWindowClosed(true);
+    }
 
     QFont font = QApplication::font();
     font.setPointSize(font_size);

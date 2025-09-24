@@ -3,7 +3,6 @@
 
 WidgetFunctional::~WidgetFunctional()
 {
-    delete clipboard;
     delete ui;
 }
 
