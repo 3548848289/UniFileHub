@@ -18,5 +18,6 @@
         <file>usedimage/tips.svg</file>
         <file>conf/help.txt</file>
         <file>conf/settings.ini</file>
+        <file>usedimage/pin.svg</file>
     </qresource>
 </RCC>

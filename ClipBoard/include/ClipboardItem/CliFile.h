@@ -22,6 +22,7 @@ public:
     const QStringList& filePaths() const { return m_filePaths; }
     // 判断是否为图片文件（单文件场景）
     bool isImageFile() const;
+    bool isDirectory(const QString &path) const;
 
     // 静态成员：支持的图片格式（全局共享）
     static QStringList s_supportedImageFormats;

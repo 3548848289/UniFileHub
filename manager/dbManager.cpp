@@ -103,6 +103,8 @@ bool dbManager::initializeTables() {
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
                 source TEXT,
                 is_favorite BOOLEAN DEFAULT 0,
+                is_pinned BOOLEAN DEFAULT 0,
+
                 tags TEXT,
                 format TEXT
             );
