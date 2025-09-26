@@ -17,6 +17,7 @@
 #include <QToolTip>
 #include <algorithm>
 #include <QMouseEvent>
+#include <QShortcut>
 
 Q_DECLARE_METATYPE(quintptr) // 确保能用 QVariant 存取 quintptr
 
@@ -35,6 +36,20 @@ ClipboardView::ClipboardView(QWidget *parent)
                 }
             });
 
+    QShortcut* ctrlCShortcut = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_Q), ui->listWidget);
+    ctrlCShortcut->setContext(Qt::WidgetWithChildrenShortcut);
+    connect(ctrlCShortcut, &QShortcut::activated, this, [this](){
+        QListWidgetItem* item = ui->listWidget->currentItem();
+        if (!item) return;
+
+        m_currentRightClickedItem = item;
+        copyItem();
+        if (auto w = this->window()) {
+            w->hide(); // 隐藏窗口
+        }
+    });
+
+    connect(qApp, &QApplication::aboutToQuit, this, &ClipboardView::on_saveButton_clicked);
 
     int hours = SettingManager::Instance().clip_board_hours();
     m_historyManager.loadHistory(hours);
@@ -247,7 +262,7 @@ void ClipboardView::on_listWidget_itemDoubleClicked(QListWidgetItem *item) {
     copyItem();
 
     if (auto w = this->window()) {
-        w->showMinimized();
+        w->hide(); // 隐藏窗口
     }
 }
 
