@@ -45,9 +45,15 @@ ClipboardView::ClipboardView(QWidget *parent)
         m_currentRightClickedItem = item;
         copyItem();
         if (auto w = this->window()) {
-            w->hide(); // 隐藏窗口
+            if (SettingManager::Instance().all_setting_fenable_tray()) {
+                w->hide();
+            } else {
+                w->showNormal();
+                w->setWindowState(Qt::WindowMinimized);
+            }
         }
     });
+
 
     connect(qApp, &QApplication::aboutToQuit, this, &ClipboardView::on_saveButton_clicked);
 
@@ -262,9 +268,15 @@ void ClipboardView::on_listWidget_itemDoubleClicked(QListWidgetItem *item) {
     copyItem();
 
     if (auto w = this->window()) {
-        w->hide(); // 隐藏窗口
+        if (SettingManager::Instance().all_setting_fenable_tray()) {
+            w->hide();
+        } else {
+            w->showNormal();
+            w->setWindowState(Qt::WindowMinimized);
+        }
     }
 }
+
 
 
 void ClipboardView::on_listWidget_customContextMenuRequested(const QPoint &pos) {
