@@ -12,24 +12,26 @@ void ClipboardHistoryManager::loadHistory(int hours) {
     m_items.clear();
     QSet<QString> loadedContents; // 用于避免重复
 
-    // 1️⃣ 先加载置顶项（无时间限制）
+    // 加载置顶项
     for (const auto& rec : m_dbService.dbClip().loadPinnedHistory()) {
         std::unique_ptr<ClipboardItem> item =
             ClipboardItemFactory::createFromSerializedString(rec.content);
         if (item) {
-            item->setPinned(true);
+            item->setId(rec.id);
+            item->setPinned(rec.isPinned);
             m_items.push_back(std::move(item));
             loadedContents.insert(rec.content);
         }
     }
 
-    // 2️⃣ 再加载最近 X 小时的普通项
+    // 加载普通项
     for (const auto& rec : m_dbService.dbClip().loadRecentNormalHistory(hours)) {
         if (loadedContents.contains(rec.content)) continue; // 避免重复
         std::unique_ptr<ClipboardItem> item =
             ClipboardItemFactory::createFromSerializedString(rec.content);
         if (item) {
-            item->setPinned(false);
+            item->setId(rec.id);
+            item->setPinned(rec.isPinned);
             m_items.push_back(std::move(item));
             loadedContents.insert(rec.content);
         }
@@ -74,8 +76,11 @@ int ClipboardHistoryManager::saveIncremental() {
     int successCount = 0;
 
     for (size_t i = m_initialItemCount; i < m_items.size(); ++i) {
-        const auto& item = m_items[i];
-        if (m_dbService.dbClip().setHistory(item->serialize(), item->isPinned())) {
+        auto& item = m_items[i];
+        int newId = m_dbService.dbClip().setHistory(item->serialize(), item->isPinned());
+        if (newId != -1) {
+            // 设置新插入项的ID
+            item->setId(newId);
             successCount++;
         }
     }
@@ -106,6 +111,11 @@ void ClipboardHistoryManager::moveToPinnedFront(ClipboardItem* item) {
 void ClipboardHistoryManager::updatePinnedStatus(ClipboardItem* item) {
     if (!item) return;
 
-    // 调用数据库接口更新 pinned
-    m_dbService.dbClip().updatePinnedStatus(item->serialize(), item->isPinned());
+    // 优先使用ID更新，如果ID有效
+    if (item->id() != -1) {
+        m_dbService.dbClip().updatePinnedStatusById(item->id(), item->isPinned());
+    } else {
+        // 否则回退到使用内容更新（用于新创建尚未保存的项）
+        m_dbService.dbClip().updatePinnedStatus(item->serialize(), item->isPinned());
+    }
 }

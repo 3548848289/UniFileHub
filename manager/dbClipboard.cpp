@@ -2,7 +2,7 @@
 
 dbClipboard::dbClipboard(const QString &dbName) : dbManager(dbName) { }
 
-bool dbClipboard::setHistory(const QString &content, bool isPinned = false)
+int dbClipboard::setHistory(const QString &content, bool isPinned)
 {
     QSqlQuery query(dbsqlite);
     query.prepare(R"(
@@ -15,9 +15,11 @@ bool dbClipboard::setHistory(const QString &content, bool isPinned = false)
 
     if (!query.exec()) {
         qDebug() << "插入失败:" << query.lastError().text();
-        return false;
+        return -1; // 返回-1表示失败
     }
-    return true;
+    
+    // 返回新插入记录的ID
+    return query.lastInsertId().toInt();
 }
 
 
@@ -26,7 +28,7 @@ QList<DbClipRecord> dbClipboard::loadRecentNormalHistory(int hours) {
     QList<DbClipRecord> list;
     QSqlQuery query(dbsqlite);
     query.prepare(R"(
-        SELECT content, is_pinned FROM clipboard_history
+        SELECT id, content, is_pinned FROM clipboard_history
         WHERE is_pinned = 0 AND datetime(timestamp) >= datetime('now', ?)
         ORDER BY timestamp DESC
     )");
@@ -35,7 +37,7 @@ QList<DbClipRecord> dbClipboard::loadRecentNormalHistory(int hours) {
     query.exec();
 
     while (query.next()) {
-        list.append({query.value(0).toString(), query.value(1).toBool()});
+        list.append({query.value(0).toInt(), query.value(1).toString(), query.value(2).toBool()});
     }
     return list;
 }
@@ -45,14 +47,14 @@ QList<DbClipRecord> dbClipboard::loadPinnedHistory() {
     QList<DbClipRecord> list;
     QSqlQuery query(dbsqlite);
     query.prepare(R"(
-        SELECT content, is_pinned FROM clipboard_history
+        SELECT id, content, is_pinned FROM clipboard_history
         WHERE is_pinned = 1
         ORDER BY timestamp DESC
     )");
     query.exec();
 
     while (query.next()) {
-        list.append({query.value(0).toString(), query.value(1).toBool()});
+        list.append({query.value(0).toInt(), query.value(1).toString(), query.value(2).toBool()});
     }
     return list;
 }
@@ -90,6 +92,29 @@ bool dbClipboard::insertClipboardItem(const QString &content,
     return true;
 }
 
+// 新增：根据ID更新置顶状态
+bool dbClipboard::updatePinnedStatusById(int id, bool isPinned)
+{
+    QSqlQuery query(dbsqlite);
+
+    query.prepare(R"(
+        UPDATE clipboard_history
+        SET is_pinned = :is_pinned
+        WHERE id = :id
+    )");
+
+    query.bindValue(":is_pinned", isPinned ? 1 : 0);
+    query.bindValue(":id", id);
+
+    if (!query.exec()) {
+        qDebug() << "根据ID更新置顶状态失败:" << query.lastError().text();
+        return false;
+    }
+
+    return true;
+}
+
+// 保留旧方法以保持兼容性
 bool dbClipboard::updatePinnedStatus(const QString &content, bool isPinned)
 {
     QSqlQuery query(dbsqlite);

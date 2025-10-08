@@ -11,6 +11,7 @@
 #include "dbManager.h"
 
 struct DbClipRecord {
+    int id;
     QString content;
     bool isPinned;
 };
@@ -21,7 +22,11 @@ public:
     dbClipboard(const QString &dbName);
     QList<QString> loadRecentHistory(int hours);
     bool insertClipboardItem(const QString &content, const QString &type, const QDateTime &timestamp, const QString &source, bool isFavorite, bool isPinned, const QString &tags, const QString &format);
-    bool setHistory(const QString &content, bool isPinned);
+    // 修改返回类型为int，返回插入的ID，-1表示失败
+    int setHistory(const QString &content, bool isPinned = false);
+    // 新增：根据ID更新置顶状态
+    bool updatePinnedStatusById(int id, bool isPinned);
+    // 保留旧方法以保持兼容性
     bool updatePinnedStatus(const QString &content, bool isPinned);
     QList<DbClipRecord> loadRecentNormalHistory(int hours);
     QList<DbClipRecord> loadPinnedHistory();
