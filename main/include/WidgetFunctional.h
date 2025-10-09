@@ -16,7 +16,7 @@
 #include "../../userinfo/include/DInfo.h"
 #include "../../EmailService/SendEmail.h"
 #include "../../MoreFunction/MoreFunction.h"
-#include "../../ClipBoard/include/ClipboardView.h"
+#include "../../ClipBoard/include/ClipboardComponentFactory.h"
 
 
 namespace Ui {

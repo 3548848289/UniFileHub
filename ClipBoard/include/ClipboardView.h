@@ -2,15 +2,11 @@
 #define CLIPBOARDVIEW_H
 
 #include <QWidget>
-#include <QClipboard>
 #include <QLabel>
 #include <QListWidgetItem>
-#include <memory>
 #include "ClipboardItem/ClipboardItem.h"
-#include "ClipboardHistoryManager.h"
-#include "../../Setting/include/SettingManager.h"
-#include "ClipboardMonitor.h"
 
+class ClipboardController;
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class ClipboardView; }
@@ -20,33 +16,44 @@ class ClipboardView : public QWidget {
     Q_OBJECT
 
 public:
-    explicit ClipboardView(QWidget *parent = nullptr);
+    explicit ClipboardView(ClipboardController* controller, QWidget *parent = nullptr);
     ~ClipboardView() override;
+
+public slots:
+    // 接收Controller通知的更新UI的槽
+    void onItemAdded(ClipboardItem* item);
+    void onItemRemoved(ClipboardItem* item);
+    void onModelCleared();
+    void onItemPinnedChanged(ClipboardItem* item);
+    void refreshAllItems(); // 完全刷新UI
 
 private slots:
     void on_clearButton_clicked();
     void on_saveButton_clicked();
     void on_listWidget_itemDoubleClicked(QListWidgetItem *item);
     void on_listWidget_customContextMenuRequested(const QPoint &pos);
+    void on_TextBtn_clicked();
+    void on_ImageBtn_clicked();
+    void on_FileBtn_clicked();
+    void on_restoreBtn_clicked();
 
     void copyItem();
     void previewImage();
     void deleteItem();
     void openFileLocation();
-
-    void pinItem();   // 置顶/取消置顶
+    void pinItem();
+    void filterItemsByType(ClipboardItemType type);
 
 private:
     Ui::ClipboardView *ui;
-    ClipboardMonitor* m_clipboardMonitor;
-    ClipboardHistoryManager m_historyManager;
+    ClipboardController* m_controller;
     QListWidgetItem* m_currentRightClickedItem;
     QLabel *m_imagePreviewLabel;
 
     void initializeListWidget();
     void insertNewItem(ClipboardItem *newItem);
-    void refreshUI(); // 从 historyManager 刷新 UI
     ClipboardItem* findItemForListWidgetItem(QListWidgetItem* listItem);
+    QListWidgetItem* findListWidgetItemForClipboardItem(ClipboardItem* item);
 };
 
 #endif // CLIPBOARDVIEW_H

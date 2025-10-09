@@ -9,7 +9,8 @@
 enum class ClipboardItemType {
     Text,  // 文本类型
     Image, // 图片类型
-    File   // 文件类型
+    File,  // 文件类型
+    Unknown
 };
 
 // 剪贴板项基类（抽象类，采用多态设计）

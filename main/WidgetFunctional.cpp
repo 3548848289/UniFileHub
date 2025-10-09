@@ -1,5 +1,6 @@
 #include "./include/WidgetFunctional.h"
 #include "ui/ui_WidgetFunctional.h"
+#include "../../ClipBoard/include/ClipboardComponentFactory.h"
 
 WidgetFunctional::~WidgetFunctional()
 {
@@ -114,7 +115,7 @@ WidgetFunctional::WidgetFunctional(QWidget *parent)
 
     // ui->pushButton_7->hide(); //暂时不隐藏
     form = new SendEmail();
-    clipboard = new ClipboardView();
+    clipboard = ClipboardComponentFactory::createClipboardComponent();
 }
 
 

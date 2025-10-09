@@ -12,6 +12,8 @@ set(SETTING_SOURCES
     ClipboardView.cpp
     ClipboardMenuBuilder.cpp
     ClipboardMonitor.cpp
+    ClipboardController.cpp
+    ClipboardComponentFactory.cpp
 )
 
 set(SETTING_HEADERS
@@ -28,6 +30,8 @@ set(SETTING_HEADERS
     include/ClipboardHistoryManager.h
     include/ClipboardMenuBuilder.h
     include/ClipboardMonitor.h
+    include/ClipboardController.h
+    include/ClipboardComponentFactory.h
 
 )
 
