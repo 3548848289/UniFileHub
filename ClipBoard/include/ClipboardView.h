@@ -36,6 +36,9 @@ private slots:
     void on_ImageBtn_clicked();
     void on_FileBtn_clicked();
     void on_restoreBtn_clicked();
+    void on_lineEdit_editingFinished();
+    void on_lineEdit_textChanged(const QString &text);
+    void on_lineEdit_returnPressed();
 
     void copyItem();
     void previewImage();
