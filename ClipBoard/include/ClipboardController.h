@@ -36,6 +36,9 @@ public slots:
     
     // 加载历史记录
     void loadHistory(int hours);
+    
+    // 搜索功能
+    void searchItems(const QString& searchText);
 
 private slots:
     void onItemAdded(ClipboardItem* item);

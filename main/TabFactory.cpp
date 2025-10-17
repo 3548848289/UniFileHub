@@ -29,7 +29,7 @@ const QMap<QString, std::function<TabAbstract*(const QString&)>> TabFactory::fac
 
     // --- 表格/数据类 ---
     { "csv",   [](const QString& f){ return new TabHandleCSV(f); } },
-    { "tsv",   [](const QString& f){ return new TabHandleCSV(f); } },  // TSV 可复用 CSV 处理
+    { "tsv",   [](const QString& f){ return new TabHandleCSV(f); } },
     { "xlsx",  [](const QString& f){ return new TabHandleXLSX(f); } },
     { "xls",   [](const QString& f){ return new TabHandleXLSX(f); } },
     { "ods",   [](const QString& f){ return new TabHandleXLSX(f); } },
@@ -55,6 +55,10 @@ const QMap<QString, std::function<TabAbstract*(const QString&)>> TabFactory::fac
     { "mkv",   [](const QString& f){ return new TabHandleVideo(f); } },
     { "flv",   [](const QString& f){ return new TabHandleVideo(f); } },
     { "webm",  [](const QString& f){ return new TabHandleVideo(f); } },
+
+    // --- PDF类 ---
+    { "pdf",  [](const QString& f){ return new TabHandlePDF(f); } },
+    { "ai",  [](const QString& f){ return new TabHandlePDF(f); } },
 };
 
 TabAbstract* TabFactory::create(const QString& fileName) {

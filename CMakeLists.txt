@@ -4,8 +4,8 @@ cmake_minimum_required(VERSION 3.5)
 project(SmartDesk VERSION 0.1 LANGUAGES CXX)
 
 
-find_package(QT NAMES Qt6 REQUIRED COMPONENT    S Widgets Sql Network Svg SvgWidgets Multimedia MultimediaWidgets)
-find_package(Qt6 REQUIRED COMPONENTS Widgets Sql Network Svg SvgWidgets Multimedia MultimediaWidgets)
+find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets Sql Network Svg SvgWidgets Multimedia MultimediaWidgets Pdf PdfWidgets)
+find_package(Qt6 REQUIRED COMPONENTS Widgets Sql Network Svg SvgWidgets Multimedia MultimediaWidgets Pdf PdfWidgets)
 
 # 启用自动处理 Qt 的 uic, moc, 和 rcc
 set(CMAKE_AUTOUIC ON)
@@ -28,6 +28,7 @@ add_subdirectory(DisposeAbstract/DisposeCSV)
 add_subdirectory(DisposeAbstract/DisposeIMG)
 add_subdirectory(DisposeAbstract/DisposeXLSX)
 add_subdirectory(DisposeAbstract/DisposeVideo)
+add_subdirectory(DisposeAbstract/DisposePDF)
 add_subdirectory(main)
 
 
@@ -54,7 +55,6 @@ endif()
 qt_add_executable(SmartDesk WIN32 ${RESOURCES} ${APP_ICON_RESOURCE_WINDOWS})
 
 
-
 target_link_libraries(SmartDesk PRIVATE
     mytxt_main
     mytxt_filehis
@@ -69,6 +69,7 @@ target_link_libraries(SmartDesk PRIVATE
     mytxt_img
     mytxt_xlsx
     mytxt_video
+    mytxt_pdf
     mytxt_manager
     mytxt_morefunction
     mytxt_clipboard

@@ -407,51 +407,13 @@ void ClipboardView::on_lineEdit_returnPressed()
 
 void ClipboardView::on_lineEdit_editingFinished()
 {
-    if (!m_controller || !m_controller->getHistoryManager()) return;
+    if (!m_controller) return;
     
     // 获取搜索文本
     QString searchText = ui->lineEdit->text().trimmed();
     
-    // 清空当前列表
-    ui->listWidget->clear();
-    
-    auto addToListWidget = [this](ClipboardItem* item) {
-        QListWidgetItem* listItem = item->createListWidgetItem();
-        quintptr addr = reinterpret_cast<quintptr>(item);
-        listItem->setData(Qt::UserRole, QVariant::fromValue<quintptr>(addr));
-        if (item->isPinned()) {
-            QIcon pinIcon(":/usedimage/pin.svg");
-            QPixmap pixmap = pinIcon.pixmap(QSize(16, 16));
-            listItem->setIcon(QIcon(pixmap));
-        }
-        ui->listWidget->addItem(listItem);
-    };
-    
-    // 收集符合条件的置顶项和普通项
-    std::vector<ClipboardItem*> pinnedItems;
-    std::vector<ClipboardItem*> normalItems;
-    
-    // 从最新到最旧收集项目，确保新项排在前面
-    auto& items = m_controller->getHistoryManager()->items();
-    for (auto it = items.rbegin(); it != items.rend(); ++it) {
-        ClipboardItem* item = it->get();
-        
-        // 只处理文本类型的项
-        if (item->type() == ClipboardItemType::Text) {
-            // 动态转换为CliText类型以访问text()方法
-            CliText* textItem = dynamic_cast<CliText*>(item);
-            // 如果搜索文本为空，显示所有项；否则执行模糊匹配
-            if (searchText.isEmpty() || (textItem && textItem->text().contains(searchText, Qt::CaseInsensitive))) {
-                if (item->isPinned())
-                    pinnedItems.push_back(item);
-                else
-                    normalItems.push_back(item);
-            }
-        }
-    }
-    
-    // 按优先级排序显示：置顶项（新到旧）、普通项（新到旧）
-    for (auto* item : pinnedItems) addToListWidget(item);
-    for (auto* item : normalItems) addToListWidget(item);
+    // 调用Controller执行搜索，符合MVC架构
+    // 注意：这里需要在Controller中添加searchItems方法
+    m_controller->searchItems(searchText);
 }
 

@@ -2,11 +2,13 @@
 #include "include/ClipboardView.h"
 #include "include/ClipboardItemFactory.h"
 #include "include/FileTypeDetector.h"
+#include "include/ClipboardItem/CliText.h"
 #include <QGuiApplication>
 #include <QClipboard>
 #include <QDesktopServices>
 #include <QUrl>
 #include <QDebug>
+#include <QRegularExpression>
 
 ClipboardController::ClipboardController(QObject *parent)
     : QObject(parent), m_view(nullptr)
@@ -124,4 +126,68 @@ void ClipboardController::onItemsCleared()
 void ClipboardController::onItemPinnedStatusChanged(ClipboardItem* item)
 {
     emit itemPinnedChanged(item);
+}
+
+void ClipboardController::searchItems(const QString& query)
+{
+    // 先清空现有内容
+    emit modelCleared();
+    
+    QString searchText = query.trimmed();
+    
+    // 收集符合条件的置顶项和普通项
+    std::vector<ClipboardItem*> pinnedItems;
+    std::vector<ClipboardItem*> normalItems;
+    
+    // 从最新到最旧收集项目，确保新项排在前面（反向迭代）
+    const auto& items = m_historyManager.items();
+    for (auto it = items.rbegin(); it != items.rend(); ++it) {
+        ClipboardItem* item = it->get();
+        bool matchFound = false;
+        
+        // 根据不同类型的剪贴板项目进行搜索
+        if (item->type() == ClipboardItemType::Text) {
+            // 文本类型的项目可以直接搜索内容
+            CliText* textItem = dynamic_cast<CliText*>(item);
+            if (searchText.isEmpty() || (textItem && textItem->text().contains(searchText, Qt::CaseInsensitive))) {
+                matchFound = true;
+            }
+        } else if (item->type() == ClipboardItemType::File) {
+            // 文件类型的项目可以搜索文件名
+            if (searchText.isEmpty()) {
+                matchFound = true;
+            } else {
+                QString serialized = item->serialize();
+                if (serialized.startsWith("FILE_DATA:")) {
+                    QStringList filePaths = serialized.mid(10).split(";").filter(QRegularExpression(".+"));
+                    for (const QString& path : filePaths) {
+                        if (QFileInfo(path).fileName().contains(searchText, Qt::CaseInsensitive)) {
+                            matchFound = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        } else if (searchText.isEmpty()) {
+            // 空搜索时显示所有类型
+            matchFound = true;
+        }
+        
+        // 将匹配的项目添加到相应的列表
+        if (matchFound) {
+            if (item->isPinned()) {
+                pinnedItems.push_back(item);
+            } else {
+                normalItems.push_back(item);
+            }
+        }
+    }
+    
+    // 按优先级排序显示：先显示置顶项，再显示普通项
+    for (auto* item : pinnedItems) {
+        emit itemAddedToModel(item);
+    }
+    for (auto* item : normalItems) {
+        emit itemAddedToModel(item);
+    }
 }

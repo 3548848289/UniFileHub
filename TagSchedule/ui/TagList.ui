@@ -15,7 +15,7 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,8,4,1">
+    <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,6,4,1">
      <item>
       <widget class="QLabel" name="tagLabel">
        <property name="sizePolicy">
@@ -39,6 +39,12 @@
       <layout class="QVBoxLayout" name="verticalLayout_6" stretch="4,1">
        <item>
         <widget class="QLabel" name="fileLabel">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="font">
           <font>
            <pointsize>12</pointsize>
@@ -55,7 +61,7 @@
        <item>
         <widget class="QLineEdit" name="lineEdit">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
