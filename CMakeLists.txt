@@ -29,6 +29,7 @@ add_subdirectory(DisposeAbstract/DisposeIMG)
 add_subdirectory(DisposeAbstract/DisposeXLSX)
 add_subdirectory(DisposeAbstract/DisposeVideo)
 add_subdirectory(DisposeAbstract/DisposePDF)
+add_subdirectory(DisposeAbstract/DisposeDB)
 add_subdirectory(main)
 
 
@@ -70,6 +71,7 @@ target_link_libraries(SmartDesk PRIVATE
     mytxt_xlsx
     mytxt_video
     mytxt_pdf
+    mytxt_db
     mytxt_manager
     mytxt_morefunction
     mytxt_clipboard

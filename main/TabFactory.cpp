@@ -59,6 +59,11 @@ const QMap<QString, std::function<TabAbstract*(const QString&)>> TabFactory::fac
     // --- PDF类 ---
     { "pdf",  [](const QString& f){ return new TabHandlePDF(f); } },
     { "ai",  [](const QString& f){ return new TabHandlePDF(f); } },
+    
+    // --- 数据库类 ---
+    { "db",   [](const QString& f){ return new TabHandleDB(f); } },
+    { "sqlite", [](const QString& f){ return new TabHandleDB(f); } },
+    { "sqlite3", [](const QString& f){ return new TabHandleDB(f); } },
 };
 
 TabAbstract* TabFactory::create(const QString& fileName) {

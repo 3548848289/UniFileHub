@@ -4,8 +4,15 @@
 ControlWidVideo::ControlWidVideo(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::ControlWidVideo)
+    , isSliding(false)
 {
     ui->setupUi(this);
+    
+    // 设置滑块初始范围
+    ui->horizontalSlider->setRange(0, 0);
+    
+    // 初始化为播放状态
+    ui->pushButton->setText(tr("播放"));
 }
 
 ControlWidVideo::~ControlWidVideo()
@@ -13,37 +20,43 @@ ControlWidVideo::~ControlWidVideo()
     delete ui;
 }
 
-// // 播放按钮
-// QPushButton *playButton = new QPushButton(tr("播放"), this);
+void ControlWidVideo::setSliderRange(int min, int max)
+{
+    ui->horizontalSlider->setRange(min, max);
+}
 
-// // 播放进度条
-// QSlider *slider = new QSlider(Qt::Horizontal, this);
-// slider->setRange(0, 0); // 先设空范围，等时长获取后更新
+void ControlWidVideo::setSliderPosition(int position)
+{
+    if (!isSliding) {
+        ui->horizontalSlider->setValue(position);
+    }
+}
 
-// // 播放/暂停控制
-// connect(playButton, &QPushButton::clicked, this, [=]() {
-//     if (player->playbackState() == QMediaPlayer::PlayingState) {
-//         player->pause();
-//         playButton->setText(tr("播放"));
-//     } else {
-//         player->play();
-//         playButton->setText(tr("暂停"));
-//     }
-// });
+void ControlWidVideo::setPlayButtonText(const QString &text)
+{
+    ui->pushButton->setText(text);
+}
 
-// // 视频时长变化时更新 slider 范围
-// connect(player, &QMediaPlayer::durationChanged, this, [=](qint64 duration) {
-//     slider->setRange(0, static_cast<int>(duration));
-// });
+void ControlWidVideo::on_pushButton_clicked()
+{
+    emit playPauseRequested();
+}
 
-// // 播放进度变化时更新 slider
-// connect(player, &QMediaPlayer::positionChanged, this, [=](qint64 pos) {
-//     if (!slider->isSliderDown()) {
-//         slider->setValue(static_cast<int>(pos));
-//     }
-// });
+void ControlWidVideo::on_horizontalSlider_sliderMoved(int position)
+{
+    emit sliderMoved(position);
+}
 
-// // 拖动 slider 改变播放位置
-// connect(slider, &QSlider::sliderMoved, this, [=](int position) {
-//     player->setPosition(position);
-// });
+void ControlWidVideo::on_horizontalSlider_sliderPressed()
+{
+    isSliding = true;
+    emit sliderPressed();
+}
+
+void ControlWidVideo::on_horizontalSlider_sliderReleased()
+{
+    isSliding = false;
+    emit sliderReleased();
+    // 释放时也发送一次位置信号，确保视频播放位置更新
+    emit sliderMoved(ui->horizontalSlider->value());
+}

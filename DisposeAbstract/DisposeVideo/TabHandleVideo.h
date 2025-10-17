@@ -31,14 +31,22 @@ public:
     void loadFromFile(const QString &fileName) override;
     void loadFromInternet(const QByteArray &content) override;
     void saveToFile(const QString &fileName) override;
-    void ControlWidget(bool judge){
-        isShowControl = judge;
-    }
+    void ControlWidget(bool judge) override;
+
+private slots:
+    void onPlayPauseButtonClicked();
+    void onSliderMoved(int position);
+    void updateSlider(qint64 position);
+    void updateDuration(qint64 duration);
 
 private:
     QSplitter* splitter;
-
     ControlWidVideo * controlwidVideo;
+    QMediaPlayer *player;
+    QVideoWidget *videoWidget;
+    QAudioOutput *audioOutput;
+    QLabel *loadingLabel;
+    bool isPlaying;
 
 };
 
