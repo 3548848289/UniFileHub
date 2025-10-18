@@ -165,6 +165,8 @@ void TabHandleVideo::updateSlider(qint64 position)
 {
     if (controlwidVideo) {
         controlwidVideo->setSliderPosition(static_cast<int>(position));
+        // 同时更新时间显示
+        controlwidVideo->updateTimeDisplay(static_cast<int>(position), static_cast<int>(player->duration()));
     }
 }
 
@@ -172,6 +174,8 @@ void TabHandleVideo::updateDuration(qint64 duration)
 {
     if (controlwidVideo) {
         controlwidVideo->setSliderRange(0, static_cast<int>(duration));
+        // 同时更新时间显示
+        controlwidVideo->updateTimeDisplay(static_cast<int>(player->position()), static_cast<int>(duration));
     }
 }
 

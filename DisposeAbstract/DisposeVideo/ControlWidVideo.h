@@ -21,6 +21,8 @@ public slots:
     void setSliderPosition(int position);
     // 更新播放/暂停按钮文本
     void setPlayButtonText(const QString &text);
+    // 更新时间显示
+    void updateTimeDisplay(int current, int total);
 
 private slots:
     void on_pushButton_clicked();

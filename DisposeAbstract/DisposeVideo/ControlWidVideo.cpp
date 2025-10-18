@@ -37,6 +37,20 @@ void ControlWidVideo::setPlayButtonText(const QString &text)
     ui->pushButton->setText(text);
 }
 
+void ControlWidVideo::updateTimeDisplay(int current, int total)
+{
+    // 将毫秒转换为分:秒格式
+    auto formatTime = [](int milliseconds) {
+        int seconds = milliseconds / 1000;
+        int minutes = seconds / 60;
+        seconds = seconds % 60;
+        return QString("%1:%2").arg(minutes).arg(seconds, 2, 10, QLatin1Char('0'));
+    };
+    
+    QString timeText = QString("%1/%2").arg(formatTime(current)).arg(formatTime(total));
+    ui->timeLabel->setText(timeText);
+}
+
 void ControlWidVideo::on_pushButton_clicked()
 {
     emit playPauseRequested();
