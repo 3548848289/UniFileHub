@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ControlWidPSD</class>
+ <widget class="QWidget" name="ControlWidPSD">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>80</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>PSD 控制器</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QLabel" name="zoomLabel">
+       <property name="text">
+        <string>缩放：</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSlider" name="zoomSlider">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="minimum">
+        <number>10</number>
+       </property>
+       <property name="maximum">
+        <number>500</number>
+       </property>
+       <property name="singleStep">
+        <number>10</number>
+       </property>
+       <property name="pageStep">
+        <number>50</number>
+       </property>
+       <property name="value">
+        <number>100</number>
+       </property>
+       <property name="tickInterval">
+        <number>50</number>
+       </property>
+       <property name="tickPosition">
+        <enum>QSlider::TicksBelow</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="zoomValueLabel">
+       <property name="text">
+        <string>100%</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>zoomSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>ControlWidPSD</receiver>
+   <slot>on_zoomSlider_valueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>200</x>
+     <y>40</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>200</x>
+     <y>40</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>on_zoomSlider_valueChanged(int)</slot>
+ </slots>
+</ui>

@@ -1,6 +1,7 @@
 #include "TabFactory.h"
 #include <QFileInfo>
 #include <QMessageBox>
+#include "../DisposeAbstract/DisposePSD/include/TabHandlePSD.h"
 
 const QMap<QString, std::function<TabAbstract*(const QString&)>> TabFactory::factories = {
     { "txt",   [](const QString& f){ return new TextTab(f); } },
@@ -44,7 +45,7 @@ const QMap<QString, std::function<TabAbstract*(const QString&)>> TabFactory::fac
     { "webp",  [](const QString& f){ return new TabHandleIMG(f); } },
     { "tiff",  [](const QString& f){ return new TabHandleIMG(f); } },
     { "ico",   [](const QString& f){ return new TabHandleIMG(f); } },
-    { "psd",  [](const QString& f){ return new TabHandleIMG(f); } },
+    { "psd",  [](const QString& f){ return new TabHandlePSD(f); } },
     { "ai",   [](const QString& f){ return new TabHandleIMG(f); } },
 
     // --- 视频类 ---
@@ -64,6 +65,9 @@ const QMap<QString, std::function<TabAbstract*(const QString&)>> TabFactory::fac
     { "db",   [](const QString& f){ return new TabHandleDB(f); } },
     { "sqlite", [](const QString& f){ return new TabHandleDB(f); } },
     { "sqlite3", [](const QString& f){ return new TabHandleDB(f); } },
+
+    { "psd", [](const QString& f){ return new TabHandlePSD(f); } },
+
 };
 
 TabAbstract* TabFactory::create(const QString& fileName) {

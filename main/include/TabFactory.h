@@ -12,6 +12,7 @@
 #include "../../DisposeAbstract/DisposeVideo/TabHandleVideo.h"
 #include "../../DisposeAbstract/DisposePDF/TabHandlePDF.h"
 #include "../../DisposeAbstract/DisposeDB/TabHandleDB.h"
+#include "../../DisposeAbstract/DisposePSD/include/TabHandlePSD.h"
 
 class TabFactory {
 public:

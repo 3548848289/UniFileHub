@@ -6,7 +6,7 @@ set(SETTING_SOURCES
     ClipboardItemFactory.cpp
     ClipboardHistoryManager.cpp
 
-    FiletypeDetector.cpp
+    FileTypeDetector.cpp
     ImagePreviewDialog.cpp
 
     ClipboardView.cpp
@@ -23,7 +23,7 @@ set(SETTING_HEADERS
     include/ClipboardItem/CliFile.h
     include/ClipboardItemFactory.h
 
-    include/FiletypeDetector.h
+    include/FileTypeDetector.h
     include/ImagePreviewDialog.h
 
     include/ClipboardView.h

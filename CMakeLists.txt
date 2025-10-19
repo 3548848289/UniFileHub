@@ -30,6 +30,7 @@ add_subdirectory(DisposeAbstract/DisposeXLSX)
 add_subdirectory(DisposeAbstract/DisposeVideo)
 add_subdirectory(DisposeAbstract/DisposePDF)
 add_subdirectory(DisposeAbstract/DisposeDB)
+add_subdirectory(DisposeAbstract/DisposePSD)
 add_subdirectory(main)
 
 
@@ -44,6 +45,10 @@ add_subdirectory(Resources/ThirdParty/LmsgNotify/
 
 add_subdirectory(Resources/ThirdParty/QFileSystemBreadcrumbBar/
     ${CMAKE_CURRENT_BINARY_DIR}/Resources/ThirdParty/QFileSystemBreadcrumbBar)
+
+add_subdirectory(Resources/ThirdParty/libqpsd/
+    ${CMAKE_CURRENT_BINARY_DIR}/Resources/ThirdParty/libqpsd)
+
 
 qt_add_resources(RESOURCES
     Resources/res.qrc
@@ -72,12 +77,14 @@ target_link_libraries(SmartDesk PRIVATE
     mytxt_video
     mytxt_pdf
     mytxt_db
+    mytxt_psd
     mytxt_manager
     mytxt_morefunction
     mytxt_clipboard
     SimpleMail::Core
     QXlsx::QXlsx
     LmsgNotify::LmsgNotify
+    libqpsd
     Qt${QT_VERSION_MAJOR}::Widgets
 )
 
