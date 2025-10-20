@@ -33,6 +33,9 @@ TabHandlePSD::TabHandlePSD(const QString& filePath, QWidget *parent)
     layout->setContentsMargins(0, 0, 0, 0);
     setLayout(layout);
 
+    setContentModified(false);
+
+
     // 连接信号槽
     connect(controlFrame, &ControlWidPSD::zoomValueChanged, this, [this](int value) {
         // 计算缩放比例

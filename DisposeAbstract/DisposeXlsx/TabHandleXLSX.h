@@ -12,6 +12,7 @@
 #include <QString>
 #include <QWidget>
 #include <QFile>
+#include <QComboBox>
 #include <QHeaderView>
 #include "../../main/include/TabAbstract.h"
 
@@ -30,8 +31,16 @@ public:
 
     TabHandleXLSX(const QString& filePath,QWidget *parent = nullptr);
 
+private slots:
+    void onSheetChanged(int index);
+
 private:
     QTableWidget *tableWidget;
+    QComboBox *sheetComboBox; // 用于切换sheet的下拉框
+    QString currentFilePath; // 当前文件路径
+    
+    // 加载指定sheet的数据
+    void loadSheetData(int sheetIndex);
 
 };
 

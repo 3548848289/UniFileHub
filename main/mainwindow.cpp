@@ -48,15 +48,13 @@ void MainWindow::initConnect() {
     });
 
     connect(widgetfunc, &WidgetFunctional::sendEmailForm, this, [this](SendEmail *form) {
-        int newIndex = tabManager->addWidgetTab(form, "Email"); // 通过 TabManager 添加
+        tabManager->addWidgetTab(form, "Email"); // 通过 TabManager 添加
         form->show();
-        tabWidget->setCurrentIndex(newIndex);
         ui->stackedWidget->setCurrentWidget(file_system);
     });
     connect(widgetfunc, &WidgetFunctional::showClipboard, this, [this](ClipboardView* clipboard) {
-        int newIndex = tabManager->addWidgetTab(clipboard, "剪贴板"); // 通过 TabManager 添加
+        tabManager->addWidgetTab(clipboard, "剪贴板"); // 通过 TabManager 添加
         clipboard->show();
-        tabWidget->setCurrentIndex(newIndex);
         ui->stackedWidget->setCurrentWidget(file_system);
     });
 
@@ -147,13 +145,52 @@ void MainWindow::initMemubarLayout() {
     widgetfunc->setFixedWidth(60);
 
     horizontalSplitter->addWidget(ui->combinedWidget);
-    horizontalSplitter->addWidget(tabWidget);
+    
+    // 添加tabManager的容器部件，并隐藏原始tabWidget
+    QWidget* containerWidget = tabManager->getContainerWidget();
+    horizontalSplitter->addWidget(containerWidget);
+    
+    // 隐藏原始的tabWidget，避免重叠显示
+    if (tabWidget) {
+        tabWidget->setVisible(false);
+    }
+    
     horizontalSplitter->setStretchFactor(0, 0);
     horizontalSplitter->setStretchFactor(1, 1);
     horizontalSplitter->setStretchFactor(2, 3);
     setCentralWidget(horizontalSplitter);
     QList<int> sizes = {60, 340, 600};
     horizontalSplitter->setSizes(sizes);
+    
+    // 添加布局菜单选项
+    QMenu* layoutMenu = new QMenu("布局", this);
+    
+    QAction* layout1x1 = new QAction("单视图 (1x1)", this);
+    connect(layout1x1, &QAction::triggered, this, [this]() {
+        tabManager->setLayoutType(LayoutType::LAYOUT_1X1);
+    });
+    
+    QAction* layout1x2 = new QAction("水平分割 (1x2)", this);
+    connect(layout1x2, &QAction::triggered, this, [this]() {
+        tabManager->setLayoutType(LayoutType::LAYOUT_1X2);
+    });
+    
+    QAction* layout2x1 = new QAction("垂直分割 (2x1)", this);
+    connect(layout2x1, &QAction::triggered, this, [this]() {
+        tabManager->setLayoutType(LayoutType::LAYOUT_2X1);
+    });
+    
+    QAction* layout2x2 = new QAction("网格视图 (2x2)", this);
+    connect(layout2x2, &QAction::triggered, this, [this]() {
+        tabManager->setLayoutType(LayoutType::LAYOUT_2X2);
+    });
+    
+    layoutMenu->addAction(layout1x1);
+    layoutMenu->addAction(layout1x2);
+    layoutMenu->addAction(layout2x1);
+    layoutMenu->addAction(layout2x2);
+    
+    ui->menu_2->addMenu(layoutMenu); // 添加到"视图"菜单下
 
 
     const QMap<int, QString> buttonNames = {

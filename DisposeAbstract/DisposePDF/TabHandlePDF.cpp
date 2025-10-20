@@ -31,6 +31,8 @@ TabHandlePDF::TabHandlePDF(const QString &filePath, QWidget *parent)
     mainLayout->addWidget(splitter);
     mainLayout->setContentsMargins(0,0,0,0);
 
+    setContentModified(false);
+
     // 连接信号槽
     connect(controlWidPDF, &ControlWidPDF::prevPageRequested, this, &TabHandlePDF::goToPrevPage);
     connect(controlWidPDF, &ControlWidPDF::nextPageRequested, this, &TabHandlePDF::goToNextPage);

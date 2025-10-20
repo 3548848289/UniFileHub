@@ -18,6 +18,7 @@
 #include "WidgetFunctional.h"
 #include "finddialog.h"
 #include "TabAbstract.h"
+#include "TabManager.h" // 包含LayoutType
 #include "../../DisposeAbstract/DisposeTXT/TabHandleTXT.h"
 #include "../../DisposeAbstract/DisposeCSV/TabHandleCSV.h"
 #include "../../DisposeAbstract/DisposeIMG/include/TabHandleIMG.h"
