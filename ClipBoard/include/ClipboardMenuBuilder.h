@@ -7,7 +7,7 @@
 #include "ClipboardItem/CliText.h"
 #include "ClipboardItem/CliImage.h"
 #include "ClipboardItem/CliFile.h"
-#include "FiletypeDetector.h"
+#include "FileTypeDetector.h"
 
 class ClipboardMenuBuilder {
 public:

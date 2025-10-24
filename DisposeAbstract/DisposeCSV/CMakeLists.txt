@@ -11,7 +11,7 @@ set(SCHEDULE_HEADERS
 qt_add_library(mytxt_csv STATIC
     ${SCHEDULE_SOURCES}
     ${SCHEDULE_HEADERS}
-    ControlWidcsv.ui
+    ControlWidCSV.ui
 )
 
 target_link_libraries(mytxt_csv PRIVATE

@@ -11,9 +11,9 @@
 #include <memory>
 #include <QDebug>
 
-#include "../../userinfo/include/DLogin.h"
+#include "../../UserInfo/include/DLogin.h"
 #include "../../manager/include/dbService.h"
-#include "../../userinfo/include/DInfo.h"
+#include "../../UserInfo/include/DInfo.h"
 #include "../../EmailService/SendEmail.h"
 #include "../../MoreFunction/MoreFunction.h"
 #include "../../ClipBoard/include/ClipboardComponentFactory.h"
