@@ -25,6 +25,9 @@ public:
 
     TagDetail(QWidget *parent, QString filePath);
     ~TagDetail();
+    
+signals:
+    void tagDeleted(const QString &filePath); // 添加标签删除信号
 
 private slots:
 

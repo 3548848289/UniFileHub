@@ -46,6 +46,7 @@ private slots:
     void onCommitTriggered(QAbstractItemModel *model, const QModelIndex &index);
     void onCopyPathTriggered(QAbstractItemModel *model, const QModelIndex &index);
     void onOpenInExplorer(QAbstractItemModel *model, const QModelIndex &index);
+    void onTagDeleted(const QString &filePath); // 新增槽函数，处理标签删除事件
 private:
     QStringList fileList;
 

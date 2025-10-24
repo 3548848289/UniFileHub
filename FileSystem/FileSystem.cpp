@@ -41,7 +41,11 @@ FileSystem::FileSystem(QWidget *parent)
 
 
     connect(tagItemdelegate, &TagItemDelegate::TagUpdated, this, [=](){
+        // 使用更强制的刷新方法，先重置模型，再更新
+        QModelIndex currentRootIndex = ui->treeView->rootIndex();
+        ui->treeView->reset();
         ui->treeView->update();
+        ui->treeView->setRootIndex(currentRootIndex); // 重新设置根索引以强制刷新
     });
 
     connect(tagItemdelegate, &TagItemDelegate::tagbutClicked, this, [this](const QModelIndex &index) {

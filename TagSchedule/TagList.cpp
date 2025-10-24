@@ -56,7 +56,19 @@ QString TagList::getExpInfo(const QDateTime expDate)
 
 void TagList::on_pushButton_clicked()
 {
-    TagDetail * tagdetail = new TagDetail(nullptr, fileInfo);
-    tagdetail->show();
+    // 实现单例模式，确保只有一个标签详情窗口实例
+    if (!tagdetail) {
+        tagdetail = new TagDetail(nullptr, fileInfo);
+        // 连接destroyed信号，当窗口关闭时重置指针
+        connect(tagdetail, &QObject::destroyed, this, [=]() {
+            tagdetail = nullptr;
+        });
+        tagdetail->show();
+    } else {
+        // 如果窗口已存在，将其显示在前台
+        tagdetail->show();
+        tagdetail->raise();
+        tagdetail->activateWindow();
+    }
 }
 

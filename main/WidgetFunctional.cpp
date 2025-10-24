@@ -59,8 +59,18 @@ void WidgetFunctional::on_pushButton_8_clicked()
 
 void WidgetFunctional::on_pushButton_9_clicked()
 {
-    more_function = new MoreFunction();
+    // 检查是否已经存在MoreFunction窗口，如果存在则显示它，不存在才创建新窗口
+    if (!more_function) {
+        more_function = new MoreFunction();
+        // 设置窗口属性，确保在关闭时删除对象并重置指针
+        connect(more_function, &QWidget::destroyed, this, [this]() {
+            more_function = nullptr;
+        });
+    }
+    // 显示窗口并将其置于前台
     more_function->show();
+    more_function->raise();
+    more_function->activateWindow();
 }
 
 
@@ -71,7 +81,7 @@ void WidgetFunctional::handleLoginSuccess(const QString& username) {
 }
 
 WidgetFunctional::WidgetFunctional(QWidget *parent)
-    : QWidget(parent), ui(new Ui::WidgetFunctional)
+    : QWidget(parent), ui(new Ui::WidgetFunctional), more_function(nullptr)
 {
     ui->setupUi(this);
     btnGroup=new QButtonGroup;

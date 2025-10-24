@@ -164,6 +164,16 @@ bool dbFilepath::updateFileInfo(const FilePathInfo& fileInfo)
     }
 
     int fileId = q.value(0).toInt();
+    
+    // 先删除旧的标签记录，避免出现重复记录
+    q.prepare("DELETE FROM Tags WHERE file_id = :file_id");
+    q.bindValue(":file_id", fileId);
+    if (!q.exec()) {
+        dbsqlite.rollback();
+        return false;
+    }
+    
+    // 然后插入新的标签记录
     q.prepare(UPDATEFILEINFO3);
     q.bindValue(":tag", fileInfo.tagName);
     q.bindValue(":file_id", fileId);

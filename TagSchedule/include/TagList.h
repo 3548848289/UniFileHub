@@ -36,6 +36,7 @@ private slots:
 private:
     Ui::TagList *ui;
     FilePathInfo fileInfo;
+    TagDetail *tagdetail = nullptr; // 标签详情窗口实例
 };
 
 #endif // TAGLIST_H

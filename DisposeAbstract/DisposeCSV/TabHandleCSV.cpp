@@ -8,6 +8,8 @@ TabHandleCSV::TabHandleCSV(const QString& filePath, QWidget *parent): TabAbstrac
     tableWidget = new QTableWidget(this);
     tableWidget->setSortingEnabled(true);
     tableWidget->horizontalHeader()->setSortIndicatorShown(true);
+    tableWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+    tableWidget->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
 
     splitter = new QSplitter(Qt::Vertical, this);
 
@@ -57,6 +59,8 @@ TabHandleCSV::TabHandleCSV(const QString& filePath, QWidget *parent): TabAbstrac
         if (link)
             emit dataToSend(jsonString);
     });
+
+
 }
 
 void TabHandleCSV::setContent(const QString &text)
@@ -85,6 +89,18 @@ void TabHandleCSV::setContent(const QString &text)
             tableWidget->setItem(i - 1, j, new QTableWidgetItem(value));
         }
     }
+
+    // 填充完表格数据后
+    tableWidget->resizeColumnsToContents(); // 先自适应内容
+
+    for (int col = 0; col < tableWidget->columnCount(); ++col) {
+        int w = tableWidget->columnWidth(col);
+        if (w > 300)
+            tableWidget->setColumnWidth(col, 300);
+        else if (w < 50)
+            tableWidget->setColumnWidth(col, 50);
+    }
+
 }
 
 void TabHandleCSV::loadFromFile(const QString &fileName)

@@ -49,13 +49,14 @@ void TagDetail::init(FilePathInfo fileInfo) {
 TagDetail::TagDetail(QWidget *parent, QString filePath) :
     QWidget(parent), ui(new Ui::TagDetail), dbservice(dbService::instance("./SmartDesk.db")) {
     ui->setupUi(this);
-    this->fileInfo = fileInfo;
+    this->fileInfo.filePath = filePath; // 正确初始化filePath
     if (dbservice.dbTags().getFileInfoByFilePath(filePath, fileInfo)) {
         init(fileInfo);
     } else {
         qDebug() << "未能从数据库获取文件信息";
+        // 即使获取失败，也初始化基本信息
+        init(fileInfo);
     }
-    init(fileInfo);
 }
 
 TagDetail::~TagDetail()
@@ -126,15 +127,23 @@ void TagDetail::on_deleteBtn_clicked() {
 
     if (reply == QMessageBox::Yes) {
         int fileId;
+        // 使用表格中实际显示的文件路径
         QString filePath = ui->tableWidget->item(0, 1)->text();
-        if (!dbservice.dbTags().getFileId(fileInfo.filePath, fileId)) {
+        
+        // 使用表格中的filePath而不是fileInfo.filePath
+        if (!dbservice.dbTags().getFileId(filePath, fileId)) {
             QMessageBox::warning(this, "错误", "无法找到文件ID！");
             return;
         }
         bool result = dbservice.dbTags().deleteTag(fileId);
 
-        if (!result)
+        if (!result) {
             QMessageBox::warning(this, "删除失败", "删除过程中出现错误，操作已回滚。");
+        } else {
+            // 使用正确的filePath发送信号
+            emit tagDeleted(filePath);
+            qDebug() << "已发送tagDeleted信号，文件路径:" << filePath;
+        }
         close();
     }
 }

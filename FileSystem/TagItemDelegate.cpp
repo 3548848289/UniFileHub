@@ -24,9 +24,7 @@ void TagItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &optio
     }
 }
 
-bool TagItemDelegate::editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem &option, const QModelIndex &index) {
-    if (event->type() == QEvent::MouseButtonRelease) {
-        QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+bool TagItemDelegate::editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem &option, const QModelIndex &index) {    if (event->type() == QEvent::MouseButtonRelease) {        QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
 
         QRect tagIconRect(option.rect.right() - 30, option.rect.top() + 5, 20, 20);
         if (tagIconRect.contains(mouseEvent->pos())) {
@@ -35,6 +33,12 @@ bool TagItemDelegate::editorEvent(QEvent *event, QAbstractItemModel *model, cons
 
             QString filePath = model->data(index, QFileSystemModel::FilePathRole).toString();
             TagDetail *tagDetail = new TagDetail(nullptr, filePath);
+            // 连接标签删除信号到槽函数，添加调试输出和连接类型
+            bool connected = connect(tagDetail, &TagDetail::tagDeleted, this, &TagItemDelegate::onTagDeleted, Qt::UniqueConnection);
+            qDebug() << "信号连接结果:" << connected << "，目标槽函数:onTagDeleted";
+            
+            // 确保TagDetail在删除后自动清理
+            connect(tagDetail, &QObject::destroyed, tagDetail, &QObject::deleteLater);
             tagDetail->show();
 
             return true;
@@ -201,8 +205,7 @@ void TagItemDelegate::onCopyPathTriggered(QAbstractItemModel *model, const QMode
     }
 }
 
-void TagItemDelegate::onOpenInExplorer(QAbstractItemModel *model, const QModelIndex &index) {
-    if (!index.isValid()) {
+void TagItemDelegate::onOpenInExplorer(QAbstractItemModel *model, const QModelIndex &index) {    if (!index.isValid()) {
         return;
     }
     QFileSystemModel *fileSystemModel = qobject_cast<QFileSystemModel*>(model);
@@ -210,4 +213,13 @@ void TagItemDelegate::onOpenInExplorer(QAbstractItemModel *model, const QModelIn
     QFileInfo fileInfo(filePath);
     if (!fileInfo.exists()) return;
     QProcess::startDetached("explorer.exe", {"/select,", QDir::toNativeSeparators(filePath)});
+}
+
+void TagItemDelegate::onTagDeleted(const QString &filePath) {
+    
+    // 清理整个缓存，确保所有标签状态都被重新检查
+    m_tagsCache.clear();
+    
+    // 发射标签更新信号，通知界面刷新
+    emit TagUpdated();
 }

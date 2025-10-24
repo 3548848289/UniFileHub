@@ -9,6 +9,8 @@ TabHandleXLSX::TabHandleXLSX(const QString& filePath, QWidget *parent) : TabAbst
     tableWidget->setSortingEnabled(true);
     tableWidget->horizontalHeader()->setSortIndicatorShown(true);
     tableWidget->setEditTriggers(QAbstractItemView::DoubleClicked | QAbstractItemView::SelectedClicked);
+    tableWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+    tableWidget->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
 
     // 添加sheet切换下拉框
     sheetComboBox = new QComboBox(this);
@@ -26,6 +28,8 @@ TabHandleXLSX::TabHandleXLSX(const QString& filePath, QWidget *parent) : TabAbst
     connect(tableWidget, &QTableWidget::itemChanged, this, [this]() {
         setContentModified(true);
     });
+
+
 }
 
 void TabHandleXLSX::setContent(const QString &text) {
@@ -114,6 +118,19 @@ void TabHandleXLSX::loadSheetData(int sheetIndex) {
             }
         }
     }
+
+    tableWidget->resizeColumnsToContents();
+
+    // 填充完表格数据后
+    tableWidget->resizeColumnsToContents(); // 先自适应内容
+    for (int col = 0; col < tableWidget->columnCount(); ++col) {
+        int w = tableWidget->columnWidth(col);
+        if (w > 300)
+            tableWidget->setColumnWidth(col, 300);
+        else if (w < 50)
+            tableWidget->setColumnWidth(col, 50);
+    }
+
 }
 
 void TabHandleXLSX::onSheetChanged(int index) {

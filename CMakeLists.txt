@@ -1,8 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-
-# 设置项目名称和版本
 project(SmartDesk VERSION 0.1 LANGUAGES CXX)
-
 
 find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets Sql Network Svg SvgWidgets Multimedia MultimediaWidgets Pdf PdfWidgets)
 find_package(Qt6 REQUIRED COMPONENTS Widgets Sql Network Svg SvgWidgets Multimedia MultimediaWidgets Pdf PdfWidgets)
@@ -11,6 +8,7 @@ find_package(Qt6 REQUIRED COMPONENTS Widgets Sql Network Svg SvgWidgets Multimed
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
+
 
 # 添加子目录
 add_subdirectory(manager)
