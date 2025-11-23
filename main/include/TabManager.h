@@ -45,7 +45,7 @@ public:
 
     template<typename T>
     T* getCurrentTab();
-    
+
     // 事件过滤器
     bool eventFilter(QObject *obj, QEvent *event) override;
 

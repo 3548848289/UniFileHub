@@ -2,6 +2,11 @@
 TextTab::TextTab(const QString &filePath, QWidget *parent)  : TabAbstract(filePath, parent)
 {
     textEdit = new QTextEdit(this);
+
+    QFontMetrics fm(textEdit->font());
+    int tabWidth = fm.horizontalAdvance("中文");
+    textEdit->setTabStopDistance(tabWidth);
+
     // 为 QTextEdit 设置 C++ 语法高亮
     // new CppHighlighter(textEdit->document());
 

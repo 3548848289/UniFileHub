@@ -120,7 +120,8 @@ void TabHandlePDF::goToPage(int pageNumber)
     controlWidPDF->setCurrentPage(pageNumber);
 
     if (pdfView->pageNavigator()) {
-        pdfView->pageNavigator()->jump(pageNumber, QPointF(0,0), 1.0);
+        // QPdfPageNavigator使用0-based索引，而我们的界面使用1-based页码
+        pdfView->pageNavigator()->jump(pageNumber - 1, QPointF(0,0), 1.0);
     }
 }
 

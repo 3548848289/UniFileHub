@@ -4,7 +4,7 @@ TabManager::TabManager(QTabWidget* parentTabWidget, QObject* parent) : QObject(p
 {
     connect(tabWidget, &QTabWidget::tabCloseRequested,
             this, [this](int index) { closeTab(index); });
-    
+
     // 初始化容器部件和网格布局，设置父对象为主窗口
     if (parentTabWidget) {
         containerWidget = new QWidget(parentTabWidget->parentWidget());
@@ -97,10 +97,10 @@ void TabManager::closeTab(int index) {
     // 先检查活动视图中的标签页
     int row = activePosition.first;
     int col = activePosition.second;
-    
+
     if (row >= 0 && row < viewTabs.size() && col >= 0 && col < viewTabs[row].size() && viewTabs[row][col]) {
         QTabWidget* currentTabWidget = viewTabs[row][col];
-        
+
         if (index >= 0 && index < currentTabWidget->count()) {
             QWidget* widget = currentTabWidget->widget(index);
             if (!widget) return;
@@ -127,7 +127,7 @@ void TabManager::closeTab(int index) {
             return;
         }
     }
-    
+
     // 回退到原始tabWidget
     if (index < 0 || index >= tabWidget->count()) return;
     QWidget* widget = tabWidget->widget(index);
@@ -419,10 +419,11 @@ void TabManager::updateLayout() {
                 
                 // 添加鼠标点击事件处理，确保用户点击时更新活动位置
                 viewTabs[i][j]->installEventFilter(this);
-                
+                viewTabs[i][j]->tabBar()->installEventFilter(this);
+
                 // 连接关闭标签信号
                 connect(viewTabs[i][j], &QTabWidget::tabCloseRequested, this, &TabManager::closeTab);
-                
+
                 // 连接右键菜单信号
                 connect(viewTabs[i][j], &QTabWidget::customContextMenuRequested, 
                         this, [this, i, j](const QPoint &pos) {
@@ -675,9 +676,25 @@ bool TabManager::eventFilter(QObject *obj, QEvent *event) {
     if (event->type() == QEvent::MouseButtonPress || event->type() == QEvent::MouseButtonRelease) {
         for (int i = 0; i < viewTabs.size(); ++i) {
             for (int j = 0; j < viewTabs[i].size(); ++j) {
-                if (viewTabs[i][j] && obj == viewTabs[i][j]) {
+                if ((viewTabs[i][j] && obj == viewTabs[i][j]) || (viewTabs[i][j] && obj == viewTabs[i][j]->tabBar())) {
                     // 更新活动位置
                     activePosition = {i, j};
+
+                    // 清除所有QTabWidget的选中样式
+                    for (auto& tabRow : viewTabs) {
+                        for (auto tabWidget : tabRow) {
+                            if (tabWidget) {
+                                // 重置为默认样式
+                                tabWidget->setStyleSheet("");
+                            }
+                        }
+                    }
+
+                    // 使用更浅的蓝色边框
+                    viewTabs[i][j]->setStyleSheet(
+                        "QTabWidget::pane { border: 2px solid #87ceeb; }"  // 天蓝色
+                        );
+
                     // 确保该视图获得焦点
                     viewTabs[i][j]->setFocus();
                     return QObject::eventFilter(obj, event);

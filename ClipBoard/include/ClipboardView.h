@@ -32,10 +32,7 @@ private slots:
     void on_saveButton_clicked();
     void on_listWidget_itemDoubleClicked(QListWidgetItem *item);
     void on_listWidget_customContextMenuRequested(const QPoint &pos);
-    void on_TextBtn_clicked();
-    void on_ImageBtn_clicked();
-    void on_FileBtn_clicked();
-    void on_restoreBtn_clicked();
+
     void on_lineEdit_editingFinished();
     void on_lineEdit_textChanged(const QString &text);
     void on_lineEdit_returnPressed();
@@ -47,6 +44,7 @@ private slots:
     void pinItem();
     void filterItemsByType(ClipboardItemType type);
 
+    void on_typeComboBox_currentIndexChanged(int index);
 private:
     Ui::ClipboardView *ui;
     ClipboardController* m_controller;

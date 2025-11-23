@@ -145,7 +145,8 @@ void MainWindow::initMemubarLayout() {
     widgetfunc->setFixedWidth(60);
 
     horizontalSplitter->addWidget(ui->combinedWidget);
-    
+    ui->combinedWidget->setMaximumWidth(450);
+
     // 添加tabManager的容器部件，并隐藏原始tabWidget
     QWidget* containerWidget = tabManager->getContainerWidget();
     horizontalSplitter->addWidget(containerWidget);
@@ -157,7 +158,7 @@ void MainWindow::initMemubarLayout() {
     
     horizontalSplitter->setStretchFactor(0, 0);
     horizontalSplitter->setStretchFactor(1, 1);
-    horizontalSplitter->setStretchFactor(2, 3);
+    horizontalSplitter->setStretchFactor(2, 20);
     setCentralWidget(horizontalSplitter);
     QList<int> sizes = {60, 340, 600};
     horizontalSplitter->setSizes(sizes);

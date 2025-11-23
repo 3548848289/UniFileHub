@@ -32,7 +32,7 @@ ClipboardView::ClipboardView(ClipboardController* controller, QWidget *parent)
     ui->setupUi(this);
 
     initializeListWidget();
-    
+
     // 设置Controller的View引用
     m_controller->setView(this);
 
@@ -44,7 +44,7 @@ ClipboardView::ClipboardView(ClipboardController* controller, QWidget *parent)
 
     QShortcut* ctrlCShortcut = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_Q), ui->listWidget);
     ctrlCShortcut->setContext(Qt::WidgetWithChildrenShortcut);
-    connect(ctrlCShortcut, &QShortcut::activated, this, [this](){        
+    connect(ctrlCShortcut, &QShortcut::activated, this, [this](){
         QListWidgetItem* item = ui->listWidget->currentItem();
         if (!item) return;
 
@@ -146,14 +146,14 @@ ClipboardItem* ClipboardView::findItemForListWidgetItem(QListWidgetItem* listIte
 // 根据 ClipboardItem 查找对应的 QListWidgetItem
 QListWidgetItem* ClipboardView::findListWidgetItemForClipboardItem(ClipboardItem* item) {
     if (!item) return nullptr;
-    
+
     for (int i = 0; i < ui->listWidget->count(); ++i) {
         QListWidgetItem* listItem = ui->listWidget->item(i);
         if (findItemForListWidgetItem(listItem) == item) {
             return listItem;
         }
     }
-    
+
     return nullptr;
 }
 
@@ -202,7 +202,7 @@ void ClipboardView::openFileLocation() {
     if (!m_currentRightClickedItem) return;
     ClipboardItem* item = findItemForListWidgetItem(m_currentRightClickedItem);
     if (!item) return;
-    
+
     m_controller->openFileLocation(item);
 }
 
@@ -210,7 +210,7 @@ void ClipboardView::pinItem() {
     if (!m_currentRightClickedItem) return;
     ClipboardItem* item = findItemForListWidgetItem(m_currentRightClickedItem);
     if (!item) return;
-    
+
     m_controller->pinItem(item);
 }
 
@@ -219,7 +219,7 @@ void ClipboardView::deleteItem() {
     for (QListWidgetItem* listItem : selectedItems) {
         ClipboardItem* item = findItemForListWidgetItem(listItem);
         if (!item) continue;
-        
+
         m_controller->deleteItem(item);
         // UI更新将通过onItemRemoved槽处理
     }
@@ -273,34 +273,36 @@ void ClipboardView::on_listWidget_customContextMenuRequested(const QPoint &pos) 
     }
 }
 
-void ClipboardView::on_TextBtn_clicked() {
-    // 过滤显示文本类型项
-    filterItemsByType(ClipboardItemType::Text);
-}
-
-void ClipboardView::on_ImageBtn_clicked() {
-    // 过滤显示图片类型项
-    filterItemsByType(ClipboardItemType::Image);
-}
-
-void ClipboardView::on_FileBtn_clicked() {
-    // 过滤显示文件类型项
-    filterItemsByType(ClipboardItemType::File);
-}
-
-void ClipboardView::on_restoreBtn_clicked()
-{
-    // 显示所有类型的剪贴板项，不进行筛选
-    filterItemsByType(ClipboardItemType::Unknown);
+void ClipboardView::on_typeComboBox_currentIndexChanged(int index) {
+    // 根据选择的索引过滤不同类型的剪贴板项
+    ClipboardItemType type;
+    switch (index) {
+    case 0: // 全部
+        type = ClipboardItemType::Unknown;
+        break;
+    case 1: // 文本
+        type = ClipboardItemType::Text;
+        break;
+    case 2: // 图片
+        type = ClipboardItemType::Image;
+        break;
+    case 3: // 文件
+        type = ClipboardItemType::File;
+        break;
+    default:
+        type = ClipboardItemType::Unknown;
+        break;
+    }
+    filterItemsByType(type);
 }
 
 
 void ClipboardView::filterItemsByType(ClipboardItemType type) {
     // 重新加载所有项目并过滤
     if (!m_controller || !m_controller->getHistoryManager()) return;
-    
+
     ui->listWidget->clear();
-    
+
     auto addToListWidget = [this](ClipboardItem* item) {
         QListWidgetItem* listItem = item->createListWidgetItem();
         quintptr addr = reinterpret_cast<quintptr>(item);
@@ -312,11 +314,11 @@ void ClipboardView::filterItemsByType(ClipboardItemType type) {
         }
         ui->listWidget->addItem(listItem);
     };
-    
+
     // 收集置顶项和普通项
     std::vector<ClipboardItem*> pinnedItems;
     std::vector<ClipboardItem*> normalItems;
-    
+
     // 从最新到最旧收集项目，确保新项排在前面
     auto& items = m_controller->getHistoryManager()->items();
     for (auto it = items.rbegin(); it != items.rend(); ++it) {
@@ -328,7 +330,7 @@ void ClipboardView::filterItemsByType(ClipboardItemType type) {
                 normalItems.push_back(item);
         }
     }
-    
+
     // 按优先级排序显示：置顶项（新到旧）、普通项（新到旧）
     for (auto* item : pinnedItems) addToListWidget(item);
     for (auto* item : normalItems) addToListWidget(item);
@@ -358,9 +360,9 @@ void ClipboardView::onItemPinnedChanged(ClipboardItem* item) {
 
 void ClipboardView::refreshAllItems() {
     ui->listWidget->clear();
-    
+
     if (!m_controller || !m_controller->getHistoryManager()) return;
-    
+
     // 收集置顶项和普通项
     std::vector<ClipboardItem*> pinnedItems;
     std::vector<ClipboardItem*> normalItems;
@@ -408,10 +410,10 @@ void ClipboardView::on_lineEdit_returnPressed()
 void ClipboardView::on_lineEdit_editingFinished()
 {
     if (!m_controller) return;
-    
+
     // 获取搜索文本
     QString searchText = ui->lineEdit->text().trimmed();
-    
+
     // 调用Controller执行搜索，符合MVC架构
     // 注意：这里需要在Controller中添加searchItems方法
     m_controller->searchItems(searchText);
