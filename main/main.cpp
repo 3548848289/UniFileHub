@@ -101,7 +101,6 @@ int main(int argc, char *argv[]) {
     Qt::ColorScheme scheme = static_cast<Qt::ColorScheme>(themeIndex);
 
     qApp->styleHints()->setColorScheme(scheme);
-
     if (SettingManager::Instance().all_setting_fenable_tray()) {
         QApplication::setQuitOnLastWindowClosed(false);
     } else {

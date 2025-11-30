@@ -40,7 +40,7 @@ public:
     explicit TabManager(QTabWidget* parentTabWidget, QObject* parent = nullptr);
 
     int addTab(TabAbstract* tab, const QString& displayName, const QString& filePath);
-    void closeTab(int index);
+    void closeTab(int row, int col, int index);
     void createNewTab(std::function<TabAbstract*()> tabFactory, const QString& tabName);
 
     template<typename T>

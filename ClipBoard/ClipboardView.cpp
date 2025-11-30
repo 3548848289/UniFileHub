@@ -115,24 +115,28 @@ void ClipboardView::initializeListWidget() {
     ui->listWidget->scrollToBottom();
     ui->listWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->listWidget->setIconSize(QSize(80, 60));
-    ui->listWidget->setStyleSheet(
-        R"(
-            QListWidget::item {
-                border: 1px solid lightgray;
-                padding: 5px;
-                margin: 2px;
-            }
 
-            QListWidget::item:selected {
-                background-color: #a8c5f7;
-                color: black;
-            }
+    QString selectedColor = (SettingManager::Instance().all_setting_theme() == 2) ? "#444444" : "#e0e0e0";
 
-            QListWidget::item:hover {
-                background-color: #e0e0e0;
-            }
-        )"
-        );
+    QString style = QString(R"(
+        QListWidget::item {
+            border-top: 1px solid lightgray;
+            padding: 5px;
+            margin: 2px;
+        }
+
+        QListWidget::item:selected {
+            background-color: %1;
+            color: black;
+        }
+
+        QListWidget::item:hover {
+            background-color: %1;
+        }
+    )").arg(selectedColor);
+
+    ui->listWidget->setStyleSheet(style);
+
     ui->listWidget->setMouseTracking(true);
 }
 

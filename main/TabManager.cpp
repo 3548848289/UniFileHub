@@ -2,8 +2,9 @@
 
 TabManager::TabManager(QTabWidget* parentTabWidget, QObject* parent) : QObject(parent), tabWidget(parentTabWidget)
 {
+    // 对于构造函数中的初始tabWidget，它对应位置(0,0)
     connect(tabWidget, &QTabWidget::tabCloseRequested,
-            this, [this](int index) { closeTab(index); });
+            this, [this](int index) { closeTab(0, 0, index); });
 
     // 初始化容器部件和网格布局，设置父对象为主窗口
     if (parentTabWidget) {
@@ -93,14 +94,14 @@ int TabManager::addTab(TabAbstract* tab, const QString& displayName, const QStri
     return index;
 }
 
-void TabManager::closeTab(int index) {
-    // 先检查活动视图中的标签页
-    int row = activePosition.first;
-    int col = activePosition.second;
-
+void TabManager::closeTab(int row, int col, int index) {
+    // 确保位置和索引有效
     if (row >= 0 && row < viewTabs.size() && col >= 0 && col < viewTabs[row].size() && viewTabs[row][col]) {
         QTabWidget* currentTabWidget = viewTabs[row][col];
-
+        
+        // 更新活动位置到当前操作的QTabWidget
+        activePosition = {row, col};
+        
         if (index >= 0 && index < currentTabWidget->count()) {
             QWidget* widget = currentTabWidget->widget(index);
             if (!widget) return;
@@ -153,6 +154,8 @@ void TabManager::closeTab(int index) {
         tab->deleteLater();
     }
 }
+
+
 
 
 
@@ -404,6 +407,8 @@ void TabManager::updateLayout() {
             } else {
                 // 创建新的QTabWidget，确保使用containerWidget作为父对象
                 viewTabs[i][j] = new QTabWidget(containerWidget);
+                viewTabs[i][j]->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
                 viewTabs[i][j]->setTabsClosable(true);
                 viewTabs[i][j]->setObjectName(QString("tabWidget_%1_%2").arg(i).arg(j));
                 
@@ -421,8 +426,11 @@ void TabManager::updateLayout() {
                 viewTabs[i][j]->installEventFilter(this);
                 viewTabs[i][j]->tabBar()->installEventFilter(this);
 
-                // 连接关闭标签信号
-                connect(viewTabs[i][j], &QTabWidget::tabCloseRequested, this, &TabManager::closeTab);
+                // 连接关闭标签信号，使用lambda传递正确的QTabWidget
+                connect(viewTabs[i][j], &QTabWidget::tabCloseRequested, this, [this, i, j](int index) {
+                    // 直接调用新的closeTab方法，传递正确的位置信息
+                    closeTab(i, j, index);
+                });
 
                 // 连接右键菜单信号
                 connect(viewTabs[i][j], &QTabWidget::customContextMenuRequested, 
@@ -443,15 +451,15 @@ void TabManager::updateLayout() {
                     if (!selectedAction) return;
 
                     if (selectedAction == closeCurrent) {
-                        closeTab(tabIndex);
+                        closeTab(i, j, tabIndex);
                     } else if (selectedAction == closeOthers) {
                         for (int idx = currentTabWidget->count() - 1; idx >= 0; --idx) {
                             if (idx != tabIndex)
-                                closeTab(idx);
+                                closeTab(i, j, idx);
                         }
                     } else if (selectedAction == closeAll) {
                         for (int idx = currentTabWidget->count() - 1; idx >= 0; --idx) {
-                            closeTab(idx);
+                            closeTab(i, j, idx);
                         }
                     }
                 });
@@ -512,6 +520,8 @@ void TabManager::updateLayout() {
         QList<int> sizes;
         sizes << 1 << 1;
         splitter->setSizes(sizes);
+        splitter->setStretchFactor(0, 1);
+        splitter->setStretchFactor(1, 1);
         // 启用手柄移动
         splitter->setOpaqueResize(true);
         layoutWidget = splitter;

@@ -26,6 +26,32 @@
 #include <QPointer>
 #include <QMessageBox>
 #include "../../Setting/include/SettingManager.h"
+
+static QString friendlyErrorMessage(QNetworkReply::NetworkError code)
+{
+    switch (code) {
+    case QNetworkReply::ConnectionRefusedError:
+        return "无法连接服务器，请检查网络或稍后重试。";
+    case QNetworkReply::RemoteHostClosedError:
+        return "服务器断开了连接，请稍后再试。";
+    case QNetworkReply::HostNotFoundError:
+        return "服务器地址不存在，请检查设置。";
+    case QNetworkReply::TimeoutError:
+        return "连接服务器超时，请检查网络后重试。";
+    case QNetworkReply::OperationCanceledError:
+        return "上传已取消。";
+    case QNetworkReply::ContentAccessDenied:
+        return "没有权限上传文件，请联系管理员。";
+    case QNetworkReply::UnknownNetworkError:
+    case QNetworkReply::UnknownContentError:
+    case QNetworkReply::UnknownServerError:
+        return "发生未知服务器错误，请稍后重试。";
+
+    default:
+        return "上传失败，请检查网络后再试。";
+    }
+}
+
 class ServerManager : public QObject {
     Q_OBJECT
 

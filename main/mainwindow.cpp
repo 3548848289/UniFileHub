@@ -78,7 +78,7 @@ void MainWindow::initConnect() {
     connect(loginButton, &QPushButton::clicked, this, &MainWindow::showUserInfoDialog);
 
     // connect(tabWidget, &QTabWidget::tabCloseRequested, this, [this](int index) {
-    //     tabManager->closeTab(index);  // 只用 index，不用 currentIndex
+    //     tabManager->closeTab(0, 0, index);  // 使用行列坐标 (0,0) 和 index
     // });
 
 
@@ -294,7 +294,7 @@ void MainWindow::on_actionclose_triggered()
 {
     int currentIndex = tabWidget->currentIndex();
     if (currentIndex >= 0) {
-        tabManager->closeTab(currentIndex);
+        tabManager->closeTab(0, 0, currentIndex);
     }
 }
 
@@ -321,15 +321,15 @@ void MainWindow::onTabContextMenuRequested(const QPoint &pos) {
     if (!selectedAction) return;
 
     if (selectedAction == closeCurrent) {
-        tabManager->closeTab(tabIndex);  // 用点击的 tabIndex
+        tabManager->closeTab(0, 0, tabIndex);  // 用点击的 tabIndex
     } else if (selectedAction == closeOthers) {
         for (int i = tabWidget->count() - 1; i >= 0; --i) {
             if (i != tabIndex)
-                tabManager->closeTab(i);
+                tabManager->closeTab(0, 0, i);
         }
     } else if (selectedAction == closeAll) {
         for (int i = tabWidget->count() - 1; i >= 0; --i) {
-            tabManager->closeTab(i);
+            tabManager->closeTab(0, 0, i);
         }
     }
 

@@ -52,8 +52,6 @@ void WidgetFunctional::on_pushButton_7_clicked()
 void WidgetFunctional::on_pushButton_8_clicked()
 {
 
-    dlogin = new DLogin();
-    connect(dlogin, &DLogin::loginSuccessful, this, &WidgetFunctional::handleLoginSuccess);
     dlogin->exec();
 }
 
@@ -126,6 +124,9 @@ WidgetFunctional::WidgetFunctional(QWidget *parent)
     // ui->pushButton_7->hide(); //暂时不隐藏
     form = new SendEmail();
     clipboard = ClipboardComponentFactory::createClipboardComponent();
+    dlogin = new DLogin();
+    connect(dlogin, &DLogin::loginSuccessful, this, &WidgetFunctional::handleLoginSuccess);
+
 }
 
 

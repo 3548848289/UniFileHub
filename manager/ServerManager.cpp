@@ -37,8 +37,8 @@ void ServerManager::oncommitFin(QPointer<QNetworkReply> reply)
     if (reply->error() == QNetworkReply::NoError) {
         QMessageBox::information(nullptr, "成功", "文件已经上传至云端");
     } else {
-        QString error = reply->errorString();
-        QMessageBox::critical(nullptr, "上传失败", error);
+        QString friendlyMessage = friendlyErrorMessage(reply->error());
+        QMessageBox::critical(nullptr, "上传失败", friendlyMessage);
         emit commitFailed();
     }
 
@@ -58,10 +58,14 @@ void ServerManager::downloadFile(const QString& filepath) {
 }
 
 void ServerManager::ondownloadFin(QNetworkReply* reply, const QString& filepath) {
+
     if (reply->error() != QNetworkReply::NoError) {
-        QMessageBox::critical(nullptr, "下载失败", "出现错误：\n" + reply->errorString());
+        QString message = friendlyErrorMessage(reply->error());
+        QMessageBox::critical(nullptr, "下载失败", message);
+        reply->deleteLater();
         return;
     }
+
     QByteArray data = reply->readAll();
     QFile file(filepath);
     if (!file.open(QIODevice::WriteOnly)) {
