@@ -1,0 +1,5 @@
+EXPORTS
+    QPsdHandler__ctor     = ?QPsdHandler@@QEAA@XZ
+    QPsdHandler_canRead   = ?canRead@QPsdHandler@@QEBA_NXZ
+    QPsdHandler_read      = ?read@QPsdHandler@@QEAA_NPEAVQImage@@@Z
+    QPsdHandler__dtor     = ?~QPsdHandler@@QEAA@XZ
