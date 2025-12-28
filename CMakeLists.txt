@@ -18,9 +18,10 @@ add_subdirectory(OnlineDoc)
 add_subdirectory(TagSchedule)
 add_subdirectory(Setting)
 add_subdirectory(UserInfo)
+add_subdirectory(PersonalDrive)
 add_subdirectory(EmailService)
-add_subdirectory(MoreFunction)
 add_subdirectory(ClipBoard)
+add_subdirectory(MoreFunction)
 add_subdirectory(DisposeAbstract/DisposeTXT)
 add_subdirectory(DisposeAbstract/DisposeCSV)
 add_subdirectory(DisposeAbstract/DisposeIMG)
@@ -68,6 +69,7 @@ target_link_libraries(SmartDesk PRIVATE
     mytxt_setting
     mytxt_userinfo
     mytxt_email
+    mytxt_drive
     mytxt_txt
     mytxt_csv
     mytxt_img

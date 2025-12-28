@@ -2,6 +2,7 @@
 #include "ui/ui_DLogin.h"
 #include <QMessageBox>
 #include <QFileDialog>
+#include "../Setting/include/SettingManager.h"
 
 DLogin::DLogin(QWidget *parent): QDialog(parent), ui(new Ui::DLogin)
 {
@@ -112,12 +113,19 @@ void DLogin::onLoginResponse(const QJsonObject &response)
 {
 
     QString message = response["message"].toString();
+
     if (message == "Login successful") {
         if (!m_avatarImage.isNull())
             ui->avatar_pushButton->setIcon(QIcon(QPixmap::fromImage(m_avatarImage)));  // 直接使用保存的头像
         else
             qDebug() << "Avatar image not available.";
 
+        // 从登录响应中获取token并存储
+        if (response.contains("access_token")) {
+            m_token = response["access_token"].toString();
+            SettingManager::Instance().setToken(m_token);
+        }
+        
         emit loginSuccessful(response["username"].toString());
         QMessageBox::information(this, "登录成功", message);
         this->close();

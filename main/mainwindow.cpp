@@ -48,13 +48,19 @@ void MainWindow::initConnect() {
     });
 
     connect(widgetfunc, &WidgetFunctional::sendEmailForm, this, [this](SendEmail *form) {
-        tabManager->addWidgetTab(form, "Email"); // 通过 TabManager 添加
+        tabManager->addWidgetTab(form, "Email");
         form->show();
         ui->stackedWidget->setCurrentWidget(file_system);
     });
     connect(widgetfunc, &WidgetFunctional::showClipboard, this, [this](ClipboardView* clipboard) {
-        tabManager->addWidgetTab(clipboard, "剪贴板"); // 通过 TabManager 添加
+        tabManager->addWidgetTab(clipboard, "剪贴板");
         clipboard->show();
+        ui->stackedWidget->setCurrentWidget(file_system);
+    });
+
+    connect(widgetfunc, &WidgetFunctional::showDrive, this, [this](PersonalDriveView* drive) {
+        tabManager->addWidgetTab(drive, "个人网盘");
+        drive->show();
         ui->stackedWidget->setCurrentWidget(file_system);
     });
 
@@ -196,7 +202,7 @@ void MainWindow::initMemubarLayout() {
 
     const QMap<int, QString> buttonNames = {
         {1, "文件标签"}, {2, "文件备份"}, {3, "备忘日程"}, {4, "在线文档"}, {5, "手写绘图"},
-        {6, "邮件服务"}, {7, "剪切字板"}, {8, "用户登录"}, {9, "更多功能"}
+        {6, "个人网盘"},{7, "邮件服务"}, {8, "剪切字板"}, {9, "用户登录"}, {10, "更多功能"}
     };
     connect(widgetfunc, &WidgetFunctional::buttonVisibilityChanged,
             this, [this, buttonNames](int buttonIndex, bool isVisible) {
@@ -207,7 +213,7 @@ void MainWindow::initMemubarLayout() {
                 }
             });
 
-    for (int i = 1; i <= 9; ++i) {
+    for (int i = 1; i <= 10; ++i) {
         QAction *action = findChild<QAction *>(QString("Function%1").arg(i));
         if (action) {
             connect(action, &QAction::triggered, this, [this, i]() {
@@ -248,7 +254,6 @@ void MainWindow::togglePanel(QWidget* target) {
     }
 }
 
-
 void MainWindow::showUserInfoDialog() {
     DInfo *dinfo = widgetfunc->getDInfo();
     if (dinfo != nullptr) {
@@ -264,7 +269,7 @@ void MainWindow::showUserInfoDialog() {
             QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes
         );
         if (reply == QMessageBox::Yes)
-            widgetfunc->on_pushButton_8_clicked();
+            widgetfunc->on_pushButton_9_clicked();
     }
 }
 

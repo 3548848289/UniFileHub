@@ -16,6 +16,7 @@ public:
     void addMenuItem(int index, const QString& text);
     void setAllowEditMode(bool value);
     void parsePath(const QString& pathText);
+    const QList<BreadcrumbNode*>& path() const;
 
 signals:
     void pathClicked(int index, const QString& name);

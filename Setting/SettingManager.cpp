@@ -116,3 +116,11 @@ void SettingManager::saveHistory()
     settings.endArray();
 }
 
+QString SettingManager::getToken() {
+    return settings.value("user/token", "").toString();
+}
+
+void SettingManager::setToken(const QString &token) {
+    settings.setValue("user/token", token);
+}
+

@@ -47,6 +47,10 @@ public:
     QString serverconfig_ip4();
     QString file_backup_IP();
     int all_setting_theme();
+    
+    // Token相关方法
+    QString getToken();
+    void setToken(const QString &token);
 private:
     SettingManager();
     ~SettingManager();

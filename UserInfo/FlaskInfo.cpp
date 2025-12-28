@@ -96,6 +96,7 @@ void FlaskInfo::handleResponse(QNetworkReply *reply, const QString &action)
 
 void FlaskInfo::H_LoginAct(const QJsonObject &jsonRes)
 {
+
     if (jsonRes.contains("avatar_url") && !jsonRes["avatar_url"].toString().isEmpty()) {
         QString baseUrl = address;
         QString avatarUrl = baseUrl + jsonRes["avatar_url"].toString();

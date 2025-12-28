@@ -406,6 +406,14 @@
     <string>关闭控制组件</string>
    </property>
   </action>
+  <action name="Function10">
+   <property name="text">
+    <string>关闭个人网盘</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::NoRole</enum>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

@@ -55,6 +55,8 @@ private:
     bool mousePressed;                        // Flag for dragging the window
     QPoint startPos;                          // Start position for moving window
 
+    QString m_token;  // 保存登录后的 JWT
+
     // Private member functions for handling UI and network
     void handleLoginSuccess(const QJsonObject &jsonObject);
     void showMessage(const QString &title, const QString &message);

@@ -102,6 +102,10 @@ void QBreadcrumbBar::parsePath(const QString& pathText) {
     setPath(newPath);
 }
 
+const QList<BreadcrumbNode *> &QBreadcrumbBar::path() const {
+    return currentPath;
+}
+
 
 void QBreadcrumbBar::rebuild() {
     clearLayout();
@@ -127,7 +131,24 @@ void QBreadcrumbBar::rebuild() {
         // 填充子节点
         populateChildren(node);
 
-        if (!node->children.isEmpty()) {
+        // 检查是否需要显示分隔符
+        // 对于自定义节点（fullPath为空），只要不是最后一个节点，就显示分隔符
+        // 对于文件系统节点，有子节点时显示分隔符
+        bool showSeparator = false;
+        if (i < currentPath.size() - 1) {
+            // 如果是自定义节点（fullPath为空）且不是最后一个节点，显示分隔符
+            if (node->fullPath.isEmpty()) {
+                showSeparator = true;
+            } else {
+                // 文件系统节点，有子节点时显示分隔符
+                showSeparator = !node->children.isEmpty();
+            }
+        } else {
+            // 最后一个节点，根据是否有子节点决定是否显示分隔符
+            showSeparator = !node->children.isEmpty();
+        }
+
+        if (showSeparator) {
             QToolButton* sepBtn = new QToolButton(this);
             sepBtn->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
             sepBtn->setStyleSheet("border: none; background: transparent;");
@@ -142,7 +163,15 @@ void QBreadcrumbBar::rebuild() {
                         emit fileClicked(child->fullPath);
                     } else {
                         QList<BreadcrumbNode*> newPath = currentPath.mid(0, i+1);
-                        newPath.append(new BreadcrumbNode(child->name, child->fullPath, child->isVirtualRoot));
+                        // 对于自定义节点，直接使用原节点引用而不是创建新节点，确保保留children信息
+                        // 对于文件系统节点，创建新节点也可以，因为会通过populateChildren重新加载子节点
+                        if (child->fullPath.isEmpty()) {
+                            // 自定义节点，直接使用原节点
+                            newPath.append(child);
+                        } else {
+                            // 文件系统节点，创建新节点
+                            newPath.append(new BreadcrumbNode(child->name, child->fullPath, child->isVirtualRoot));
+                        }
                         setPath(newPath);
                         emit pathClicked(i+1, child->fullPath);
                     }

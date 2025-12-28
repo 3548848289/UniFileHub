@@ -17,6 +17,7 @@
 #include "../../EmailService/SendEmail.h"
 #include "../../MoreFunction/MoreFunction.h"
 #include "../../ClipBoard/include/ClipboardComponentFactory.h"
+#include "../../PersonalDrive/PersonalDriveView.h"
 
 
 namespace Ui {
@@ -42,9 +43,10 @@ signals:
     void sendEmailForm(SendEmail *form);
     void showDraw();
     void showClipboard(ClipboardView* clipboard);
+    void showDrive(PersonalDriveView* drive);
     void buttonVisibilityChanged(int buttonIndex, bool isVisible);
 public slots:
-    void on_pushButton_8_clicked();
+    void on_pushButton_9_clicked();
 
 private slots:
     void on_pushButton_1_clicked();
@@ -54,9 +56,10 @@ private slots:
     void on_pushButton_5_clicked();
     void on_pushButton_6_clicked();
     void on_pushButton_7_clicked();
+    void on_pushButton_8_clicked();
+    void on_pushButton_10_clicked();
     void handleLoginSuccess(const QString& username);
 
-    void on_pushButton_9_clicked();
 
 private:
     QButtonGroup* btnGroup;
@@ -67,6 +70,7 @@ private:
     MoreFunction * more_function;
     ClipboardView* clipboard;
     SendEmail * form;
+    PersonalDriveView * drive;
     Ui::WidgetFunctional *ui;
 };
 
