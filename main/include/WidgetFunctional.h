@@ -17,7 +17,7 @@
 #include "../../EmailService/SendEmail.h"
 #include "../../MoreFunction/MoreFunction.h"
 #include "../../ClipBoard/include/ClipboardComponentFactory.h"
-#include "../../PersonalDrive/PersonalDriveView.h"
+#include "../../PersonalDrive/DriveView.h"
 
 
 namespace Ui {
@@ -43,7 +43,7 @@ signals:
     void sendEmailForm(SendEmail *form);
     void showDraw();
     void showClipboard(ClipboardView* clipboard);
-    void showDrive(PersonalDriveView* drive);
+    void showDrive(DriveView* drive);
     void buttonVisibilityChanged(int buttonIndex, bool isVisible);
 public slots:
     void on_pushButton_9_clicked();
@@ -70,7 +70,7 @@ private:
     MoreFunction * more_function;
     ClipboardView* clipboard;
     SendEmail * form;
-    PersonalDriveView * drive;
+    DriveView * drive;
     Ui::WidgetFunctional *ui;
 };
 

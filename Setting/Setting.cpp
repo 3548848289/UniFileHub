@@ -82,6 +82,7 @@ void Setting::loadSettings() {
     ui->server_config_lineEdit2->setText(settings.value("ServerConfig/IP2", "http://43.139.86.56:5000/").toString());
     ui->server_config_lineEdit3->setText(settings.value("ServerConfig/IP3", "http://43.139.86.56:5003/").toString());
     ui->server_config_lineEdit4->setText(settings.value("ServerConfig/IP4", "http://43.139.86.56:5001/").toString());
+    ui->server_config_lineEdit5->setText(settings.value("PersonalDrive/ServerIP", "http://127.0.0.1:5005/").toString());
 }
 
 void Setting::saveSettings() {
@@ -134,6 +135,7 @@ void Setting::saveSettings() {
     settings.setValue("ServerConfig/IP2", ui->server_config_lineEdit2->text());
     settings.setValue("ServerConfig/IP3", ui->server_config_lineEdit3->text());
     settings.setValue("ServerConfig/IP4", ui->server_config_lineEdit4->text());
+    settings.setValue("PersonalDrive/ServerIP", ui->server_config_lineEdit5->text());
     settings.sync();
 }
 

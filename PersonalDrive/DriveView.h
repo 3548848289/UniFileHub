@@ -1,5 +1,5 @@
-#ifndef PERSONALDRIVEVIEW_H
-#define PERSONALDRIVEVIEW_H
+#ifndef DRIVEVIEW_H
+#define DRIVEVIEW_H
 
 #include <QWidget>
 #include <QStandardItemModel>
@@ -7,19 +7,19 @@
 #include "../../Resources/ThirdParty/QFileSystemBreadcrumbBar/QFileSystemBreadcrumbBar.h"
 
 namespace Ui {
-class PersonalDriveView;
+class DriveView;
 }
 
 class DriveManager;
 class DriveItem;
 
-class PersonalDriveView : public QWidget
+class DriveView : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit PersonalDriveView(QWidget *parent = nullptr);
-    ~PersonalDriveView();
+    explicit DriveView(QWidget *parent = nullptr);
+    ~DriveView();
 
 private slots:
     void on_PushFileBtn_clicked();
@@ -38,13 +38,18 @@ private slots:
     // 处理操作失败
     void onOperationFailed(const QString &errorMessage);
 
-    void on_pushButton_clicked();
+    // 处理委托中的按钮点击
+    void onActionClicked(int row, int action);
+
+    void on_RefreshBtn_clicked();
+
+    void on_NewFloderBtn_clicked();
 
 private:
     QFileSystemBreadcrumbBar* breadcrumb;
     QList<BreadcrumbNode*> m_breadcrumbPath;
 
-    Ui::PersonalDriveView *ui;
+    Ui::DriveView *ui;
     QStandardItemModel * m_model;
     DriveManager *m_driveManager;
     int m_currentDirId;
@@ -54,4 +59,4 @@ private:
     void buildBreadcrumbPath();
 };
 
-#endif // PERSONALDRIVEVIEW_H
+#endif // DRIVEVIEW_H

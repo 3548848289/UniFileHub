@@ -10,6 +10,8 @@ DriveApiClient::DriveApiClient(QObject *parent)
     : QObject(parent)
 {
     m_networkManager = new QNetworkAccessManager(this);
+    // 初始化服务器IP缓存
+    updateServerIpCache();
 }
 
 DriveApiClient::~DriveApiClient()
@@ -29,9 +31,14 @@ QNetworkRequest DriveApiClient::createRequest(const QUrl &url)
     return request;
 }
 
+void DriveApiClient::updateServerIpCache()
+{
+    m_serverIp = SettingManager::Instance().personal_drive_server_ip();
+}
+
 void DriveApiClient::getFileList(int parentId)
 {
-    QUrl url(QString("http://127.0.0.1:5005/api/drive/list?parent_id=%1").arg(parentId));
+    QUrl url(QString("%1/api/drive/list?parent_id=%2").arg(m_serverIp).arg(parentId));
     QNetworkRequest request = createRequest(url);
     
     QNetworkReply *reply = m_networkManager->get(request);
@@ -80,7 +87,7 @@ void DriveApiClient::uploadFile(const QString &filePath, int parentId)
     parentPart.setBody(QString::number(parentId).toUtf8());
     multiPart->append(parentPart);
     
-    QUrl url("http://127.0.0.1:5005/api/drive/upload");
+    QUrl url(QString("%1/api/drive/upload").arg(m_serverIp));
     QNetworkRequest request = createRequest(url);
     
     QNetworkReply *reply = m_networkManager->post(request, multiPart);
@@ -106,7 +113,7 @@ void DriveApiClient::uploadFile(const QString &filePath, int parentId)
 
 void DriveApiClient::downloadFile(int fileId, const QString &savePath)
 {
-    QUrl url(QString("http://127.0.0.1:5005/api/drive/download?file_id=%1").arg(fileId));
+    QUrl url(QString("%1/api/drive/download/%2").arg(m_serverIp).arg(fileId));
     QNetworkRequest request = createRequest(url);
     
     QNetworkReply *reply = m_networkManager->get(request);
@@ -134,17 +141,12 @@ void DriveApiClient::downloadFile(int fileId, const QString &savePath)
 
 void DriveApiClient::createFolder(const QString &folderName, int parentId)
 {
-    QUrl url("http://127.0.0.1:5005/api/drive/create_folder");
+    // 后端接口格式: /new_folder/<int:parent_id>/<folder_name>
+    QUrl url(QString("%1/api/drive/new_folder/%2/%3").arg(m_serverIp).arg(parentId).arg(folderName));
     QNetworkRequest request = createRequest(url);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     
-    QJsonObject json;
-    json["name"] = folderName;
-    json["parent_id"] = parentId;
-    
-    QByteArray data = QJsonDocument(json).toJson();
-    
-    QNetworkReply *reply = m_networkManager->post(request, data);
+    // 接口不需要JSON数据，直接发送POST请求
+    QNetworkReply *reply = m_networkManager->post(request, QByteArray());
     
     connect(reply, &QNetworkReply::finished, this, [=]() {
         reply->deleteLater();
@@ -160,13 +162,18 @@ void DriveApiClient::createFolder(const QString &folderName, int parentId)
             return;
         }
         
-        emit folderCreated(doc.object());
+        QJsonObject response = doc.object();
+        if (response["msg"].toString() == "ok") {
+            emit folderCreated(response);
+        } else {
+            emit folderCreateError(response["msg"].toString());
+        }
     });
 }
 
 void DriveApiClient::deleteItem(int itemId)
 {
-    QUrl url(QString("http://127.0.0.1:5005/api/drive/delete?item_id=%1").arg(itemId));
+    QUrl url(QString("%1/api/drive/delete/%2").arg(m_serverIp).arg(itemId));
     QNetworkRequest request = createRequest(url);
     
     QNetworkReply *reply = m_networkManager->deleteResource(request);
@@ -185,7 +192,7 @@ void DriveApiClient::deleteItem(int itemId)
 
 void DriveApiClient::getPath(int dirId)
 {
-    QUrl url(QString("http://127.0.0.1:5005/api/drive/path?dir_id=%1").arg(dirId));
+    QUrl url(QString("%1/api/drive/path?dir_id=%2").arg(m_serverIp).arg(dirId));
     QNetworkRequest request = createRequest(url);
     
     QNetworkReply *reply = m_networkManager->get(request);
@@ -210,7 +217,7 @@ void DriveApiClient::getPath(int dirId)
 
 void DriveApiClient::renameItem(int itemId, const QString &newName)
 {
-    QUrl url("http://127.0.0.1:5005/api/drive/rename");
+    QUrl url(QString("%1/api/drive/rename").arg(m_serverIp));
     QNetworkRequest request = createRequest(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     
@@ -242,7 +249,7 @@ void DriveApiClient::renameItem(int itemId, const QString &newName)
 
 void DriveApiClient::moveItem(int itemId, int newParentId)
 {
-    QUrl url("http://127.0.0.1:5005/api/drive/move");
+    QUrl url(QString("%1/api/drive/move").arg(m_serverIp));
     QNetworkRequest request = createRequest(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     

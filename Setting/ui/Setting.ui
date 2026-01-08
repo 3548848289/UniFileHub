@@ -537,7 +537,7 @@
          </property>
         </widget>
        </item>
-       <item row="4" column="0">
+       <item row="5" column="0">
         <widget class="QLabel" name="server_confi_label6">
          <property name="text">
           <string>用户信息</string>
@@ -554,7 +554,7 @@
          </property>
         </widget>
        </item>
-       <item row="4" column="2">
+       <item row="5" column="2">
         <widget class="QLineEdit" name="server_config_lineEdit4"/>
        </item>
        <item row="1" column="0">
@@ -582,6 +582,16 @@
        </item>
        <item row="2" column="2">
         <widget class="QLineEdit" name="server_config_lineEdit2"/>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="server_config_label6">
+         <property name="text">
+          <string>个人网盘</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="2">
+        <widget class="QLineEdit" name="server_config_lineEdit5"/>
        </item>
       </layout>
      </widget>

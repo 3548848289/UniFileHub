@@ -8,6 +8,9 @@
 #include <QTextCharFormat>
 #include <QRegularExpression>
 #include <QTextDocument>
+#include <QStringDecoder>
+#include <QStringEncoder>
+#include <QComboBox>
 #include "../../Setting/include/SettingManager.h"
 
 class CppHighlighter : public QSyntaxHighlighter
@@ -67,12 +70,25 @@ class ControlWidTXT : public QWidget
     Q_OBJECT
 public:
     explicit ControlWidTXT(QWidget *parent = nullptr);
+    ~ControlWidTXT();
+    
+    // 获取当前编码名称
+    QString getCurrentCodecName() const;
+    
+    // 设置当前编码名称
+    void setCurrentCodecName(const QString& codecName);
 
 signals:
+    // 编码方式改变信号
+    void encodingChanged(const QString& codecName);
+
+private slots:
+    // 处理编码选择变化
+    void onEncodingComboBoxCurrentIndexChanged(const QString& codecName);
 
 private:
     Ui::ControlWidTXT *ui;  // UI 类的指针
-
+    QString m_currentCodecName;  // 当前选择的编码名称
 };
 
 #endif // CONTROLWIDTXT_H

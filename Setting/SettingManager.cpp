@@ -95,6 +95,11 @@ QString SettingManager::serverconfig_ip4()
     return settings.value("ServerConfig/IP4", "http://43.139.86.56:5001/").toString();
 }
 
+QString SettingManager::personal_drive_server_ip()
+{
+    return settings.value("PersonalDrive/ServerIP", "http://43.139.86.56:5005/").toString();
+}
+
 void SettingManager::loadHistory()
 {
     int size = settings.beginReadArray("fileHistory");

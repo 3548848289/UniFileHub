@@ -132,7 +132,7 @@ WidgetFunctional::WidgetFunctional(QWidget *parent)
     form = new SendEmail();
     clipboard = ClipboardComponentFactory::createClipboardComponent();
     dlogin = new DLogin();
-    drive = new PersonalDriveView();
+    drive = new DriveView();
 
     connect(dlogin, &DLogin::loginSuccessful, this, &WidgetFunctional::handleLoginSuccess);
 

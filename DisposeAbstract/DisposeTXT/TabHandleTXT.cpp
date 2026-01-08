@@ -1,5 +1,7 @@
 #include "TabHandleTXT.h"
-TextTab::TextTab(const QString &filePath, QWidget *parent)  : TabAbstract(filePath, parent)
+#include <QDebug>
+
+TextTab::TextTab(const QString &filePath, QWidget *parent)  : TabAbstract(filePath, parent), m_currentCodecName("UTF-8")
 {
     textEdit = new QTextEdit(this);
 
@@ -11,7 +13,6 @@ TextTab::TextTab(const QString &filePath, QWidget *parent)  : TabAbstract(filePa
     // new CppHighlighter(textEdit->document());
 
     controlWidtxt = new ControlWidTXT(this);
-
 
     splitter = new QSplitter(Qt::Vertical, this);
     splitter->addWidget(textEdit);
@@ -31,6 +32,12 @@ TextTab::TextTab(const QString &filePath, QWidget *parent)  : TabAbstract(filePa
     connect(textEdit, &QTextEdit::textChanged, this, [this]() {
         setContentModified(true);
     });
+    
+    // 连接编码变化信号
+    connect(controlWidtxt, &ControlWidTXT::encodingChanged, this, &TextTab::onEncodingChanged);
+    
+    // 初始化编码为UTF-8
+    setCurrentCodecName("UTF-8");
 }
 
 void TextTab::setContent(const QString &text)
@@ -43,38 +50,73 @@ QString TextTab::getContent() const
 {
     return textEdit->toPlainText();
 }
-
 void TextTab::loadFromFile(const QString &fileName)
 {
     QFile file(fileName);
-    if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QTextStream in(&file);
-        setContent(in.readAll());
-        file.close();
-    } else {
+    if (!file.open(QIODevice::ReadOnly)) {
         QMessageBox::warning(this, tr("错误"), tr("无法打开文件"));
+        return;
     }
+
+    QByteArray content = file.readAll();
+    file.close();
+
+    QString text;
+
+    if (m_currentCodecName == "UTF-8 BOM") {
+        // UTF-8 BOM 文件
+        if (content.startsWith("\xEF\xBB\xBF"))
+            content = content.mid(3);
+        text = QString::fromUtf8(content);
+    } else if (m_currentCodecName == "UTF-8") {
+        text = QString::fromUtf8(content);
+    } else if (m_currentCodecName == "GBK" || m_currentCodecName == "ANSI" || m_currentCodecName == "System") {
+        text = gbkToQString(content);  // 用 Windows API 解码
+    } else {
+        // 默认尝试 UTF-8
+        text = QString::fromUtf8(content);
+    }
+
+    setContent(text);
     setContentModified(false);
 }
+
 
 void TextTab::saveToFile(const QString &fileName)
 {
     QFile file(fileName);
-    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QTextStream out(&file);
-        out << getContent();
-        file.close();
-    } else
-    {
+    if (!file.open(QIODevice::WriteOnly)) {
         QMessageBox::warning(this, tr("错误"), tr("无法保存文件"));
+        return;
     }
+
+    QByteArray content;
+
+    if (m_currentCodecName == "UTF-8 BOM") {
+        content = "\xEF\xBB\xBF" + getContent().toUtf8();
+    } else if (m_currentCodecName == "UTF-8") {
+        content = getContent().toUtf8();
+    } else if (m_currentCodecName == "GBK" || m_currentCodecName == "ANSI" || m_currentCodecName == "System") {
+        content = qStringToGbk(getContent());  // 用 Windows API 编码
+    } else {
+        content = getContent().toUtf8();
+    }
+
+    file.write(content);
+    file.close();
     setContentModified(false);
 }
 
 
 void TextTab::loadFromInternet(const QByteArray &content)
 {
-    QString text = QString::fromUtf8(content);
+    QString text;
+    if (!m_currentCodecName.isEmpty()) {
+        QStringDecoder decoder(m_currentCodecName.toUtf8());
+        text = decoder.decode(content);
+    } else {
+        text = QString::fromUtf8(content);
+    }
     qDebug() << "Converted text:" << text;
     setContent(text);
 }
@@ -144,6 +186,37 @@ void TextTab::findAll(const QString &str, Qt::CaseSensitivity cs)
 void TextTab::clearHighlight()
 {
     textEdit->setExtraSelections(QList<QTextEdit::ExtraSelection>());
+}
+
+
+
+QString TextTab::getCurrentCodecName() const
+{
+    return m_currentCodecName;
+}
+
+void TextTab::setCurrentCodecName(const QString& codecName)
+{
+    if (m_currentCodecName != codecName) {
+        m_currentCodecName = codecName;
+        if (controlWidtxt) {
+            controlWidtxt->setCurrentCodecName(codecName);
+        }
+    }
+}
+
+void TextTab::onEncodingChanged(const QString& codecName)
+{
+    if (m_currentCodecName != codecName) {
+        m_currentCodecName = codecName;
+        // 重新加载文件内容以应用新编码
+        QString currentFileName = getCurrentFilePath();
+        if (!currentFileName.isEmpty()) {
+            loadFromFile(currentFileName);
+        }
+        // 设置文档为已修改状态
+        setContentModified(true);
+    }
 }
 
 

@@ -1,89 +1,93 @@
-#include "PersonalDriveView.h"
-#include "ui_PersonalDriveView.h"
+#include "DriveView.h"
+#include "ui_DriveView.h"
 #include "include/DriveManager.h"
 #include "include/DriveItem.h"
 #include "include/DriveFile.h"
 #include "include/DriveFolder.h"
+#include "include/DriveViewDelegate.h"
 #include <QFileDialog>
 #include <QDebug>
 #include <QMessageBox>
+#include <QDir>
+#include <QInputDialog>
 
-PersonalDriveView::PersonalDriveView(QWidget *parent)
-    : QWidget(parent)
-    , ui(new Ui::PersonalDriveView)
-    , m_currentDirId(0)
+DriveView::DriveView(QWidget *parent): QWidget(parent), ui(new Ui::DriveView), m_currentDirId(0)
 {
     ui->setupUi(this);
+    this->setWindowTitle(tr("Personal Drive"));
 
-    // 创建面包屑控件
+    // ===== 1. Breadcrumb =====
     breadcrumb = new QFileSystemBreadcrumbBar();
-    // 将面包屑插入到标题下方（垂直布局的索引1位置）
     ui->verticalLayout->insertWidget(1, breadcrumb);
 
-    // 捕捉信号
-    connect(breadcrumb, &QFileSystemBreadcrumbBar::pathClicked, this,
-            [this](int clickedIndex, const QString&) {
+    connect(breadcrumb, &QFileSystemBreadcrumbBar::pathClicked,
+            this, [this](int clickedIndex, const QString&) {
                 if (clickedIndex < 0) return;
 
                 BreadcrumbNode* node = breadcrumb->bar()->path().at(clickedIndex);
                 if (!node) return;
 
-                int dirId = node->data.toInt();  // ← 用这个访问后端
-                loadFileList(dirId);
+                loadFileList(node->data.toInt());
             });
 
-
-    connect(breadcrumb, &QFileSystemBreadcrumbBar::fileClicked,
-            [](const QString& path) {
-                qDebug() << "File clicked:" << path;
-            });
-    connect(breadcrumb, &QFileSystemBreadcrumbBar::pathEdited, [this](const QString& path){
-        // if(path != "")
-            // changePath(path);
-    });
-    this->setWindowTitle(tr("Personal Drive"));
-
+    // ===== 2. Model =====
     m_model = new QStandardItemModel(this);
-    m_model->setHorizontalHeaderLabels(
-        {"文件名", "大小(字节)", "上传时间"}
-        );
+    m_model->setHorizontalHeaderLabels({
+        tr("文件名"), tr("大小(字节)"), tr("上传时间")
+    });
 
+    // ===== 3. TableView =====
     ui->tableView->setModel(m_model);
+    ui->tableView->setMouseTracking(true);          // ⭐ 必须
     ui->tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
-    ui->tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->tableView->setSelectionMode(QAbstractItemView::SingleSelection);
+    ui->tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->tableView->horizontalHeader()->setStretchLastSection(true);
     ui->tableView->verticalHeader()->setVisible(false);
 
+    // ===== 4. Delegate =====
+    auto delegate = new DriveViewDelegate(this);
+    ui->tableView->setItemDelegate(delegate);
+
+    connect(ui->tableView, &QTableView::entered,
+            this, [=](const QModelIndex &index) {
+                delegate->setHoverRow(index.row());
+                ui->tableView->viewport()->update();
+            });
+
+    connect(ui->tableView, &QTableView::viewportEntered,
+            this, [=]() {
+                delegate->setHoverRow(-1);
+                ui->tableView->viewport()->update();
+            });
+
+    connect(delegate, &DriveViewDelegate::actionClicked,
+            this, &DriveView::onActionClicked);
+
+    // ===== 5. View 行为 =====
     connect(ui->tableView, &QTableView::doubleClicked,
-            this, &PersonalDriveView::onItemDoubleClicked);
+            this, &DriveView::onItemDoubleClicked);
 
-    // 获取DriveManager实例
+    // ===== 6. DriveManager =====
     m_driveManager = &DriveManager::Instance();
-    
-    // 连接DriveManager信号
+
     connect(m_driveManager, &DriveManager::fileListUpdated,
-            this, &PersonalDriveView::onFileListUpdated);
-
+            this, &DriveView::onFileListUpdated);
     connect(m_driveManager, &DriveManager::pathReceived,
-            this, &PersonalDriveView::onPathReceived);
-
+            this, &DriveView::onPathReceived);
     connect(m_driveManager, &DriveManager::operationSuccess,
-            this, &PersonalDriveView::onOperationSuccess);
-    
+            this, &DriveView::onOperationSuccess);
     connect(m_driveManager, &DriveManager::operationFailed,
-            this, &PersonalDriveView::onOperationFailed);
-
-
+            this, &DriveView::onOperationFailed);
 }
 
-PersonalDriveView::~PersonalDriveView()
+DriveView::~DriveView()
 {
     delete ui;
     // DriveManager是单例，不需要手动删除
 }
 
-void PersonalDriveView::on_PushFileBtn_clicked()
+void DriveView::on_PushFileBtn_clicked()
 {
     QString filePath = QFileDialog::getOpenFileName(this, tr("选择文件"), "E:/Tmp", tr("所有文件 (*.*);"));
 
@@ -98,7 +102,7 @@ void PersonalDriveView::on_PushFileBtn_clicked()
     m_driveManager->uploadFile(filePath, m_currentDirId);
 }
 
-void PersonalDriveView::loadFileList(int parentId)
+void DriveView::loadFileList(int parentId)
 {
     m_currentDirId = parentId; // 更新当前目录ID
     m_model->removeRows(0, m_model->rowCount());
@@ -107,7 +111,7 @@ void PersonalDriveView::loadFileList(int parentId)
     m_driveManager->getCurrentDirectoryFiles(parentId);
 }
 
-void PersonalDriveView::onItemDoubleClicked(const QModelIndex &index)
+void DriveView::onItemDoubleClicked(const QModelIndex &index)
 {
     if (!index.isValid()) return;
 
@@ -121,7 +125,7 @@ void PersonalDriveView::onItemDoubleClicked(const QModelIndex &index)
     loadFileList(m_currentDirId);
 }
 
-void PersonalDriveView::onFileListUpdated(const QList<DriveItem *> &fileList)
+void DriveView::onFileListUpdated(const QList<DriveItem *> &fileList)
 {
     updateFileList(fileList);
 }
@@ -129,27 +133,62 @@ void PersonalDriveView::onFileListUpdated(const QList<DriveItem *> &fileList)
 
 
 
-void PersonalDriveView::onOperationSuccess(const QString &message)
+void DriveView::onActionClicked(int row, int action)
+{
+    QStandardItem *item = m_model->item(row, 0);
+    if (!item) return;
+
+    int id = item->data(Qt::UserRole).toInt();
+    bool isDir = item->data(Qt::UserRole + 1).toBool();
+
+    switch (action) {
+    case 0: // 下载
+        if (!isDir) {
+            QString fileName = item->text();
+            QDir dir("E:/Tmp");
+            if (!dir.exists()) {
+                dir.mkpath(".");
+            }
+            QString savePath = dir.absoluteFilePath(fileName);
+            m_driveManager->downloadFile(id, savePath);
+        } else {
+            qDebug() << "不能下载文件夹，行：" << row;
+        }
+        break;
+    case 1: // 删除
+        m_driveManager->deleteItem(id);
+        break;
+    case 2: // 重命名
+        break;
+    case 3: // 移动
+        break;
+
+    default:
+        break;
+    }
+}
+
+void DriveView::onOperationSuccess(const QString &message)
 {
     qDebug() << "操作成功:" << message;
     QMessageBox::information(this, tr("提示"), message);
 }
 
-void PersonalDriveView::onOperationFailed(const QString &errorMessage)
+void DriveView::onOperationFailed(const QString &errorMessage)
 {
     qDebug() << "操作失败:" << errorMessage;
     QMessageBox::warning(this, tr("错误"), errorMessage);
 }
 
 // 构建面包屑路径
-void PersonalDriveView::buildBreadcrumbPath()
+void DriveView::buildBreadcrumbPath()
 {
     // 调用DriveManager的getPath方法获取当前目录的完整路径
     m_driveManager->getPath(m_currentDirId);
 }
 
 // 处理从DriveManager接收到的目录路径
-void PersonalDriveView::onPathReceived(const QList<DriveItem *> &pathItems)
+void DriveView::onPathReceived(const QList<DriveItem *> &pathItems)
 {
     // 清空之前的路径
     m_breadcrumbPath.clear();
@@ -177,7 +216,7 @@ void PersonalDriveView::onPathReceived(const QList<DriveItem *> &pathItems)
     breadcrumb->setBreadcrumbPath(path); // 更新显示
 }
 
-void PersonalDriveView::updateFileList(const QList<DriveItem *> &fileList)
+void DriveView::updateFileList(const QList<DriveItem *> &fileList)
  { 
      for (DriveItem *item : fileList) { 
          bool isDir = item->isFolder(); 
@@ -212,7 +251,21 @@ void PersonalDriveView::updateFileList(const QList<DriveItem *> &fileList)
      buildBreadcrumbPath(); 
  }
 
-void PersonalDriveView::on_pushButton_clicked()
+void DriveView::on_RefreshBtn_clicked()
 {
     loadFileList(0);
 }
+
+void DriveView::on_NewFloderBtn_clicked()
+{
+    // 弹出对话框让用户输入文件夹名称
+    bool ok;
+    QString folderName = QInputDialog::getText(this, tr("新建文件夹"), 
+                                               tr("文件夹名称:"), QLineEdit::Normal, 
+                                               tr("新建文件夹"), &ok);
+    
+    if (ok && !folderName.isEmpty()) {
+        m_driveManager->createFolder(folderName, m_currentDirId);
+    }
+}
+

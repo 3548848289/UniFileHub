@@ -10,7 +10,6 @@ ClipboardHistoryManager::ClipboardHistoryManager()
 
 void ClipboardHistoryManager::loadHistory(int hours) {
     m_items.clear();
-    QSet<QString> loadedContents; // 用于避免重复
 
     // 加载置顶项
     for (const auto& rec : m_dbService.dbClip().loadPinnedHistory()) {
@@ -20,20 +19,17 @@ void ClipboardHistoryManager::loadHistory(int hours) {
             item->setId(rec.id);
             item->setPinned(rec.isPinned);
             m_items.push_back(std::move(item));
-            loadedContents.insert(rec.content);
         }
     }
 
     // 加载普通项
     for (const auto& rec : m_dbService.dbClip().loadRecentNormalHistory(hours)) {
-        if (loadedContents.contains(rec.content)) continue; // 避免重复
         std::unique_ptr<ClipboardItem> item =
             ClipboardItemFactory::createFromSerializedString(rec.content);
         if (item) {
             item->setId(rec.id);
             item->setPinned(rec.isPinned);
             m_items.push_back(std::move(item));
-            loadedContents.insert(rec.content);
         }
     }
 
@@ -47,12 +43,6 @@ void ClipboardHistoryManager::loadHistory(int hours) {
 bool ClipboardHistoryManager::addItem(std::unique_ptr<ClipboardItem> item) {
     if (!item) return false;
 
-    QString serialized = item->serialize();
-    for (const auto& existing : m_items) {
-        if (existing->serialize() == serialized) {
-            return false; // 已存在
-        }
-    }
     m_items.push_back(std::move(item));
     return true;
 }

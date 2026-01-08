@@ -1,25 +1,27 @@
 set(SCHEDULE_SOURCES
-   PersonalDriveView.cpp
+   DriveView.cpp
    DriveApiClient.cpp
    DriveItem.cpp
    DriveFile.cpp
    DriveFolder.cpp
    DriveManager.cpp
+   DriveViewDelegate.cpp
 )
 
 set(SCHEDULE_HEADERS
-    PersonalDriveView.h
+    DriveView.h
     include/DriveApiClient.h
     include/DriveItem.h
     include/DriveFile.h
     include/DriveFolder.h
     include/DriveManager.h
+    include/DriveViewDelegate.h
 )
 
 qt_add_library(mytxt_drive STATIC
     ${SCHEDULE_SOURCES}
     ${SCHEDULE_HEADERS}
-    PersonalDriveView.ui
+    DriveView.ui
 )
 
 target_link_libraries(mytxt_drive PRIVATE

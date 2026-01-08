@@ -8,6 +8,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QString>
 
 class DriveApiClient : public QObject
 {
@@ -39,6 +40,9 @@ public:
 
     // 获取目录路径（用于面包屑导航）
     void getPath(int dirId);
+    
+    // 更新服务器IP缓存
+    void updateServerIpCache();
 
 signals:
     // 信号：文件列表获取成功
@@ -89,6 +93,7 @@ signals:
 
 private:
     QNetworkAccessManager *m_networkManager;
+    QString m_serverIp; // 服务器IP缓存
     QString getToken();
     QNetworkRequest createRequest(const QUrl &url);
 };

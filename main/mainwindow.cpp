@@ -58,7 +58,7 @@ void MainWindow::initConnect() {
         ui->stackedWidget->setCurrentWidget(file_system);
     });
 
-    connect(widgetfunc, &WidgetFunctional::showDrive, this, [this](PersonalDriveView* drive) {
+    connect(widgetfunc, &WidgetFunctional::showDrive, this, [this](DriveView* drive) {
         tabManager->addWidgetTab(drive, "个人网盘");
         drive->show();
         ui->stackedWidget->setCurrentWidget(file_system);
