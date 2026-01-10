@@ -6,6 +6,8 @@
 #include <QMouseEvent>
 #include <QPainter>
 #include <QToolTip>
+#include "../Setting/include/IconManager.h"
+#include "DriveRoles.h"
 
 class DriveViewDelegate : public QStyledItemDelegate {
     Q_OBJECT

@@ -1,4 +1,4 @@
-#include "DriveView.h"
+#include "include/DriveView.h"
 #include "ui_DriveView.h"
 #include "include/DriveManager.h"
 #include "include/DriveItem.h"
@@ -33,7 +33,7 @@ DriveView::DriveView(QWidget *parent): QWidget(parent), ui(new Ui::DriveView), m
     // ===== 2. Model =====
     m_model = new QStandardItemModel(this);
     m_model->setHorizontalHeaderLabels({
-        tr("文件名"), tr("大小(字节)"), tr("上传时间")
+        tr("名称"), tr("大小(字节)"), tr("上传时间")
     });
 
     // ===== 3. TableView =====
@@ -44,6 +44,7 @@ DriveView::DriveView(QWidget *parent): QWidget(parent), ui(new Ui::DriveView), m
     ui->tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->tableView->horizontalHeader()->setStretchLastSection(true);
     ui->tableView->verticalHeader()->setVisible(false);
+
 
     // ===== 4. Delegate =====
     auto delegate = new DriveViewDelegate(this);
@@ -217,43 +218,46 @@ void DriveView::onPathReceived(const QList<DriveItem *> &pathItems)
 }
 
 void DriveView::updateFileList(const QList<DriveItem *> &fileList)
- { 
-     for (DriveItem *item : fileList) { 
-         bool isDir = item->isFolder(); 
+{
+    m_model->removeRows(0, m_model->rowCount());
 
-         QStandardItem *nameItem = 
-             new QStandardItem( 
-                 isDir ? QIcon(":/icons/folder.png") 
-                       : QIcon(":/icons/file.png"), 
-                 item->getName() 
-                 ); 
+    for (DriveItem *item : fileList) {
+        bool isDir = item->isFolder();
 
-         nameItem->setData(item->getId(), Qt::UserRole);        // itemId 
-         nameItem->setData(isDir, Qt::UserRole + 1);           // isDir 
+        IconManager::Icon iconEnum = isDir ? IconManager::Icon::Folder
+                                           : IconManager::Icon::File;
 
-         QStandardItem *sizeItem = new QStandardItem(); 
-         if (isDir) { 
-             sizeItem->setText(""); 
-         } else { 
-             DriveFile *file = dynamic_cast<DriveFile *>(item); 
-             if (file) { 
-                 sizeItem->setText(QString::number(file->getSize())); 
-             } 
-         } 
+        QStandardItem *nameItem = new QStandardItem(item->getName());
+        nameItem->setData(int(iconEnum), DriveRoles::RoleIcon);  // 保存 Icon enum
+        nameItem->setData(item->getName(), DriveRoles::RoleText);
+        nameItem->setData(item->getId(), DriveRoles::RoleId);
+        nameItem->setData(isDir, DriveRoles::RoleIsDir);
 
-         QStandardItem *timeItem = 
-             new QStandardItem(item->getCreatedAt().toString(Qt::ISODate)); 
+        QStandardItem *sizeItem = new QStandardItem();
+        if (!isDir) {
+            DriveFile *file = dynamic_cast<DriveFile *>(item);
+            if (file) {
+                sizeItem->setText(QString::number(file->getSize()));
+            }
+        }
 
-         m_model->appendRow({nameItem, sizeItem, timeItem}); 
-     } 
+        QStandardItem *timeItem = new QStandardItem(item->getCreatedAt().toString(Qt::ISODate));
 
-     // 构建并设置面包屑路径
-     buildBreadcrumbPath(); 
- }
+        m_model->appendRow({nameItem, sizeItem, timeItem});
+    }
+
+    buildBreadcrumbPath();
+}
+
 
 void DriveView::on_RefreshBtn_clicked()
 {
     loadFileList(0);
+    int totalWidth = ui->tableView->viewport()->width();
+    ui->tableView->setColumnWidth(0, totalWidth * 4 / 9); // 名称
+    ui->tableView->setColumnWidth(1, totalWidth * 2 / 9); // 大小
+    ui->tableView->setColumnWidth(2, totalWidth * 3 / 9); // 上传时间
+
 }
 
 void DriveView::on_NewFloderBtn_clicked()

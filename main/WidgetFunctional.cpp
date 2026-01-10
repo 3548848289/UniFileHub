@@ -128,6 +128,19 @@ WidgetFunctional::WidgetFunctional(QWidget *parent)
         "{background:transparent;border:none;   border-bottom:3px solid #7598db;color:#7598db;}"
     );
 
+
+    // 设置所有按钮的自定义图标
+    ui->pushButton_1->setIcon(IconManager::icon(IconManager::Icon::FileSystem, QSize(24,24)));
+    ui->pushButton_2->setIcon(IconManager::icon(IconManager::Icon::FileBackup, QSize(24,24)));
+    ui->pushButton_3->setIcon(IconManager::icon(IconManager::Icon::Tag, QSize(24,24)));
+    ui->pushButton_4->setIcon(IconManager::icon(IconManager::Icon::OnlineDoc, QSize(24,24)));
+    ui->pushButton_5->setIcon(IconManager::icon(IconManager::Icon::Drawing, QSize(24,24)));
+    ui->pushButton_6->setIcon(IconManager::icon(IconManager::Icon::Drive, QSize(24,24)));
+    ui->pushButton_7->setIcon(IconManager::icon(IconManager::Icon::Email, QSize(24,24)));
+    ui->pushButton_8->setIcon(IconManager::icon(IconManager::Icon::Clipboard, QSize(24,24)));
+    ui->pushButton_9->setIcon(IconManager::icon(IconManager::Icon::Login, QSize(24,24)));
+    ui->pushButton_10->setIcon(IconManager::icon(IconManager::Icon::More, QSize(24,24)));
+
     // ui->pushButton_7->hide(); //暂时不隐藏
     form = new SendEmail();
     clipboard = ClipboardComponentFactory::createClipboardComponent();

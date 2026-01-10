@@ -19,5 +19,21 @@
         <file>conf/help.txt</file>
         <file>conf/settings.ini</file>
         <file>usedimage/pin.svg</file>
+        <file>PersonalDrive/file.svg</file>
+        <file>PersonalDrive/folder.svg</file>
+        <file>PersonalDrive/download.svg</file>
+        <file>PersonalDrive/delete.svg</file>
+        <file>PersonalDrive/rename.svg</file>
+        <file>PersonalDrive/move.svg</file>
+        <file>Main/FileSystem.svg</file>
+        <file>Main/Clipboard.svg</file>
+        <file>Main/OnlineDoc.svg</file>
+        <file>Main/FileBackup.svg</file>
+        <file>Main/More.svg</file>
+        <file>Main/Tag.svg</file>
+        <file>Main/Drawing.svg</file>
+        <file>Main/Login.svg</file>
+        <file>Main/Drive.svg</file>
+        <file>Main/Email.svg</file>
     </qresource>
 </RCC>

@@ -9,13 +9,15 @@ set(SCHEDULE_SOURCES
 )
 
 set(SCHEDULE_HEADERS
-    DriveView.h
+    include/DriveView.h
     include/DriveApiClient.h
     include/DriveItem.h
     include/DriveFile.h
     include/DriveFolder.h
     include/DriveManager.h
     include/DriveViewDelegate.h
+    include/DriveRoles.h
+
 )
 
 qt_add_library(mytxt_drive STATIC
@@ -27,6 +29,7 @@ qt_add_library(mytxt_drive STATIC
 target_link_libraries(mytxt_drive PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::Network
+    mytxt_setting
 )
 
 target_include_directories(mytxt_drive PRIVATE

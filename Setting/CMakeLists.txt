@@ -2,13 +2,15 @@ set(SETTING_SOURCES
     Setting.cpp
     SettingManager.cpp
     AppHelp.cpp
-
+    IconManager.cpp
 )
 
 set(SETTING_HEADERS
     include/Setting.h
     include/SettingManager.h
     include/AppHelp.h
+    include/IconManager.h
+
 )
 
 set(SETTING_UIS
@@ -24,6 +26,7 @@ qt_add_library(mytxt_setting STATIC
 
 target_link_libraries(mytxt_setting PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
+    Qt${QT_VERSION_MAJOR}::Svg
 )
 
 target_include_directories(mytxt_setting PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

@@ -17,8 +17,8 @@
 #include "../../EmailService/SendEmail.h"
 #include "../../MoreFunction/MoreFunction.h"
 #include "../../ClipBoard/include/ClipboardComponentFactory.h"
-#include "../../PersonalDrive/DriveView.h"
-
+#include "../../PersonalDrive/include/DriveView.h"
+#include "../../Setting/include/IconManager.h"
 
 namespace Ui {
 class WidgetFunctional;
