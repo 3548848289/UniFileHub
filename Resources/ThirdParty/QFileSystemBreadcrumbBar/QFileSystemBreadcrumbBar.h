@@ -11,6 +11,7 @@ public:
 
     void setBreadcrumbPath(const QList<BreadcrumbNode*>& path);
     void setPath(const QString& path);  // 新接口
+    void setAllowEditMode(bool value);
 
     QBreadcrumbBar* bar() const;
 signals:

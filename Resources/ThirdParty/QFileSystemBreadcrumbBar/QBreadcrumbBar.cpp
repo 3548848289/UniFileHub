@@ -70,6 +70,12 @@ void QBreadcrumbBar::parsePath(const QString& pathText) {
     newPath.append(root);
 #endif
 
+    // 处理空输入的情况
+    if (pathText.isEmpty()) {
+        setPath(newPath);
+        return;
+    }
+
     QString p = pathText;
     p.replace("\\", "/");
     p = QDir::cleanPath(p);

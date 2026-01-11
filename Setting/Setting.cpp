@@ -83,6 +83,23 @@ void Setting::loadSettings() {
     ui->server_config_lineEdit3->setText(settings.value("ServerConfig/IP3", "http://43.139.86.56:5003/").toString());
     ui->server_config_lineEdit4->setText(settings.value("ServerConfig/IP4", "http://43.139.86.56:5001/").toString());
     ui->server_config_lineEdit5->setText(settings.value("PersonalDrive/ServerIP", "http://127.0.0.1:5005/").toString());
+    ui->personal_drive_lineEdit->setText(settings.value("PersonalDrive/DefaultDir").toString());
+    
+    // 设置标签计划的默认时间值
+    // 提前提醒时间默认1小时
+    int reminderTimeInSeconds = settings.value("tag_schedule/reminder_time", 3600).toInt();
+    QTime reminderTime(reminderTimeInSeconds / 3600, (reminderTimeInSeconds % 3600) / 60, reminderTimeInSeconds % 60);
+    ui->tag_schedule_timeEdit1->setTime(reminderTime);
+    
+    // 提醒间隔时间默认10分钟
+    int intervalTimeInSeconds = settings.value("tag_schedule/interval_time", 600).toInt();
+    QTime intervalTime(intervalTimeInSeconds / 3600, (intervalTimeInSeconds % 3600) / 60, intervalTimeInSeconds % 60);
+    ui->tag_schedule_timeEdit2->setTime(intervalTime);
+    
+    // 通知显示时间默认5秒
+    int showTimeInSeconds = settings.value("tag_schedule/show_time", 5).toInt();
+    QTime showTime(showTimeInSeconds / 3600, (showTimeInSeconds % 3600) / 60, showTimeInSeconds % 60);
+    ui->tag_schedule_timeEdit3->setTime(showTime);
 }
 
 void Setting::saveSettings() {
@@ -136,6 +153,13 @@ void Setting::saveSettings() {
     settings.setValue("ServerConfig/IP3", ui->server_config_lineEdit3->text());
     settings.setValue("ServerConfig/IP4", ui->server_config_lineEdit4->text());
     settings.setValue("PersonalDrive/ServerIP", ui->server_config_lineEdit5->text());
+    
+    QString personalDriveDir = ui->personal_drive_lineEdit->text();
+    if (personalDriveDir.isEmpty())
+        personalDriveDir = settings.value("PersonalDrive/DefaultDir", QStandardPaths::writableLocation(QStandardPaths::HomeLocation)).toString();
+    else
+        settings.setValue("PersonalDrive/DefaultDir", personalDriveDir);
+    
     settings.sync();
 }
 
@@ -177,5 +201,15 @@ void Setting::on_file_backup_Btn_clicked()
 void Setting::on_all_setting_comboBox_currentIndexChanged(int index)
 {
 
+}
+
+
+void Setting::on_personal_drive_Btn_clicked()
+{
+    QString selectedDir = QFileDialog::getExistingDirectory(this, "Select Personal Drive Directory", ui->personal_drive_lineEdit->text());
+    if (!selectedDir.isEmpty()) {
+        selectedDir.replace("\\", "/");
+        ui->personal_drive_lineEdit->setText(selectedDir);
+    }
 }
 

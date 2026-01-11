@@ -163,24 +163,32 @@ void TagItemDelegate::addTag(const QAbstractItemModel *model, const QModelIndex 
         QString tagName = tagDialog.getTagName();
         QString annotation = tagDialog.getAnnotation();
         QDateTime expirationDate = tagDialog.getExpirationDate();
+        QTime reminderTime = tagDialog.getReminderTime();
+        QTime intervalTime = tagDialog.getIntervalTime();
+        QTime notifyDisplayTime = tagDialog.getNotifyDisplayTime();
 
         QString filePath = model->data(index, QFileSystemModel::FilePathRole).toString();
 
         int fileId;
 
+        FilePathInfo fileInfo;
+        fileInfo.filePath = filePath;
+        fileInfo.tagName = tagName;
+        fileInfo.expirationDate = expirationDate;
+        fileInfo.annotation = annotation;
+        fileInfo.reminderTime = reminderTime;
+        fileInfo.intervalTime = intervalTime;
+        fileInfo.notifyDisplayTime = notifyDisplayTime;
+
         if (!dbservice.dbTags().getFileId(filePath, fileId)) {
             dbservice.dbTags().addFilePath(filePath, fileId);
             dbservice.dbTags().saveTags(fileId, tagName);
             dbservice.dbTags().saveAnnotation(fileId, annotation);
-            dbservice.dbTags().saveExpirationDate(fileId, expirationDate);
-
+            // 使用updateFileInfo保存所有信息，包括新的提醒设置
+            dbservice.dbTags().updateFileInfo(fileInfo);
         }
         else {
-            FilePathInfo fileInfo;
-            fileInfo.filePath = filePath;
-            fileInfo.tagName = tagName;
-            fileInfo.expirationDate = expirationDate;
-            fileInfo.annotation = annotation;
+            // 更新所有信息，包括新的提醒设置
             dbservice.dbTags().updateFileInfo(fileInfo);
         }
 

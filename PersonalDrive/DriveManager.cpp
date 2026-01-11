@@ -8,13 +8,9 @@
 #include <QDebug>
 #include <QDateTime>
 
-DriveManager::DriveManager(QObject *parent)
-    : QObject(parent)
-    , m_apiClient(nullptr)
-    , m_currentDirectoryId(0)
-    , m_initialized(false)
+DriveManager::DriveManager(QObject *parent): QObject(parent), m_apiClient(nullptr), m_currentDirectoryId(0), m_initialized(false)
 {
-    // 私有构造函数，防止外部实例化
+
 }
 
 DriveManager::~DriveManager()

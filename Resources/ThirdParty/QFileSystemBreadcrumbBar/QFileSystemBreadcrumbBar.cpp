@@ -46,6 +46,13 @@ void QFileSystemBreadcrumbBar::setPath(const QString& path) {
     }
 }
 
+void QFileSystemBreadcrumbBar::setAllowEditMode(bool value)
+{
+    if (breadcrumb) {
+        breadcrumb->setAllowEditMode(value);
+    }
+}
+
 QBreadcrumbBar *QFileSystemBreadcrumbBar::bar() const {
     return breadcrumb;
 }

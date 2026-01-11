@@ -70,9 +70,9 @@ void DriveApiClient::uploadFile(const QString &filePath, int parentId)
         delete file;
         return;
     }
-    
+
     QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
-    
+
     // 文件部分
     QHttpPart filePart;
     filePart.setHeader(QNetworkRequest::ContentDispositionHeader,
@@ -80,61 +80,63 @@ void DriveApiClient::uploadFile(const QString &filePath, int parentId)
     filePart.setBodyDevice(file);
     file->setParent(multiPart); // 让 multiPart 管理 file 生命周期
     multiPart->append(filePart);
-    
+
     // 父目录ID部分
     QHttpPart parentPart;
     parentPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"parent_id\""));
     parentPart.setBody(QString::number(parentId).toUtf8());
     multiPart->append(parentPart);
-    
+
     QUrl url(QString("%1/api/drive/upload").arg(m_serverIp));
     QNetworkRequest request = createRequest(url);
-    
+
     QNetworkReply *reply = m_networkManager->post(request, multiPart);
     multiPart->setParent(reply); // 让 reply 管理 multiPart 生命周期
-    
+
     connect(reply, &QNetworkReply::finished, this, [=]() {
         reply->deleteLater();
-        
+
         if (reply->error() != QNetworkReply::NoError) {
             emit fileUploadError(reply->errorString());
             return;
         }
-        
+
         QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
         if (!doc.isObject()) {
             emit fileUploadError("Invalid response format");
             return;
         }
-        
+
         emit fileUploaded(doc.object());
     });
 }
 
 void DriveApiClient::downloadFile(int fileId, const QString &savePath)
 {
+    qDebug() << "Downloading file with ID: " << fileId;  // 调试打印 fileId
+
     QUrl url(QString("%1/api/drive/download/%2").arg(m_serverIp).arg(fileId));
     QNetworkRequest request = createRequest(url);
-    
+
     QNetworkReply *reply = m_networkManager->get(request);
-    
+
     connect(reply, &QNetworkReply::finished, this, [=]() {
         reply->deleteLater();
-        
+
         if (reply->error() != QNetworkReply::NoError) {
             emit fileDownloadError(reply->errorString());
             return;
         }
-        
+
         QFile file(savePath);
         if (!file.open(QIODevice::WriteOnly)) {
             emit fileDownloadError("无法保存文件");
             return;
         }
-        
+
         file.write(reply->readAll());
         file.close();
-        
+
         emit fileDownloaded(savePath);
     });
 }

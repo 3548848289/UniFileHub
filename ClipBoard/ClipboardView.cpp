@@ -342,7 +342,59 @@ void ClipboardView::filterItemsByType(ClipboardItemType type) {
 
 // 接收Controller通知的槽函数
 void ClipboardView::onItemAdded(ClipboardItem* item) {
-    insertNewItem(item);
+    // 检查当前的筛选条件，只有符合条件的项才添加到UI列表中
+    ClipboardItemType currentType = ClipboardItemType::Unknown;
+    int index = ui->typeComboBox->currentIndex();
+    switch (index) {
+    case 0: // 全部
+        currentType = ClipboardItemType::Unknown;
+        break;
+    case 1: // 文本
+        currentType = ClipboardItemType::Text;
+        break;
+    case 2: // 图片
+        currentType = ClipboardItemType::Image;
+        break;
+    case 3: // 文件
+        currentType = ClipboardItemType::File;
+        break;
+    default:
+        currentType = ClipboardItemType::Unknown;
+        break;
+    }
+    
+    // 检查类型筛选条件
+    bool matchType = (currentType == ClipboardItemType::Unknown) || (item->type() == currentType);
+    
+    // 检查搜索文本筛选条件
+    QString searchText = ui->lineEdit->text().trimmed();
+    bool matchSearch = searchText.isEmpty();
+    
+    if (!matchSearch) {
+        // 根据不同类型的剪贴板项目进行搜索
+        if (item->type() == ClipboardItemType::Text) {
+            CliText* textItem = dynamic_cast<CliText*>(item);
+            if (textItem && textItem->text().contains(searchText, Qt::CaseInsensitive)) {
+                matchSearch = true;
+            }
+        } else if (item->type() == ClipboardItemType::File) {
+            QString serialized = item->serialize();
+            if (serialized.startsWith("FILE_DATA:")) {
+                QStringList filePaths = serialized.mid(10).split(";").filter(QRegularExpression(".+"));
+                for (const QString& path : filePaths) {
+                    if (QFileInfo(path).fileName().contains(searchText, Qt::CaseInsensitive)) {
+                        matchSearch = true;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    
+    // 只有同时符合类型和搜索条件的项才添加到UI中
+    if (matchType && matchSearch) {
+        insertNewItem(item);
+    }
 }
 
 void ClipboardView::onItemRemoved(ClipboardItem* item) {

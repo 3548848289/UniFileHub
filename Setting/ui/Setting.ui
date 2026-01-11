@@ -105,6 +105,16 @@
      </item>
      <item>
       <property name="text">
+       <string>个人网盘</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>默认使用目录</string>
+       </property>
+      </item>
+     </item>
+     <item>
+      <property name="text">
        <string>剪切字板</string>
       </property>
       <item>
@@ -128,7 +138,7 @@
    <item row="0" column="1">
     <widget class="QStackedWidget" name="stackedWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>6</number>
      </property>
      <widget class="QWidget" name="all_setting">
       <layout class="QGridLayout" name="gridLayout_4">
@@ -488,6 +498,33 @@
          </property>
          <property name="text">
           <string>单位均为（时:分）</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="personal_drive">
+      <layout class="QGridLayout" name="gridLayout_11">
+       <item row="0" column="0">
+        <widget class="QLabel" name="personal_drive_label">
+         <property name="text">
+          <string>文件
+下载
+目录</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignmentFlag::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="personal_drive_lineEdit"/>
+       </item>
+       <item row="0" column="2">
+        <widget class="QPushButton" name="personal_drive_Btn">
+         <property name="text">
+          <string>选取
+路径</string>
          </property>
         </widget>
        </item>

@@ -5,6 +5,7 @@
 #include "include/DriveFile.h"
 #include "include/DriveFolder.h"
 #include "include/DriveViewDelegate.h"
+#include "../../Setting/include/SettingManager.h"
 #include <QFileDialog>
 #include <QDebug>
 #include <QMessageBox>
@@ -18,7 +19,10 @@ DriveView::DriveView(QWidget *parent): QWidget(parent), ui(new Ui::DriveView), m
 
     // ===== 1. Breadcrumb =====
     breadcrumb = new QFileSystemBreadcrumbBar();
-    ui->verticalLayout->insertWidget(1, breadcrumb);
+    breadcrumb->setAllowEditMode(false);
+    breadcrumb->setBreadcrumbPath({new BreadcrumbNode("网盘")});
+
+    ui->verticalLayout->insertWidget(0, breadcrumb);
 
     connect(breadcrumb, &QFileSystemBreadcrumbBar::pathClicked,
             this, [this](int clickedIndex, const QString&) {
@@ -85,7 +89,6 @@ DriveView::DriveView(QWidget *parent): QWidget(parent), ui(new Ui::DriveView), m
 DriveView::~DriveView()
 {
     delete ui;
-    // DriveManager是单例，不需要手动删除
 }
 
 void DriveView::on_PushFileBtn_clicked()
@@ -119,10 +122,10 @@ void DriveView::onItemDoubleClicked(const QModelIndex &index)
     int row = index.row();
     QStandardItem *item = m_model->item(row, 0);
 
-    bool isDir = item->data(Qt::UserRole + 1).toBool();
+    bool isDir = item->data(DriveRoles::RoleIsDir).toBool();
     if (!isDir) return;
 
-    m_currentDirId = item->data(Qt::UserRole).toInt();
+    m_currentDirId = item->data(DriveRoles::RoleId).toInt();
     loadFileList(m_currentDirId);
 }
 
@@ -139,17 +142,24 @@ void DriveView::onActionClicked(int row, int action)
     QStandardItem *item = m_model->item(row, 0);
     if (!item) return;
 
-    int id = item->data(Qt::UserRole).toInt();
-    bool isDir = item->data(Qt::UserRole + 1).toBool();
+    int id = item->data(DriveRoles::RoleId).toInt();
+    bool isDir = item->data(DriveRoles::RoleIsDir).toBool();
 
     switch (action) {
     case 0: // 下载
         if (!isDir) {
             QString fileName = item->text();
-            QDir dir("E:/Tmp");
-            if (!dir.exists()) {
-                dir.mkpath(".");
+            QString downloadPath = SettingManager::Instance().personal_drive_download_dir();
+            QDir dir(downloadPath);
+            
+            // 如果设置的路径为空或不存在，则使用默认路径
+            if (downloadPath.isEmpty() || !dir.exists()) {
+                dir.setPath("E:/Tmp");
+                if (!dir.exists()) {
+                    dir.mkpath(".");
+                }
             }
+            
             QString savePath = dir.absoluteFilePath(fileName);
             m_driveManager->downloadFile(id, savePath);
         } else {
@@ -160,6 +170,30 @@ void DriveView::onActionClicked(int row, int action)
         m_driveManager->deleteItem(id);
         break;
     case 2: // 重命名
+        {
+            QString oldName = item->text();
+            bool ok;
+            QString newName = QInputDialog::getText(this, tr("重命名"), tr("请输入新名称:"), QLineEdit::Normal, oldName, &ok);
+            
+            if (ok && !newName.isEmpty() && newName != oldName) {
+                // 检查当前目录下是否有同名文件/文件夹
+                bool isDuplicate = false;
+                for (int row = 0; row < m_model->rowCount(); ++row) {
+                    QStandardItem *currentItem = m_model->item(row, 0);
+                    if (currentItem && currentItem->text() == newName) {
+                        isDuplicate = true;
+                        break;
+                    }
+                }
+                
+                if (isDuplicate) {
+                    QMessageBox::warning(this, tr("错误"), tr("当前目录下已存在同名文件或文件夹"));
+                } else {
+                    // 调用DriveManager进行重命名
+                    m_driveManager->renameItem(id, newName);
+                }
+            }
+        }
         break;
     case 3: // 移动
         break;

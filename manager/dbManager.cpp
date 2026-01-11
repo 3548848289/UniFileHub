@@ -76,7 +76,10 @@ bool dbManager::initializeTables() {
             CREATE TABLE IF NOT EXISTS FilePaths (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 file_path TEXT UNIQUE NOT NULL,
-                expiration_date DATE
+                expiration_date DATE,
+                reminder_time TEXT,
+                interval_time TEXT,
+                notify_display_time TEXT
             );
         )"},
         {"Tags", R"(
