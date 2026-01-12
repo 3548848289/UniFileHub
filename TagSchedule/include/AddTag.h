@@ -19,7 +19,6 @@ public:
     QDateTime getExpirationDate() const;
     QTime getReminderTime() const;      // 提前多久提醒
     QTime getIntervalTime() const;      // 每次提醒间隔时间
-    QTime getNotifyDisplayTime() const; // 通知消息显示时间
     ~AddTag();
 
 private slots:

@@ -1,5 +1,6 @@
 #include "include/DriveApiClient.h"
 #include <QFile>
+#include <QDir>
 #include <QFileInfo>
 #include <QHttpMultiPart>
 #include <QHttpPart>
@@ -128,7 +129,27 @@ void DriveApiClient::downloadFile(int fileId, const QString &savePath)
             return;
         }
 
-        QFile file(savePath);
+        // 处理重名文件，自动生成新文件名
+        QString finalPath = savePath;
+        QFileInfo fileInfo(savePath);
+        QString baseName = fileInfo.baseName();
+        QString suffix = fileInfo.completeSuffix();
+        QString path = fileInfo.path();
+        int counter = 1;
+
+        // 如果文件已存在，生成新的文件名
+        while (QFile::exists(finalPath)) {
+            QString newName;
+            if (suffix.isEmpty()) {
+                newName = QString("%1 (%2)").arg(baseName).arg(counter);
+            } else {
+                newName = QString("%1 (%2).%3").arg(baseName).arg(counter).arg(suffix);
+            }
+            finalPath = QDir(path).absoluteFilePath(newName);
+            counter++;
+        }
+
+        QFile file(finalPath);
         if (!file.open(QIODevice::WriteOnly)) {
             emit fileDownloadError("无法保存文件");
             return;
@@ -137,7 +158,7 @@ void DriveApiClient::downloadFile(int fileId, const QString &savePath)
         file.write(reply->readAll());
         file.close();
 
-        emit fileDownloaded(savePath);
+        emit fileDownloaded(finalPath);
     });
 }
 

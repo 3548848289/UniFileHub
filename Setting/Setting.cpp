@@ -11,8 +11,6 @@ Setting::Setting(QWidget *parent) : QWidget(parent), ui(new Ui::Setting)
     ui->stackedWidget->setCurrentIndex(0);
     ui->treeWidget->setHeaderHidden(true);
 
-    ui->tag_schedule_timeEdit1->setDisplayFormat("HH:mm");
-    ui->tag_schedule_timeEdit2->setDisplayFormat("HH:mm");
     ui->tag_schedule_timeEdit3->setDisplayFormat("HH:mm");
 
     if (settings.status() == QSettings::NoError) {
@@ -62,10 +60,6 @@ void Setting::loadSettings() {
     if (reminderIndex != -1)
         ui->tag_schedule_comboBox->setCurrentIndex(reminderIndex);
 
-    QTime time = QTime(0, 0).addSecs(settings.value("tag_schedule/reminder_time", 0).toInt());
-    ui->tag_schedule_timeEdit1->setTime(time);
-    QTime interval = QTime(0, 0).addSecs(settings.value("tag_schedule/interval_time", 0).toInt());
-    ui->tag_schedule_timeEdit2->setTime(interval);
     QTime showtime = QTime(0, 0).addSecs(settings.value("tag_schedule/show_time", 0).toInt());
     ui->tag_schedule_timeEdit3->setTime(showtime);
 
@@ -86,16 +80,6 @@ void Setting::loadSettings() {
     ui->personal_drive_lineEdit->setText(settings.value("PersonalDrive/DefaultDir").toString());
     
     // 设置标签计划的默认时间值
-    // 提前提醒时间默认1小时
-    int reminderTimeInSeconds = settings.value("tag_schedule/reminder_time", 3600).toInt();
-    QTime reminderTime(reminderTimeInSeconds / 3600, (reminderTimeInSeconds % 3600) / 60, reminderTimeInSeconds % 60);
-    ui->tag_schedule_timeEdit1->setTime(reminderTime);
-    
-    // 提醒间隔时间默认10分钟
-    int intervalTimeInSeconds = settings.value("tag_schedule/interval_time", 600).toInt();
-    QTime intervalTime(intervalTimeInSeconds / 3600, (intervalTimeInSeconds % 3600) / 60, intervalTimeInSeconds % 60);
-    ui->tag_schedule_timeEdit2->setTime(intervalTime);
-    
     // 通知显示时间默认5秒
     int showTimeInSeconds = settings.value("tag_schedule/show_time", 5).toInt();
     QTime showTime(showTimeInSeconds / 3600, (showTimeInSeconds % 3600) / 60, showTimeInSeconds % 60);
@@ -127,13 +111,6 @@ void Setting::saveSettings() {
 
 
     settings.setValue("tag_schedule/reminder_type", ui->tag_schedule_comboBox->currentText());
-    QTime reminderTime = ui->tag_schedule_timeEdit1->time();
-    int timeInSeconds = reminderTime.hour() * 3600 + reminderTime.minute() * 60 + reminderTime.second();
-    settings.setValue("tag_schedule/reminder_time", timeInSeconds);
-
-    QTime Interval = ui->tag_schedule_timeEdit2->time();
-    int IntervalInSeconds = Interval.hour() * 3600 + Interval.minute() * 60 + Interval.second();
-    settings.setValue("tag_schedule/interval_time", IntervalInSeconds);
 
     QTime showTime = ui->tag_schedule_timeEdit3->time();
     int showTimeInSeconds = showTime.hour() * 3600 + showTime.minute() * 60 + showTime.second();

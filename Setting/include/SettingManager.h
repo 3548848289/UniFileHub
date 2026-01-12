@@ -31,8 +31,6 @@ public:
 
     QString file_system_file_system_dir();
 
-    int tag_schedule_reminder_time();
-    int tag_schedule_interval_time();
     int tag_schedule_show_time();
 
     void loadHistory();

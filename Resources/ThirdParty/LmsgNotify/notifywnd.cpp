@@ -1,4 +1,4 @@
-﻿#include "notifywnd.h"
+#include "notifywnd.h"
 #include "notifymanager.h"
 #include <QBoxLayout>
 #include <QGraphicsDropShadowEffect>

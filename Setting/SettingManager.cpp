@@ -57,16 +57,6 @@ QString SettingManager::file_system_file_system_dir()
     return settings.value("file_system/file_system_dir").toString();
 }
 
-int SettingManager::tag_schedule_reminder_time() {
-    int timeInSeconds = settings.value("tag_schedule/reminder_time", 1440).toInt();
-    return timeInSeconds;
-}
-
-int SettingManager::tag_schedule_interval_time() {
-    int timeInSeconds = settings.value("tag_schedule/interval_time", 1440).toInt();
-    return timeInSeconds;
-}
-
 int SettingManager::tag_schedule_show_time() {
     int timeInSeconds = settings.value("tag_schedule/show_time", 1440).toInt();
     return timeInSeconds;
