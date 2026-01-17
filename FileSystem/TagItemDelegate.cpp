@@ -163,8 +163,8 @@ void TagItemDelegate::addTag(const QAbstractItemModel *model, const QModelIndex 
         QString tagName = tagDialog.getTagName();
         QString annotation = tagDialog.getAnnotation();
         QDateTime expirationDate = tagDialog.getExpirationDate();
-        QTime reminderTime = tagDialog.getReminderTime();
-        QTime intervalTime = tagDialog.getIntervalTime();
+        int reminderHours = tagDialog.getReminderTime();
+        int intervalMinutes = tagDialog.getIntervalTime();
 
         QString filePath = model->data(index, QFileSystemModel::FilePathRole).toString();
 
@@ -175,8 +175,9 @@ void TagItemDelegate::addTag(const QAbstractItemModel *model, const QModelIndex 
         fileInfo.tagName = tagName;
         fileInfo.expirationDate = expirationDate;
         fileInfo.annotation = annotation;
-        fileInfo.reminderTime = reminderTime;
-        fileInfo.intervalTime = intervalTime;
+        fileInfo.reminderTime = reminderHours; // 直接保存小时数
+        fileInfo.intervalTime = intervalMinutes; // 直接保存分钟数
+        fileInfo.lastReminderIndex = -1; // 初始化lastReminderIndex为-1
 
         if (!dbservice.dbTags().getFileId(filePath, fileId)) {
             dbservice.dbTags().addFilePath(filePath, fileId);

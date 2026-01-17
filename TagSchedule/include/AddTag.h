@@ -17,8 +17,8 @@ public:
     QString getTagName() const;
     QString getAnnotation() const;
     QDateTime getExpirationDate() const;
-    QTime getReminderTime() const;      // 提前多久提醒
-    QTime getIntervalTime() const;      // 每次提醒间隔时间
+    int getReminderTime() const;      // 提前多久提醒(小时)
+    int getIntervalTime() const;      // 每次提醒间隔时间(分钟)
     ~AddTag();
 
 private slots:

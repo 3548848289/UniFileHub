@@ -52,9 +52,6 @@ private:
     NotifyManager *manager;
     SendEmail * sendemail;
     dbService& dbservice;
-    
-    // 存储每个文件的上次提醒时间，用于控制提醒间隔
-    QMap<QString, QDateTime> lastReminderTimeMap;
 
 };
 

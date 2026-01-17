@@ -3,11 +3,15 @@
 #include <QFileDialog>
 #include <QCoreApplication>
 #include <QSettings>
+#include <QColorDialog>
+#include "include/IconManager.h"
 
 Setting::Setting(QWidget *parent) : QWidget(parent), ui(new Ui::Setting)
     , settings("settings.ini", QSettings::IniFormat)
 {
     ui->setupUi(this);
+    is_modified = false;
+    loadSettings();
     ui->stackedWidget->setCurrentIndex(0);
     ui->treeWidget->setHeaderHidden(true);
 
@@ -45,6 +49,16 @@ void Setting::loadSettings() {
     ui->all_setting_comboBox->setCurrentIndex(settings.value("all_setting/theme", 0).toInt());
 
     ui->all_setting_checkBox->setChecked(settings.value("all_setting/fenableray", true).toBool());
+    
+    // 加载图标颜色设置
+    QString iconColor = settings.value("all_setting/icon_color", "#7598db").toString();
+    QString secondaryIconColor = settings.value("all_setting/secondary_icon_color", "#7598db").toString();
+    
+    // 设置按钮样式以显示当前颜色
+    QColor color1(iconColor);
+    QColor color2(secondaryIconColor);
+    ui->all_setting_iconColorBtn->setStyleSheet(QString("background-color: %1; color: %2;").arg(iconColor).arg(color1.lightness() < 128 ? "white" : "black"));
+    ui->all_setting_secondaryIconColorBtn->setStyleSheet(QString("background-color: %1; color: %2;").arg(secondaryIconColor).arg(color2.lightness() < 128 ? "white" : "black"));
     ui->file_system_lineEdit->setText(settings.value("file_system/file_system_dir").toString());
     ui->file_see_spinBox->setValue(settings.value("file_see/font_size", 12).toInt());
     ui->file_see_checkBox1->setChecked(settings.value("file_see/txt", true).toBool());
@@ -89,7 +103,12 @@ void Setting::loadSettings() {
 void Setting::saveSettings() {
     settings.setValue("all_setting/font_size", ui->all_setting_spinBox->value());
     settings.setValue("all_setting/theme", ui->all_setting_comboBox->currentIndex());
+
     settings.setValue("all_setting/fenableray", ui->all_setting_checkBox->isChecked());
+    
+    // 保存图标颜色设置
+    settings.setValue("all_setting/icon_color", ui->all_setting_iconColorBtn->styleSheet().section("background-color: ", 1, 1).section("; color", 0, 0));
+    settings.setValue("all_setting/secondary_icon_color", ui->all_setting_secondaryIconColorBtn->styleSheet().section("background-color: ", 1, 1).section("; color", 0, 0));
 
     QString filesystemDir = ui->file_system_lineEdit->text();
     if (filesystemDir.isEmpty())
@@ -177,7 +196,28 @@ void Setting::on_file_backup_Btn_clicked()
 
 void Setting::on_all_setting_comboBox_currentIndexChanged(int index)
 {
+    settings.setValue("all_setting/theme", index);
+    is_modified = true;
+}
 
+void Setting::on_all_setting_iconColorBtn_clicked() {
+    QColor color = QColorDialog::getColor(Qt::blue, this, "选择图标颜色");
+    if (color.isValid()) {
+        QString colorStr = color.name();
+        ui->all_setting_iconColorBtn->setStyleSheet(QString("background-color: %1; color: %2;").arg(colorStr).arg(color.lightness() < 128 ? "white" : "black"));
+        settings.setValue("all_setting/icon_color", colorStr);
+        is_modified = true;
+    }
+}
+
+void Setting::on_all_setting_secondaryIconColorBtn_clicked() {
+    QColor color = QColorDialog::getColor(Qt::blue, this, "选择辅助图标颜色");
+    if (color.isValid()) {
+        QString colorStr = color.name();
+        ui->all_setting_secondaryIconColorBtn->setStyleSheet(QString("background-color: %1; color: %2;").arg(colorStr).arg(color.lightness() < 128 ? "white" : "black"));
+        settings.setValue("all_setting/secondary_icon_color", colorStr);
+        is_modified = true;
+    }
 }
 
 

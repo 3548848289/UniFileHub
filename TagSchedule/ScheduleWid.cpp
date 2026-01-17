@@ -98,56 +98,49 @@ void ScheduleWid::checkExpiration()
     QString reminderType = SettingManager::Instance().tag_schedule_reminder_type();
     const QDateTime now = QDateTime::currentDateTime();
 
-    for (const auto &file : files)
+    for (auto &file : files)
     {
         // 跳过没有设置提醒时间的文件
-        if (!file.reminderTime.isValid() || !file.expirationDate.isValid())
+        if (file.reminderTime <= 0 || !file.expirationDate.isValid())
             continue;
 
-        int reminderSeconds = file.reminderTime.hour() * 3600
-                              + file.reminderTime.minute() * 60
-                              + file.reminderTime.second();
+        int reminderSeconds = file.reminderTime * 3600; // 小时转换为秒
+        int intervalSeconds = file.intervalTime * 60; // 分钟转换为秒
 
-        // 文件未过期且在提醒范围内
-        if (now >= file.expirationDate.addSecs(-reminderSeconds) && now < file.expirationDate)
+        // 计算提醒开始时间（到期时间 - 提前提醒时间）
+        QDateTime start = file.expirationDate.addSecs(-reminderSeconds);
+        qint64 elapsed = start.secsTo(now);
+
+        // 如果还没到提醒时间，跳过
+        if (elapsed < 0 || now >= file.expirationDate)
+            continue;
+
+        // 计算当前应该提醒的索引
+        int currentIndex = elapsed / intervalSeconds;
+
+        // 如果当前索引大于已提醒的最大索引，需要提醒
+        if (currentIndex > file.lastReminderIndex)
         {
-            // 检查提醒间隔
-            int intervalSeconds = file.intervalTime.isValid()
-                                      ? file.intervalTime.hour() * 3600
-                                            + file.intervalTime.minute() * 60
-                                            + file.intervalTime.second()
-                                      : 0;
+            QVariantMap data;
+            data["tag"] = file.tagName;
+            data["annotation"] = file.annotation;
+            data["expirationDate"] = file.expirationDate;
 
-            QDateTime lastTime = lastReminderTimeMap.value(file.filePath, QDateTime());
-            bool shouldRemind = !lastTime.isValid() || intervalSeconds == 0 || lastTime.secsTo(now) >= intervalSeconds;
-
-            if (shouldRemind)
+            if (reminderType == "弹窗提醒")
             {
-                QVariantMap data;
-                data["tag"] = file.tagName;
-                data["annotation"] = file.annotation;
-                data["expirationDate"] = file.expirationDate;
-
-                if (reminderType == "弹窗提醒")
-                {
-                    manager->notify("到期提醒", file.filePath, data);
-                }
-                else if (reminderType == "邮件提醒")
-                {
-                    const QString allDetails = QString("标签: %1\n备注: %2\n到期时间: %3")
-                                                   .arg(file.tagName)
-                                                   .arg(file.annotation)
-                                                   .arg(file.expirationDate.toString());
-                    sendemail->sendEmailWithData(file.filePath, allDetails, QStringList());
-                }
-
-                lastReminderTimeMap[file.filePath] = now;
+                manager->notify("到期提醒", file.filePath, data);
             }
-        }
-        else
-        {
-            // 超过提醒范围，清除上次提醒记录
-            lastReminderTimeMap.remove(file.filePath);
+            else if (reminderType == "邮件提醒")
+            {
+                const QString allDetails = QString("标签: %1\n备注: %2\n到期时间: %3")
+                                               .arg(file.tagName)
+                                               .arg(file.annotation)
+                                               .arg(file.expirationDate.toString());
+                sendemail->sendEmailWithData(file.filePath, allDetails, QStringList());
+            }
+
+            // 更新数据库中的lastReminderIndex
+            dbservice.dbTags().updateLastReminderIndex(file.filePath, currentIndex);
         }
     }
 }

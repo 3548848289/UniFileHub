@@ -47,6 +47,8 @@ public:
     QString personal_drive_download_dir();
     QString file_backup_IP();
     int all_setting_theme();
+    QString all_setting_icon_color();
+    QString all_setting_secondary_icon_color();
     
     // Token相关方法
     QString getToken();

@@ -43,9 +43,10 @@ QList<FilePathInfo> dbFilepath::searchFiles(const QString &keyword) {
         fileInfo.tagName = q.value(1).toString();
         fileInfo.expirationDate = q.value(2).toDateTime();
         fileInfo.annotation = q.value(3).toString();
-        fileInfo.reminderTime = QTime::fromString(q.value(4).toString());
-        fileInfo.intervalTime = QTime::fromString(q.value(5).toString());
+        fileInfo.reminderTime = q.value(4).toInt();
+        fileInfo.intervalTime = q.value(5).toInt();
         fileInfo.notifyDisplayTime = QTime::fromString(q.value(6).toString());
+        fileInfo.lastReminderIndex = q.value(7).toInt();
 
         fileInfos << fileInfo;
     }
@@ -153,9 +154,10 @@ bool dbFilepath::updateFileInfo(const FilePathInfo& fileInfo)
     q.prepare(UPDATEFILEINFO1);
     q.bindValue(":file_path", fileInfo.filePath);
     q.bindValue(":expiration_date", fileInfo.expirationDate.toString("yyyy-MM-dd HH:mm:ss"));
-    q.bindValue(":reminder_time", fileInfo.reminderTime.toString());
-    q.bindValue(":interval_time", fileInfo.intervalTime.toString());
+    q.bindValue(":reminder_time", fileInfo.reminderTime);
+    q.bindValue(":interval_time", fileInfo.intervalTime);
     q.bindValue(":notify_display_time", fileInfo.notifyDisplayTime.toString());
+    q.bindValue(":last_reminder_index", fileInfo.lastReminderIndex);
 
     if (!q.exec()) {
         dbsqlite.rollback();
@@ -252,9 +254,10 @@ QList<FilePathInfo> dbFilepath::getFilePathsByTag(const QString &tag) {
         info.tagName = q.value(1).toString();
         info.expirationDate = q.value(2).toDateTime();
         info.annotation = q.value(3).toString();  // 获取批注内容
-        info.reminderTime = QTime::fromString(q.value(4).toString());
-        info.intervalTime = QTime::fromString(q.value(5).toString());
+        info.reminderTime = q.value(4).toInt();
+        info.intervalTime = q.value(5).toInt();
         info.notifyDisplayTime = QTime::fromString(q.value(6).toString());
+        info.lastReminderIndex = q.value(7).toInt();
 
         filePathsWithTags.append(info);
     }
@@ -303,9 +306,10 @@ bool dbFilepath::getFileInfoByFilePath(const QString& filePath, FilePathInfo& fi
 
     fileInfo.filePath = filePath;
     fileInfo.expirationDate = QDateTime::fromString(q.value(0).toString(), "yyyy-MM-dd'T'HH:mm:ss.zzz");
-    fileInfo.reminderTime = QTime::fromString(q.value(1).toString());
-    fileInfo.intervalTime = QTime::fromString(q.value(2).toString());
+    fileInfo.reminderTime = q.value(1).toInt();
+    fileInfo.intervalTime = q.value(2).toInt();
     fileInfo.notifyDisplayTime = QTime::fromString(q.value(3).toString());
+    fileInfo.lastReminderIndex = q.value(4).toInt();
     qDebug() << fileInfo.expirationDate;
     q.prepare(GETFILEINFOBYFILEPATH2);
     q.bindValue(":file_path", filePath);
@@ -327,6 +331,20 @@ bool dbFilepath::getFileInfoByFilePath(const QString& filePath, FilePathInfo& fi
 
     fileInfo.annotation = q.value(0).toString();
     dbsqlite.commit();
+    return true;
+}
+
+bool dbFilepath::updateLastReminderIndex(const QString &filePath, int index)
+{
+    QSqlQuery q(dbsqlite);
+    q.prepare(UPDATE_LAST_REMINDER_INDEX);
+    q.bindValue(":file_path", filePath);
+    q.bindValue(":last_reminder_index", index);
+    
+    if (!q.exec()) {
+        qDebug() << "更新last_reminder_index失败：" << q.lastError().text();
+        return false;
+    }
     return true;
 }
 

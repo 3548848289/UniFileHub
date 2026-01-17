@@ -21,9 +21,20 @@ public:
         Drawing,
         Login,
         Drive,
-        Email
+        Email,
+        MenuDownload,
+        MenuFileClose,
+        MenuFileSave,
+        MenuHelp,
+        MenuFileBackup,
+        MenuFileOpen,
+        MenuNew,
+        MenuSearch,
+        MenuSettings
     };
 
-    static QIcon icon(Icon type, QSize size);
+    static QIcon icon(Icon type, QSize size, QColor color = QColor());
     static void clearCache();
+    static void setDefaultIconColor(const QColor &color);
+    static QColor defaultIconColor();
 };

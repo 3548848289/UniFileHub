@@ -57,7 +57,7 @@
        <item row="3" column="0">
         <widget class="QLabel" name="reminderLabel">
          <property name="text">
-          <string>提前多久提醒</string>
+          <string>提前多久提醒(小时)</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignmentFlag::AlignCenter</set>
@@ -65,16 +65,19 @@
         </widget>
        </item>
        <item row="3" column="1">
-        <widget class="QTimeEdit" name="reminderTimeEdit">
-         <property name="displayFormat">
-          <string>HH:mm</string>
+        <widget class="QSpinBox" name="reminderTimeEdit">
+         <property name="maximum">
+          <number>8760</number>
+         </property>
+         <property name="singleStep">
+          <number>1</number>
          </property>
         </widget>
        </item>
        <item row="4" column="0">
         <widget class="QLabel" name="intervalLabel">
          <property name="text">
-          <string>每次提醒间隔时间</string>
+          <string>每次提醒间隔时间(分钟)</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignmentFlag::AlignCenter</set>
@@ -82,9 +85,12 @@
         </widget>
        </item>
        <item row="4" column="1">
-        <widget class="QTimeEdit" name="intervalTimeEdit">
-         <property name="displayFormat">
-          <string>HH:mm</string>
+        <widget class="QSpinBox" name="intervalTimeEdit">
+         <property name="maximum">
+          <number>43200</number>
+         </property>
+         <property name="singleStep">
+          <number>1</number>
          </property>
         </widget>
        </item>

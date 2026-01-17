@@ -3,6 +3,7 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include "../Setting/include/SettingManager.h"
+#include "../Setting/include/ThemeManager.h"
 
 DLogin::DLogin(QWidget *parent): QDialog(parent), ui(new Ui::DLogin)
 {
@@ -10,6 +11,28 @@ DLogin::DLogin(QWidget *parent): QDialog(parent), ui(new Ui::DLogin)
     this->setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint);
     ui->loginBtn->setEnabled(false);
     ui->registerBtn->setEnabled(false);
+
+    // 使用ThemeManager设置样式
+    QString secondaryColor = ThemeManager::Instance().secondaryColor().name();
+    QString lightSecondaryColor = ThemeManager::Instance().secondaryColor().lighter(150).name();
+    
+    // 设置头像按钮样式
+    ui->avatar_pushButton->setStyleSheet(QString(
+        "QPushButton {"
+        "    color: %1;"
+        "    background-color: %2;  "
+        "    border: 1px solid %1; "
+        "    border-radius: 25px; "
+        "    padding: 10px;  "
+        "    width: 50px; "
+        "    height: 50px;"
+        "    text-align: center; "
+        "}"
+    ).arg(secondaryColor, lightSecondaryColor));
+    
+    // 初始化登录和注册按钮的初始样式
+    ui->loginBtn->setStyleSheet(QString("background-color: %1; color: rgb(255, 255, 255); border: none; border-radius: 10px;").arg(lightSecondaryColor));
+    ui->registerBtn->setStyleSheet(QString("background-color: %1; color: rgb(255, 255, 255); border: none; border-radius: 10px;").arg(lightSecondaryColor));
 
     flaskinfo = new FlaskInfo(this);
 
@@ -39,15 +62,18 @@ void DLogin::onAvatarDownloaded(const QByteArray &data, const QString &action)
 
 
 void DLogin::on_radioButton_clicked() {
+    QString secondaryColor = ThemeManager::Instance().secondaryColor().name();
+    QString lightSecondaryColor = ThemeManager::Instance().secondaryColor().lighter(150).name();
+    
     if (ui->radioButton->isChecked()) {
-        ui->loginBtn->setStyleSheet("background-color: rgb(0, 141, 235);");
+        ui->loginBtn->setStyleSheet(QString("background-color: %1;").arg(secondaryColor));
         ui->loginBtn->setEnabled(true);
-        ui->registerBtn->setStyleSheet("background-color: rgb(0, 141, 235);");
+        ui->registerBtn->setStyleSheet(QString("background-color: %1;").arg(secondaryColor));
         ui->registerBtn->setEnabled(true);
     } else {
-        ui->loginBtn->setStyleSheet("background-color: rgb(158, 218, 255);");
+        ui->loginBtn->setStyleSheet(QString("background-color: %1;").arg(lightSecondaryColor));
         ui->loginBtn->setEnabled(false);
-        ui->registerBtn->setStyleSheet("background-color: rgb(158, 218, 255);");
+        ui->registerBtn->setStyleSheet(QString("background-color: %1;").arg(lightSecondaryColor));
         ui->registerBtn->setEnabled(false);
     }
 }

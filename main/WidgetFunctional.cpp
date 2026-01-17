@@ -1,6 +1,7 @@
 #include "./include/WidgetFunctional.h"
 #include "ui/ui_WidgetFunctional.h"
 #include "../../ClipBoard/include/ClipboardComponentFactory.h"
+#include "../../Setting/include/ThemeManager.h"
 
 WidgetFunctional::~WidgetFunctional()
 {
@@ -106,27 +107,27 @@ WidgetFunctional::WidgetFunctional(QWidget *parent)
         }
     }
 
-   this->setStyleSheet(
-        // "QPushButton#pushButton_1, QPushButton#pushButton_2,"
-        // "QPushButton#pushButton_3, QPushButton#pushButton_4,"
-        // "QPushButton#pushButton_5, QPushButton#pushButton_6,"
-        // "QPushButton#pushButton_7"
-        // "{background:transparent;border:none;color:#000000;}"
+   // 使用ThemeManager统一管理样式
+    QString primaryColor = ThemeManager::Instance().primaryColor().name();
+    QString hoverColor = primaryColor;
 
+    QString styleSheet = QString(
         "QPushButton#pushButton_1:checked, QPushButton#pushButton_2:checked,"
         "QPushButton#pushButton_3:checked, QPushButton#pushButton_4:checked,"
         "QPushButton#pushButton_5:checked, QPushButton#pushButton_6:checked,"
         "QPushButton#pushButton_7:checked, QPushButton#pushButton_8:checked,"
         "QPushButton#pushButton_9:checked, QPushButton#pushButton_10:checked"
-        "{background:transparent;border:none;   border-bottom:3px solid #3598db;color:#3598db;}"
+        "{background:transparent;border:none; border-bottom:3px solid %1;color:%1;}"
 
         "QPushButton#pushButton_1:hover, QPushButton#pushButton_2:hover,"
         "QPushButton#pushButton_3:hover, QPushButton#pushButton_4:hover,"
         "QPushButton#pushButton_5:hover, QPushButton#pushButton_6:hover,"
         "QPushButton#pushButton_7:hover, QPushButton#pushButton_8:hover,"
         "QPushButton#pushButton_9:hover, QPushButton#pushButton_10:hover"
-        "{background:transparent;border:none;   border-bottom:3px solid #7598db;color:#7598db;}"
-    );
+        "{background:transparent;border:none; border-bottom:3px solid %1;color:%1;}"
+    ).arg(primaryColor);
+
+    this->setStyleSheet(styleSheet);
 
 
     // 设置所有按钮的自定义图标

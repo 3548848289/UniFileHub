@@ -5,6 +5,9 @@
 #include <QPainter>
 #include <QHash>
 
+// 静态变量存储默认图标颜色
+static QColor g_defaultIconColor = QColor("#7598db");
+
 static QColor currentIconColor()
 {
     return qApp->styleHints()->colorScheme() == Qt::ColorScheme::Dark
@@ -21,52 +24,65 @@ static QString iconPath(IconManager::Icon icon)
     case IconManager::Icon::Delete:   return ":/PersonalDrive/delete.svg";
     case IconManager::Icon::Rename:   return ":/PersonalDrive/rename.svg";
     case IconManager::Icon::Move:     return ":/PersonalDrive/move.svg";
-    case IconManager::Icon::FileSystem: return "://Main/FileSystem.svg";
-    case IconManager::Icon::Clipboard: return "://Main/Clipboard.svg";
-    case IconManager::Icon::OnlineDoc: return "://Main/OnlineDoc.svg";
-    case IconManager::Icon::FileBackup: return "://Main/FileBackup.svg";
-    case IconManager::Icon::More: return "://Main/More.svg";
-    case IconManager::Icon::Tag: return "://Main/Tag.svg";
-    case IconManager::Icon::Drawing: return "://Main/Drawing.svg";
-    case IconManager::Icon::Login: return "://Main/Login.svg";
-    case IconManager::Icon::Drive: return "://Main/Drive.svg";
-    case IconManager::Icon::Email: return "://Main/Email.svg";
+    case IconManager::Icon::FileSystem: return ":/Main/FileSystem.svg";
+    case IconManager::Icon::Clipboard: return ":/Main/Clipboard.svg";
+    case IconManager::Icon::OnlineDoc: return ":/Main/OnlineDoc.svg";
+    case IconManager::Icon::FileBackup: return ":/Main/FileBackup.svg";
+    case IconManager::Icon::More: return ":/Main/More.svg";
+    case IconManager::Icon::Tag: return ":/Main/Tag.svg";
+    case IconManager::Icon::Drawing: return ":/Main/Drawing.svg";
+    case IconManager::Icon::Login: return ":/Main/Login.svg";
+    case IconManager::Icon::Drive: return ":/Main/Drive.svg";
+    case IconManager::Icon::Email: return ":/Main/Email.svg";
+    case IconManager::Icon::MenuDownload: return ":/Menu/download.svg";
+    case IconManager::Icon::MenuFileClose: return ":/Menu/file_close.svg";
+    case IconManager::Icon::MenuFileSave: return ":/Menu/file_save.svg";
+    case IconManager::Icon::MenuHelp: return ":/Menu/help.svg";
+    case IconManager::Icon::MenuFileBackup: return ":/Menu/file_backup.svg";
+    case IconManager::Icon::MenuFileOpen: return ":/Menu/file_open.svg";
+    case IconManager::Icon::MenuNew: return ":/Menu/new.svg";
+    case IconManager::Icon::MenuSearch: return ":/Menu/search.svg";
+    case IconManager::Icon::MenuSettings: return ":/Menu/settings.svg";
     }
     return {};
 }
 
-static QPixmap renderSvg(const QString &file, const QColor &color, QSize size)
+static QPixmap renderSvg(const QString &file,
+                         const QColor &color,
+                         QSize size,
+                         bool tint = true)
 {
     QSvgRenderer renderer(file);
 
     if (!renderer.isValid()) {
-        // 如果SVG文件无效，返回一个空的透明图像
         QPixmap pixmap(size);
         pixmap.fill(Qt::transparent);
         return pixmap;
     }
 
-    // 创建一个与目标尺寸相同的QImage
     QImage img(size, QImage::Format_ARGB32_Premultiplied);
     img.fill(Qt::transparent);
 
     QPainter p(&img);
-    // 将SVG渲染到整个图像区域
     renderer.render(&p);
 
-    // 关键：统一染色
-    p.setCompositionMode(QPainter::CompositionMode_SourceIn);
-    p.fillRect(img.rect(), color);
-    p.end();
+    if (tint) {
+        p.setCompositionMode(QPainter::CompositionMode_SourceIn);
+        p.fillRect(img.rect(), color);
+    }
 
+    p.end();
     return QPixmap::fromImage(img);
 }
 
-QIcon IconManager::icon(Icon type, QSize size)
+QIcon IconManager::icon(Icon type, QSize size, QColor color)
 {
+    if (!color.isValid()) {
+        color = g_defaultIconColor;
+    }
+
     static QHash<QString, QIcon> cache;
 
-    QColor color = currentIconColor();
     QString key = QString("%1_%2_%3_%4")
                       .arg(int(type))
                       .arg(size.width())
@@ -81,9 +97,24 @@ QIcon IconManager::icon(Icon type, QSize size)
     return icon;
 }
 
+
 void IconManager::clearCache()
 {
     static QHash<QString, QIcon> empty;
     empty.clear();
+}
+
+void IconManager::setDefaultIconColor(const QColor &color)
+{
+    if (color.isValid()) {
+        g_defaultIconColor = color;
+        // 清除缓存，确保下次获取图标时使用新颜色
+        clearCache();
+    }
+}
+
+QColor IconManager::defaultIconColor()
+{
+    return g_defaultIconColor;
 }
 

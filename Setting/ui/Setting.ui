@@ -198,6 +198,34 @@
          </item>
         </widget>
        </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="all_setting_label4">
+         <property name="text">
+          <string>图标颜色</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QPushButton" name="all_setting_iconColorBtn">
+         <property name="text">
+          <string>选择颜色</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="all_setting_label5">
+         <property name="text">
+          <string>辅助图标颜色</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QPushButton" name="all_setting_secondaryIconColorBtn">
+         <property name="text">
+          <string>选择颜色</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="file_system">

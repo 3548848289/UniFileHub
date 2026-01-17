@@ -30,12 +30,15 @@ private slots:
     void on_file_system_Btn_clicked();
     void on_file_backup_Btn_clicked();
     void on_personal_drive_Btn_clicked();
+    void on_all_setting_iconColorBtn_clicked();
+    void on_all_setting_secondaryIconColorBtn_clicked();
 
     void on_all_setting_comboBox_currentIndexChanged(int index);
 
 private:
     Ui::Setting *ui;
     QSettings settings;
+    bool is_modified;
     void loadSettings();
     void saveSettings();
 

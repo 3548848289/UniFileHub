@@ -12,6 +12,14 @@ int SettingManager::all_setting_theme() {
     return settings.value("all_setting/theme", "0").toInt();
 }
 
+QString SettingManager::all_setting_icon_color() {
+    return settings.value("all_setting/icon_color", "#7598db").toString();
+}
+
+QString SettingManager::all_setting_secondary_icon_color() {
+    return settings.value("all_setting/secondary_icon_color", "#7598db").toString();
+}
+
 bool SettingManager::all_setting_fenable_tray() {
     return settings.value("all_setting/fenableray", true).toBool();
 }

@@ -77,6 +77,12 @@ TabAbstract* TabFactory::create(const QString& fileName) {
     if (it != factories.end()) {
         return it.value()(fileName);
     }
+    
+    // 处理没有扩展名的文件
+    if (ext.isEmpty()) {
+        // 尝试以文本方式打开没有扩展名的文件
+        return new TextTab(fileName);
+    }
 
     QMessageBox::StandardButton reply = QMessageBox::question(
         nullptr, QObject::tr("不受支持的文件类型"),

@@ -1,0 +1,29 @@
+Windows Registry Editor Version 5.00
+
+; 注册SmartDesk应用程序
+[HKEY_CLASSES_ROOT\Applications\SmartDesk.exe]
+@="SmartDesk"
+"FriendlyAppName"="SmartDesk"
+
+[HKEY_CLASSES_ROOT\Applications\SmartDesk.exe\shell]
+
+[HKEY_CLASSES_ROOT\Applications\SmartDesk.exe\shell\open]
+@="使用SmartDesk打开"
+
+[HKEY_CLASSES_ROOT\Applications\SmartDesk.exe\shell\open\command]
+@="\"%1\" \"%L\""
+
+; 可选：将SmartDesk注册为支持的文件类型
+; 这里以.txt文件为例，您可以根据需要添加更多文件类型
+[HKEY_CLASSES_ROOT\.txt\OpenWithProgids]
+"SmartDesk.txt"=""
+
+[HKEY_CLASSES_ROOT\SmartDesk.txt]
+@="文本文档"
+
+[HKEY_CLASSES_ROOT\SmartDesk.txt\shell]
+
+[HKEY_CLASSES_ROOT\SmartDesk.txt\shell\open]
+
+[HKEY_CLASSES_ROOT\SmartDesk.txt\shell\open\command]
+@="\"%1\" \"%L\""

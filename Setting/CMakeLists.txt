@@ -3,6 +3,7 @@ set(SETTING_SOURCES
     SettingManager.cpp
     AppHelp.cpp
     IconManager.cpp
+    ThemeManager.cpp
 )
 
 set(SETTING_HEADERS
@@ -10,6 +11,7 @@ set(SETTING_HEADERS
     include/SettingManager.h
     include/AppHelp.h
     include/IconManager.h
+    include/ThemeManager.h
 
 )
 

@@ -1,12 +1,14 @@
 #include "include/mainwindow.h"
 #include "ui/ui_mainwindow.h"
 #include "../manager/include/dbService.h"
+#include "../Setting/include/ThemeManager.h"
 
 void MainWindow::initCoreWidgets() {
     loginButton = new QPushButton(this);
-    loginButton->setFixedSize(26, 26);
+    loginButton->setFixedSize(26, 26);    
     loginButton->setStyleSheet("border: none; border-radius: 13px;");
-    loginButton->setIcon(QIcon::fromTheme(QIcon::ThemeIcon::UserAvailable));
+    // loginButton->setIcon(QIcon::fromTheme(QIcon::ThemeIcon::UserAvailable));
+    loginButton->setIcon(IconManager::icon(IconManager::Icon::Login, QSize(24,24)));
     loginButton->setIconSize(loginButton->size());
 
     ui->menubar->setCornerWidget(loginButton, Qt::TopRightCorner);
@@ -25,7 +27,7 @@ void MainWindow::initCoreWidgets() {
     widgetfunc = new WidgetFunctional(this);
 
     ui->stackedWidget->setObjectName("pWidget");
-    ui->stackedWidget->setStyleSheet("QWidget#pWidget { border: 1px solid #808080; }");
+    ui->stackedWidget->setStyleSheet("QWidget#pWidget { border: 1px solid " + ThemeManager::Instance().borderColor().name() + "; }");
     ui->stackedWidget->addWidget(file_system);
     ui->stackedWidget->addWidget(file_backup_view);
     ui->stackedWidget->addWidget(wonlinedoc);
@@ -229,9 +231,21 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     recentFilesManager(new RecentFilesManager(this))
 {
     ui->setupUi(this);
+    this->setWindowTitle("UniFileHub");
+    // this->setWindowIcon(QIcon("E:/Tmp/1.png"));
     initCoreWidgets();
     initConnect();
     initMemubarLayout();
+    
+    // 设置菜单图标
+    ui->actionopen->setIcon(IconManager::icon(IconManager::Icon::MenuFileOpen, QSize(16, 16)));
+    ui->actionsave->setIcon(IconManager::icon(IconManager::Icon::MenuFileSave, QSize(16, 16)));
+    ui->actionclose->setIcon(IconManager::icon(IconManager::Icon::MenuFileClose, QSize(16, 16)));
+    ui->actiondownload->setIcon(IconManager::icon(IconManager::Icon::MenuDownload, QSize(16, 16)));
+    ui->actionshe->setIcon(IconManager::icon(IconManager::Icon::MenuSettings, QSize(16, 16)));
+    ui->actionhelp->setIcon(IconManager::icon(IconManager::Icon::MenuHelp, QSize(16, 16)));
+    ui->actionfind->setIcon(IconManager::icon(IconManager::Icon::MenuSearch, QSize(16, 16)));
+    
     tabManager->openFile(":/conf/help.txt");
     recentFilesManager->populateRecentFilesMenu(ui->recentFile);
 }
@@ -344,5 +358,12 @@ void MainWindow::on_actionfind_triggered()
 {
     if (tabManager) {
         tabManager->findInCurrentTab(this); // this 作为 parent，保证对话框弹在主窗口上
+    }
+}
+
+void MainWindow::openFileFromCommandLine(const QString& filePath)
+{
+    if (tabManager && QFile::exists(filePath)) {
+        tabManager->openFile(filePath);
     }
 }

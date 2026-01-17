@@ -1,4 +1,5 @@
 #include "TabManager.h"
+#include "../Setting/include/ThemeManager.h"
 
 TabManager::TabManager(QTabWidget* parentTabWidget, QObject* parent) : QObject(parent), tabWidget(parentTabWidget)
 {
@@ -700,9 +701,9 @@ bool TabManager::eventFilter(QObject *obj, QEvent *event) {
                         }
                     }
 
-                    // 使用更浅的蓝色边框
+                    // 使用主题管理器中的主颜色作为活动标签的高亮边框
                     viewTabs[i][j]->setStyleSheet(
-                        "QTabWidget::pane { border: 2px solid #87ceeb; }"  // 天蓝色
+                        "QTabWidget::pane { border: 2px solid " + ThemeManager::Instance().secondaryColor().name() + "; }"
                         );
 
                     // 确保该视图获得焦点

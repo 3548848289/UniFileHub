@@ -77,9 +77,10 @@ bool dbManager::initializeTables() {
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 file_path TEXT UNIQUE NOT NULL,
                 expiration_date DATE,
-                reminder_time TEXT,
-                interval_time TEXT,
-                notify_display_time TEXT
+                reminder_time INTEGER DEFAULT 0,
+                interval_time INTEGER DEFAULT 0,
+                notify_display_time TEXT,
+                last_reminder_index INTEGER DEFAULT -1
             );
         )"},
         {"Tags", R"(
@@ -125,6 +126,8 @@ bool dbManager::initializeTables() {
             return false;
         }
     }
+
+    // 不需要迁移代码，因为数据库已被删除，新数据库将使用最新的表结构
 
     // 提交事务
     if (!dbsqlite.commit()) {

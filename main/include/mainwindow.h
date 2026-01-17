@@ -33,6 +33,7 @@
 #include "../../FileBackup/include/FileBackupView.h"
 #include "../../manager/include/dbService.h"
 
+
 #include "TabManager.h"
 
 
@@ -51,6 +52,7 @@ signals:
 
 public slots:
     void showSetting();
+    void openFileFromCommandLine(const QString& filePath);
 
 private slots:
     void on_actionopen_triggered();

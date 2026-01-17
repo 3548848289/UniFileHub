@@ -17,7 +17,7 @@
 
 #define SEARCHFILES \
     "SELECT fp.file_path, t.tag_name, fp.expiration_date, a.annotation, " \
-    "fp.reminder_time, fp.interval_time, fp.notify_display_time " \
+    "fp.reminder_time, fp.interval_time, fp.notify_display_time, fp.last_reminder_index " \
         "FROM FilePaths fp " \
         "LEFT JOIN Tags t ON fp.id = t.file_id " \
         "LEFT JOIN Annotations a ON fp.id = a.file_id " \
@@ -50,26 +50,28 @@
 #define UPDATEFILEINFO1 \
     "UPDATE FilePaths SET expiration_date = :expiration_date, " \
     "reminder_time = :reminder_time, interval_time = :interval_time, " \
-    "notify_display_time = :notify_display_time WHERE file_path = :file_path"
+    "notify_display_time = :notify_display_time, last_reminder_index = :last_reminder_index WHERE file_path = :file_path"
 #define UPDATEFILEINFO2 \
     "SELECT id FROM FilePaths WHERE file_path = :file_path"
 #define UPDATEFILEINFO3 \
     "INSERT OR REPLACE INTO Tags (file_id, tag_name) VALUES (:file_id, :tag)"
 #define UPDATEFILEINFO4 \
     "UPDATE Annotations SET annotation = :annotation WHERE file_id = :file_id"
+#define UPDATE_LAST_REMINDER_INDEX \
+    "UPDATE FilePaths SET last_reminder_index = :last_reminder_index WHERE file_path = :file_path"
 #define HASTAGSFORFILE \
     "SELECT COUNT(*) FROM FilePaths WHERE file_path = :filePath"
 #define GETALLTAGS \
     "SELECT DISTINCT tag_name FROM Tags"
 #define GETFILEPATHSBYTAG1 \
     "SELECT DISTINCT fp.file_path, t.tag_name, fp.expiration_date, a.annotation, " \
-    "fp.reminder_time, fp.interval_time, fp.notify_display_time " \
+    "fp.reminder_time, fp.interval_time, fp.notify_display_time, fp.last_reminder_index " \
     "FROM FilePaths fp " \
     "LEFT JOIN Tags t ON fp.id = t.file_id " \
     "LEFT JOIN Annotations a ON fp.id = a.file_id" 
 #define GETFILEPATHSBYTAG2 \
     "SELECT DISTINCT fp.file_path, t.tag_name, fp.expiration_date, a.annotation, " \
-    "fp.reminder_time, fp.interval_time, fp.notify_display_time " \
+    "fp.reminder_time, fp.interval_time, fp.notify_display_time, fp.last_reminder_index " \
     "FROM FilePaths fp " \
     "LEFT JOIN Tags t ON fp.id = t.file_id " \
     "LEFT JOIN Annotations a ON fp.id = a.file_id " \
@@ -81,7 +83,7 @@
 #define GETANNOTATION \
     "SELECT annotation FROM Annotations WHERE file_id = :fileId"
 #define GETFILEINFOBYFILEPATH1 \
-    "SELECT expiration_date, reminder_time, interval_time, notify_display_time FROM FilePaths WHERE file_path = :file_path"
+    "SELECT expiration_date, reminder_time, interval_time, notify_display_time, last_reminder_index FROM FilePaths WHERE file_path = :file_path"
 #define GETFILEINFOBYFILEPATH2 \
     "SELECT tag_name FROM Tags WHERE file_id = (SELECT id FROM FilePaths WHERE file_path = :file_path)"
 #define GETFILEINFOBYFILEPATH3 \
@@ -92,9 +94,10 @@ struct FilePathInfo {
     QString tagName;
     QDateTime expirationDate;
     QString annotation;
-    QTime reminderTime;
-    QTime intervalTime;
+    int reminderTime; // 提前多久提醒(小时)
+    int intervalTime; // 每次提醒间隔时间(分钟)
     QTime notifyDisplayTime;
+    int lastReminderIndex; // 已成功提醒的最大索引
 };
 
 class dbFilepath : public dbManager {
@@ -129,6 +132,7 @@ public:
     bool getTags(int fileId, QStringList &tags);
 
     bool getFileInfoByFilePath(const QString &filePath, FilePathInfo &fileInfo);
+    bool updateLastReminderIndex(const QString &filePath, int index);
 };
 
 
