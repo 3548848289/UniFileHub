@@ -27,6 +27,9 @@ void TagDetail::init(FilePathInfo fileInfo) {
     ui->tableWidget->setItem(1, 1, tagItem);
     ui->tableWidget->setItem(2, 1, new QTableWidgetItem(fileInfo.expirationDate.toString("yyyy-MM-ddTHH:mm:ss.zzz")));
     ui->tableWidget->setItem(3, 1, new QTableWidgetItem(fileInfo.annotation));
+    
+    // 保存原始文件路径
+    oldFilePath = fileInfo.filePath;
 
     QFileInfo fileInfoCheck(fileInfo.filePath);
     if (!fileInfoCheck.exists()) {
@@ -64,86 +67,43 @@ TagDetail::~TagDetail()
     delete ui;
 }
 
-
-void TagDetail::on_choosePathBtn_clicked()
-{
-    QString newPath = QFileDialog::getOpenFileName(this, "选择新文件", "", "所有文件 (*.*)");
-    if (!newPath.isEmpty()) {
-        oldFilePath = fileInfo.filePath;
-        ui->tableWidget->item(0, 1)->setText(newPath);
-
-        QFileInfo fileInfoCheck(newPath);
-        if (!fileInfoCheck.exists())
-            ui->tableWidget->item(4, 1)->setText("文件不存在");
-        else
-            ui->tableWidget->item(4, 1)->setText("文件存在");
+void TagDetail::on_choosePathBtn_clicked() {
+    QString filePath = QFileDialog::getOpenFileName(this, tr("选择文件"), ".", tr("所有文件 (*.*)"));
+    if (!filePath.isEmpty()) {
+        // 更新表格中的文件路径
+        ui->tableWidget->setItem(0, 1, new QTableWidgetItem(filePath));
+        // 更新fileInfo中的路径
+        fileInfo.filePath = filePath;
     }
 }
 
-
-
-void TagDetail::on_YesBtn_clicked()
-{
-    QString filePath = ui->tableWidget->item(0, 1)->text();
-    QString newTag = ui->tableWidget->item(1, 1)->text();
-    QString newDate = ui->tableWidget->item(2, 1)->text();
-    QString newAnnotation = ui->tableWidget->item(3, 1)->text();
-
-    if(filePath != oldFilePath)
-    {
-        bool judge = dbservice.dbTags().updateFilePath(filePath, oldFilePath);
-        if (!judge) {
-            QMessageBox::warning(this, "", "更新文件夹路径失败");
-            return;
-        }
-    }
-
-    if (newTag.isEmpty()) {
-        QMessageBox::warning(this, "", "标签不能为空！");
-        return;
-    }
-    QDateTime updateDate = QDateTime::fromString(newDate, "yyyy-MM-ddTHH:mm:ss.zzz");
-    if (!updateDate.isValid() && !newDate.isEmpty()) {
-        QMessageBox::warning(this, "", "过期时间格式无效！");
+void TagDetail::on_YesBtn_clicked() {
+    // 获取修改后的文件路径
+    QString newFilePath = ui->tableWidget->item(0, 1)->text();
+    if (newFilePath.isEmpty()) {
+        QMessageBox::warning(this, tr("警告"), tr("文件路径不能为空！"));
         return;
     }
 
-    FilePathInfo fileInfo;
-    fileInfo.filePath = filePath;
-    fileInfo.tagName = newTag;
-    fileInfo.expirationDate = updateDate;
-    fileInfo.annotation = newAnnotation;
+    // 检查文件是否存在
+    QFileInfo fileInfoCheck(newFilePath);
+    if (!fileInfoCheck.exists()) {
+        QMessageBox::warning(this, tr("警告"), tr("文件不存在！"));
+        return;
+    }
 
-    bool judge = dbservice.dbTags().updateFileInfo(fileInfo);
-    if (judge)
-        close();
-    else
-        QMessageBox::warning(this, "", "更新标签和文件信息失败！");
-}
-
-void TagDetail::on_deleteBtn_clicked() {
-    QMessageBox::StandardButton reply;
-    reply = QMessageBox::question(this, "确认删除", "确认删除标签、批注吗?", QMessageBox::Yes | QMessageBox::No);
-
-    if (reply == QMessageBox::Yes) {
-        int fileId;
-        // 使用表格中实际显示的文件路径
-        QString filePath = ui->tableWidget->item(0, 1)->text();
-        
-        // 使用表格中的filePath而不是fileInfo.filePath
-        if (!dbservice.dbTags().getFileId(filePath, fileId)) {
-            QMessageBox::warning(this, "错误", "无法找到文件ID！");
-            return;
-        }
-        bool result = dbservice.dbTags().deleteTag(fileId);
-
-        if (!result) {
-            QMessageBox::warning(this, "删除失败", "删除过程中出现错误，操作已回滚。");
-        } else {
-            // 使用正确的filePath发送信号
-            emit tagDeleted(filePath);
-            qDebug() << "已发送tagDeleted信号，文件路径:" << filePath;
-        }
-        close();
+    // 更新数据库
+    if (dbservice.dbTags().updateFilePath(oldFilePath, newFilePath)) {
+        // 更新成功
+        QMessageBox::information(this, tr("提示"), tr("文件路径已成功更新！"));
+        // 更新UI中的文件状态
+        ui->tableWidget->setItem(4, 1, new QTableWidgetItem("文件存在"));
+        // 更新oldFilePath
+        oldFilePath = newFilePath;
+    } else {
+        QMessageBox::warning(this, tr("警告"), tr("文件路径更新失败！"));
+        // 恢复原来的路径
+        ui->tableWidget->setItem(0, 1, new QTableWidgetItem(oldFilePath));
+        fileInfo.filePath = oldFilePath;
     }
 }

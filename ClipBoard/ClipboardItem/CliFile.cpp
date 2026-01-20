@@ -1,6 +1,8 @@
 #include "include/ClipboardItem/CliFile.h"
 #include "include/FileTypeDetector.h"
+#include "../Setting/include/IconManager.h"
 #include <QListWidgetItem>
+#include <QDir>
 #include <QVariant>
 #include <Qt>
 #include <QFileInfo>
@@ -35,10 +37,20 @@ QListWidgetItem* CliFile::createListWidgetItem() const {
 
     item->setText(displayText);
 
-    // 统一使用默认文件图标，不生成图片缩略图
-    item->setIcon(QIcon::fromTheme("document", QIcon("://usedimage/history.svg")));
+    // 根据文件类型使用不同图标
+    if (m_filePaths.size() == 1) {
+        QFileInfo fileInfo(m_filePaths.first());
+        if (fileInfo.isDir()) {
+            item->setIcon(IconManager::icon(IconManager::Icon::Folder, QSize(24, 24)));
+        } else {
+            item->setIcon(IconManager::icon(IconManager::Icon::File, QSize(24, 24)));
+        }
+    } else {
+        // 多个文件/目录时使用文件图标
+        item->setIcon(IconManager::icon(IconManager::Icon::File, QSize(24, 24)));
+    }
 
-    // 设置 ToolTip：始终显示完整文件路径
+    // 设置 ToolTip
     if (m_filePaths.size() > 1) {
         // 多文件/文件夹显示每个完整路径
         QString toolTip;
@@ -47,8 +59,21 @@ QListWidgetItem* CliFile::createListWidgetItem() const {
         }
         item->setToolTip(toolTip.trimmed());
     } else {
-        // 单个文件/文件夹显示完整路径
-        item->setToolTip(m_filePaths.first());
+        QString path = m_filePaths.first();
+        QFileInfo fileInfo(path);
+        if (fileInfo.isDir()) {
+            // 单个文件夹：显示路径及其下的所有文件名
+            QString toolTip ="包含的文件(夹)：\n";
+            QDir dir(path);
+            QStringList files = dir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
+            for (const auto& file : files) {
+                toolTip += file + "\n";
+            }
+            item->setToolTip(toolTip.trimmed());
+        } else {
+            // 单个文件：显示完整路径
+            item->setToolTip(path);
+        }
     }
 
     item->setData(Qt::UserRole, QVariant::fromValue<quintptr>(reinterpret_cast<quintptr>(this)));

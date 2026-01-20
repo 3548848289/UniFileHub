@@ -232,7 +232,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 {
     ui->setupUi(this);
     this->setWindowTitle("UniFileHub");
-    // this->setWindowIcon(QIcon("E:/Tmp/1.png"));
     initCoreWidgets();
     initConnect();
     initMemubarLayout();

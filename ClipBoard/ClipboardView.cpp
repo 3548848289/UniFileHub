@@ -24,6 +24,8 @@
 #include <QMouseEvent>
 #include <QShortcut>
 #include "../Setting/include/SettingManager.h"
+#include "../Setting/include/ThemeManager.h"
+#include "../Setting/include/IconManager.h"
 
 Q_DECLARE_METATYPE(quintptr) // 确保能用 QVariant 存取 quintptr
 
@@ -84,9 +86,9 @@ void ClipboardView::insertNewItem(ClipboardItem* newItem) {
             }
         }
         ui->listWidget->insertItem(0, listItem); // 新的置顶项总是放在最前面
-        QIcon pinIcon(":/usedimage/pin.svg");
-        QPixmap pixmap = pinIcon.pixmap(QSize(16, 16)); // 指定小图尺寸
-        listItem->setIcon(QIcon(pixmap));
+        // 使用IconManager加载pin图标
+        QIcon pinIcon = IconManager::icon(IconManager::Icon::Pin, QSize(16, 16));
+        listItem->setIcon(pinIcon);
     } else {
         // 普通项插入到所有置顶项的后面，普通项的最前面
         int insertRow = 0;
@@ -116,24 +118,31 @@ void ClipboardView::initializeListWidget() {
     ui->listWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->listWidget->setIconSize(QSize(80, 60));
 
-    QString selectedColor = (SettingManager::Instance().all_setting_theme() == 2) ? "#444444" : "#e0e0e0";
+    // 获取主题颜色
+    ThemeManager& themeManager = ThemeManager::Instance();
+    QColor secondaryColor = themeManager.secondaryColor();
+    QColor borderColor = themeManager.borderColor();
+    
+    // 为选中和悬停状态创建一个半透明的辅助颜色
+    QColor selectedColor = secondaryColor;
+    selectedColor.setAlpha(128); // 50% opacity
 
     QString style = QString(R"(
         QListWidget::item {
-            border-top: 1px solid lightgray;
+            border-top: 1px solid %1;
             padding: 5px;
             margin: 2px;
         }
 
         QListWidget::item:selected {
-            background-color: %1;
+            background-color: %2;
             color: black;
         }
 
         QListWidget::item:hover {
-            background-color: %1;
+            background-color: %2;
         }
-    )").arg(selectedColor);
+    )").arg(borderColor.name(QColor::HexRgb), selectedColor.name(QColor::HexRgb));
 
     ui->listWidget->setStyleSheet(style);
 
@@ -312,9 +321,9 @@ void ClipboardView::filterItemsByType(ClipboardItemType type) {
         quintptr addr = reinterpret_cast<quintptr>(item);
         listItem->setData(Qt::UserRole, QVariant::fromValue<quintptr>(addr));
         if (item->isPinned()) {
-            QIcon pinIcon(":/usedimage/pin.svg");
-            QPixmap pixmap = pinIcon.pixmap(QSize(16, 16));
-            listItem->setIcon(QIcon(pixmap));
+            // 使用IconManager加载pin图标
+            QIcon pinIcon = IconManager::icon(IconManager::Icon::Pin, QSize(16, 16));
+            listItem->setIcon(pinIcon);
         }
         ui->listWidget->addItem(listItem);
     };
@@ -437,9 +446,9 @@ void ClipboardView::refreshAllItems() {
         quintptr addr = reinterpret_cast<quintptr>(item);
         listItem->setData(Qt::UserRole, QVariant::fromValue<quintptr>(addr));
         if (item->isPinned()) {
-            QIcon pinIcon(":/usedimage/pin.svg");
-            QPixmap pixmap = pinIcon.pixmap(QSize(16, 16)); // 指定小图尺寸
-            listItem->setIcon(QIcon(pixmap));
+            // 使用IconManager加载pin图标
+            QIcon pinIcon = IconManager::icon(IconManager::Icon::Pin, QSize(24, 24));
+            listItem->setIcon(pinIcon);
         }
 
         ui->listWidget->addItem(listItem);

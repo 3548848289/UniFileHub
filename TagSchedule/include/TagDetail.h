@@ -27,17 +27,8 @@ public:
     ~TagDetail();
     
 signals:
-    void tagDeleted(const QString &filePath); // 添加标签删除信号
-
-private slots:
-
-
-    void on_choosePathBtn_clicked();
-
-    void on_YesBtn_clicked();
-
-    void on_deleteBtn_clicked();
-
+    void tagDeleted(const QString &filePath);
+    
 private:
     void init( FilePathInfo fileInfo);
     void updateFileInfo();
@@ -45,7 +36,11 @@ private:
     Ui::TagDetail *ui;
     dbService& dbservice;    // dbService 单例引用
     FilePathInfo fileInfo;  // 引用传递的文件路径信息
-    QString oldFilePath ;
+    QString oldFilePath;    // 原文件路径，用于比较是否修改
+
+private slots:
+    void on_choosePathBtn_clicked();
+    void on_YesBtn_clicked();
 };
 
 #endif // TAGDETAIL_H

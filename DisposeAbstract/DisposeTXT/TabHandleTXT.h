@@ -4,6 +4,7 @@
 #include "../../main/include/TabAbstract.h"
 #include <QTextEdit>
 #include <QFile>
+#include <QFileInfo>
 #include <QTextStream>
 #include <QMessageBox>
 #include <QVBoxLayout>
@@ -19,6 +20,23 @@
 #include <QByteArray>
 
 
+
+// 行号显示组件
+class LineNumberWidget : public QWidget
+{
+    Q_OBJECT
+
+public:
+    explicit LineNumberWidget(QTextEdit *editor, QWidget *parent = nullptr);
+    void updateLineNumbers();
+    
+protected:
+    void paintEvent(QPaintEvent *event) override;
+    void resizeEvent(QResizeEvent *event) override;
+    
+private:
+    QTextEdit *m_textEdit;
+};
 
 class TextTab : public TabAbstract
 {
@@ -69,6 +87,12 @@ public:
     // 设置当前编码名称
     void setCurrentCodecName(const QString& codecName);
 
+public:
+    bool eventFilter(QObject *obj, QEvent *event) override;
+    
+    // 创建自定义右键菜单
+    void createCustomContextMenu(const QPoint &pos);
+    
 public slots:
     void findNext(const QString &str, Qt::CaseSensitivity cs);
     void findAll(const QString &str, Qt::CaseSensitivity cs);
@@ -76,11 +100,22 @@ public slots:
     
     // 处理编码变化
     void onEncodingChanged(const QString& codecName);
+    
+    // 处理文本滚动
+    void onTextScrolled(int value);
+    
+    // 右键菜单槽函数
+    void pasteWithFormat();
+    void pasteAsPlainText();
 
 private:
     ControlWidTXT * controlWidtxt;
     QSplitter * splitter;
     QTextEdit *textEdit;
+    LineNumberWidget *lineNumberWidget;
+    QWidget *textContainer;
+    QHBoxLayout *textLayout;
+    SyntaxHighlighter *m_syntaxHighlighter;
     QString m_currentCodecName;  // 当前使用的编码名称
 };
 

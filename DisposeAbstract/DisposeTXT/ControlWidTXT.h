@@ -13,51 +13,51 @@
 #include <QComboBox>
 #include "../../Setting/include/SettingManager.h"
 
-class CppHighlighter : public QSyntaxHighlighter
+class SyntaxHighlighter : public QSyntaxHighlighter
 {
     Q_OBJECT
 
 public:
-    CppHighlighter(QTextDocument *parent = nullptr) : QSyntaxHighlighter(parent) {}
+    enum Language {
+        PlainText,
+        Cpp,
+        C,
+        Java,
+        Python,
+        JavaScript,
+        TypeScript,
+        HTML,
+        CSS,
+        XML,
+        JSON,
+        Markdown
+    };
+
+    explicit SyntaxHighlighter(QTextDocument *parent = nullptr);
+    void setLanguage(Language language);
 
 protected:
-    void highlightBlock(const QString &text) override
-    {
-        // 设置默认格式
-        QTextCharFormat defaultFormat;
-        defaultFormat.setForeground(Qt::white);
-        setFormat(0, text.length(), defaultFormat);
+    void highlightBlock(const QString &text) override;
 
-        // 关键字高亮
-        QTextCharFormat keywordFormat;
-        keywordFormat.setForeground(Qt::blue);  // 设置蓝色
-        QRegularExpression keywordRegex("\\b(class|struct|public|private|protected|if|else|for|while|return|int|float|double|char|void)\\b");
-        QRegularExpressionMatchIterator keywordIterator = keywordRegex.globalMatch(text);
-        while (keywordIterator.hasNext()) {
-            QRegularExpressionMatch match = keywordIterator.next();
-            setFormat(match.capturedStart(), match.capturedLength(), keywordFormat);
-        }
+private:
+    struct HighlightingRule {
+        QRegularExpression pattern;
+        QTextCharFormat format;
+    };
 
-        // 字符串高亮
-        QTextCharFormat stringFormat;
-        stringFormat.setForeground(Qt::green);  // 设置绿色
-        QRegularExpression stringRegex("\"([^\"]*)\"");
-        QRegularExpressionMatchIterator stringIterator = stringRegex.globalMatch(text);
-        while (stringIterator.hasNext()) {
-            QRegularExpressionMatch match = stringIterator.next();
-            setFormat(match.capturedStart(), match.capturedLength(), stringFormat);
-        }
+    void setupRules();
+    void highlightComments(const QString &text);
+    void highlightStrings(const QString &text);
+    void highlightNumbers(const QString &text);
 
-        // 注释高亮
-        QTextCharFormat commentFormat;
-        commentFormat.setForeground(Qt::darkGreen);  // 设置深绿色
-        QRegularExpression commentRegex("//[^\n]*");
-        QRegularExpressionMatchIterator commentIterator = commentRegex.globalMatch(text);
-        while (commentIterator.hasNext()) {
-            QRegularExpressionMatch match = commentIterator.next();
-            setFormat(match.capturedStart(), match.capturedLength(), commentFormat);
-        }
-    }
+    Language m_language;
+    QList<HighlightingRule> m_highlightingRules;
+    QTextCharFormat m_keywordFormat;
+    QTextCharFormat m_stringFormat;
+    QTextCharFormat m_commentFormat;
+    QTextCharFormat m_numberFormat;
+    QTextCharFormat m_typeFormat;
+    QTextCharFormat m_functionFormat;
 };
 
 
@@ -72,23 +72,38 @@ public:
     explicit ControlWidTXT(QWidget *parent = nullptr);
     ~ControlWidTXT();
     
-    // 获取当前编码名称
+
     QString getCurrentCodecName() const;
     
-    // 设置当前编码名称
+
     void setCurrentCodecName(const QString& codecName);
+    
+
+    void updateTextStats(int lineCount, int charCount);
 
 signals:
-    // 编码方式改变信号
+
     void encodingChanged(const QString& codecName);
+    
+
+    void tabIndentChanged(int indent);
+    
+
+    void fontSizeChanged(int fontSize);
 
 private slots:
-    // 处理编码选择变化
+
     void onEncodingComboBoxCurrentIndexChanged(const QString& codecName);
+    
+
+    void onTabIndentLineEditTextChanged(const QString& text);
+    
+
+    void onFontSizeComboBoxCurrentIndexChanged(const QString& text);
 
 private:
-    Ui::ControlWidTXT *ui;  // UI 类的指针
-    QString m_currentCodecName;  // 当前选择的编码名称
+    Ui::ControlWidTXT *ui;
+    QString m_currentCodecName;
 };
 
-#endif // CONTROLWIDTXT_H
+#endif

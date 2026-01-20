@@ -39,6 +39,8 @@ private slots:
     void on_avatar_pushButton_clicked();
     void on_registerBtn_clicked();
     void on_loginBtn_clicked();
+    void onPrivacyPolicyClicked();
+    void onForgotPasswordClicked();
 
     void onLoginResponse(const QJsonObject &response);
     void onRegisterResponse(const QJsonObject &response);

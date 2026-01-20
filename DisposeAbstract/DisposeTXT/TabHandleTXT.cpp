@@ -1,21 +1,132 @@
 #include "TabHandleTXT.h"
 #include <QDebug>
+#include <QPainter>
+#include <QScrollBar>
+#include <QClipboard>
+#include <QAbstractTextDocumentLayout>
+#include <QMenu>
+#include <QAction>
 
+// LineNumberWidget 实现
+LineNumberWidget::LineNumberWidget(QTextEdit *editor, QWidget *parent) : QWidget(parent), m_textEdit(editor)
+{
+    setFixedWidth(50);
+    setFont(editor->font());
+    
+    // 连接滚动条信号
+    connect(editor->verticalScrollBar(), &QScrollBar::valueChanged, this, &LineNumberWidget::updateLineNumbers);
+    connect(editor->document(), &QTextDocument::blockCountChanged, this, &LineNumberWidget::updateLineNumbers);
+    connect(editor->document(), &QTextDocument::documentLayoutChanged, this, &LineNumberWidget::updateLineNumbers);
+    connect(editor->document(), &QTextDocument::contentsChanged, this, &LineNumberWidget::updateLineNumbers);
+}
+
+void LineNumberWidget::updateLineNumbers()
+{
+    update();
+}
+
+void LineNumberWidget::paintEvent(QPaintEvent *event)
+{
+    QPainter painter(this);
+    painter.fillRect(event->rect(), QColor(240, 240, 240));
+    painter.setPen(QColor(120, 120, 120));
+    painter.setFont(m_textEdit->font());
+    
+    QTextBlock block = m_textEdit->document()->begin();
+    int blockNumber = 1;
+    
+    while (block.isValid()) {
+        QTextLayout *layout = block.layout();
+        QRectF boundingRect = layout->boundingRect();
+        QPointF position = m_textEdit->document()->documentLayout()->blockBoundingRect(block).topLeft();
+        
+        // 检查当前块是否在可视区域内
+        if (position.y() >= m_textEdit->verticalScrollBar()->value() + m_textEdit->viewport()->height()) {
+            break;
+        }
+        
+        if (position.y() + boundingRect.height() <= m_textEdit->verticalScrollBar()->value()) {
+            block = block.next();
+            blockNumber++;
+            continue;
+        }
+        
+        // 绘制行号
+        painter.drawText(0, position.y() - m_textEdit->verticalScrollBar()->value() + boundingRect.height(),
+                         width() - 5, boundingRect.height(), Qt::AlignRight, QString::number(blockNumber));
+        
+        block = block.next();
+        blockNumber++;
+    }
+}
+
+void LineNumberWidget::resizeEvent(QResizeEvent *event)
+{
+    updateLineNumbers();
+    QWidget::resizeEvent(event);
+}
+
+// TextTab 实现
 TextTab::TextTab(const QString &filePath, QWidget *parent)  : TabAbstract(filePath, parent), m_currentCodecName("UTF-8")
 {
     textEdit = new QTextEdit(this);
-
+    lineNumberWidget = new LineNumberWidget(textEdit, this);
+    
+    // 设置Tab缩进
     QFontMetrics fm(textEdit->font());
     int tabWidth = fm.horizontalAdvance("中文");
     textEdit->setTabStopDistance(tabWidth);
 
-    // 为 QTextEdit 设置 C++ 语法高亮
-    // new CppHighlighter(textEdit->document());
+    // 创建语法高亮器
+    m_syntaxHighlighter = new SyntaxHighlighter(textEdit->document());
+    
+    // 根据文件扩展名设置语言
+    QString ext = QFileInfo(filePath).suffix().toLower();
+    if (ext == "cpp" || ext == "hpp" || ext == "cc") {
+        m_syntaxHighlighter->setLanguage(SyntaxHighlighter::Cpp);
+    } else if (ext == "c" || ext == "h") {
+        m_syntaxHighlighter->setLanguage(SyntaxHighlighter::C);
+    } else if (ext == "java") {
+        m_syntaxHighlighter->setLanguage(SyntaxHighlighter::Java);
+    } else if (ext == "py") {
+        m_syntaxHighlighter->setLanguage(SyntaxHighlighter::Python);
+    } else if (ext == "js") {
+        m_syntaxHighlighter->setLanguage(SyntaxHighlighter::JavaScript);
+    } else if (ext == "ts") {
+        m_syntaxHighlighter->setLanguage(SyntaxHighlighter::TypeScript);
+    } else if (ext == "html" || ext == "htm") {
+        m_syntaxHighlighter->setLanguage(SyntaxHighlighter::HTML);
+    } else if (ext == "css") {
+        m_syntaxHighlighter->setLanguage(SyntaxHighlighter::CSS);
+    } else if (ext == "xml" || ext == "qrc") {
+        m_syntaxHighlighter->setLanguage(SyntaxHighlighter::XML);
+    } else if (ext == "json") {
+        m_syntaxHighlighter->setLanguage(SyntaxHighlighter::JSON);
+    } else if (ext == "md") {
+        m_syntaxHighlighter->setLanguage(SyntaxHighlighter::Markdown);
+    } else {
+        m_syntaxHighlighter->setLanguage(SyntaxHighlighter::PlainText);
+    }
+    
+    // 安装事件过滤器处理粘贴操作
+    textEdit->installEventFilter(this);
+    
+    // 启用自定义右键菜单
+    textEdit->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(textEdit, &QWidget::customContextMenuRequested, this, &TextTab::createCustomContextMenu);
 
+    // 创建文本容器，包含行号和文本编辑
+    textContainer = new QWidget(this);
+    textLayout = new QHBoxLayout(textContainer);
+    textLayout->setContentsMargins(0, 0, 0, 0);
+    textLayout->setSpacing(0);
+    textLayout->addWidget(lineNumberWidget);
+    textLayout->addWidget(textEdit);
+    
     controlWidtxt = new ControlWidTXT(this);
 
     splitter = new QSplitter(Qt::Vertical, this);
-    splitter->addWidget(textEdit);
+    splitter->addWidget(textContainer);
     splitter->addWidget(controlWidtxt);
     splitter->setSizes({700, 100});
 
@@ -31,13 +142,119 @@ TextTab::TextTab(const QString &filePath, QWidget *parent)  : TabAbstract(filePa
 
     connect(textEdit, &QTextEdit::textChanged, this, [this]() {
         setContentModified(true);
+        
+        // 更新文本统计信息
+        int lineCount = textEdit->document()->blockCount();
+        int charCount = textEdit->toPlainText().length();
+        controlWidtxt->updateTextStats(lineCount, charCount);
     });
     
     // 连接编码变化信号
     connect(controlWidtxt, &ControlWidTXT::encodingChanged, this, &TextTab::onEncodingChanged);
     
+    // 连接Tab缩进字符数变化信号
+    connect(controlWidtxt, &ControlWidTXT::tabIndentChanged, this, [this](int indent) {
+        QFontMetrics fm(textEdit->font());
+        int tabWidth = fm.horizontalAdvance(" ") * indent;
+        textEdit->setTabStopDistance(tabWidth);
+    });
+    
+    // 连接字体大小变化信号
+    connect(controlWidtxt, &ControlWidTXT::fontSizeChanged, this, [this](int fontSize) {
+        QFont font = textEdit->font();
+        font.setPointSize(fontSize);
+        textEdit->setFont(font);
+    });
+    
+    // 初始化文本统计信息
+    int lineCount = textEdit->document()->blockCount();
+    int charCount = textEdit->toPlainText().length();
+    controlWidtxt->updateTextStats(lineCount, charCount);
+    
     // 初始化编码为UTF-8
     setCurrentCodecName("UTF-8");
+}
+
+void TextTab::onTextScrolled(int value)
+{
+    Q_UNUSED(value);
+    lineNumberWidget->updateLineNumbers();
+}
+
+bool TextTab::eventFilter(QObject *obj, QEvent *event)
+{
+    if (obj == textEdit && event->type() == QEvent::KeyPress) {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
+        // 处理Ctrl+V粘贴操作 - 保存格式
+        if (keyEvent->matches(QKeySequence::Paste)) {
+            // 允许默认的带格式粘贴行为
+            return false;
+        }
+    }
+    
+    // 其他事件交给父类处理
+    return QObject::eventFilter(obj, event);
+}
+
+// 实现自定义右键菜单
+void TextTab::createCustomContextMenu(const QPoint &pos)
+{
+    // 获取默认菜单
+    QMenu *menu = textEdit->createStandardContextMenu();
+    
+    // 查找并移除默认的粘贴菜单项
+    QAction *defaultPasteAction = nullptr;
+    QList<QAction*> actions = menu->actions();
+    for (QAction *action : actions) {
+        if (action->shortcut() == QKeySequence::Paste) {
+            defaultPasteAction = action;
+            break;
+        }
+    }
+    
+    if (defaultPasteAction) {
+        // 移除默认粘贴菜单项
+        menu->removeAction(defaultPasteAction);
+        
+        // 在合适的位置添加分隔符
+        menu->addSeparator();
+        
+        // 添加带格式粘贴选项（默认选项）
+        QAction *pasteWithFormatAction = new QAction("带格式粘贴", this);
+        pasteWithFormatAction->setShortcut(QKeySequence::Paste);
+        connect(pasteWithFormatAction, &QAction::triggered, this, &TextTab::pasteWithFormat);
+        menu->addAction(pasteWithFormatAction);
+        
+        // 添加只粘贴文本选项
+        QAction *pasteAsPlainTextAction = new QAction("只粘贴文本", this);
+        connect(pasteAsPlainTextAction, &QAction::triggered, this, &TextTab::pasteAsPlainText);
+        menu->addAction(pasteAsPlainTextAction);
+        
+        menu->addSeparator();
+    }
+    
+    // 显示菜单
+    menu->exec(textEdit->mapToGlobal(pos));
+    delete menu;
+}
+
+// 带格式粘贴
+void TextTab::pasteWithFormat()
+{
+    // 使用默认的粘贴行为，保留格式
+    QKeyEvent keyEvent(QEvent::KeyPress, Qt::Key_V, Qt::ControlModifier);
+    QApplication::sendEvent(textEdit, &keyEvent);
+}
+
+// 只粘贴文本
+void TextTab::pasteAsPlainText()
+{
+    // 获取剪贴板内容
+    QClipboard *clipboard = QApplication::clipboard();
+    QString plainText = clipboard->text();
+    
+    // 插入纯文本
+    textEdit->insertPlainText(plainText);
 }
 
 void TextTab::setContent(const QString &text)

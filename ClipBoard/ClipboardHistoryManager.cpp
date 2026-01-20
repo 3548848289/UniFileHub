@@ -33,7 +33,7 @@ void ClipboardHistoryManager::loadHistory(int hours) {
         }
     }
 
-    // 3️⃣ UI 显示时按置顶排序（已保证置顶在前）
+    // UI 显示时按置顶排序（已保证置顶在前）
     std::stable_sort(m_items.begin(), m_items.end(),
                      [](const auto& a, const auto& b){ return a->isPinned() && !b->isPinned(); });
 

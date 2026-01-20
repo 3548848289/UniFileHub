@@ -63,24 +63,52 @@ void FlaskInfo::sendRequest(const QUrl &url, const QJsonObject &json, const QStr
 
 void FlaskInfo::handleResponse(QNetworkReply *reply, const QString &action)
 {
-    if (reply->error() != QNetworkReply::NoError) {
+    // 先读取响应数据
+    QByteArray responseData = reply->readAll();
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(responseData);
+    QJsonObject jsonRes = jsonDoc.isObject() ? jsonDoc.object() : QJsonObject();
+
+    // 获取 HTTP 状态码
+    int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+
+    // 1️⃣ 网络层错误（连接失败、超时等），才用 reply->error()
+    if (reply->error() != QNetworkReply::NoError && statusCode == 0) {
         emit errorOccurred(reply->errorString());
         reply->deleteLater();
         return;
     }
 
-    QByteArray responseData = reply->readAll();
-    QJsonDocument jsonDoc = QJsonDocument::fromJson(responseData);
+    // 2️⃣ 业务层 HTTP 错误（4xx/5xx）通过 JSON 处理，不触发 errorOccurred
+    if (statusCode >= 400 && statusCode < 600) {
+        QString msg;
+        if (jsonRes.contains("error"))
+            msg = jsonRes["error"].toString();
+        else if (jsonRes.contains("message"))
+            msg = jsonRes["message"].toString();
+        else
+            msg = QString("HTTP Error %1").arg(statusCode);
 
+        // 对注册操作特殊处理
+        if (action == "login") {
+            H_LoginAct(jsonRes);  // 登录失败 JSON 包含错误信息
+        } else if (action == "register") {
+            H_RegisterAct(jsonRes); // 让注册函数自己解析 error/message
+        } else {
+            emit errorOccurred(msg);
+        }
+
+        reply->deleteLater();
+        return;
+    }
+
+    // 3️⃣ JSON解析失败
     if (!jsonDoc.isObject()) {
         emit errorOccurred("Invalid JSON response.");
         reply->deleteLater();
         return;
     }
 
-    QJsonObject jsonRes = jsonDoc.object();
-    // qDebug() << "Response JSON:" << jsonRes;
-
+    // 4️⃣ 正常业务逻辑处理
     if (action == "login") {
         H_LoginAct(jsonRes);
     } else if (action == "register") {

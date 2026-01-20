@@ -30,13 +30,21 @@ public:
     QString getFilePath() const;
 
     QString getExpInfo(const QDateTime expDate);
+protected:
+    void contextMenuEvent(QContextMenuEvent *event) override;
+
 private slots:
-    void on_pushButton_clicked();
+    void onPreviewAction();
+    void onOpenLocationAction();
+    void onDetailAction();
+    void onModifyPathAction();
+    void onDeleteTagAction();
 
 private:
     Ui::TagList *ui;
     FilePathInfo fileInfo;
     TagDetail *tagdetail = nullptr; // 标签详情窗口实例
+    dbService& dbservice;    // dbService 单例引用
 };
 
 #endif // TAGLIST_H

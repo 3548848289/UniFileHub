@@ -30,7 +30,9 @@ public:
         MenuFileOpen,
         MenuNew,
         MenuSearch,
-        MenuSettings
+        MenuSettings,
+        Pin,
+        Close
     };
 
     static QIcon icon(Icon type, QSize size, QColor color = QColor());

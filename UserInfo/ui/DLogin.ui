@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>270</width>
-    <height>436</height>
+    <width>257</width>
+    <height>412</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -57,9 +57,9 @@ QPushButton#registerBtn{
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>20</y>
+     <y>0</y>
      <width>241</width>
-     <height>381</height>
+     <height>401</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -98,13 +98,10 @@ QPushButton#registerBtn{
         <property name="text">
          <string>退出登录</string>
         </property>
-        <property name="icon">
-         <iconset theme="QIcon::ThemeIcon::EditClear"/>
-        </property>
         <property name="iconSize">
          <size>
-          <width>24</width>
-          <height>24</height>
+          <width>36</width>
+          <height>36</height>
          </size>
         </property>
        </widget>
@@ -285,17 +282,36 @@ QPushButton#registerBtn{
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_4">
       <property name="spacing">
-       <number>51</number>
+       <number>0</number>
       </property>
+      <item>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Orientation::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
       <item>
        <widget class="QPushButton" name="resiger_pushButton">
         <property name="text">
-         <string>更多信息</string>
+         <string>隐私政策</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="Line" name="line">
+        <property name="minimumSize">
+         <size>
+          <width>70</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="orientation">
          <enum>Qt::Orientation::Vertical</enum>
         </property>
@@ -307,6 +323,19 @@ QPushButton#registerBtn{
          <string>忘记密码</string>
         </property>
        </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_4">
+        <property name="orientation">
+         <enum>Qt::Orientation::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
      </layout>
     </item>
