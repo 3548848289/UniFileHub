@@ -2,7 +2,6 @@
 #define TABHANDLETXT_H
 
 #include "../../main/include/TabAbstract.h"
-#include <QTextEdit>
 #include <QFile>
 #include <QFileInfo>
 #include <QTextStream>
@@ -10,33 +9,15 @@
 #include <QVBoxLayout>
 #include <QSettings>
 #include <QSplitter>
-#include <QStringDecoder>
-#include <QStringEncoder>
+#include <QtCore5Compat/QTextCodec>
 #include "ControlWidTXT.h"
-
-
-#include <Windows.h>
+#include "PlainTextEdit.h"
+#include "LineNumberWidget.h"
+#include "SyntaxHighlighter.h"
 #include <QString>
 #include <QByteArray>
-
-
-
-// 行号显示组件
-class LineNumberWidget : public QWidget
-{
-    Q_OBJECT
-
-public:
-    explicit LineNumberWidget(QTextEdit *editor, QWidget *parent = nullptr);
-    void updateLineNumbers();
-    
-protected:
-    void paintEvent(QPaintEvent *event) override;
-    void resizeEvent(QResizeEvent *event) override;
-    
-private:
-    QTextEdit *m_textEdit;
-};
+#include <QStringDecoder>
+#include <QStringEncoder>
 
 class TextTab : public TabAbstract
 {
@@ -44,33 +25,8 @@ class TextTab : public TabAbstract
 
 public:
     explicit TextTab(const QString& filePath, QWidget *parent = nullptr);
-    QString gbkToQString(const QByteArray &data)
-    {
-        if (data.isEmpty())
-            return QString();
+    
 
-        int len = MultiByteToWideChar(CP_ACP, 0, data.constData(), data.size(), nullptr, 0);
-        if (len <= 0)
-            return QString();
-
-        std::wstring buf(len, L'\0');
-        MultiByteToWideChar(CP_ACP, 0, data.constData(), data.size(), buf.data(), len);
-        return QString::fromStdWString(buf);
-    }
-
-    QByteArray qStringToGbk(const QString &str)
-    {
-        if (str.isEmpty())
-            return QByteArray();
-
-        int len = WideCharToMultiByte(CP_ACP, 0, (LPCWSTR)str.utf16(), str.size(), nullptr, 0, nullptr, nullptr);
-        if (len <= 0)
-            return QByteArray();
-
-        QByteArray buf(len, 0);
-        WideCharToMultiByte(CP_ACP, 0, (LPCWSTR)str.utf16(), str.size(), buf.data(), len, nullptr, nullptr);
-        return buf;
-    }
 
     void setContent(const QString &text) override;
     QString getContent() const override;
@@ -86,12 +42,21 @@ public:
     
     // 设置当前编码名称
     void setCurrentCodecName(const QString& codecName);
+    
+    // 将编码名称转换为Qt支持的格式
+    static QString normalizeCodecName(const QString& codecName);
+    
+private:
+    // 辅助函数：将字节数组根据当前编码转换为字符串
+    QString decodeContent(const QByteArray &content) const;
+    
+    // 辅助函数：将字符串根据当前编码转换为字节数组
+    QByteArray encodeContent(const QString &text) const;
 
 public:
     bool eventFilter(QObject *obj, QEvent *event) override;
     
-    // 创建自定义右键菜单
-    void createCustomContextMenu(const QPoint &pos);
+    
     
 public slots:
     void findNext(const QString &str, Qt::CaseSensitivity cs);
@@ -105,18 +70,17 @@ public slots:
     void onTextScrolled(int value);
     
     // 右键菜单槽函数
-    void pasteWithFormat();
-    void pasteAsPlainText();
+
 
 private:
     ControlWidTXT * controlWidtxt;
     QSplitter * splitter;
-    QTextEdit *textEdit;
+    PlainTextEdit *textEdit;
     LineNumberWidget *lineNumberWidget;
     QWidget *textContainer;
     QHBoxLayout *textLayout;
     SyntaxHighlighter *m_syntaxHighlighter;
-    QString m_currentCodecName;  // 当前使用的编码名称
+    QString m_currentCodecName;
 };
 
 #endif // TABHANDLETXT_H

@@ -16,9 +16,9 @@ class TabAbstract : public QWidget
     Q_OBJECT
 
 public:
-    explicit TabAbstract(QWidget *parent = nullptr) : QWidget(parent) {}
+    explicit TabAbstract(QWidget *parent = nullptr) : QWidget(parent), isModified(false), isShowControl(false) {}
     explicit TabAbstract(const QString& filePath, QWidget *parent = nullptr)
-        : QWidget(parent), currentFilePath(filePath) {}
+        : QWidget(parent), currentFilePath(filePath), isModified(false), isShowControl(false) {}
 
     virtual ~TabAbstract() {    }
 

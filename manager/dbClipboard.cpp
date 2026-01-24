@@ -135,3 +135,20 @@ bool dbClipboard::updatePinnedStatus(const QString &content, bool isPinned)
 
     return true;
 }
+
+// 新增：清除所有历史记录
+bool dbClipboard::clearAllHistory()
+{
+    QSqlQuery query(dbsqlite);
+
+    query.prepare(R"(
+        DELETE FROM clipboard_history
+    )");
+
+    if (!query.exec()) {
+        qDebug() << "清除所有历史记录失败:" << query.lastError().text();
+        return false;
+    }
+
+    return true;
+}

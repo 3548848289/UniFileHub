@@ -43,6 +43,9 @@ void ClipboardController::handleNewClipboardItem(ClipboardItem* rawItem)
     if (m_historyManager.addItem(std::move(item))) {
         ClipboardItem* addedItem = m_historyManager.items().back().get();
         emit itemAddedToModel(addedItem);
+        
+        // 自动保存到数据库，防止异常退出时数据丢失
+        m_historyManager.saveIncremental();
     }
 }
 
@@ -60,6 +63,9 @@ void ClipboardController::deleteItem(ClipboardItem* item)
     
     m_historyManager.removeItem(item);
     emit itemRemovedFromModel(item);
+    
+    // 自动保存到数据库，防止异常退出时数据丢失
+    m_historyManager.saveIncremental();
 }
 
 void ClipboardController::clearAllItems()
@@ -75,6 +81,9 @@ void ClipboardController::pinItem(ClipboardItem* item)
     item->setPinned(!item->isPinned());
     m_historyManager.updatePinnedStatus(item);
     emit itemPinnedChanged(item);
+    
+    // 自动保存到数据库，防止异常退出时数据丢失
+    m_historyManager.saveIncremental();
 }
 
 void ClipboardController::saveHistory()

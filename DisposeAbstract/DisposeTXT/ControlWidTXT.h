@@ -3,67 +3,39 @@
 
 #include <QWidget>
 #include <QApplication>
-#include <QTextEdit>
-#include <QSyntaxHighlighter>
-#include <QTextCharFormat>
-#include <QRegularExpression>
-#include <QTextDocument>
-#include <QStringDecoder>
-#include <QStringEncoder>
 #include <QComboBox>
+#include <QLabel>
+#include <QMouseEvent>
+#include <QCursor>
 #include "../../Setting/include/SettingManager.h"
-
-class SyntaxHighlighter : public QSyntaxHighlighter
-{
-    Q_OBJECT
-
-public:
-    enum Language {
-        PlainText,
-        Cpp,
-        C,
-        Java,
-        Python,
-        JavaScript,
-        TypeScript,
-        HTML,
-        CSS,
-        XML,
-        JSON,
-        Markdown
-    };
-
-    explicit SyntaxHighlighter(QTextDocument *parent = nullptr);
-    void setLanguage(Language language);
-
-protected:
-    void highlightBlock(const QString &text) override;
-
-private:
-    struct HighlightingRule {
-        QRegularExpression pattern;
-        QTextCharFormat format;
-    };
-
-    void setupRules();
-    void highlightComments(const QString &text);
-    void highlightStrings(const QString &text);
-    void highlightNumbers(const QString &text);
-
-    Language m_language;
-    QList<HighlightingRule> m_highlightingRules;
-    QTextCharFormat m_keywordFormat;
-    QTextCharFormat m_stringFormat;
-    QTextCharFormat m_commentFormat;
-    QTextCharFormat m_numberFormat;
-    QTextCharFormat m_typeFormat;
-    QTextCharFormat m_functionFormat;
-};
+#include "SyntaxHighlighter.h"
 
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class ControlWidTXT; }
 QT_END_NAMESPACE
+
+class ClickableLabel : public QLabel
+{
+    Q_OBJECT
+
+public:
+    explicit ClickableLabel(QWidget *parent = nullptr) : QLabel(parent)
+    {
+        setCursor(Qt::PointingHandCursor);
+        setStyleSheet("ClickableLabel:hover { background-color: rgba(0, 0, 0, 0.1); border-radius: 2px; }");
+    }
+
+signals:
+    void clicked();
+
+protected:
+    void mousePressEvent(QMouseEvent *event) override
+    {
+        emit clicked();
+        QLabel::mousePressEvent(event);
+    }
+};
 
 class ControlWidTXT : public QWidget
 {
@@ -71,39 +43,30 @@ class ControlWidTXT : public QWidget
 public:
     explicit ControlWidTXT(QWidget *parent = nullptr);
     ~ControlWidTXT();
-    
 
     QString getCurrentCodecName() const;
-    
-
-    void setCurrentCodecName(const QString& codecName);
-    
-
-    void updateTextStats(int lineCount, int charCount);
+    void setCurrentCodecName(const QString &codecName);
+    void updateTextStatistics(int lineCount, int charCount);
+    void updateTextExcerpt(const QString &excerpt);
 
 signals:
-
-    void encodingChanged(const QString& codecName);
-    
-
+    void encodingChanged(const QString &codecName);
     void tabIndentChanged(int indent);
-    
-
-    void fontSizeChanged(int fontSize);
+    void fontSizeChanged(int size);
+    void saveWithEncodingRequested();
 
 private slots:
-
-    void onEncodingComboBoxCurrentIndexChanged(const QString& codecName);
-    
-
-    void onTabIndentLineEditTextChanged(const QString& text);
-    
-
-    void onFontSizeComboBoxCurrentIndexChanged(const QString& text);
+    void onTabIndentLabelClicked();
+    void onEncodingLabelClicked();
+    void onFontSizeLabelClicked();
 
 private:
     Ui::ControlWidTXT *ui;
     QString m_currentCodecName;
+    int m_tabIndent;
+    int m_fontSize;
+
+    void updateDisplayLabels();
 };
 
 #endif

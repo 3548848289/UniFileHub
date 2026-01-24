@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.5)
 project(SmartDesk VERSION 0.1 LANGUAGES CXX)
 
-find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets Sql Network Svg SvgWidgets Multimedia MultimediaWidgets Pdf PdfWidgets)
-find_package(Qt6 REQUIRED COMPONENTS Widgets Sql Network Svg SvgWidgets Multimedia MultimediaWidgets Pdf PdfWidgets)
+find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets Sql Network Svg SvgWidgets Multimedia MultimediaWidgets )
+find_package(Qt6 REQUIRED COMPONENTS Widgets Sql Network Svg SvgWidgets Multimedia MultimediaWidgets )
 
 # 启用自动处理 Qt 的 uic, moc, 和 rcc
 set(CMAKE_AUTOUIC ON)
@@ -57,7 +57,7 @@ if(WIN32)
     set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_SOURCE_DIR}/Resources/SmartDeskIcon.rc")
 endif()
 
-qt_add_executable(SmartDesk WIN32 ${RESOURCES} ${APP_ICON_RESOURCE_WINDOWS})
+qt_add_executable(SmartDesk main/main.cpp ${RESOURCES} ${APP_ICON_RESOURCE_WINDOWS})
 
 
 target_link_libraries(SmartDesk PRIVATE

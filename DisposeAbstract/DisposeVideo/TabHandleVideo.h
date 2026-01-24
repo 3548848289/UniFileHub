@@ -8,15 +8,15 @@
 #include <QVBoxLayout>
 #include <QGraphicsScene>
 #include <QGraphicsView>
-#include <QGraphicsVideoItem>
-#include <QVideoSink>
+// #include <QGraphicsVideoItem>
+// #include <QVideoSink>
 #include <QSlider>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
-#include <QMediaPlayer>
-#include <QVideoWidget>
-#include <QAudioOutput>
+// #include <QMediaPlayer>
+// #include <QVideoWidget>
+// #include <QAudioOutput>
 #include "ControlWidVideo.h"
 
 class TabHandleVideo : public TabAbstract
@@ -42,9 +42,9 @@ private slots:
 private:
     QSplitter* splitter;
     ControlWidVideo * controlwidVideo;
-    QMediaPlayer *player;
-    QVideoWidget *videoWidget;
-    QAudioOutput *audioOutput;
+    // QMediaPlayer *player;
+    // QVideoWidget *videoWidget;
+    // QAudioOutput *audioOutput;
     QLabel *loadingLabel;
     bool isPlaying;
 

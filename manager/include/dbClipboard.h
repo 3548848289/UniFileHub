@@ -30,6 +30,8 @@ public:
     bool updatePinnedStatus(const QString &content, bool isPinned);
     QList<DbClipRecord> loadRecentNormalHistory(int hours);
     QList<DbClipRecord> loadPinnedHistory();
+    // 新增：清除所有历史记录
+    bool clearAllHistory();
 };
 
 #endif // DBCLIPBOARD_H

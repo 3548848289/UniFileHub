@@ -58,6 +58,10 @@ void ClipboardHistoryManager::removeItem(ClipboardItem* item) {
 }
 
 void ClipboardHistoryManager::clear() {
+    // 清除数据库中的所有历史记录
+    m_dbService.dbClip().clearAllHistory();
+    
+    // 清除内存中的数据
     m_items.clear();
     m_initialItemCount = 0;
 }
