@@ -20,8 +20,7 @@ void ControlWidPDF::setTotalPages(int totalPages)
 {
     m_totalPages = totalPages;
     ui->totalPagesLabel->setText(QString("/ %1").arg(totalPages));
-    ui->pageSpinBox->setMaximum(totalPages > 0 ? totalPages : 1);
-    
+
     // 禁用或启用按钮
     ui->prevPageButton->setEnabled(totalPages > 1);
     ui->nextPageButton->setEnabled(totalPages > 1);
@@ -30,8 +29,8 @@ void ControlWidPDF::setTotalPages(int totalPages)
 // 设置当前页码
 void ControlWidPDF::setCurrentPage(int pageNumber)
 {
-    QSignalBlocker blocker(ui->pageSpinBox);  // 自动在作用域结束时恢复信号
-    ui->pageSpinBox->setValue(pageNumber);
+    QSignalBlocker blocker(ui->pageLineEdit);  // 自动在作用域结束时恢复信号
+    ui->pageLineEdit->setText(QString::number(pageNumber));
 
     ui->prevPageButton->setEnabled(pageNumber > 1);
     ui->nextPageButton->setEnabled(pageNumber < m_totalPages);
@@ -40,7 +39,9 @@ void ControlWidPDF::setCurrentPage(int pageNumber)
 // 获取当前页码
 int ControlWidPDF::getCurrentPage() const
 {
-    return ui->pageSpinBox->value();
+    bool ok;
+    int page = ui->pageLineEdit->text().toInt(&ok);
+    return ok ? page : 1;
 }
 
 // 上一页按钮点击
@@ -55,14 +56,28 @@ void ControlWidPDF::on_nextPageButton_clicked()
     emit nextPageRequested();
 }
 
-// 页码变化
-void ControlWidPDF::on_pageSpinBox_valueChanged(int arg1)
+// 页码输入完成
+void ControlWidPDF::on_pageLineEdit_editingFinished()
 {
-    emit pageChanged(arg1);
-    
+    bool ok;
+    int page = ui->pageLineEdit->text().toInt(&ok);
+
+    // 验证输入是否有效
+    if (!ok || page < 1) {
+        page = 1;
+    } else if (page > m_totalPages && m_totalPages > 0) {
+        page = m_totalPages;
+    }
+
+    // 更新显示
+    ui->pageLineEdit->setText(QString::number(page));
+
+    // 发送页码变化信号
+    emit pageChanged(page);
+
     // 更新按钮状态
-    ui->prevPageButton->setEnabled(arg1 > 1);
-    ui->nextPageButton->setEnabled(arg1 < m_totalPages);
+    ui->prevPageButton->setEnabled(page > 1);
+    ui->nextPageButton->setEnabled(page < m_totalPages);
 }
 
 // 缩放模式变化

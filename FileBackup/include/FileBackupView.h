@@ -1,5 +1,5 @@
-#ifndef FileBackupView_H
-#define FileBackupView_H
+#ifndef FILEBACKUPVIEW_H
+#define FILEBACKUPVIEW_H
 
 #include <QWidget>
 #include <QListWidgetItem>
@@ -25,7 +25,7 @@ public:
 
     bool deleteBackupFile(const QString &backupFilePath);
 public slots:
-    void updateFileList(const QString filepath);
+    void updateFileList(const QString filePath);
 
 private slots:
     void on_backupList_itemClicked(QListWidgetItem *item);
@@ -38,8 +38,11 @@ private slots:
 
     void on_refreshBtn_clicked();
 
+    void on_openInFileSystemBtn_clicked();
+
 signals:
-    void s_fileopen(const QString& filepath);
+    void s_fileopen(const QString &filePath);
+    void openInFileSystemRequested(const QString &filePath);
 
 private:
     ServerManager* serverManager;
@@ -53,4 +56,4 @@ private:
     void loadFileNames();
 };
 
-#endif // FileBackupView_H
+#endif // FILEBACKUPVIEW_H

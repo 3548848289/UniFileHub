@@ -1,8 +1,10 @@
 #include "TabHandleCSV.h"
+#include <QMenu>
+#include <QSet>
+#include <algorithm>
 
 TabHandleCSV::TabHandleCSV(const QString& filePath, QWidget *parent): TabAbstract(filePath, parent)
 {
-
     QSplitter* splitter;
     highlightLabel = new QLabel(this);
     tableWidget = new QTableWidget(this);
@@ -10,22 +12,18 @@ TabHandleCSV::TabHandleCSV(const QString& filePath, QWidget *parent): TabAbstrac
     tableWidget->horizontalHeader()->setSortIndicatorShown(true);
     tableWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     tableWidget->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
+    tableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 
     splitter = new QSplitter(Qt::Vertical, this);
 
-    controlwidget = new ControlWidCSV(this);
-    connect(controlwidget, &ControlWidCSV::addRowClicked, this, &TabHandleCSV::addRow);
-    connect(controlwidget, &ControlWidCSV::deleteRowClicked, this, &TabHandleCSV::deleteRow);
-    connect(controlwidget, &ControlWidCSV::addColumnClicked, this, &TabHandleCSV::addColumn);
-    connect(controlwidget, &ControlWidCSV::deleteColumnClicked, this, &TabHandleCSV::deleteColumn);
-
     splitter->addWidget(tableWidget);
-    splitter->addWidget(controlwidget);
-    splitter->setSizes({700, 100});
+    splitter->setSizes({800});
     QVBoxLayout* layout = new QVBoxLayout(this);
     layout->addWidget(splitter);
 
     setLayout(layout);
+
+    connect(tableWidget, &QTableWidget::customContextMenuRequested, this, &TabHandleCSV::showContextMenu);
 
     connect(tableWidget, &QAbstractItemView::clicked, this, [=](const QModelIndex &index){
         int row = index.row();
@@ -203,50 +201,137 @@ void TabHandleCSV::adjustItem(QTableWidgetItem *item)
     }
 }
 
-void TabHandleCSV::addRow()
+void TabHandleCSV::addRow(bool insertAbove)
 {
-    int rowCount = tableWidget->rowCount();
     int currentRow = tableWidget->currentRow();
-    if (currentRow == -1)
-        tableWidget->insertRow(rowCount);
-    else
-        tableWidget->insertRow(currentRow + 1);
+    int insertPosition;
+
+    if (currentRow == -1) {
+        insertPosition = tableWidget->rowCount();
+    } else {
+        insertPosition = insertAbove ? currentRow : currentRow + 1;
+    }
+
+    tableWidget->insertRow(insertPosition);
     setContentModified(true);
 }
 
 
-void TabHandleCSV::addColumn()
+void TabHandleCSV::addColumn(bool insertLeft)
 {
     bool ok;
-    QString columnName = QInputDialog::getText(this, tr("New Column"), tr("Enter column name:"), QLineEdit::Normal, "", &ok);
+    QString defaultName = tr("Column %1").arg(tableWidget->columnCount() + 1);
+    QString columnName = QInputDialog::getText(this, tr("New Column"), tr("Enter column name:"), QLineEdit::Normal, defaultName, &ok);
 
     if (ok && !columnName.isEmpty()) {
-        int columnCount = tableWidget->columnCount();
-        tableWidget->insertColumn(columnCount);
-        tableWidget->setHorizontalHeaderItem(columnCount, new QTableWidgetItem(columnName));
+        int currentColumn = tableWidget->currentColumn();
+        int insertPosition;
+
+        if (currentColumn == -1) {
+            insertPosition = tableWidget->columnCount();
+        } else {
+            insertPosition = insertLeft ? currentColumn : currentColumn + 1;
+        }
+
+        tableWidget->insertColumn(insertPosition);
+        tableWidget->setHorizontalHeaderItem(insertPosition, new QTableWidgetItem(columnName));
         setContentModified(true);
     }
 }
 
-void TabHandleCSV::deleteRow()
+void TabHandleCSV::deleteSelectedRows()
 {
-    int currentRow = tableWidget->currentRow();
-    if (currentRow != -1) {
-        tableWidget->removeRow(currentRow);
+    QModelIndexList selectedIndexes = tableWidget->selectionModel()->selectedIndexes();
+
+    if (selectedIndexes.isEmpty()) {
+        QMessageBox::warning(this, tr("警告"), tr("请选择要删除的行或单元格"));
+        return;
+    }
+
+    QSet<int> rowsToDelete;
+    for (const QModelIndex &index : selectedIndexes) {
+        rowsToDelete.insert(index.row());
+    }
+
+    int count = rowsToDelete.size();
+    QMessageBox::StandardButton reply = QMessageBox::question(
+        this,
+        tr("确认删除"),
+        tr("确定要删除选中的 %1 行吗？").arg(count),
+        QMessageBox::Yes | QMessageBox::No
+    );
+
+    if (reply == QMessageBox::Yes) {
+        QList<int> sortedRows = rowsToDelete.values();
+        std::sort(sortedRows.begin(), sortedRows.end(), std::greater<int>());
+
+        for (int row : sortedRows) {
+            tableWidget->removeRow(row);
+        }
         setContentModified(true);
-    } else {
-        QMessageBox::warning(this, tr("警告"), tr("没选择行"));
     }
 }
 
-void TabHandleCSV::deleteColumn()
+void TabHandleCSV::deleteSelectedColumns()
 {
-    int currentColumn = tableWidget->currentColumn();
-    if (currentColumn != -1) {
-        tableWidget->removeColumn(currentColumn);
+    QModelIndexList selectedIndexes = tableWidget->selectionModel()->selectedIndexes();
+
+    if (selectedIndexes.isEmpty()) {
+        QMessageBox::warning(this, tr("警告"), tr("请选择要删除的列或单元格"));
+        return;
+    }
+
+    QSet<int> columnsToDelete;
+    for (const QModelIndex &index : selectedIndexes) {
+        columnsToDelete.insert(index.column());
+    }
+
+    int count = columnsToDelete.size();
+    QMessageBox::StandardButton reply = QMessageBox::question(
+        this,
+        tr("确认删除"),
+        tr("确定要删除选中的 %1 列吗？").arg(count),
+        QMessageBox::Yes | QMessageBox::No
+    );
+
+    if (reply == QMessageBox::Yes) {
+        QList<int> sortedColumns = columnsToDelete.values();
+        std::sort(sortedColumns.begin(), sortedColumns.end(), std::greater<int>());
+
+        for (int column : sortedColumns) {
+            tableWidget->removeColumn(column);
+        }
         setContentModified(true);
-    } else {
-        QMessageBox::warning(this, tr("警告"), tr("没选择列"));
+    }
+}
+
+void TabHandleCSV::showContextMenu(const QPoint &pos)
+{
+    QMenu contextMenu(this);
+
+    QAction *insertRowAbove = contextMenu.addAction(tr("在上方插入行"));
+    QAction *insertRowBelow = contextMenu.addAction(tr("在下方插入行"));
+    contextMenu.addSeparator();
+    QAction *insertColumnLeft = contextMenu.addAction(tr("在左侧插入列"));
+    QAction *insertColumnRight = contextMenu.addAction(tr("在右侧插入列"));
+    contextMenu.addSeparator();
+    QAction *deleteRows = contextMenu.addAction(tr("删除选中行"));
+    QAction *deleteColumns = contextMenu.addAction(tr("删除选中列"));
+
+    QAction *selectedAction = contextMenu.exec(tableWidget->viewport()->mapToGlobal(pos));
+
+    if (selectedAction == insertRowAbove) {
+        addRow(true);
+    } else if (selectedAction == insertRowBelow) {
+        addRow(false);
+    } else if (selectedAction == insertColumnLeft) {
+        addColumn(true);
+    } else if (selectedAction == insertColumnRight) {
+        addColumn(false);
+    } else if (selectedAction == deleteRows) {
+        deleteSelectedRows();
+    } else if (selectedAction == deleteColumns) {
+        deleteSelectedColumns();
     }
 }
 
@@ -397,6 +482,8 @@ void TabHandleCSV::findAll(const QString &str, Qt::CaseSensitivity cs)
     int rowCount = tableWidget->rowCount();
     int colCount = tableWidget->columnCount();
 
+    tableWidget->blockSignals(true);
+
     // 遍历所有单元格，查找匹配项
     for (int row = 0; row < rowCount; ++row) {
         for (int col = 0; col < colCount; ++col) {
@@ -409,6 +496,8 @@ void TabHandleCSV::findAll(const QString &str, Qt::CaseSensitivity cs)
         }
     }
 
+    tableWidget->blockSignals(false);
+
     if (!found)
         QMessageBox::information(this, tr("查找"), tr("找不到此单词"));
 
@@ -416,9 +505,10 @@ void TabHandleCSV::findAll(const QString &str, Qt::CaseSensitivity cs)
 
 void TabHandleCSV::clearHighlight()
 {
-
     int rowCount = tableWidget->rowCount();
     int colCount = tableWidget->columnCount();
+
+    tableWidget->blockSignals(true);
 
     for (int row = 0; row < rowCount; ++row) {
         for (int col = 0; col < colCount; ++col) {
@@ -428,6 +518,8 @@ void TabHandleCSV::clearHighlight()
             }
         }
     }
+
+    tableWidget->blockSignals(false);
 }
 
 

@@ -64,23 +64,31 @@ QString TagList::getExpInfo(const QDateTime expDate)
 void TagList::contextMenuEvent(QContextMenuEvent *event)
 {
     QMenu menu(this);
-    
+
     // 创建右键菜单项
     QAction *previewAction = menu.addAction("预览");
     QAction *detailAction = menu.addAction("详情");
     QAction *modifyPathAction = menu.addAction("修改路径");
     QAction *deleteTagAction = menu.addAction("删除标签");
     QAction *openLocationAction = menu.addAction("打开文件位置");
-    
+    QAction *openInFileSystemAction = menu.addAction("在文件系统打开");
+
     // 连接槽函数
     connect(previewAction, &QAction::triggered, this, &TagList::onPreviewAction);
     connect(openLocationAction, &QAction::triggered, this, &TagList::onOpenLocationAction);
+    connect(openInFileSystemAction, &QAction::triggered, this, &TagList::onOpenInFileSystemAction);
     connect(detailAction, &QAction::triggered, this, &TagList::onDetailAction);
     connect(modifyPathAction, &QAction::triggered, this, &TagList::onModifyPathAction);
     connect(deleteTagAction, &QAction::triggered, this, &TagList::onDeleteTagAction);
-    
+
     // 显示右键菜单
     menu.exec(event->globalPos());
+}
+
+void TagList::onOpenInFileSystemAction()
+{
+    // 发送信号，通知文件系统打开并跳转到该文件所在路径
+    emit openInFileSystemRequested(fileInfo.filePath);
 }
 
 void TagList::onPreviewAction()
@@ -94,7 +102,7 @@ void TagList::onOpenLocationAction()
     // 打开文件所在位置
     QFileInfo fileInfoObj(fileInfo.filePath);
     QString path = fileInfoObj.path();
-    
+
     // 使用系统默认的文件管理器打开路径
     QProcess::startDetached("explorer.exe", QStringList() << "/select," << fileInfo.filePath);
 }
@@ -123,26 +131,26 @@ void TagList::onModifyPathAction()
     QString newPath = QFileDialog::getOpenFileName(this, "选择新文件", "", "所有文件 (*.*)");
     if (!newPath.isEmpty()) {
         QString oldFilePath = fileInfo.filePath;
-        
+
         // 验证文件是否存在
         QFileInfo fileInfoCheck(newPath);
         if (!fileInfoCheck.exists()) {
             QMessageBox::warning(this, "警告", "新文件不存在");
             return;
         }
-        
+
         // 更新数据库中的文件路径
         bool result = dbservice.dbTags().updateFilePath(newPath, oldFilePath);
         if (result) {
             // 更新本地fileInfo
             fileInfo.filePath = newPath;
-            
+
             // 更新UI显示
             QFileInfo newFileInfoObj(newPath);
             ui->fileLabel->setText(newFileInfoObj.fileName());
             ui->lineEdit->setText(newFileInfoObj.path());
             ui->lineEdit->setToolTip(newFileInfoObj.path());
-            
+
             QMessageBox::information(this, "成功", "文件路径已更新");
         } else {
             QMessageBox::warning(this, "失败", "更新文件路径失败");
@@ -163,7 +171,7 @@ void TagList::onDeleteTagAction()
             QMessageBox::warning(this, "错误", "无法找到文件ID！");
             return;
         }
-        
+
         // 删除标签
         bool result = dbservice.dbTags().deleteTag(fileId);
         if (result) {

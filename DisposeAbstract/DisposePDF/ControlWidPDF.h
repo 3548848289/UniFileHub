@@ -35,8 +35,8 @@ private slots:
     // 按钮点击槽函数
     void on_prevPageButton_clicked();
     void on_nextPageButton_clicked();
-    // 页码变化槽函数
-    void on_pageSpinBox_valueChanged(int arg1);
+    // 页码输入框变化槽函数
+    void on_pageLineEdit_editingFinished();
     // 缩放模式变化槽函数
     void on_zoomComboBox_currentTextChanged(const QString &arg1);
 

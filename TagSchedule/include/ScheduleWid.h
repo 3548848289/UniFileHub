@@ -32,6 +32,7 @@ public:
 
 signals:
     void fileClicked(const QString &path);
+    void openInFileSystemRequested(const QString &filePath);
 
 private slots:
     void onItemClicked(QListWidgetItem *item);

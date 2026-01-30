@@ -1,17 +1,14 @@
 set(SCHEDULE_SOURCES
-   ControlWidCSV.cpp
    TabHandleCSV.cpp
 )
 
 set(SCHEDULE_HEADERS
-    ControlWidCSV.h
     TabHandleCSV.h
 )
 
 qt_add_library(mytxt_csv STATIC
     ${SCHEDULE_SOURCES}
     ${SCHEDULE_HEADERS}
-    ControlWidCSV.ui
 )
 
 target_link_libraries(mytxt_csv PRIVATE

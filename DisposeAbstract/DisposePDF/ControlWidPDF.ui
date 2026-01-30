@@ -1,7 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <author/>
- <comment/>
- <exportmacro/>
  <class>ControlWidPDF</class>
  <widget class="QWidget" name="ControlWidPDF">
   <property name="geometry">
@@ -15,7 +13,7 @@
   <property name="windowTitle">
    <string>PDF 控制</string>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout">
+  <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,1,1,1,2,20,1">
    <item>
     <widget class="QPushButton" name="prevPageButton">
      <property name="text">
@@ -38,9 +36,18 @@
     </widget>
    </item>
    <item>
-    <widget class="QSpinBox" name="pageSpinBox">
-     <property name="minimum">
-      <number>1</number>
+    <widget class="QLineEdit" name="pageLineEdit">
+     <property name="maximumSize">
+      <size>
+       <width>80</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignmentFlag::AlignCenter</set>
+     </property>
+     <property name="placeholderText">
+      <string>1</string>
      </property>
     </widget>
    </item>
@@ -54,7 +61,7 @@
    <item>
     <spacer name="horizontalSpacer">
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Orientation::Horizontal</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
@@ -67,7 +74,7 @@
    <item>
     <widget class="QComboBox" name="zoomComboBox">
      <property name="currentText">
-      <string>适应窗口</string>
+      <string>适应宽度</string>
      </property>
      <item>
       <property name="text">
@@ -108,6 +115,6 @@
    </item>
   </layout>
  </widget>
- <pixmapfunction/>
+ <resources/>
  <connections/>
 </ui>

@@ -22,6 +22,7 @@ class FileSystem : public QWidget
 
 public:
     explicit FileSystem(QWidget *parent = nullptr);
+    void changePath(const QString& path);
 
     ~FileSystem();
 
@@ -48,7 +49,6 @@ private:
     QString curfilePath;
     QString currentDir;
 
-    void changePath(const QString& path);
 };
 
 #endif // FILESYSTEM_H

@@ -36,9 +36,13 @@ protected:
 private slots:
     void onPreviewAction();
     void onOpenLocationAction();
+    void onOpenInFileSystemAction();
     void onDetailAction();
     void onModifyPathAction();
     void onDeleteTagAction();
+
+signals:
+    void openInFileSystemRequested(const QString &filePath);
 
 private:
     Ui::TagList *ui;

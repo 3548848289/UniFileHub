@@ -18,7 +18,6 @@
 #include <QSplitter>
 #include <QtNetwork/QNetworkInterface>
 
-#include "ControlWidCSV.h"
 #include "../../main/include/TabAbstract.h"
 #include "../../manager/include/myJson.h"
 
@@ -43,10 +42,10 @@ public:
 
     void setLinkStatus(bool status);
     bool getLinkStatus();
-    void addRow();
-    void addColumn();
-    void deleteRow();
-    void deleteColumn();
+    void addRow(bool insertAbove = false);
+    void addColumn(bool insertLeft = false);
+    void deleteSelectedRows();
+    void deleteSelectedColumns();
 
     void ReadfromServer(const QJsonObject& jsonObj);
     void ChickfromServer(const QJsonObject& jsonObj);
@@ -58,15 +57,12 @@ public slots:
     void findNext(const QString &str, Qt::CaseSensitivity cs);
     void findAll(const QString &str, Qt::CaseSensitivity cs);
     void clearHighlight();
+    void showContextMenu(const QPoint &pos);
 signals:
     void dataToSend(const QString &data);
 
 
-protected:
-
 private:
-
-    ControlWidCSV *controlwidget;
 
     int row = 0, col = 0;
     int foucsRow = 0, foucsCol = 0;

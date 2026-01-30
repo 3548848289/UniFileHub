@@ -7,10 +7,10 @@ ControlWidVideo::ControlWidVideo(QWidget *parent)
     , isSliding(false)
 {
     ui->setupUi(this);
-    
+
     // 设置滑块初始范围
     ui->horizontalSlider->setRange(0, 0);
-    
+
     // 初始化为播放状态
     ui->pushButton->setText(tr("播放"));
 }
@@ -46,7 +46,7 @@ void ControlWidVideo::updateTimeDisplay(int current, int total)
         seconds = seconds % 60;
         return QString("%1:%2").arg(minutes).arg(seconds, 2, 10, QLatin1Char('0'));
     };
-    
+
     QString timeText = QString("%1/%2").arg(formatTime(current)).arg(formatTime(total));
     ui->timeLabel->setText(timeText);
 }

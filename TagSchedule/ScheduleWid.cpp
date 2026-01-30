@@ -25,13 +25,13 @@ ScheduleWid::ScheduleWid(QWidget *parent) : QWidget(parent), ui(new Ui::Schedule
     manager->setNotifyWndSize(300, 80);
     connect(manager, &NotifyManager::notifyDetail, [](const QVariantMap &data){
         QMessageBox msgbox(QMessageBox::Information,
-            QStringLiteral("具体信息"), data.value("title").toString());
+                           QStringLiteral("具体信息"), data.value("title").toString());
         msgbox.setWindowIcon(QIcon::fromTheme("utilities-system-monitor"));
         QStringList tagList = data.value("tag").toStringList();
 
         QString allDetails = QString("%1\n\n标签: %2\n备注: %3\n到期时间: %4")
-            .arg(data.value("body").toString()).arg(tagList.join(", "))
-            .arg(data.value("annotation").toString()).arg(data.value("expirationDate").toString());
+                                 .arg(data.value("body").toString()).arg(tagList.join(", "))
+                                 .arg(data.value("annotation").toString()).arg(data.value("expirationDate").toString());
 
         msgbox.setInformativeText(allDetails);
         msgbox.findChild<QDialogButtonBox*>()->setMinimumWidth(500);
@@ -165,6 +165,8 @@ void ScheduleWid::on_sortComboBox_currentIndexChanged(int index)
 
         for (const FilePathInfo &file : files) {
             TagList *widget = new TagList(file);
+            // 连接信号
+            connect(widget, &TagList::openInFileSystemRequested, this, &ScheduleWid::openInFileSystemRequested);
 
             QListWidgetItem *listItem = new QListWidgetItem(ui->listWidget);
             listItem->setSizeHint(widget->sizeHint());
@@ -173,7 +175,6 @@ void ScheduleWid::on_sortComboBox_currentIndexChanged(int index)
         }
     }
 }
-
 
 
 void ScheduleWid::on_refreshBtn_clicked(const QString &tag = "全部")
@@ -185,6 +186,8 @@ void ScheduleWid::on_refreshBtn_clicked(const QString &tag = "全部")
 
     for (const auto &info : files) {
         TagList *taglist = new TagList(info);
+        // 连接信号
+        connect(taglist, &TagList::openInFileSystemRequested, this, &ScheduleWid::openInFileSystemRequested);
 
         QListWidgetItem *listItem = new QListWidgetItem(ui->listWidget);
         listItem->setSizeHint(taglist->sizeHint());

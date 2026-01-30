@@ -2,8 +2,8 @@
 #define TABHANDLEPDF_H
 
 #include "../../main/include/TabAbstract.h"
-// #include <QPdfDocument>
-// #include <QPdfView>
+#include <QPdfDocument>
+#include <QPdfView>
 #include <QVBoxLayout>
 #include <QFile>
 #include <QMessageBox>
@@ -35,11 +35,11 @@ private slots:
     void changeZoomMode(const QString &mode);
 
 private:
-    // QPdfDocument *pdfDoc;
-    // QPdfView *pdfView;
+    QPdfDocument *pdfDoc;
+    QPdfView *pdfView;
     QVBoxLayout *mainLayout;
     bool isShowControl;
-    
+
     // 新增成员变量
     ControlWidPDF *controlWidPDF;
     QSplitter *splitter;
