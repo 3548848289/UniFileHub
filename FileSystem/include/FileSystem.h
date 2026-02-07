@@ -29,15 +29,18 @@ public:
 private slots:
     void onItemClicked(const QModelIndex &index);
     // void on_goButton_clicked();
+    void onSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
 
 signals:
     void fileOpened(const QString &filePath);
     void deleteFileRequested(const QString &filePath);
     void filebackuplistOpened();
     void tagopened();
+    void fileSelectedByKeyboard(const QString &filePath);
 private:
     void loadFileMetadata(const QString &filePath);
     void saveExpirationDate(const QString &filePath, const QDate &expirationDate);
+    bool eventFilter(QObject *watched, QEvent *event);
 
     ServerManager* serverManager;
 
@@ -48,6 +51,8 @@ private:
 
     QString curfilePath;
     QString currentDir;
+    bool isMouseClick;
+    bool isKeyboardSelection;
 
 };
 

@@ -25,6 +25,7 @@ QListWidgetItem* CliImage::createListWidgetItem() const {
     QListWidgetItem* item = new QListWidgetItem();
     // 缩放到80x60（保持宽高比）
     item->setIcon(QIcon(m_pixmap.scaled(80, 60, Qt::KeepAspectRatio, Qt::SmoothTransformation)));
+    // 直接设置显示文本，不添加序号
     item->setText(QString("[图片] %1x%2").arg(m_pixmap.width()).arg(m_pixmap.height()));
     item->setData(Qt::UserRole, QVariant::fromValue<quintptr>(reinterpret_cast<quintptr>(this)));
     item->setData(Qt::UserRole + 1, "image");

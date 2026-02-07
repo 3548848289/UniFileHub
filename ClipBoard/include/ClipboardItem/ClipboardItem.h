@@ -26,6 +26,10 @@ public:
     int id() const { return m_id; }
     void setId(int id) { m_id = id; }
 
+    // 获取和设置序号
+    int sequenceNumber() const { return m_sequenceNumber; }
+    void setSequenceNumber(int number) { m_sequenceNumber = number; }
+
     bool isPinned() const { return m_pinned; }
     void setPinned(bool pinned) { m_pinned = pinned; }
 
@@ -40,6 +44,7 @@ protected:
     bool m_pinned;
     ClipboardItemType m_type; // 类型标识
     int m_id; // 数据库ID，-1表示尚未保存到数据库
+    int m_sequenceNumber = 0; // 序号，用于在列表中显示
 };
 
 #endif // CLIPBOARDITEM_H

@@ -132,3 +132,25 @@ void SettingManager::setToken(const QString &token) {
     settings.setValue("user/token", token);
 }
 
+QSize SettingManager::getWindowSize() {
+    int width = settings.value("window/width", 1000).toInt();
+    int height = settings.value("window/height", 600).toInt();
+    return QSize(width, height);
+}
+
+void SettingManager::setWindowSize(const QSize &size) {
+    settings.setValue("window/width", size.width());
+    settings.setValue("window/height", size.height());
+}
+
+QPoint SettingManager::getWindowPosition() {
+    int x = settings.value("window/x", 100).toInt();
+    int y = settings.value("window/y", 100).toInt();
+    return QPoint(x, y);
+}
+
+void SettingManager::setWindowPosition(const QPoint &position) {
+    settings.setValue("window/x", position.x());
+    settings.setValue("window/y", position.y());
+}
+

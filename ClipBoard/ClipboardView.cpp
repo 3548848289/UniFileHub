@@ -9,6 +9,7 @@
 #include "include/ClipboardItem/CliImage.h"
 #include "include/ClipboardItem/CliFile.h"
 #include "include/ClipboardItem/CliText.h"
+#include "include/ClipboardItemDelegate.h"
 
 #include <QGuiApplication>
 #include <QMimeData>
@@ -117,7 +118,7 @@ void ClipboardView::initializeListWidget() {
     ui->listWidget->scrollToBottom();
     ui->listWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->listWidget->setIconSize(QSize(80, 60));
-
+    
     // 获取主题颜色
     ThemeManager& themeManager = ThemeManager::Instance();
     QColor secondaryColor = themeManager.secondaryColor();
@@ -126,6 +127,11 @@ void ClipboardView::initializeListWidget() {
     // 为选中和悬停状态创建一个半透明的辅助颜色
     QColor selectedColor = secondaryColor;
     selectedColor.setAlpha(128); // 50% opacity
+    
+    // 设置自定义的 delegate 来显示序号，并传递主题颜色
+    ClipboardItemDelegate* delegate = new ClipboardItemDelegate(this);
+    delegate->setThemeColors(borderColor, selectedColor);
+    ui->listWidget->setItemDelegate(delegate);
 
     QString style = QString(R"(
         QListWidget::item {
@@ -403,6 +409,8 @@ void ClipboardView::onItemAdded(ClipboardItem* item) {
     // 只有同时符合类型和搜索条件的项才添加到UI中
     if (matchType && matchSearch) {
         insertNewItem(item);
+        // 更新序号
+        updateSequenceNumbers();
     }
 }
 
@@ -411,6 +419,8 @@ void ClipboardView::onItemRemoved(ClipboardItem* item) {
     if (listItem) {
         int row = ui->listWidget->row(listItem);
         delete ui->listWidget->takeItem(row);
+        // 更新序号
+        updateSequenceNumbers();
     }
 }
 
@@ -421,6 +431,13 @@ void ClipboardView::onModelCleared() {
 void ClipboardView::onItemPinnedChanged(ClipboardItem* item) {
     // 刷新整个UI以重新排序置顶项
     refreshAllItems();
+    // 更新序号
+    updateSequenceNumbers();
+}
+
+void ClipboardView::updateSequenceNumbers() {
+    // 不再需要更新序号到列表项文本中，因为序号由自定义的 delegate 显示
+    // 这里可以保留方法的空实现，以避免其他代码调用时出错
 }
 
 void ClipboardView::refreshAllItems() {
@@ -456,6 +473,9 @@ void ClipboardView::refreshAllItems() {
 
     for (auto* item : pinnedItems) addToListWidget(item);
     for (auto* item : normalItems) addToListWidget(item);
+
+    // 更新序号
+    updateSequenceNumbers();
 }
 
 

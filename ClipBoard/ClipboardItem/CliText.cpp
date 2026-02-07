@@ -22,6 +22,7 @@ QListWidgetItem* CliText::createListWidgetItem() const {
         displayText = m_text;
     }
 
+    // 直接设置显示文本，不添加序号
     item->setText(displayText);
     item->setData(Qt::UserRole, QVariant::fromValue<quintptr>(reinterpret_cast<quintptr>(this)));
     item->setToolTip(m_text);

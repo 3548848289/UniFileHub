@@ -32,6 +32,7 @@ class TabManager : public QObject {
 
 signals:
     void fileOpened(const QString& filePath);
+    void openInFileSystemRequested(const QString& filePath);
 
 public slots:
     void openFile(const QString& filePath);
@@ -57,6 +58,10 @@ public:
     void openSharedCSVTab(SharedView *sharedView);
     void findInCurrentTab(QWidget *parent);
     int addWidgetTab(QWidget *widget, const QString &displayName);
+    // 删除当前预览标签页
+    void removePreviewTab();
+    // 设置当前预览标签页
+    void setPreviewTab(TabAbstract* tab);
 public:
     // 设置布局类型
     void setLayoutType(LayoutType type);
@@ -83,6 +88,9 @@ private:
     // FindDialog* findDialog;
     QTabWidget* tabWidget;
     QMap<QString, int> fileTabMap;
+    
+    // 预览标签页相关
+    TabAbstract* currentPreviewTab = nullptr;
     
     // 布局相关成员
     LayoutType currentLayout = LayoutType::LAYOUT_1X1;

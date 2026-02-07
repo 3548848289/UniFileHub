@@ -112,8 +112,10 @@ void ClipboardController::loadHistory(int hours)
     m_historyManager.loadHistory(hours);
     
     // 通知View加载完成，可以更新UI
-    for (const auto& item : m_historyManager.items()) {
-        emit itemAddedToModel(item.get());
+    // 反向遍历，确保新记录在上方、老记录在下方
+    const auto& items = m_historyManager.items();
+    for (auto it = items.rbegin(); it != items.rend(); ++it) {
+        emit itemAddedToModel(it->get());
     }
 }
 

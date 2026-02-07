@@ -2,6 +2,8 @@
 #define SETTINGMANAGER_H
 
 #include<QSettings>
+#include<QSize>
+#include<QPoint>
 
 class SettingManager
 {
@@ -53,6 +55,12 @@ public:
     // Token相关方法
     QString getToken();
     void setToken(const QString &token);
+    
+    // 窗口大小和位置相关方法
+    QSize getWindowSize();
+    void setWindowSize(const QSize &size);
+    QPoint getWindowPosition();
+    void setWindowPosition(const QPoint &position);
 private:
     SettingManager();
     ~SettingManager();

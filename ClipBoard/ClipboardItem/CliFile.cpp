@@ -35,6 +35,7 @@ QListWidgetItem* CliFile::createListWidgetItem() const {
         displayText = QString("[多个项目] 共 %1 个").arg(m_filePaths.size());
     }
 
+    // 直接设置显示文本，不添加序号
     item->setText(displayText);
 
     // 根据文件类型使用不同图标

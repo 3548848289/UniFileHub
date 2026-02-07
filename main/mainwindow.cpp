@@ -2,6 +2,7 @@
 #include "ui/ui_mainwindow.h"
 #include "../manager/include/dbService.h"
 #include "../Setting/include/ThemeManager.h"
+#include "../Setting/include/SettingManager.h"
 
 void MainWindow::initCoreWidgets() {
     loginButton = new QPushButton(this);
@@ -136,6 +137,14 @@ void MainWindow::initConnect() {
 
     connect(file_system, &FileSystem::fileOpened, tabManager, &TabManager::openFile);
     connect(file_system, &FileSystem::deleteFileRequested, tabManager, &TabManager::deleteFile);
+    connect(file_system, &FileSystem::fileSelectedByKeyboard, this, [this](const QString &filePath) {
+        // 创建预览标签页
+        TabAbstract* previewTab = TabFactory::create(filePath);
+        if (previewTab) {
+            previewTab->loadFromFile(filePath);
+            tabManager->setPreviewTab(previewTab);
+        }
+    });
     connect(schedule_wid, &ScheduleWid::fileClicked, tabManager, &TabManager::openFile);
     connect(file_backup_view, &FileBackupView::s_fileopen, tabManager, &TabManager::openFile);
 
@@ -158,6 +167,16 @@ void MainWindow::initConnect() {
 
     // 连接文件备份的文件系统打开信号
     connect(file_backup_view, &FileBackupView::openInFileSystemRequested, this, [=](const QString &filePath){
+        // 切换到文件系统视图
+        ui->stackedWidget->setCurrentWidget(file_system);
+        // 跳转到文件所在路径
+        QFileInfo fileInfo(filePath);
+        QString directoryPath = fileInfo.path();
+        file_system->changePath(directoryPath);
+    });
+
+    // 连接TabManager的文件系统打开信号
+    connect(tabManager, &TabManager::openInFileSystemRequested, this, [=](const QString &filePath){
         // 切换到文件系统视图
         ui->stackedWidget->setCurrentWidget(file_system);
         // 跳转到文件所在路径
@@ -256,6 +275,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     initConnect();
     initMemubarLayout();
     
+    // 加载窗口大小和位置
+    QSize size = SettingManager::Instance().getWindowSize();
+    QPoint pos = SettingManager::Instance().getWindowPosition();
+    this->resize(size);
+    this->move(pos);
+    
     // 设置菜单图标
     ui->actionopen->setIcon(IconManager::icon(IconManager::Icon::MenuFileOpen, QSize(16, 16)));
     ui->actionsave->setIcon(IconManager::icon(IconManager::Icon::MenuFileSave, QSize(16, 16)));
@@ -267,6 +292,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     
     tabManager->openFile(":/conf/help.txt");
     recentFilesManager->populateRecentFilesMenu(ui->recentFile);
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    // 保存窗口大小和位置
+    SettingManager::Instance().setWindowSize(this->size());
+    SettingManager::Instance().setWindowPosition(this->pos());
+    event->accept();
 }
 
 MainWindow::~MainWindow()

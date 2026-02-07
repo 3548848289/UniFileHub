@@ -23,8 +23,8 @@ void LineNumberWidget::updateLineNumbers()
 void LineNumberWidget::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
-    painter.fillRect(event->rect(), QColor(240, 240, 240));
-    painter.setPen(QColor(120, 120, 120));
+    // painter.fillRect(event->rect(), QColor(240, 240, 240));
+    // painter.setPen(QColor(120, 120, 120));
     painter.setFont(m_textEdit->font());
     
     QTextBlock block = m_textEdit->document()->begin();

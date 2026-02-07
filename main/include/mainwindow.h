@@ -64,6 +64,9 @@ private slots:
 
     void on_actionfind_triggered();
 
+protected:
+    void closeEvent(QCloseEvent *event) override;
+
 private:
     Ui::MainWindow *ui;
     int currentIndex = 0;

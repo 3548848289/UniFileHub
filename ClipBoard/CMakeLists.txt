@@ -14,6 +14,7 @@ set(SETTING_SOURCES
     ClipboardMonitor.cpp
     ClipboardController.cpp
     ClipboardComponentFactory.cpp
+    ClipboardItemDelegate.cpp
 )
 
 set(SETTING_HEADERS
@@ -32,6 +33,7 @@ set(SETTING_HEADERS
     include/ClipboardMonitor.h
     include/ClipboardController.h
     include/ClipboardComponentFactory.h
+    include/ClipboardItemDelegate.h
 
 )
 

@@ -76,8 +76,11 @@
    </item>
    <item>
     <widget class="QPlainTextEdit" name="textExcerptEdit">
+     <property name="undoRedoEnabled">
+      <bool>false</bool>
+     </property>
      <property name="readOnly">
-      <bool>true</bool>
+      <bool>false</bool>
      </property>
      <property name="placeholderText">
       <string>文本摘录</string>

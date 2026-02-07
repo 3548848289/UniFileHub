@@ -1,5 +1,8 @@
 #include "TabManager.h"
 #include "../Setting/include/ThemeManager.h"
+#include <QDesktopServices>
+#include <QUrl>
+#include <QFileInfo>
 
 TabManager::TabManager(QTabWidget* parentTabWidget, QObject* parent) : QObject(parent), tabWidget(parentTabWidget)
 {
@@ -199,6 +202,72 @@ void TabManager::deleteFile(const QString& filePath) {
 
     if (auto* tab = qobject_cast<TabAbstract*>(tabWidget->widget(index))) {
         tab->markModified();
+    }
+}
+
+void TabManager::removePreviewTab() {
+    if (currentPreviewTab) {
+        // 查找当前预览标签页所在的标签页控件
+        QTabWidget* tabWidget = nullptr;
+        int index = -1;
+        
+        // 首先在所有视图中查找
+        for (int row = 0; row < viewTabs.size(); ++row) {
+            for (int col = 0; col < viewTabs[row].size(); ++col) {
+                if (viewTabs[row][col]) {
+                    index = viewTabs[row][col]->indexOf(currentPreviewTab);
+                    if (index != -1) {
+                        tabWidget = viewTabs[row][col];
+                        break;
+                    }
+                }
+            }
+            if (tabWidget) break;
+        }
+        
+        // 如果在视图中没有找到，在主tabWidget中查找
+        if (!tabWidget) {
+            index = this->tabWidget->indexOf(currentPreviewTab);
+            if (index != -1) {
+                tabWidget = this->tabWidget;
+            }
+        }
+        
+        // 如果找到了，删除标签页
+        if (tabWidget && index != -1) {
+            tabWidget->removeTab(index);
+            delete currentPreviewTab;
+            currentPreviewTab = nullptr;
+        }
+    }
+}
+
+void TabManager::setPreviewTab(TabAbstract* tab) {
+    // 删除旧的预览标签页
+    removePreviewTab();
+    
+    // 设置新的预览标签页
+    currentPreviewTab = tab;
+    
+    // 将预览标签页添加到活动的QTabWidget中
+    if (currentPreviewTab) {
+        // 首先尝试通过findActiveWidgetPosition获取真正的活动位置
+        auto actualPosition = findActiveWidgetPosition();
+        int row = actualPosition.first;
+        int col = actualPosition.second;
+        
+        // 检查当前布局是否有效
+        if (row >= 0 && row < viewTabs.size() && col >= 0 && col < viewTabs[row].size() && viewTabs[row][col]) {
+            QTabWidget* currentTabWidget = viewTabs[row][col];
+            QString displayName = QFileInfo(currentPreviewTab->getCurrentFilePath()).fileName() + " (预览)";
+            currentTabWidget->addTab(currentPreviewTab, displayName);
+            currentTabWidget->setCurrentWidget(currentPreviewTab);
+        } else {
+            // 如果活动位置无效，回退到原始tabWidget
+            QString displayName = QFileInfo(currentPreviewTab->getCurrentFilePath()).fileName() + " (预览)";
+            tabWidget->addTab(currentPreviewTab, displayName);
+            tabWidget->setCurrentWidget(currentPreviewTab);
+        }
     }
 }
 
@@ -447,6 +516,11 @@ void TabManager::updateLayout() {
                     QAction *closeCurrent = menu.addAction("关闭当前");
                     QAction *closeOthers = menu.addAction("关闭其他");
                     QAction *closeAll = menu.addAction("关闭全部");
+                    
+                    // 添加"打开文件所在位置"选项
+                    QAction *openContainingFolder = menu.addAction("打开文件所在位置");
+                    // 添加"在文件系统打开"选项
+                    QAction *openInFileSystem = menu.addAction("在文件系统打开");
 
                     QAction *selectedAction = menu.exec(currentTabWidget->tabBar()->mapToGlobal(pos));
                     if (!selectedAction) return;
@@ -461,6 +535,26 @@ void TabManager::updateLayout() {
                     } else if (selectedAction == closeAll) {
                         for (int idx = currentTabWidget->count() - 1; idx >= 0; --idx) {
                             closeTab(i, j, idx);
+                        }
+                    } else if (selectedAction == openContainingFolder) {
+                        // 打开文件所在位置
+                        QWidget* widget = currentTabWidget->widget(tabIndex);
+                        if (auto* tab = qobject_cast<TabAbstract*>(widget)) {
+                            QString filePath = tab->getCurrentFilePath();
+                            if (!filePath.isEmpty()) {
+                                QFileInfo fileInfo(filePath);
+                                QString folderPath = fileInfo.absolutePath();
+                                QDesktopServices::openUrl(QUrl::fromLocalFile(folderPath));
+                            }
+                        }
+                    } else if (selectedAction == openInFileSystem) {
+                        // 在文件系统打开
+                        QWidget* widget = currentTabWidget->widget(tabIndex);
+                        if (auto* tab = qobject_cast<TabAbstract*>(widget)) {
+                            QString filePath = tab->getCurrentFilePath();
+                            if (!filePath.isEmpty()) {
+                                emit openInFileSystemRequested(filePath);
+                            }
                         }
                     }
                 });

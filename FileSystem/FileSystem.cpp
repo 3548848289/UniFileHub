@@ -1,5 +1,6 @@
 #include "include/FileSystem.h"
 #include "ui/ui_FileSystem.h"
+#include <QTimer>
 
 FileSystem::FileSystem(QWidget *parent)
     : QWidget(parent), ui(new Ui::FileSystem), serverManager(ServerManager::instance()),
@@ -34,6 +35,7 @@ FileSystem::FileSystem(QWidget *parent)
     ui->treeView->setItemDelegate(tagItemdelegate);
 
     connect(ui->treeView, &QTreeView::clicked, this, &FileSystem::onItemClicked);
+    connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &FileSystem::onSelectionChanged);
 
     connect(tagItemdelegate, &TagItemDelegate::openFileRequested, this, [=](const QString &filePath){
         emit fileOpened(filePath);
@@ -78,6 +80,11 @@ FileSystem::FileSystem(QWidget *parent)
         if(path != "")
             changePath(path);
     });
+
+    // 安装事件过滤器来捕获鼠标和键盘事件
+    ui->treeView->installEventFilter(this);
+    isMouseClick = false;
+    isKeyboardSelection = false;
 }
 
 
@@ -93,17 +100,74 @@ void FileSystem::onItemClicked(const QModelIndex &index) {
 
     currentDir = directoryPath;
 
+    // 发射文件打开信号
     emit fileOpened(curfilePath);
+
+    // 延迟设置焦点到文件系统视图，确保在信号处理完成后焦点仍然在treeView上
+    QTimer::singleShot(0, this, [this]() {
+        ui->treeView->setFocus();
+    });
+}
+
+
+void FileSystem::onSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected) {
+    if (!selected.isEmpty()) {
+        QModelIndex index = selected.first().topLeft();
+        if (!fileSystemModel->isDir(index)) {
+            QString curfilePath = fileSystemModel->filePath(index);
+            this->curfilePath = curfilePath;
+            // qDebug() << "curfilePath；" << curfilePath;
+
+            // 区分鼠标和键盘触发的选择
+            if (isMouseClick) {
+                qDebug() << "选择由鼠标触发";
+                isMouseClick = false;
+            } else if (isKeyboardSelection) {
+                qDebug() << "选择由键盘触发";
+                emit fileSelectedByKeyboard(curfilePath);
+                isKeyboardSelection = false;
+            } else {
+                qDebug() << "选择由其他方式触发";
+            }
+
+        }
+    }
 }
 
 
 
 void FileSystem::changePath(const QString& path){
     QFileInfo fileInfo(path);
-    if (fileInfo.exists() && fileInfo.isDir())
+    if (fileInfo.exists() && fileInfo.isDir()) {
         ui->treeView->setRootIndex(fileSystemModel->index(path));
-    else
+        // 更新面包屑路径
+        breadcrumb->setPath(path);
+        // 更新当前目录记录
+        currentDir = path;
+    } else {
         QMessageBox::warning(this, "", "改路径不是有效路径，请重新输入");
+    }
+}
+
+bool FileSystem::eventFilter(QObject *watched, QEvent *event) {
+    if (watched == ui->treeView) {
+        if (event->type() == QEvent::MouseButtonPress) {
+            isMouseClick = true;
+            isKeyboardSelection = false;
+            qDebug() << "Mouse click detected";
+        } else if (event->type() == QEvent::KeyPress) {
+            QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
+            if (keyEvent->key() == Qt::Key_Up || keyEvent->key() == Qt::Key_Down ||
+                keyEvent->key() == Qt::Key_Left || keyEvent->key() == Qt::Key_Right ||
+                keyEvent->key() == Qt::Key_PageUp || keyEvent->key() == Qt::Key_PageDown ||
+                keyEvent->key() == Qt::Key_Home || keyEvent->key() == Qt::Key_End) {
+                isKeyboardSelection = true;
+                isMouseClick = false;
+                qDebug() << "Keyboard navigation detected";
+            }
+        }
+    }
+    return QWidget::eventFilter(watched, event);
 }
 
 FileSystem::~FileSystem() {

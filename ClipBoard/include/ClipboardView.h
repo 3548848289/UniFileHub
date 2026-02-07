@@ -5,6 +5,7 @@
 #include <QLabel>
 #include <QListWidgetItem>
 #include "ClipboardItem/ClipboardItem.h"
+#include "ClipboardItemDelegate.h"
 
 class ClipboardController;
 
@@ -55,6 +56,7 @@ private:
     void insertNewItem(ClipboardItem *newItem);
     ClipboardItem* findItemForListWidgetItem(QListWidgetItem* listItem);
     QListWidgetItem* findListWidgetItemForClipboardItem(ClipboardItem* item);
+    void updateSequenceNumbers();
 };
 
 #endif // CLIPBOARDVIEW_H
