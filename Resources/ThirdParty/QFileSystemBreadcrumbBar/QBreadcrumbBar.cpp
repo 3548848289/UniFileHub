@@ -48,8 +48,11 @@ void QBreadcrumbBar::switchToEditMode() {
 
     connect(edit, &QLineEdit::editingFinished, this, [this, edit]() {
         QString newPath = edit->text();
-        parsePath(newPath);
         editMode = false;
+        // 先从布局中移除edit控件，避免parsePath中的clearLayout删除它
+        layout->removeWidget(edit);
+        edit->deleteLater();
+        parsePath(newPath);
         emit pathEdited(newPath);
     });
 

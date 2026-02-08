@@ -154,3 +154,11 @@ void SettingManager::setWindowPosition(const QPoint &position) {
     settings.setValue("window/y", position.y());
 }
 
+bool SettingManager::getWindowMaximized() {
+    return settings.value("window/maximized", false).toBool();
+}
+
+void SettingManager::setWindowMaximized(bool maximized) {
+    settings.setValue("window/maximized", maximized);
+}
+

@@ -50,12 +50,24 @@ QLocalServer* createLocalServer(MainWindow *w) {
                 QByteArray msg = clientConnection->readAll();
                 if (msg.startsWith("open:")) {
                     QString filePath = QString(msg.mid(5)); // 移除"open:"前缀
-                    w->showNormal();
+                    // 显示窗口时保持之前的状态
+                    bool wasMaximized = SettingManager::Instance().getWindowMaximized();
+                    if (wasMaximized) {
+                        w->showMaximized();
+                    } else {
+                        w->showNormal();
+                    }
                     w->raise();
                     w->activateWindow();
                     w->openFileFromCommandLine(filePath);
                 } else if (msg == "show") {
-                    w->showNormal();
+                    // 显示窗口时保持之前的状态
+                    bool wasMaximized = SettingManager::Instance().getWindowMaximized();
+                    if (wasMaximized) {
+                        w->showMaximized();
+                    } else {
+                        w->showNormal();
+                    }
                     w->raise();
                     w->activateWindow();
                 }
@@ -86,15 +98,49 @@ QSystemTrayIcon* createTray(MainWindow *w, QApplication &app) {
 
     QObject::connect(trayIcon, &QSystemTrayIcon::activated, [w](QSystemTrayIcon::ActivationReason reason) {
         if (reason == QSystemTrayIcon::Trigger) {
-            w->showNormal();
-            w->raise();
-            w->activateWindow();
+            if (!w->isVisible()) {
+                // 如果窗口不可见，显示窗口（保持原状态）
+                // 先获取保存的最大化状态
+                bool wasMaximized = SettingManager::Instance().getWindowMaximized();
+                if (wasMaximized) {
+                    w->showMaximized();
+                } else {
+                    w->showNormal();
+                }
+                w->raise();
+                w->activateWindow();
+            } else {
+                // 如果窗口可见，切换显示状态
+                if (w->isMinimized()) {
+                    // 如果窗口最小化，恢复之前的状态
+                    bool wasMaximized = SettingManager::Instance().getWindowMaximized();
+                    if (wasMaximized) {
+                        w->showMaximized();
+                    } else {
+                        w->showNormal();
+                    }
+                    w->raise();
+                    w->activateWindow();
+                } else {
+                    // 如果窗口正常或最大化，保存当前状态后最小化
+                    SettingManager::Instance().setWindowMaximized(w->isMaximized());
+                    w->showMinimized();
+                }
+            }
         }
     });
     QObject::connect(showAction, &QAction::triggered, [w]() {
-        w->showNormal();
-        w->raise();
-        w->activateWindow();
+        if (!w->isVisible() || w->isMinimized()) {
+            // 如果窗口不可见或最小化，显示窗口（保持原状态）
+            bool wasMaximized = SettingManager::Instance().getWindowMaximized();
+            if (wasMaximized) {
+                w->showMaximized();
+            } else {
+                w->showNormal();
+            }
+            w->raise();
+            w->activateWindow();
+        }
     });
     QObject::connect(settingAction, &QAction::triggered, [w]() {
         w->showSetting();

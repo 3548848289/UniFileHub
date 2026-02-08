@@ -89,10 +89,19 @@ TextTab::TextTab(const QString &filePath, QWidget *parent)  : TabAbstract(filePa
         int lineCount = textEdit->document()->blockCount();
         int charCount = textEdit->toPlainText().length();
         controlWidtxt->updateTextStatistics(lineCount, charCount);
+        
+        // 更新原始纯文本内容
+        m_originalPlainText = textEdit->toPlainText();
     });
 
     // 连接编码变化信号
     connect(controlWidtxt, &ControlWidTXT::encodingChanged, this, &TextTab::onEncodingChanged);
+    
+    // 连接md预览模式切换信号
+    connect(controlWidtxt, &ControlWidTXT::mdPreviewToggled, this, &TextTab::onMdPreviewToggled);
+    
+    // 连接HTML预览模式切换信号
+    connect(controlWidtxt, &ControlWidTXT::htmlPreviewToggled, this, &TextTab::onHtmlPreviewToggled);
     
     // 连接以该编码保存信号
     connect(controlWidtxt, &ControlWidTXT::saveWithEncodingRequested, this, [this]() {
@@ -129,6 +138,14 @@ TextTab::TextTab(const QString &filePath, QWidget *parent)  : TabAbstract(filePa
 
     // 初始化编码为UTF-8
     setCurrentCodecName("UTF-8");
+    
+    // 加载文件内容
+    if (!filePath.isEmpty()) {
+        loadFromFile(filePath);
+    }
+    
+    // 初始化原始纯文本内容
+    m_originalPlainText = textEdit->toPlainText();
 }
 
 void TextTab::onTextScrolled(int value)
@@ -161,7 +178,7 @@ bool TextTab::eventFilter(QObject *obj, QEvent *event)
 void TextTab::setContent(const QString &text)
 {
     Q_ASSERT(textEdit != nullptr);
-    textEdit->setText(text);
+    textEdit->setPlainText(text);
 }
 
 QString TextTab::getContent() const
@@ -185,6 +202,7 @@ void TextTab::loadFromFile(const QString &fileName)
     QString text = decodeContent(content);
 
     setContent(text);
+    m_originalPlainText = text;
     setContentModified(false);
 }
 
@@ -213,6 +231,7 @@ void TextTab::loadFromInternet(const QByteArray &content)
     QString text = decodeContent(content);
     qDebug() << "Converted text:" << text;
     setContent(text);
+    m_originalPlainText = text;
 }
 
 void TextTab::findNext(const QString &str, Qt::CaseSensitivity cs)
@@ -395,6 +414,43 @@ void TextTab::onEncodingChanged(const QString& codecName)
     // 重新加载文件以应用新编码
     if (!getCurrentFilePath().isEmpty()) {
         loadFromFile(getCurrentFilePath());
+    }
+}
+
+void TextTab::onMdPreviewToggled(bool enabled)
+{
+    if (enabled) {
+        // 保存原始纯文本内容
+        m_originalPlainText = textEdit->toPlainText();
+        // 切换到md预览模式
+        textEdit->setMarkdown(m_originalPlainText);
+        // 禁用语法高亮
+        if (m_syntaxHighlighter) {
+            m_syntaxHighlighter->setDocument(nullptr);
+        }
+    } else {
+        // 切换回普通文本模式
+        textEdit->setPlainText(m_originalPlainText);
+        // 重新启用语法高亮
+        if (m_syntaxHighlighter) {
+            m_syntaxHighlighter->setDocument(textEdit->document());
+        }
+    }
+}
+
+void TextTab::onHtmlPreviewToggled(bool enabled)
+{
+    Q_ASSERT(textEdit != nullptr);
+    Q_ASSERT(m_syntaxHighlighter != nullptr);
+    
+    if (enabled) {
+        // 启用HTML预览模式，设置为HTML内容
+        textEdit->setText(m_originalPlainText);
+        // m_syntaxHighlighter->setEnabled(false); // 禁用语法高亮
+    } else {
+        // 禁用HTML预览模式，恢复为纯文本
+        textEdit->setPlainText(m_originalPlainText);
+        // m_syntaxHighlighter->setEnabled(true); // 启用语法高亮
     }
 }
 

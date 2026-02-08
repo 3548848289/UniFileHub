@@ -56,11 +56,13 @@ public:
     QString getToken();
     void setToken(const QString &token);
     
-    // 窗口大小和位置相关方法
+    // 窗口大小、位置和状态相关方法
     QSize getWindowSize();
     void setWindowSize(const QSize &size);
     QPoint getWindowPosition();
     void setWindowPosition(const QPoint &position);
+    bool getWindowMaximized();
+    void setWindowMaximized(bool maximized);
 private:
     SettingManager();
     ~SettingManager();

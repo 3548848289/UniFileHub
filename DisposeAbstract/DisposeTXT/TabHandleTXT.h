@@ -69,6 +69,12 @@ public slots:
     // 处理文本滚动
     void onTextScrolled(int value);
     
+    // 处理md预览模式切换
+    void onMdPreviewToggled(bool enabled);
+    
+    // 处理HTML预览模式切换
+    void onHtmlPreviewToggled(bool enabled);
+    
     // 右键菜单槽函数
 
 
@@ -81,6 +87,7 @@ private:
     QHBoxLayout *textLayout;
     SyntaxHighlighter *m_syntaxHighlighter;
     QString m_currentCodecName;
+    QString m_originalPlainText; // 保存原始纯文本内容
 };
 
 #endif // TABHANDLETXT_H

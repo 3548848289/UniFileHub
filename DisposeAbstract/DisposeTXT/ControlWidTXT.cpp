@@ -31,6 +31,8 @@ ControlWidTXT::ControlWidTXT(QWidget *parent) :
     connect(ui->encodingDisplayLabel, &ClickableLabel::clicked, this, &ControlWidTXT::onEncodingLabelClicked);
     connect(ui->fontSizeDisplayLabel, &ClickableLabel::clicked, this, &ControlWidTXT::onFontSizeLabelClicked);
     connect(ui->saveWithEncodingButton, &QPushButton::clicked, this, &ControlWidTXT::saveWithEncodingRequested);
+    connect(ui->mdPreviewCheckBox, &QCheckBox::toggled, this, &ControlWidTXT::mdPreviewToggled);
+    connect(ui->htmlPreviewCheckBox, &QCheckBox::toggled, this, &ControlWidTXT::htmlPreviewToggled);
 }
 
 ControlWidTXT::~ControlWidTXT()

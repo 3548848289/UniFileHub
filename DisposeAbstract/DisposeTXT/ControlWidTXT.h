@@ -54,6 +54,8 @@ signals:
     void tabIndentChanged(int indent);
     void fontSizeChanged(int size);
     void saveWithEncodingRequested();
+    void mdPreviewToggled(bool enabled);
+    void htmlPreviewToggled(bool enabled);
 
 private slots:
     void onTabIndentLabelClicked();

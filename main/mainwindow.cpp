@@ -281,6 +281,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     this->resize(size);
     this->move(pos);
     
+    // 恢复窗口最大化状态
+    if (SettingManager::Instance().getWindowMaximized()) {
+        this->showMaximized();
+    }
+    
     // 设置菜单图标
     ui->actionopen->setIcon(IconManager::icon(IconManager::Icon::MenuFileOpen, QSize(16, 16)));
     ui->actionsave->setIcon(IconManager::icon(IconManager::Icon::MenuFileSave, QSize(16, 16)));
@@ -296,9 +301,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    // 保存窗口大小和位置
+    // 保存窗口大小、位置和状态
     SettingManager::Instance().setWindowSize(this->size());
     SettingManager::Instance().setWindowPosition(this->pos());
+    SettingManager::Instance().setWindowMaximized(this->isMaximized());
     event->accept();
 }
 
