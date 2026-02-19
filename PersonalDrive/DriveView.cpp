@@ -11,6 +11,8 @@
 #include <QMessageBox>
 #include <QDir>
 #include <QInputDialog>
+#include <QDateTime>
+#include <QStandardPaths>
 
 DriveView::DriveView(QWidget *parent): QWidget(parent), ui(new Ui::DriveView), m_currentDirId(0)
 {
@@ -84,6 +86,30 @@ DriveView::DriveView(QWidget *parent): QWidget(parent), ui(new Ui::DriveView), m
             this, &DriveView::onOperationSuccess);
     connect(m_driveManager, &DriveManager::operationFailed,
             this, &DriveView::onOperationFailed);
+    connect(m_driveManager, &DriveManager::fileDownloaded,
+            this, &DriveView::onDownloadSuccess);
+    connect(m_driveManager, &DriveManager::downloadFailed,
+            this, &DriveView::onDownloadFailed);
+    
+    // ===== 7. Download History =====
+    m_downloadHistoryModel = new QStandardItemModel(this);
+    m_downloadHistoryModel->setHorizontalHeaderLabels({
+        tr("文件名"), tr("大小(字节)"), tr("下载时间"), tr("保存路径")
+    });
+    
+    ui->downloadHistoryTableView->setModel(m_downloadHistoryModel);
+    ui->downloadHistoryTableView->horizontalHeader()->setStretchLastSection(false);
+    ui->downloadHistoryTableView->verticalHeader()->setVisible(false);
+    
+    // 设置默认分割比例
+    ui->splitter->setSizes({300, 150});
+    
+    // 加载下载历史
+    loadDownloadHistory();
+
+    
+    // 连接清空历史按钮
+    connect(ui->clearHistoryBtn, &QPushButton::clicked, this, &DriveView::onClearHistoryBtnClicked);
 }
 
 DriveView::~DriveView()
@@ -93,17 +119,15 @@ DriveView::~DriveView()
 
 void DriveView::on_PushFileBtn_clicked()
 {
-    QString filePath = QFileDialog::getOpenFileName(this, tr("选择文件"), "E:/Tmp", tr("所有文件 (*.*);"));
-
-    if (filePath.isEmpty()) {
-        qDebug() << "用户取消了选择";
-        return;
+    QString downloadDir = SettingManager::Instance().personal_drive_download_dir();
+    if (downloadDir.isEmpty()) {
+        downloadDir = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
     }
-
-    qDebug() << "选中的文件路径:" << filePath;
     
-    // 使用DriveManager上传文件
-    m_driveManager->uploadFile(filePath, m_currentDirId);
+    QString filePath = QFileDialog::getOpenFileName(this, "选择文件", downloadDir, "所有文件 (*.*)");
+    if (!filePath.isEmpty()) {
+        DriveManager::Instance().uploadFile(filePath, m_currentDirId);
+    }
 }
 
 void DriveView::loadFileList(int parentId)
@@ -121,12 +145,49 @@ void DriveView::onItemDoubleClicked(const QModelIndex &index)
 
     int row = index.row();
     QStandardItem *item = m_model->item(row, 0);
+    if (!item) return;
 
     bool isDir = item->data(DriveRoles::RoleIsDir).toBool();
-    if (!isDir) return;
+    int id = item->data(DriveRoles::RoleId).toInt();
 
-    m_currentDirId = item->data(DriveRoles::RoleId).toInt();
-    loadFileList(m_currentDirId);
+    if (isDir) {
+        // 如果是文件夹，进入文件夹
+        loadFileList(id);
+    } else {
+        // 如果是文件，下载文件
+        DriveItem *driveItem = nullptr;
+        // 查找对应的DriveItem
+        for (DriveItem *currentItem : m_driveManager->getCurrentFileList()) {
+            if (currentItem->getId() == id) {
+                driveItem = currentItem;
+                break;
+            }
+        }
+        if (driveItem) {
+            DriveFile *driveFile = dynamic_cast<DriveFile*>(driveItem);
+            if (driveFile) {
+                QString fileName = driveFile->getName();
+                QString downloadPath = SettingManager::Instance().personal_drive_download_dir();
+                QDir dir(downloadPath);
+                
+                // 如果设置的路径为空，则使用用户路径
+                if (downloadPath.isEmpty()) {
+                    downloadPath = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
+                    dir.setPath(downloadPath);
+                }
+                
+                // 确保目录存在
+                if (!dir.exists()) {
+                    dir.mkpath(".");
+                }
+                
+                QString savePath = dir.absoluteFilePath(fileName);
+                
+                // 开始下载（下载记录由DriveManager在downloadFile中自动添加）
+                m_driveManager->downloadFile(id, savePath);
+            }
+        }
+    }
 }
 
 void DriveView::onFileListUpdated(const QList<DriveItem *> &fileList)
@@ -152,15 +213,20 @@ void DriveView::onActionClicked(int row, int action)
             QString downloadPath = SettingManager::Instance().personal_drive_download_dir();
             QDir dir(downloadPath);
             
-            // 如果设置的路径为空或不存在，则使用默认路径
-            if (downloadPath.isEmpty() || !dir.exists()) {
-                dir.setPath("E:/Tmp");
-                if (!dir.exists()) {
-                    dir.mkpath(".");
-                }
+            // 如果设置的路径为空，则使用用户路径
+            if (downloadPath.isEmpty()) {
+                downloadPath = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
+                dir.setPath(downloadPath);
+            }
+            
+            // 确保目录存在
+            if (!dir.exists()) {
+                dir.mkpath(".");
             }
             
             QString savePath = dir.absoluteFilePath(fileName);
+            
+            // 开始下载（下载记录由DriveManager在downloadFile中自动添加）
             m_driveManager->downloadFile(id, savePath);
         } else {
             qDebug() << "不能下载文件夹，行：" << row;
@@ -213,6 +279,70 @@ void DriveView::onOperationFailed(const QString &errorMessage)
 {
     qDebug() << "操作失败:" << errorMessage;
     QMessageBox::warning(this, tr("错误"), errorMessage);
+}
+
+// 加载下载历史
+void DriveView::loadDownloadHistory() {
+    m_downloadHistoryModel->clear();
+    m_downloadHistoryModel->setHorizontalHeaderLabels({
+        tr("文件名"), tr("大小(字节)"), tr("下载时间"), tr("保存路径"), tr("状态")
+    });
+    
+    QList<DriveDownloadRecord> records = m_driveManager->getDownloadHistory();
+    
+    for (const DriveDownloadRecord &record : records) {
+        QStandardItem *fileNameItem = new QStandardItem(record.fileName);
+        QStandardItem *fileSizeItem = new QStandardItem(QString::number(record.fileSize));
+        QStandardItem *downloadTimeItem = new QStandardItem(record.downloadTime.toString("yyyy-MM-dd HH:mm:ss"));
+        QStandardItem *savePathItem = new QStandardItem(record.savePath);
+        
+        // 根据状态设置显示文本和颜色
+        QString statusText;
+        if (record.downloadStatus == "downloading") {
+            statusText = tr("下载中");
+        } else if (record.downloadStatus == "success") {
+            statusText = tr("下载成功");
+        } else if (record.downloadStatus == "failed") {
+            statusText = tr("下载失败");
+        } else {
+            statusText = record.downloadStatus;
+        }
+        QStandardItem *statusItem = new QStandardItem(statusText);
+        
+        // 设置状态文本颜色
+        if (record.downloadStatus == "downloading") {
+            statusItem->setForeground(QBrush(Qt::blue));
+        } else if (record.downloadStatus == "success") {
+            statusItem->setForeground(QBrush(Qt::green));
+        } else if (record.downloadStatus == "failed") {
+            statusItem->setForeground(QBrush(Qt::red));
+        }
+        
+        QList<QStandardItem*> items = {fileNameItem, fileSizeItem, downloadTimeItem, savePathItem, statusItem};
+        m_downloadHistoryModel->appendRow(items);
+    }
+    
+    // 设置列宽
+    int totalWidth = ui->downloadHistoryTableView->viewport()->width();
+    if (totalWidth > 0) {
+        ui->downloadHistoryTableView->setColumnWidth(0, totalWidth * 25 / 100);  // 文件名 25%
+        ui->downloadHistoryTableView->setColumnWidth(1, totalWidth * 12 / 100);  // 大小 12%
+        ui->downloadHistoryTableView->setColumnWidth(2, totalWidth * 20 / 100);  // 下载时间 20%
+        ui->downloadHistoryTableView->setColumnWidth(3, totalWidth * 28 / 100);  // 保存路径 28%
+        ui->downloadHistoryTableView->setColumnWidth(4, totalWidth * 15 / 100);  // 状态 15%
+    }
+}
+
+// 清空下载历史
+void DriveView::onClearHistoryBtnClicked() {
+    if (QMessageBox::question(this, tr("确认清空"), tr("确定要清空所有下载历史记录吗？")) == QMessageBox::Yes) {
+        if (m_driveManager->clearDownloadHistory()) {
+            loadDownloadHistory();
+            QMessageBox::information(this, tr("操作成功"), tr("下载历史已清空"));
+        } else {
+            QMessageBox::warning(this, tr("操作失败"), tr("清空下载历史失败"));
+        }
+    }
 }
 
 // 构建面包屑路径
@@ -292,6 +422,9 @@ void DriveView::on_RefreshBtn_clicked()
     ui->tableView->setColumnWidth(1, totalWidth * 2 / 9); // 大小
     ui->tableView->setColumnWidth(2, totalWidth * 3 / 9); // 上传时间
 
+    loadDownloadHistory();
+
+
 }
 
 void DriveView::on_NewFloderBtn_clicked()
@@ -305,5 +438,19 @@ void DriveView::on_NewFloderBtn_clicked()
     if (ok && !folderName.isEmpty()) {
         m_driveManager->createFolder(folderName, m_currentDirId);
     }
+}
+
+// 下载成功处理
+void DriveView::onDownloadSuccess(const QString &filePath) {
+    qDebug() << "文件下载成功:" << filePath;
+    // 下载状态更新已由DriveManager在onFileDownloaded中处理
+    loadDownloadHistory();
+}
+
+// 下载失败处理
+void DriveView::onDownloadFailed(const QString &errorMessage) {
+    qDebug() << "文件下载失败:" << errorMessage;
+    // 下载状态更新已由DriveManager在onError中处理
+    loadDownloadHistory();
 }
 

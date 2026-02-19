@@ -14,7 +14,7 @@ DLogin::DLogin(QWidget *parent): QDialog(parent), ui(new Ui::DLogin)
     ui->registerBtn->setEnabled(false);
     
     // 设置关闭按钮图标
-    ui->exit_toolButton->setIcon(IconManager::icon(IconManager::Icon::Close, QSize(48, 48)));
+    ui->exit_toolButton->setIcon(IconManager::icon(IconManager::Icon::Close, QSize(12, 12)));
 
     // 使用ThemeManager设置样式
     QString secondaryColor = ThemeManager::Instance().secondaryColor().name();

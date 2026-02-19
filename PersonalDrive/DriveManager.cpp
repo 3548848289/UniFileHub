@@ -8,7 +8,7 @@
 #include <QDebug>
 #include <QDateTime>
 
-DriveManager::DriveManager(QObject *parent): QObject(parent), m_apiClient(nullptr), m_currentDirectoryId(0), m_initialized(false)
+DriveManager::DriveManager(QObject *parent): QObject(parent), m_apiClient(nullptr), m_currentDirectoryId(0), m_initialized(false), m_dbDriveDownload(nullptr)
 {
 
 }
@@ -20,6 +20,11 @@ DriveManager::~DriveManager()
     if (m_apiClient) {
         delete m_apiClient;
         m_apiClient = nullptr;
+    }
+    
+    if (m_dbDriveDownload) {
+        delete m_dbDriveDownload;
+        m_dbDriveDownload = nullptr;
     }
 }
 
@@ -36,6 +41,9 @@ void DriveManager::initialize()
     }
     
     m_apiClient = new DriveApiClient(this);
+    
+    // 初始化下载历史数据库
+    m_dbDriveDownload = new dbDriveDownload("./SmartDesk.db");
     
     // 连接DriveApiClient的信号
     connect(m_apiClient, &DriveApiClient::fileListReceived,
@@ -147,6 +155,38 @@ void DriveManager::downloadFile(int fileId, const QString &savePath)
         initialize();
     }
     
+    // 从文件列表中查找文件信息
+    for (DriveItem *item : m_currentFileList) {
+        if (item->getId() == fileId && !item->isFolder()) {
+            DriveFile *file = dynamic_cast<DriveFile*>(item);
+            if (file) {
+                // 处理重名文件，使用与DriveApiClient相同的命名规则
+                QString finalPath = savePath;
+                QFileInfo fileInfo(savePath);
+                QString baseName = fileInfo.baseName();
+                QString suffix = fileInfo.completeSuffix();
+                QString path = fileInfo.path();
+                int counter = 1;
+
+                // 如果文件已存在，生成新的文件名
+                while (QFile::exists(finalPath)) {
+                    QString newName;
+                    if (suffix.isEmpty()) {
+                        newName = QString("%1 (%2)").arg(baseName).arg(counter);
+                    } else {
+                        newName = QString("%1 (%2).%3").arg(baseName).arg(counter).arg(suffix);
+                    }
+                    finalPath = QDir(path).absoluteFilePath(newName);
+                    counter++;
+                }
+
+                // 添加下载记录（使用处理后的实际保存路径）
+                addDownloadRecord(fileId, file->getName(), file->getSize(), finalPath);
+                break;
+            }
+        }
+    }
+    
     m_apiClient->downloadFile(fileId, savePath);
 }
 
@@ -220,6 +260,13 @@ void DriveManager::onFolderCreated(const QJsonObject &folderInfo)
 
 void DriveManager::onFileDownloaded(const QString &filePath)
 {
+    // 更新下载状态为成功
+    int recordId = getRecordIdBySavePath(filePath);
+    if (recordId > 0) {
+        updateDownloadStatus(recordId, "success");
+    }
+    
+    emit fileDownloaded(filePath);
     emit operationSuccess("文件下载成功");
 }
 
@@ -246,6 +293,10 @@ void DriveManager::onItemMoved(const QJsonObject &itemInfo)
 
 void DriveManager::onError(const QString &errorMessage)
 {
+    // 检查是否是下载错误
+    if (errorMessage.contains("下载") || errorMessage.contains("download", Qt::CaseInsensitive)) {
+        emit downloadFailed(errorMessage);
+    }
     emit operationFailed(errorMessage);
 }
 
@@ -301,4 +352,66 @@ void DriveManager::onPathReceived(const QJsonArray &path)
     }
     
     emit pathReceived(pathItems);
+}
+
+// ========== 下载历史管理 ==========
+
+void DriveManager::addDownloadRecord(int fileId, const QString &fileName, qint64 fileSize, const QString &savePath)
+{
+    if (!m_dbDriveDownload) {
+        return;
+    }
+    
+    DriveDownloadRecord record;
+    record.fileId = fileId;
+    record.fileName = fileName;
+    record.fileSize = fileSize;
+    record.savePath = savePath;
+    record.downloadTime = QDateTime::currentDateTime();
+    record.downloadStatus = "downloading"; // 初始状态为下载中
+    record.fileType = fileName.section('.', -1);
+    
+    if (m_dbDriveDownload->addDownloadRecord(record)) {
+        // 获取刚插入的记录ID
+        int recordId = m_dbDriveDownload->getRecordIdBySavePath(savePath);
+        if (recordId > 0) {
+            m_downloadRecordMap[fileId] = recordId;
+        }
+    }
+}
+
+QList<DriveDownloadRecord> DriveManager::getDownloadHistory()
+{
+    if (!m_dbDriveDownload) {
+        return QList<DriveDownloadRecord>();
+    }
+    
+    return m_dbDriveDownload->getDownloadHistory();
+}
+
+bool DriveManager::clearDownloadHistory()
+{
+    if (!m_dbDriveDownload) {
+        return false;
+    }
+    
+    return m_dbDriveDownload->clearDownloadHistory();
+}
+
+bool DriveManager::updateDownloadStatus(int recordId, const QString &status)
+{
+    if (!m_dbDriveDownload) {
+        return false;
+    }
+    
+    return m_dbDriveDownload->updateDownloadStatus(recordId, status);
+}
+
+int DriveManager::getRecordIdBySavePath(const QString &savePath)
+{
+    if (!m_dbDriveDownload) {
+        return -1;
+    }
+    
+    return m_dbDriveDownload->getRecordIdBySavePath(savePath);
 }

@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QStandardItemModel>
 #include <QAbstractItemView>
+#include <QMap>
 #include "../../Resources/ThirdParty/QFileSystemBreadcrumbBar/QFileSystemBreadcrumbBar.h"
 
 namespace Ui {
@@ -44,6 +45,11 @@ private slots:
     void on_RefreshBtn_clicked();
 
     void on_NewFloderBtn_clicked();
+    
+    // 下载历史相关
+    void onClearHistoryBtnClicked();
+    void onDownloadSuccess(const QString &filePath);
+    void onDownloadFailed(const QString &errorMessage);
 
 private:
     QFileSystemBreadcrumbBar* breadcrumb;
@@ -51,12 +57,14 @@ private:
 
     Ui::DriveView *ui;
     QStandardItemModel * m_model;
+    QStandardItemModel * m_downloadHistoryModel;
     DriveManager *m_driveManager;
     int m_currentDirId;
 
     void loadFileList(int parentId);
     void updateFileList(const QList<DriveItem *> &fileList);
     void buildBreadcrumbPath();
+    void loadDownloadHistory();
 };
 
 #endif // DRIVEVIEW_H

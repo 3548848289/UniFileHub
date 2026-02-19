@@ -51,31 +51,41 @@ static QString iconPath(IconManager::Icon icon)
 
 static QPixmap renderSvg(const QString &file,
                          const QColor &color,
-                         QSize size,
+                         QSize logicalSize,
                          bool tint = true)
 {
-    QSvgRenderer renderer(file);
+    qreal dpr = qApp->devicePixelRatio();   // 关键
 
+    QSize deviceSize = logicalSize * dpr;   // 真正渲染尺寸
+
+    QSvgRenderer renderer(file);
     if (!renderer.isValid()) {
-        QPixmap pixmap(size);
-        pixmap.fill(Qt::transparent);
-        return pixmap;
+        QPixmap pm(deviceSize);
+        pm.fill(Qt::transparent);
+        pm.setDevicePixelRatio(dpr);
+        return pm;
     }
 
-    QImage img(size, QImage::Format_ARGB32_Premultiplied);
+    QImage img(deviceSize, QImage::Format_ARGB32_Premultiplied);
     img.fill(Qt::transparent);
 
     QPainter p(&img);
-    renderer.render(&p);
+    p.setRenderHint(QPainter::Antialiasing, true);
+    p.setRenderHint(QPainter::SmoothPixmapTransform, true);
+
+    renderer.render(&p, QRect(QPoint(0,0), deviceSize));
 
     if (tint) {
         p.setCompositionMode(QPainter::CompositionMode_SourceIn);
         p.fillRect(img.rect(), color);
     }
-
     p.end();
-    return QPixmap::fromImage(img);
+
+    QPixmap pm = QPixmap::fromImage(img);
+    pm.setDevicePixelRatio(dpr);   // ★★★★★ 核心
+    return pm;
 }
+
 
 QIcon IconManager::icon(Icon type, QSize size, QColor color)
 {

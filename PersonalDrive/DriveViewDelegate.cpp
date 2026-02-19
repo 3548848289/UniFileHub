@@ -24,20 +24,18 @@ void DriveViewDelegate::paint(QPainter *painter,
         painter->fillRect(option.rect, option.palette.highlight());
     }
 
-    // -------------------
     // 绘制文件/文件夹图标 + 名称
-    // -------------------
     if (index.column() == 0) {
         QVariant v = index.data(DriveRoles::RoleIcon);
         QVariant text = index.data(DriveRoles::RoleText);
 
         if (v.isValid() && text.isValid()) {
             IconManager::Icon iconEnum = static_cast<IconManager::Icon>(v.toInt());
-            QIcon icon = IconManager::icon(iconEnum, QSize(12,12)); // 12px 可改
+            QIcon icon = IconManager::icon(iconEnum, QSize(18,18));
 
             QRect iconRect(option.rect.left() + 8,
                            option.rect.center().y() - 8,
-                           12, 12);
+                           18, 18);
             icon.paint(painter, iconRect);
 
             QRect textRect = option.rect.adjusted(32, 0, -8, 0);

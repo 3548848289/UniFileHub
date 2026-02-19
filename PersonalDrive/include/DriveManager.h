@@ -4,11 +4,19 @@
 #include <QObject>
 #include <QList>
 #include <QJsonArray>
+#include <QMap>
+#include <QFileInfo>
+#include <QDir>
+#include "../../manager/include/dbDriveDownload.h"
 
 class DriveApiClient;
 class DriveItem;
 class DriveFile;
 class DriveFolder;
+class dbDriveDownload;
+
+// 前向声明
+struct DriveDownloadRecord;
 
 class DriveManager : public QObject
 {
@@ -62,6 +70,22 @@ public:
     
     // 获取目录路径（用于面包屑导航）
     void getPath(int dirId);
+    
+    // ========== 下载历史管理 ==========
+    // 添加下载记录
+    void addDownloadRecord(int fileId, const QString &fileName, qint64 fileSize, const QString &savePath);
+    
+    // 获取下载历史
+    QList<DriveDownloadRecord> getDownloadHistory();
+    
+    // 清空下载历史
+    bool clearDownloadHistory();
+    
+    // 更新下载状态
+    bool updateDownloadStatus(int recordId, const QString &status);
+    
+    // 通过保存路径获取记录ID
+    int getRecordIdBySavePath(const QString &savePath);
 
 signals:
     // 文件列表更新信号
@@ -82,6 +106,12 @@ signals:
     
     // 文件下载进度信号
     void downloadProgress(int progress);
+    
+    // 文件下载完成信号
+    void fileDownloaded(const QString &filePath);
+    
+    // 文件下载失败信号
+    void downloadFailed(const QString &errorMessage);
 
 private slots:
     // 从DriveApiClient接收文件列表
@@ -125,6 +155,10 @@ private:
     QList<DriveItem *> m_currentFileList;
     int m_currentDirectoryId;
     bool m_initialized;
+    
+    // 下载历史管理
+    dbDriveDownload *m_dbDriveDownload;
+    QMap<int, int> m_downloadRecordMap; // 文件ID -> 记录ID的映射
 };
 
 #endif // DRIVEMANAGER_H

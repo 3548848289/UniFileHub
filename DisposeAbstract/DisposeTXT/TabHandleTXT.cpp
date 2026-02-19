@@ -11,7 +11,7 @@
 #include <QFileDialog>
 
 // TextTab 实现
-TextTab::TextTab(const QString &filePath, QWidget *parent)  : TabAbstract(filePath, parent), m_currentCodecName("UTF-8")
+TextTab::TextTab(const QString &filePath, QWidget *parent)  : TabAbstract(filePath, parent), m_currentCodecName("UTF-8"), m_isSwitchingPreviewMode(false)
 {
     textEdit = new PlainTextEdit(this);
     lineNumberWidget = new LineNumberWidget(textEdit, this);
@@ -83,13 +83,18 @@ TextTab::TextTab(const QString &filePath, QWidget *parent)  : TabAbstract(filePa
     textEdit->setFont(font);
 
     connect(textEdit, &QTextEdit::textChanged, this, [this]() {
+        // 如果正在切换预览模式，不更新m_originalPlainText
+        if (m_isSwitchingPreviewMode) {
+            return;
+        }
+        
         setContentModified(true);
 
         // 更新文本统计信息
         int lineCount = textEdit->document()->blockCount();
         int charCount = textEdit->toPlainText().length();
         controlWidtxt->updateTextStatistics(lineCount, charCount);
-        
+
         // 更新原始纯文本内容
         m_originalPlainText = textEdit->toPlainText();
     });
@@ -419,6 +424,8 @@ void TextTab::onEncodingChanged(const QString& codecName)
 
 void TextTab::onMdPreviewToggled(bool enabled)
 {
+    m_isSwitchingPreviewMode = true; // 设置标志位，防止textChanged信号更新m_originalPlainText
+    
     if (enabled) {
         // 保存原始纯文本内容
         m_originalPlainText = textEdit->toPlainText();
@@ -436,12 +443,16 @@ void TextTab::onMdPreviewToggled(bool enabled)
             m_syntaxHighlighter->setDocument(textEdit->document());
         }
     }
+    
+    m_isSwitchingPreviewMode = false; // 重置标志位
 }
 
 void TextTab::onHtmlPreviewToggled(bool enabled)
 {
     Q_ASSERT(textEdit != nullptr);
     Q_ASSERT(m_syntaxHighlighter != nullptr);
+    
+    m_isSwitchingPreviewMode = true; // 设置标志位，防止textChanged信号更新m_originalPlainText
     
     if (enabled) {
         // 启用HTML预览模式，设置为HTML内容
@@ -452,6 +463,8 @@ void TextTab::onHtmlPreviewToggled(bool enabled)
         textEdit->setPlainText(m_originalPlainText);
         // m_syntaxHighlighter->setEnabled(true); // 启用语法高亮
     }
+    
+    m_isSwitchingPreviewMode = false; // 重置标志位
 }
 
 

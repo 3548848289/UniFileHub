@@ -88,6 +88,7 @@ private:
     SyntaxHighlighter *m_syntaxHighlighter;
     QString m_currentCodecName;
     QString m_originalPlainText; // 保存原始纯文本内容
+    bool m_isSwitchingPreviewMode; // 标志位：是否正在切换预览模式
 };
 
 #endif // TABHANDLETXT_H
