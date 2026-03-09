@@ -3,6 +3,10 @@
 #include <QHBoxLayout>
 #include <QtSvgWidgets/QGraphicsSvgItem>
 #include <QtSvg/QSvgRenderer>
+#include <QtCore/private/qzipreader_p.h>
+#include <QBuffer>
+#include <QDir>
+#include <QStandardPaths>
 
 TabHandleIMG::TabHandleIMG(const QString& filePath, QWidget *parent)
     : TabAbstract(filePath, parent), angle(0), scaleValue(1), shearValue(0), translateValue(0)
@@ -35,6 +39,7 @@ TabHandleIMG::TabHandleIMG(const QString& filePath, QWidget *parent)
 void TabHandleIMG::loadFromFile(const QString &fileName)
 {
     scene->clear();
+    isXmindFile = false;
 
     QFileInfo fileInfo(fileName);
     QString suffix = fileInfo.suffix().toLower();
@@ -54,6 +59,14 @@ void TabHandleIMG::loadFromFile(const QString &fileName)
 
         });
     };
+
+    // XMind 文件处理
+    if (suffix == "xmind") {
+        if (loadXmindThumbnail(fileName)) {
+            return;
+        }
+        // 如果加载缩略图失败，继续尝试其他方式
+    }
 
     if (suffix == "svg") {
         QGraphicsSvgItem* svgItem = new QGraphicsSvgItem(fileName);
@@ -75,6 +88,55 @@ void TabHandleIMG::loadFromFile(const QString &fileName)
         scene->addItem(pixItem);
         fitItemInView(pixItem);
     }
+}
+
+bool TabHandleIMG::loadXmindThumbnail(const QString &fileName)
+{
+    // XMind 文件是 ZIP 格式，缩略图通常位于 Thumbnails/thumbnail.png
+    QStringList possiblePaths = {
+        "Thumbnails/thumbnail.png",
+        "Thumbnails/thumbnail.jpg",
+        "thumbnail.png",
+        "thumbnail.jpg"
+    };
+    
+    for (const QString &pathInZip : possiblePaths) {
+        QByteArray thumbnailData = extractFileFromZip(fileName, pathInZip);
+        if (!thumbnailData.isEmpty()) {
+            QPixmap pixmap;
+            if (pixmap.loadFromData(thumbnailData)) {
+                pixItem = new PixItem(new QPixmap(pixmap));
+                scene->addItem(pixItem);
+                
+                scene->setSceneRect(pixItem->boundingRect());
+                pixItem->setPos(0, 0);
+                QTimer::singleShot(0, this, [this]() {
+                    view->fitInView(pixItem, Qt::KeepAspectRatio);
+                    double scaleFactor = view->transform().m11();
+                    int sliderVal = static_cast<int>(scaleFactor * 50.0);
+                    controlFrame->setScaleSliderValue(sliderVal);
+                });
+                
+                isXmindFile = true;
+                return true;
+            }
+        }
+    }
+    
+    return false;
+}
+
+QByteArray TabHandleIMG::extractFileFromZip(const QString &zipPath, const QString &fileNameInZip)
+{
+    QZipReader zipReader(zipPath);
+    if (!zipReader.exists()) {
+        return QByteArray();
+    }
+    
+    QByteArray fileData = zipReader.fileData(fileNameInZip);
+    zipReader.close();
+    
+    return fileData;
 }
 
 

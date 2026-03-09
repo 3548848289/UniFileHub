@@ -29,7 +29,7 @@ public:
     bool file_see_img();
 
 
-    QString tag_schedule_reminder_type();
+
 
     QString file_system_file_system_dir();
 

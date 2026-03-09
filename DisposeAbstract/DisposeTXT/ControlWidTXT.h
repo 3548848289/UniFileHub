@@ -53,7 +53,6 @@ signals:
     void encodingChanged(const QString &codecName);
     void tabIndentChanged(int indent);
     void fontSizeChanged(int size);
-    void saveWithEncodingRequested();
     void mdPreviewToggled(bool enabled);
     void htmlPreviewToggled(bool enabled);
 

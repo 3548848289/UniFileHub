@@ -31,12 +31,6 @@ void WidgetFunctional::on_pushButton_3_clicked() {
 void WidgetFunctional::on_pushButton_4_clicked()
 {
     emit showwOnlinedoc();
-
-}
-
-void WidgetFunctional::on_pushButton_5_clicked()
-{
-    emit showDraw();
 }
 
 void WidgetFunctional::on_pushButton_6_clicked()
@@ -92,7 +86,7 @@ WidgetFunctional::WidgetFunctional(QWidget *parent)
     ui->setupUi(this);
     btnGroup=new QButtonGroup;
     for (int i = 1; i <= 10; ++i) {
-        QPushButton *button = findChild<QPushButton*>(QString("pushButton_%1").arg(i));        button->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+        QPushButton *button = findChild<QPushButton*>(QString("pushButton_%1").arg(i));
 
         if (button) {
             button->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
@@ -114,16 +108,16 @@ WidgetFunctional::WidgetFunctional(QWidget *parent)
     QString styleSheet = QString(
         "QPushButton#pushButton_1:checked, QPushButton#pushButton_2:checked,"
         "QPushButton#pushButton_3:checked, QPushButton#pushButton_4:checked,"
-        "QPushButton#pushButton_5:checked, QPushButton#pushButton_6:checked,"
-        "QPushButton#pushButton_7:checked, QPushButton#pushButton_8:checked,"
-        "QPushButton#pushButton_9:checked, QPushButton#pushButton_10:checked"
+        "QPushButton#pushButton_6:checked, QPushButton#pushButton_7:checked,"
+        "QPushButton#pushButton_8:checked, QPushButton#pushButton_9:checked,"
+        "QPushButton#pushButton_10:checked"
         "{background:transparent;border:none; border-bottom:3px solid %1;color:%1;}"
 
         "QPushButton#pushButton_1:hover, QPushButton#pushButton_2:hover,"
         "QPushButton#pushButton_3:hover, QPushButton#pushButton_4:hover,"
-        "QPushButton#pushButton_5:hover, QPushButton#pushButton_6:hover,"
-        "QPushButton#pushButton_7:hover, QPushButton#pushButton_8:hover,"
-        "QPushButton#pushButton_9:hover, QPushButton#pushButton_10:hover"
+        "QPushButton#pushButton_6:hover, QPushButton#pushButton_7:hover,"
+        "QPushButton#pushButton_8:hover, QPushButton#pushButton_9:hover,"
+        "QPushButton#pushButton_10:hover"
         "{background:transparent;border:none; border-bottom:3px solid %1;color:%1;}"
     ).arg(primaryColor);
 
@@ -135,7 +129,6 @@ WidgetFunctional::WidgetFunctional(QWidget *parent)
     ui->pushButton_2->setIcon(IconManager::icon(IconManager::Icon::FileBackup, QSize(24,24)));
     ui->pushButton_3->setIcon(IconManager::icon(IconManager::Icon::Tag, QSize(24,24)));
     ui->pushButton_4->setIcon(IconManager::icon(IconManager::Icon::OnlineDoc, QSize(24,24)));
-    ui->pushButton_5->setIcon(IconManager::icon(IconManager::Icon::Drawing, QSize(24,24)));
     ui->pushButton_6->setIcon(IconManager::icon(IconManager::Icon::Drive, QSize(24,24)));
     ui->pushButton_7->setIcon(IconManager::icon(IconManager::Icon::Email, QSize(24,24)));
     ui->pushButton_8->setIcon(IconManager::icon(IconManager::Icon::Clipboard, QSize(24,24)));
@@ -161,7 +154,6 @@ void WidgetFunctional::toggleButtonVisibility(int buttonIndex)
     case 2: button = ui->pushButton_2; break;
     case 3: button = ui->pushButton_3; break;
     case 4: button = ui->pushButton_4; break;
-    case 5: button = ui->pushButton_5; break;
     case 6: button = ui->pushButton_6; break;
     case 7: button = ui->pushButton_7; break;
     case 8: button = ui->pushButton_8; break;

@@ -92,11 +92,7 @@
       <property name="text">
        <string>备忘日程</string>
       </property>
-      <item>
-       <property name="text">
-        <string>到期提醒方式</string>
-       </property>
-      </item>
+ 
       <item>
        <property name="text">
         <string>提前多久提醒</string>
@@ -460,32 +456,7 @@
      </widget>
      <widget class="QWidget" name="tag_schedule">
       <layout class="QGridLayout" name="gridLayout_8">
-       <item row="0" column="1">
-        <widget class="QComboBox" name="tag_schedule_comboBox">
-         <item>
-          <property name="text">
-           <string>不提醒</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>弹窗提醒</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>邮件提醒</string>
-          </property>
-         </item>
-        </widget>
-       </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="tag_schedule_label1">
-         <property name="text">
-          <string>提醒方式</string>
-         </property>
-        </widget>
-       </item>
+
        <item row="3" column="1">
         <widget class="QTimeEdit" name="tag_schedule_timeEdit3"/>
        </item>
@@ -658,7 +629,6 @@
   <tabstop>email_service_lineEdit_6</tabstop>
   <tabstop>file_backup_lineEdit1</tabstop>
   <tabstop>file_backup_Btn</tabstop>
-  <tabstop>tag_schedule_comboBox</tabstop>
  </tabstops>
  <resources/>
  <connections/>

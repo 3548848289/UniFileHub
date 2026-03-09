@@ -114,11 +114,19 @@ void TabManager::closeTab(int row, int col, int index) {
 
             if (auto* sendEmailTab = qobject_cast<SendEmail*>(widget)) {
                 currentTabWidget->removeTab(index);
+                sendEmailTab->deleteLater();
                 return;
             }
 
             if (auto* clipboard = qobject_cast<ClipboardView*>(widget)) {
                 currentTabWidget->removeTab(index);
+                clipboard->deleteLater();
+                return;
+            }
+
+            if (auto* driveView = qobject_cast<DriveView*>(widget)) {
+                currentTabWidget->removeTab(index);
+                driveView->deleteLater();
                 return;
             }
 
@@ -128,7 +136,12 @@ void TabManager::closeTab(int row, int col, int index) {
                 fileTabMap.remove(filePath);
                 currentTabWidget->removeTab(index);
                 tab->deleteLater();
+                return;
             }
+
+            // 处理其他类型的widget
+            currentTabWidget->removeTab(index);
+            widget->deleteLater();
             return;
         }
     }
@@ -142,11 +155,19 @@ void TabManager::closeTab(int row, int col, int index) {
 
     if (auto* sendEmailTab = qobject_cast<SendEmail*>(widget)) {
         tabWidget->removeTab(index);
+        sendEmailTab->deleteLater();
         return;
     }
 
     if (auto* clipboard = qobject_cast<ClipboardView*>(widget)) {
         tabWidget->removeTab(index);
+        clipboard->deleteLater();
+        return;
+    }
+
+    if (auto* driveView = qobject_cast<DriveView*>(widget)) {
+        tabWidget->removeTab(index);
+        driveView->deleteLater();
         return;
     }
 
@@ -156,7 +177,12 @@ void TabManager::closeTab(int row, int col, int index) {
         fileTabMap.remove(filePath);
         tabWidget->removeTab(index);
         tab->deleteLater();
+        return;
     }
+
+    // 处理其他类型的widget
+    tabWidget->removeTab(index);
+    widget->deleteLater();
 }
 
 
@@ -282,7 +308,7 @@ void TabManager::openFileFromMemory(const QString &fileName, const QByteArray &f
 {
     TabAbstract* newTab = TabFactory::create(fileName);
     if (!newTab) {
-        QMessageBox::warning(nullptr, QObject::tr("错误"), QObject::tr("不支持的文件类型"));
+        // 用户已在TabFactory::create中取消，不需要再显示警告
         return;
     }
 
@@ -727,7 +753,7 @@ void TabManager::openFileInPosition(const QString& filePath, int row, int col) {
     // 创建新标签并加载文件
     TabAbstract* newTab = TabFactory::create(filePath);
     if (!newTab) {
-        QMessageBox::warning(nullptr, QObject::tr("错误"), QObject::tr("不支持的文件类型"));
+        // 用户已在TabFactory::create中取消，不需要再显示警告
         return;
     }
     

@@ -25,6 +25,7 @@ target_link_libraries(mytxt_img PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::Svg
     Qt${QT_VERSION_MAJOR}::SvgWidgets
+    Qt${QT_VERSION_MAJOR}::GuiPrivate
 )
 
 target_include_directories(mytxt_img PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

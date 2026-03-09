@@ -90,22 +90,36 @@ DriveView::DriveView(QWidget *parent): QWidget(parent), ui(new Ui::DriveView), m
             this, &DriveView::onDownloadSuccess);
     connect(m_driveManager, &DriveManager::downloadFailed,
             this, &DriveView::onDownloadFailed);
+    connect(m_driveManager, &DriveManager::operationSuccess,
+            this, &DriveView::onUploadSuccess);
+    connect(m_driveManager, &DriveManager::uploadFailed,
+            this, &DriveView::onUploadFailed);
     
     // ===== 7. Download History =====
     m_downloadHistoryModel = new QStandardItemModel(this);
     m_downloadHistoryModel->setHorizontalHeaderLabels({
-        tr("文件名"), tr("大小(字节)"), tr("下载时间"), tr("保存路径")
+        tr("文件名"), tr("大小(字节)"), tr("下载时间"), tr("保存路径"), tr("状态")
+    });
+    
+    m_uploadHistoryModel = new QStandardItemModel(this);
+    m_uploadHistoryModel->setHorizontalHeaderLabels({
+        tr("文件名"), tr("大小(字节)"), tr("上传时间"), tr("本地路径"), tr("状态")
     });
     
     ui->downloadHistoryTableView->setModel(m_downloadHistoryModel);
     ui->downloadHistoryTableView->horizontalHeader()->setStretchLastSection(false);
     ui->downloadHistoryTableView->verticalHeader()->setVisible(false);
     
+    ui->uploadHistoryTableView->setModel(m_uploadHistoryModel);
+    ui->uploadHistoryTableView->horizontalHeader()->setStretchLastSection(false);
+    ui->uploadHistoryTableView->verticalHeader()->setVisible(false);
+    
     // 设置默认分割比例
     ui->splitter->setSizes({300, 150});
     
-    // 加载下载历史
+    // 加载下载历史和上传历史
     loadDownloadHistory();
+    loadUploadHistory();
 
     
     // 连接清空历史按钮
@@ -281,6 +295,48 @@ void DriveView::onOperationFailed(const QString &errorMessage)
     QMessageBox::warning(this, tr("错误"), errorMessage);
 }
 
+// 加载上传历史
+void DriveView::loadUploadHistory() {
+    m_uploadHistoryModel->clear();
+    m_uploadHistoryModel->setHorizontalHeaderLabels({
+        tr("文件名"), tr("大小(字节)"), tr("上传时间"), tr("本地路径"), tr("状态")
+    });
+    
+    QList<DriveUploadRecord> records = m_driveManager->getUploadHistory();
+    
+    for (const DriveUploadRecord &record : records) {
+        QStandardItem *fileNameItem = new QStandardItem(record.fileName);
+        QStandardItem *fileSizeItem = new QStandardItem(QString::number(record.fileSize));
+        QStandardItem *uploadTimeItem = new QStandardItem(record.uploadTime.toString("yyyy-MM-dd HH:mm:ss"));
+        QStandardItem *localPathItem = new QStandardItem(record.localPath);
+        
+        // 根据状态设置显示文本和颜色
+        QString statusText;
+        if (record.uploadStatus == "uploading") {
+            statusText = tr("上传中");
+        } else if (record.uploadStatus == "success") {
+            statusText = tr("上传成功");
+        } else if (record.uploadStatus == "failed") {
+            statusText = tr("上传失败");
+        } else {
+            statusText = record.uploadStatus;
+        }
+        QStandardItem *statusItem = new QStandardItem(statusText);
+        
+        // 设置状态文本颜色
+        if (record.uploadStatus == "uploading") {
+            statusItem->setForeground(QBrush(Qt::blue));
+        } else if (record.uploadStatus == "success") {
+            statusItem->setForeground(QBrush(Qt::green));
+        } else if (record.uploadStatus == "failed") {
+            statusItem->setForeground(QBrush(Qt::red));
+        }
+        
+        QList<QStandardItem*> items = {fileNameItem, fileSizeItem, uploadTimeItem, localPathItem, statusItem};
+        m_uploadHistoryModel->appendRow(items);
+    }
+}
+
 // 加载下载历史
 void DriveView::loadDownloadHistory() {
     m_downloadHistoryModel->clear();
@@ -333,14 +389,29 @@ void DriveView::loadDownloadHistory() {
     }
 }
 
-// 清空下载历史
+// 清空历史记录
 void DriveView::onClearHistoryBtnClicked() {
-    if (QMessageBox::question(this, tr("确认清空"), tr("确定要清空所有下载历史记录吗？")) == QMessageBox::Yes) {
-        if (m_driveManager->clearDownloadHistory()) {
-            loadDownloadHistory();
-            QMessageBox::information(this, tr("操作成功"), tr("下载历史已清空"));
-        } else {
-            QMessageBox::warning(this, tr("操作失败"), tr("清空下载历史失败"));
+    int currentIndex = ui->historyTabWidget->currentIndex();
+    
+    if (currentIndex == 0) {
+        // 清空下载历史
+        if (QMessageBox::question(this, tr("确认清空"), tr("确定要清空所有下载历史记录吗？")) == QMessageBox::Yes) {
+            if (m_driveManager->clearDownloadHistory()) {
+                loadDownloadHistory();
+                QMessageBox::information(this, tr("操作成功"), tr("下载历史已清空"));
+            } else {
+                QMessageBox::warning(this, tr("操作失败"), tr("清空下载历史失败"));
+            }
+        }
+    } else if (currentIndex == 1) {
+        // 清空上传历史
+        if (QMessageBox::question(this, tr("确认清空"), tr("确定要清空所有上传历史记录吗？")) == QMessageBox::Yes) {
+            if (m_driveManager->clearUploadHistory()) {
+                loadUploadHistory();
+                QMessageBox::information(this, tr("操作成功"), tr("上传历史已清空"));
+            } else {
+                QMessageBox::warning(this, tr("操作失败"), tr("清空上传历史失败"));
+            }
         }
     }
 }
@@ -423,8 +494,7 @@ void DriveView::on_RefreshBtn_clicked()
     ui->tableView->setColumnWidth(2, totalWidth * 3 / 9); // 上传时间
 
     loadDownloadHistory();
-
-
+    loadUploadHistory();
 }
 
 void DriveView::on_NewFloderBtn_clicked()
@@ -452,5 +522,19 @@ void DriveView::onDownloadFailed(const QString &errorMessage) {
     qDebug() << "文件下载失败:" << errorMessage;
     // 下载状态更新已由DriveManager在onError中处理
     loadDownloadHistory();
+}
+
+// 上传成功处理
+void DriveView::onUploadSuccess(const QString &message) {
+    qDebug() << "文件上传成功:" << message;
+    // 上传状态更新已由DriveManager在onFileUploaded中处理
+    loadUploadHistory();
+}
+
+// 上传失败处理
+void DriveView::onUploadFailed(const QString &errorMessage) {
+    qDebug() << "文件上传失败:" << errorMessage;
+    // 上传状态更新已由DriveManager在onError中处理
+    loadUploadHistory();
 }
 

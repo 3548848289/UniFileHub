@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(SmartDesk VERSION 0.1 LANGUAGES CXX)
+project(UniFileHub VERSION 0.1 LANGUAGES CXX)
 
 find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets Sql Network Svg SvgWidgets Multimedia MultimediaWidgets Pdf PdfWidgets)
 find_package(Qt6 REQUIRED COMPONENTS Widgets Sql Network Svg SvgWidgets Multimedia MultimediaWidgets Pdf PdfWidgets)
@@ -54,13 +54,13 @@ qt_add_resources(RESOURCES
 )
 
 if(WIN32)
-    set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_SOURCE_DIR}/Resources/SmartDeskIcon.rc")
+    set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_SOURCE_DIR}/Resources/UniFileHubIcon.rc")
 endif()
 
-qt_add_executable(SmartDesk WIN32 ${RESOURCES} ${APP_ICON_RESOURCE_WINDOWS})
+qt_add_executable(UniFileHub WIN32 ${RESOURCES} ${APP_ICON_RESOURCE_WINDOWS})
 
 
-target_link_libraries(SmartDesk PRIVATE
+target_link_libraries(UniFileHub PRIVATE
     mytxt_main
     mytxt_filehis
     mytxt_filetag
@@ -90,7 +90,7 @@ target_link_libraries(SmartDesk PRIVATE
 
 # 安装规则
 include(GNUInstallDirs)
-install(TARGETS SmartDesk
+install(TARGETS UniFileHub
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -98,5 +98,5 @@ install(TARGETS SmartDesk
 
 # 如果使用 Qt6，则需要调用 qt_finalize_executable
 if(QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(SmartDesk)
+    qt_finalize_executable(UniFileHub)
 endif()

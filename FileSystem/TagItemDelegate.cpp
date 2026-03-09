@@ -165,6 +165,7 @@ void TagItemDelegate::addTag(const QAbstractItemModel *model, const QModelIndex 
         QDateTime expirationDate = tagDialog.getExpirationDate();
         int reminderHours = tagDialog.getReminderTime();
         int intervalMinutes = tagDialog.getIntervalTime();
+        QString reminderType = tagDialog.getReminderType(); // 获取提醒方式
 
         QString filePath = model->data(index, QFileSystemModel::FilePathRole).toString();
 
@@ -178,6 +179,7 @@ void TagItemDelegate::addTag(const QAbstractItemModel *model, const QModelIndex 
         fileInfo.reminderTime = reminderHours; // 直接保存小时数
         fileInfo.intervalTime = intervalMinutes; // 直接保存分钟数
         fileInfo.lastReminderIndex = -1; // 初始化lastReminderIndex为-1
+        fileInfo.reminderType = reminderType; // 设置提醒方式
 
         if (!dbservice.dbTags().getFileId(filePath, fileId)) {
             dbservice.dbTags().addFilePath(filePath, fileId);

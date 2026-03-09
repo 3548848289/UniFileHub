@@ -3,6 +3,7 @@
 #include "xlsxworkbook.h"
 #include "xlsxworksheet.h"
 #include <QComboBox>
+#include <QSignalBlocker>
 
 TabHandleXLSX::TabHandleXLSX(const QString& filePath, QWidget *parent) : TabAbstract(filePath, parent) {
     tableWidget = new QTableWidget(this);
@@ -81,6 +82,9 @@ void TabHandleXLSX::loadSheetData(int sheetIndex) {
         QMessageBox::warning(this, tr("错误"), tr("无法重新加载 Excel 文件。"));
         return;
     }
+
+    // 切换/加载sheet时避免触发itemChanged导致误判为已修改
+    QSignalBlocker blocker(tableWidget);
     
     // 获取指定索引的sheet
     QXlsx::Workbook *workbook = xlsx.workbook();
@@ -142,18 +146,28 @@ void TabHandleXLSX::onSheetChanged(int index) {
 }
 
 void TabHandleXLSX::saveToFile(const QString &fileName){
-    // 创建新的Document对象
-    QXlsx::Document xlsx;
-    
+    // 读取已有文件以保留其它sheet
+    QXlsx::Document xlsx(fileName);
+    if (QFile::exists(fileName) && !xlsx.load()) {
+        QMessageBox::warning(this, tr("保存错误"), tr("无法加载现有 XLSX 文件，已取消保存以避免丢失工作表。"));
+        return;
+    }
+
     // 获取当前sheet名称
     QString currentSheetName = sheetComboBox->currentText();
-    
-    // 重命名第一个sheet
-    if (xlsx.workbook()) {
-        xlsx.workbook()->renameSheet(0, currentSheetName);
+
+    // 确保当前sheet存在并选中
+    QStringList sheetNames = xlsx.sheetNames();
+    if (!sheetNames.contains(currentSheetName)) {
+        if (sheetNames.size() == 1) {
+            xlsx.renameSheet(sheetNames.first(), currentSheetName);
+        } else {
+            xlsx.addSheet(currentSheetName);
+        }
     }
-    
-    // 写入当前表格数据到第一个sheet
+    xlsx.selectSheet(currentSheetName);
+
+    // 写入当前表格数据到当前sheet
     for (int row = 0; row < tableWidget->rowCount(); ++row) {
         for (int col = 0; col < tableWidget->columnCount(); ++col) {
             QTableWidgetItem *item = tableWidget->item(row, col);

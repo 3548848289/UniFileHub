@@ -17,7 +17,7 @@
 
 #define SEARCHFILES \
     "SELECT fp.file_path, t.tag_name, fp.expiration_date, a.annotation, " \
-    "fp.reminder_time, fp.interval_time, fp.notify_display_time, fp.last_reminder_index " \
+    "fp.reminder_time, fp.interval_time, fp.notify_display_time, fp.last_reminder_index, fp.reminder_type " \
         "FROM FilePaths fp " \
         "LEFT JOIN Tags t ON fp.id = t.file_id " \
         "LEFT JOIN Annotations a ON fp.id = a.file_id " \
@@ -50,7 +50,8 @@
 #define UPDATEFILEINFO1 \
     "UPDATE FilePaths SET expiration_date = :expiration_date, " \
     "reminder_time = :reminder_time, interval_time = :interval_time, " \
-    "notify_display_time = :notify_display_time, last_reminder_index = :last_reminder_index WHERE file_path = :file_path"
+    "notify_display_time = :notify_display_time, last_reminder_index = :last_reminder_index, " \
+    "reminder_type = :reminder_type WHERE file_path = :file_path"
 #define UPDATEFILEINFO2 \
     "SELECT id FROM FilePaths WHERE file_path = :file_path"
 #define UPDATEFILEINFO3 \
@@ -65,13 +66,13 @@
     "SELECT DISTINCT tag_name FROM Tags"
 #define GETFILEPATHSBYTAG1 \
     "SELECT DISTINCT fp.file_path, t.tag_name, fp.expiration_date, a.annotation, " \
-    "fp.reminder_time, fp.interval_time, fp.notify_display_time, fp.last_reminder_index " \
+    "fp.reminder_time, fp.interval_time, fp.notify_display_time, fp.last_reminder_index, fp.reminder_type " \
     "FROM FilePaths fp " \
     "LEFT JOIN Tags t ON fp.id = t.file_id " \
     "LEFT JOIN Annotations a ON fp.id = a.file_id" 
 #define GETFILEPATHSBYTAG2 \
     "SELECT DISTINCT fp.file_path, t.tag_name, fp.expiration_date, a.annotation, " \
-    "fp.reminder_time, fp.interval_time, fp.notify_display_time, fp.last_reminder_index " \
+    "fp.reminder_time, fp.interval_time, fp.notify_display_time, fp.last_reminder_index, fp.reminder_type " \
     "FROM FilePaths fp " \
     "LEFT JOIN Tags t ON fp.id = t.file_id " \
     "LEFT JOIN Annotations a ON fp.id = a.file_id " \
@@ -83,7 +84,7 @@
 #define GETANNOTATION \
     "SELECT annotation FROM Annotations WHERE file_id = :fileId"
 #define GETFILEINFOBYFILEPATH1 \
-    "SELECT expiration_date, reminder_time, interval_time, notify_display_time, last_reminder_index FROM FilePaths WHERE file_path = :file_path"
+    "SELECT expiration_date, reminder_time, interval_time, notify_display_time, last_reminder_index, reminder_type FROM FilePaths WHERE file_path = :file_path"
 #define GETFILEINFOBYFILEPATH2 \
     "SELECT tag_name FROM Tags WHERE file_id = (SELECT id FROM FilePaths WHERE file_path = :file_path)"
 #define GETFILEINFOBYFILEPATH3 \
@@ -98,6 +99,7 @@ struct FilePathInfo {
     int intervalTime; // 每次提醒间隔时间(分钟)
     QTime notifyDisplayTime;
     int lastReminderIndex; // 已成功提醒的最大索引
+    QString reminderType; // 提醒方式：不提醒、弹窗提醒、邮件提醒
 };
 
 class dbFilepath : public dbManager {

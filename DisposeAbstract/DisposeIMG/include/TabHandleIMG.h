@@ -15,6 +15,9 @@
 #include "../../main/include/TabAbstract.h"
 #include "ControlFrame.h"
 #include "PixItem.h"
+
+class QZipReader;
+
 class TabHandleIMG : public TabAbstract
 {
     Q_OBJECT
@@ -44,6 +47,10 @@ private:
     void updateTransformations(int angle, qreal scale, qreal shear, qreal translate);
     void addTextToImage(const QString &text, const QPointF &position);
     void exportImage(const QString &filePath);
+    
+    // XMind 支持：从 XMind 文件中提取缩略图
+    bool loadXmindThumbnail(const QString &fileName);
+    QByteArray extractFileFromZip(const QString &zipPath, const QString &fileNameInZip);
 
 
     QGraphicsView *view;
@@ -56,6 +63,9 @@ private:
     qreal shearValue;
     qreal translateValue;
     QGraphicsTextItem *textItem;
+    
+    // XMind 相关
+    bool isXmindFile = false;
 };
 
 #endif // TABHANDLEIMG_H

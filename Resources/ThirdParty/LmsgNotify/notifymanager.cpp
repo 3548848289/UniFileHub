@@ -1,12 +1,14 @@
-﻿#include "notifymanager.h"
+#include "notifymanager.h"
 #include "notifywnd.h"
 #include <QApplication>
 #include <QScreen>
+#include "../../../Setting/include/SettingManager.h"
 
 NotifyManager::NotifyManager(QObject *parent) : QObject(parent)
 {
     m_maxCount = 5;
-    m_displayTime = 10000;
+    // 从设置中获取显示时间，转换为毫秒
+    m_displayTime = SettingManager::Instance().tag_schedule_show_time() * 1000;
     m_animateTime = 300;
     m_spacing = 10;
     m_notifyWndSize = QSize(300, 60);

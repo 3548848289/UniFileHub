@@ -110,11 +110,12 @@ void ClipboardController::openFileLocation(ClipboardItem* item)
 void ClipboardController::loadHistory(int hours)
 {
     m_historyManager.loadHistory(hours);
-    
+
     // 通知View加载完成，可以更新UI
-    // 反向遍历，确保新记录在上方、老记录在下方
+    // 正向遍历（从最旧到最新），因为View的insertNewItem会将每个新项目插入到头部
+    // 这样最终顺序会是：最新的在前面，最旧的在后面
     const auto& items = m_historyManager.items();
-    for (auto it = items.rbegin(); it != items.rend(); ++it) {
+    for (auto it = items.begin(); it != items.end(); ++it) {
         emit itemAddedToModel(it->get());
     }
 }
@@ -143,19 +144,19 @@ void ClipboardController::searchItems(const QString& query)
 {
     // 先清空现有内容
     emit modelCleared();
-    
+
     QString searchText = query.trimmed();
-    
+
     // 收集符合条件的置顶项和普通项
     std::vector<ClipboardItem*> pinnedItems;
     std::vector<ClipboardItem*> normalItems;
-    
+
     // 从最新到最旧收集项目，确保新项排在前面（反向迭代）
     const auto& items = m_historyManager.items();
     for (auto it = items.rbegin(); it != items.rend(); ++it) {
         ClipboardItem* item = it->get();
         bool matchFound = false;
-        
+
         // 根据不同类型的剪贴板项目进行搜索
         if (item->type() == ClipboardItemType::Text) {
             // 文本类型的项目可以直接搜索内容
@@ -183,7 +184,7 @@ void ClipboardController::searchItems(const QString& query)
             // 空搜索时显示所有类型
             matchFound = true;
         }
-        
+
         // 将匹配的项目添加到相应的列表
         if (matchFound) {
             if (item->isPinned()) {
@@ -193,12 +194,14 @@ void ClipboardController::searchItems(const QString& query)
             }
         }
     }
-    
-    // 按优先级排序显示：先显示置顶项，再显示普通项
-    for (auto* item : pinnedItems) {
-        emit itemAddedToModel(item);
+
+    // 按优先级排序显示：先显示置顶项（从旧到新顺序发射，因为View使用insertNewItem会在头部插入）
+    // 使用反向迭代器，从最旧的置顶项开始发射，这样最新的会在最前面
+    for (auto it = pinnedItems.rbegin(); it != pinnedItems.rend(); ++it) {
+        emit itemAddedToModel(*it);
     }
-    for (auto* item : normalItems) {
-        emit itemAddedToModel(item);
+    // 普通项同样从最旧的开始发射
+    for (auto it = normalItems.rbegin(); it != normalItems.rend(); ++it) {
+        emit itemAddedToModel(*it);
     }
 }

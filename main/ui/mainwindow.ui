@@ -11,10 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>SmartDesk</string>
-  </property>
-  <property name="windowIcon">
-   <iconset theme="utilities-system-monitor"/>
+   <string>UniFileHub</string>
   </property>
   <property name="styleSheet">
    <string notr="true"/>
@@ -131,7 +128,6 @@
      <addaction name="Function2"/>
      <addaction name="Function3"/>
      <addaction name="Function4"/>
-     <addaction name="Function5"/>
      <addaction name="Function6"/>
      <addaction name="Function7"/>
      <addaction name="Function8"/>
@@ -326,14 +322,6 @@
    </property>
    <property name="toolTip">
     <string>关闭在线文档</string>
-   </property>
-  </action>
-  <action name="Function5">
-   <property name="text">
-    <string>关闭手写绘图</string>
-   </property>
-   <property name="toolTip">
-    <string>关闭手写绘图</string>
    </property>
   </action>
   <action name="Function6">

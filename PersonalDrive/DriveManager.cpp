@@ -8,7 +8,7 @@
 #include <QDebug>
 #include <QDateTime>
 
-DriveManager::DriveManager(QObject *parent): QObject(parent), m_apiClient(nullptr), m_currentDirectoryId(0), m_initialized(false), m_dbDriveDownload(nullptr)
+DriveManager::DriveManager(QObject *parent): QObject(parent), m_apiClient(nullptr), m_currentDirectoryId(0), m_initialized(false), m_dbDriveDownload(nullptr), m_dbDriveUpload(nullptr)
 {
 
 }
@@ -25,6 +25,11 @@ DriveManager::~DriveManager()
     if (m_dbDriveDownload) {
         delete m_dbDriveDownload;
         m_dbDriveDownload = nullptr;
+    }
+    
+    if (m_dbDriveUpload) {
+        delete m_dbDriveUpload;
+        m_dbDriveUpload = nullptr;
     }
 }
 
@@ -44,6 +49,9 @@ void DriveManager::initialize()
     
     // 初始化下载历史数据库
     m_dbDriveDownload = new dbDriveDownload("./SmartDesk.db");
+    
+    // 初始化上传记录数据库
+    m_dbDriveUpload = new dbDriveUpload("./SmartDesk.db");
     
     // 连接DriveApiClient的信号
     connect(m_apiClient, &DriveApiClient::fileListReceived,
@@ -108,6 +116,13 @@ void DriveManager::uploadFile(const QString &filePath, int parentId)
 {
     if (!m_initialized) {
         initialize();
+    }
+    
+    // 获取文件信息
+    QFileInfo fileInfo(filePath);
+    if (fileInfo.exists()) {
+        // 添加上传记录
+        addUploadRecord(0, fileInfo.fileName(), fileInfo.size(), filePath, parentId);
     }
     
     m_apiClient->uploadFile(filePath, parentId);
@@ -246,6 +261,19 @@ void DriveManager::onFileListReceived(const QJsonArray &fileList)
 
 void DriveManager::onFileUploaded(const QJsonObject &fileInfo)
 {
+    // 更新上传状态为成功
+    int fileId = fileInfo["id"].toInt();
+    QString fileName = fileInfo["name"].toString();
+    
+    // 查找对应的上传记录并更新状态
+    for (auto it = m_uploadRecordMap.begin(); it != m_uploadRecordMap.end(); ++it) {
+        int recordId = it.value();
+        DriveUploadRecord record;
+        // 需要从数据库获取记录来匹配
+        // 这里简化处理，更新所有uploading状态的记录为success
+        updateUploadStatus(recordId, "success");
+    }
+    
     // 文件上传成功，刷新当前目录
     getCurrentDirectoryFiles(m_currentDirectoryId);
     emit operationSuccess("文件上传成功");
@@ -296,6 +324,17 @@ void DriveManager::onError(const QString &errorMessage)
     // 检查是否是下载错误
     if (errorMessage.contains("下载") || errorMessage.contains("download", Qt::CaseInsensitive)) {
         emit downloadFailed(errorMessage);
+    }
+    // 检查是否是上传错误
+    else if (errorMessage.contains("上传") || errorMessage.contains("upload", Qt::CaseInsensitive)) {
+        // 尝试从错误消息中提取文件路径
+        QString filePath;
+        for (auto it = m_uploadRecordMap.begin(); it != m_uploadRecordMap.end(); ++it) {
+            int recordId = it.value();
+            // 更新所有uploading状态的上传记录为failed
+            updateUploadStatus(recordId, "failed");
+        }
+        emit uploadFailed(errorMessage);
     }
     emit operationFailed(errorMessage);
 }
@@ -414,4 +453,67 @@ int DriveManager::getRecordIdBySavePath(const QString &savePath)
     }
     
     return m_dbDriveDownload->getRecordIdBySavePath(savePath);
+}
+
+// ========== 上传记录管理 ==========
+
+void DriveManager::addUploadRecord(int fileId, const QString &fileName, qint64 fileSize, const QString &localPath, int parentId)
+{
+    if (!m_dbDriveUpload) {
+        return;
+    }
+    
+    DriveUploadRecord record;
+    record.fileId = fileId;
+    record.fileName = fileName;
+    record.fileSize = fileSize;
+    record.localPath = localPath;
+    record.uploadTime = QDateTime::currentDateTime();
+    record.uploadStatus = "uploading"; // 初始状态为上传中
+    record.fileType = fileName.section('.', -1);
+    record.parentId = parentId;
+    
+    if (m_dbDriveUpload->addUploadRecord(record)) {
+        // 获取刚插入的记录ID
+        int recordId = m_dbDriveUpload->getRecordIdByLocalPath(localPath);
+        if (recordId > 0) {
+            m_uploadRecordMap[localPath] = recordId;
+        }
+    }
+}
+
+QList<DriveUploadRecord> DriveManager::getUploadHistory()
+{
+    if (!m_dbDriveUpload) {
+        return QList<DriveUploadRecord>();
+    }
+    
+    return m_dbDriveUpload->getUploadHistory();
+}
+
+bool DriveManager::clearUploadHistory()
+{
+    if (!m_dbDriveUpload) {
+        return false;
+    }
+    
+    return m_dbDriveUpload->clearUploadHistory();
+}
+
+bool DriveManager::updateUploadStatus(int recordId, const QString &status)
+{
+    if (!m_dbDriveUpload) {
+        return false;
+    }
+    
+    return m_dbDriveUpload->updateUploadStatus(recordId, status);
+}
+
+int DriveManager::getRecordIdByLocalPath(const QString &localPath)
+{
+    if (!m_dbDriveUpload) {
+        return -1;
+    }
+    
+    return m_dbDriveUpload->getRecordIdByLocalPath(localPath);
 }

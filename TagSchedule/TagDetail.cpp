@@ -30,6 +30,15 @@ void TagDetail::init(FilePathInfo fileInfo) {
     
     // 保存原始文件路径
     oldFilePath = fileInfo.filePath;
+    
+    // 初始化提醒方式下拉框
+    if (fileInfo.reminderType.isEmpty()) {
+        fileInfo.reminderType = "弹窗提醒"; // 默认提醒方式
+    }
+    int index = ui->reminderTypeComboBox->findText(fileInfo.reminderType);
+    if (index >= 0) {
+        ui->reminderTypeComboBox->setCurrentIndex(index);
+    }
 
     QFileInfo fileInfoCheck(fileInfo.filePath);
     if (!fileInfoCheck.exists()) {
@@ -90,6 +99,17 @@ void TagDetail::on_YesBtn_clicked() {
     if (!fileInfoCheck.exists()) {
         QMessageBox::warning(this, tr("警告"), tr("文件不存在！"));
         return;
+    }
+
+    // 更新提醒方式
+    QString newReminderType = ui->reminderTypeComboBox->currentText();
+    if (newReminderType != fileInfo.reminderType) {
+        fileInfo.reminderType = newReminderType;
+        // 更新数据库中的提醒方式
+        if (!dbservice.dbTags().updateFileInfo(fileInfo)) {
+            QMessageBox::warning(this, tr("警告"), tr("提醒方式更新失败！"));
+            return;
+        }
     }
 
     // 更新数据库

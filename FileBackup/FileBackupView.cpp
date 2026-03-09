@@ -12,22 +12,13 @@ FileBackupView::FileBackupView(QWidget *parent) : QWidget(parent), ui(new Ui::Fi
     connect(ui->fileListComboBox, &QWidget::customContextMenuRequested, this, [=](const QPoint &pos) {
         QMenu contextMenu(this);
 
-        // 添加菜单项
-        QAction *openInFileSystemAction = contextMenu.addAction("在文件系统打开");
+        // 添加菜单项（调整顺序）
         QAction *changePathAction = contextMenu.addAction("更换文件路径");
         QAction *deleteRecordAction = contextMenu.addAction("删除文件记录");
+        QAction *openInFileSystemAction = contextMenu.addAction("在文件系统打开");
+        QAction *openFileLocationAction = contextMenu.addAction("打开文件所在位置");
 
         // 处理菜单项点击
-        connect(openInFileSystemAction, &QAction::triggered, this, [=]() {
-            int index = ui->fileListComboBox->currentIndex();
-            if (index != -1) {
-                QString filePath = ui->fileListComboBox->currentData().toString();
-                if (!filePath.isEmpty()) {
-                    emit openInFileSystemRequested(filePath);
-                }
-            }
-        });
-
         connect(changePathAction, &QAction::triggered, this, [=]() {
             int index = ui->fileListComboBox->currentIndex();
             if (index != -1) {
@@ -62,6 +53,29 @@ FileBackupView::FileBackupView(QWidget *parent) : QWidget(parent), ui(new Ui::Fi
 
                     if (ui->fileListComboBox->count() == 0)
                         ui->backupList->clear();
+                }
+            }
+        });
+
+        connect(openInFileSystemAction, &QAction::triggered, this, [=]() {
+            int index = ui->fileListComboBox->currentIndex();
+            if (index != -1) {
+                QString filePath = ui->fileListComboBox->currentData().toString();
+                if (!filePath.isEmpty()) {
+                    emit openInFileSystemRequested(filePath);
+                }
+            }
+        });
+
+        connect(openFileLocationAction, &QAction::triggered, this, [=]() {
+            int index = ui->fileListComboBox->currentIndex();
+            if (index != -1) {
+                QString filePath = ui->fileListComboBox->currentData().toString();
+                if (!filePath.isEmpty()) {
+                    QFileInfo fileInfo(filePath);
+                    QString folderPath = fileInfo.absolutePath();
+                    QUrl folderUrl = QUrl::fromLocalFile(folderPath);
+                    QDesktopServices::openUrl(folderUrl);
                 }
             }
         });
@@ -152,58 +166,7 @@ void FileBackupView::on_backupList_itemClicked(QListWidgetItem *item)
         emit s_fileopen(file);
 }
 
-void FileBackupView::on_pushButton_clicked()
-{
-    int index = ui->fileListComboBox->currentIndex();
-    if (index == -1)
-        return;
 
-    QString currentFilePath = ui->fileListComboBox->currentData().toString();
-    if (currentFilePath.isEmpty())
-        return;
-
-    QMessageBox msgBox(this);
-    msgBox.setWindowTitle("操作选择");
-    msgBox.setText("您想执行以下哪个操作？");
-    QPushButton *changePathButton = msgBox.addButton("更换文件路径", QMessageBox::YesRole);
-    QPushButton *deleteButton = msgBox.addButton("删除文件记录", QMessageBox::NoRole);
-    QPushButton *cancelButton = msgBox.addButton("取消", QMessageBox::RejectRole);
-
-    msgBox.setDefaultButton(changePathButton);
-    msgBox.exec();
-
-    if (msgBox.clickedButton() == changePathButton) {
-        QString newFilePath = QFileDialog::getOpenFileName(this, tr("选择新的文件路径"), "", tr("所有文件 (*.*)"));
-        if (!newFilePath.isEmpty() && newFilePath != choosed_file) {
-            if (dbservice.dbBackup().updateSubmissions(choosed_file, newFilePath)) {
-                ui->fileListComboBox->setItemData(index, newFilePath);
-                ui->fileListComboBox->setItemText(index, QFileInfo(newFilePath).fileName());
-            } else
-                QMessageBox::warning(this, "", tr("更新文件路径失败。"));
-        }
-    }
-
-    else if (msgBox.clickedButton() == deleteButton) {
-        QList<QString> backupFileNames = dbservice.dbBackup().getBackupFileList(choosed_file);
-        if (dbservice.dbBackup().deleteAll(choosed_file)) {
-            // 删除磁盘上的所有备份文件
-            for (const QString &backupFile : backupFileNames) {
-                deleteBackupFile(backupFile);  // 删除实际文件
-            }
-
-            ui->fileListComboBox->removeItem(index);
-        } else {
-            QMessageBox::warning(this, "", tr("从数据库中删除文件记录失败。"));
-        }
-
-        if (ui->fileListComboBox->count() == 0)
-            ui->backupList->clear();
-    }
-
-    else {
-        msgBox.close();
-    }
-}
 
 
 void FileBackupView::on_backupList_customContextMenuRequested(const QPoint &pos)
@@ -292,16 +255,5 @@ bool FileBackupView::deleteBackupFile(const QString &backupFilePath) {
 void FileBackupView::on_refreshBtn_clicked()
 {
     loadFileNames();
-}
-
-void FileBackupView::on_openInFileSystemBtn_clicked()
-{
-    int index = ui->fileListComboBox->currentIndex();
-    if (index != -1) {
-        QString filePath = ui->fileListComboBox->currentData().toString();
-        if (!filePath.isEmpty()) {
-            emit openInFileSystemRequested(filePath);
-        }
-    }
 }
 

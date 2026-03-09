@@ -67,23 +67,6 @@ void MainWindow::initConnect() {
         ui->stackedWidget->setCurrentWidget(file_system);
     });
 
-    connect(widgetfunc, &WidgetFunctional::showDraw, this, [=] {
-        QWidget *currentWidget = tabWidget->currentWidget();
-        TabHandleIMG *tabHandleImg = qobject_cast<TabHandleIMG*>(currentWidget);
-        if (tabHandleImg) {
-            tabHandleImg->test();
-        } else {
-            QMessageBox::StandardButton reply;
-            reply = QMessageBox::warning(this, "无效的文件类型",
-                                         "当前文件不是图片文件，是不是选取图片打开。", QMessageBox::Yes | QMessageBox::No);
-            if (reply == QMessageBox::Yes)
-                on_actionopen_triggered();
-            else
-                qDebug() << "用户取消打开图片操作";
-        }
-    });
-
-
     connect(loginButton, &QPushButton::clicked, this, &MainWindow::showUserInfoDialog);
 
     // connect(tabWidget, &QTabWidget::tabCloseRequested, this, [this](int index) {
@@ -242,8 +225,8 @@ void MainWindow::initMemubarLayout() {
 
 
     const QMap<int, QString> buttonNames = {
-        {1, "文件标签"}, {2, "文件备份"}, {3, "备忘日程"}, {4, "在线文档"}, {5, "手写绘图"},
-        {6, "个人网盘"},{7, "邮件服务"}, {8, "剪切字板"}, {9, "用户登录"}, {10, "更多功能"}
+        {1, "文件标签"}, {2, "文件备份"}, {3, "备忘日程"}, {4, "在线文档"},
+        {6, "个人网盘"}, {7, "邮件服务"}, {8, "剪切字板"}, {9, "用户登录"}, {10, "更多功能"}
     };
     connect(widgetfunc, &WidgetFunctional::buttonVisibilityChanged,
             this, [this, buttonNames](int buttonIndex, bool isVisible) {
@@ -255,6 +238,7 @@ void MainWindow::initMemubarLayout() {
             });
 
     for (int i = 1; i <= 10; ++i) {
+        if (i == 5) continue; // 跳过手写绘图按钮
         QAction *action = findChild<QAction *>(QString("Function%1").arg(i));
         if (action) {
             connect(action, &QAction::triggered, this, [this, i]() {
@@ -297,6 +281,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     
     tabManager->openFile(":/conf/help.txt");
     recentFilesManager->populateRecentFilesMenu(ui->recentFile);
+
+    // 默认关闭在线文档
+    QAction *action = findChild<QAction*>("Function4");
+    if (action) {
+        action->trigger();
+    }
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)

@@ -16,6 +16,7 @@
 #include "../../OnlineDoc/include/WOnlineDoc.h"
 #include "../../EmailService/SendEmail.h"
 #include "../../ClipBoard/include/ClipboardView.h"
+#include "../../PersonalDrive/include/DriveView.h"
 #include "FindDialog.h"
 
 // 布局类型枚举

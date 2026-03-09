@@ -28,5 +28,7 @@
         <file>Main/Login.svg</file>
         <file>Main/Drive.svg</file>
         <file>Main/Email.svg</file>
+        <file>conf/wibu6-rq54f-001.ico</file>
+        <file>conf/UniFileHub.png</file>
     </qresource>
 </RCC>

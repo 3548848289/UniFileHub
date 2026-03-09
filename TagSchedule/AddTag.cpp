@@ -9,7 +9,7 @@ AddTag::AddTag(QWidget *parent) :QDialog(parent),ui(new Ui::AddTag)
 
     ui->reminderTimeEdit->setValue(24);
     ui->intervalTimeEdit->setValue(1440);
-
+    ui->reminderTypeComboBox->setCurrentIndex(1); // 默认选择"弹窗提醒"
 }
 
 AddTag::~AddTag()
@@ -40,6 +40,11 @@ int AddTag::getReminderTime() const
 int AddTag::getIntervalTime() const
 {
     return ui->intervalTimeEdit->value();
+}
+
+QString AddTag::getReminderType() const
+{
+    return ui->reminderTypeComboBox->currentText();
 }
 
 void AddTag::on_saveButton_clicked()

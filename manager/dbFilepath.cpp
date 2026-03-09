@@ -47,6 +47,7 @@ QList<FilePathInfo> dbFilepath::searchFiles(const QString &keyword) {
         fileInfo.intervalTime = q.value(5).toInt();
         fileInfo.notifyDisplayTime = QTime::fromString(q.value(6).toString());
         fileInfo.lastReminderIndex = q.value(7).toInt();
+        fileInfo.reminderType = q.value(8).toString();
 
         fileInfos << fileInfo;
     }
@@ -158,6 +159,7 @@ bool dbFilepath::updateFileInfo(const FilePathInfo& fileInfo)
     q.bindValue(":interval_time", fileInfo.intervalTime);
     q.bindValue(":notify_display_time", fileInfo.notifyDisplayTime.toString());
     q.bindValue(":last_reminder_index", fileInfo.lastReminderIndex);
+    q.bindValue(":reminder_type", fileInfo.reminderType);
 
     if (!q.exec()) {
         dbsqlite.rollback();
@@ -258,6 +260,7 @@ QList<FilePathInfo> dbFilepath::getFilePathsByTag(const QString &tag) {
         info.intervalTime = q.value(5).toInt();
         info.notifyDisplayTime = QTime::fromString(q.value(6).toString());
         info.lastReminderIndex = q.value(7).toInt();
+        info.reminderType = q.value(8).toString();
 
         filePathsWithTags.append(info);
     }
@@ -310,6 +313,7 @@ bool dbFilepath::getFileInfoByFilePath(const QString& filePath, FilePathInfo& fi
     fileInfo.intervalTime = q.value(2).toInt();
     fileInfo.notifyDisplayTime = QTime::fromString(q.value(3).toString());
     fileInfo.lastReminderIndex = q.value(4).toInt();
+    fileInfo.reminderType = q.value(5).toString();
     qDebug() << fileInfo.expirationDate;
     q.prepare(GETFILEINFOBYFILEPATH2);
     q.bindValue(":file_path", filePath);

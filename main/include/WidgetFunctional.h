@@ -41,7 +41,6 @@ signals:
     void showwOnlinedoc();
     void showWSchedule();
     void sendEmailForm(SendEmail *form);
-    void showDraw();
     void showClipboard(ClipboardView* clipboard);
     void showDrive(DriveView* drive);
     void buttonVisibilityChanged(int buttonIndex, bool isVisible);
@@ -53,7 +52,6 @@ private slots:
     void on_pushButton_2_clicked();
     void on_pushButton_3_clicked();
     void on_pushButton_4_clicked();
-    void on_pushButton_5_clicked();
     void on_pushButton_6_clicked();
     void on_pushButton_7_clicked();
     void on_pushButton_8_clicked();

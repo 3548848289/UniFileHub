@@ -56,9 +56,7 @@ QString SettingManager::file_backup_IP()
 }
 
 
-QString SettingManager::tag_schedule_reminder_type() {
-    return settings.value("tag_schedule/reminder_type", "弹窗提醒").toString();
-}
+
 
 QString SettingManager::file_system_file_system_dir()
 {
@@ -66,7 +64,7 @@ QString SettingManager::file_system_file_system_dir()
 }
 
 int SettingManager::tag_schedule_show_time() {
-    int timeInSeconds = settings.value("tag_schedule/show_time", 1440).toInt();
+    int timeInSeconds = settings.value("tag_schedule/show_time", 60).toInt();
     return timeInSeconds;
 }
 

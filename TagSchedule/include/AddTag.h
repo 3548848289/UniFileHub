@@ -19,6 +19,7 @@ public:
     QDateTime getExpirationDate() const;
     int getReminderTime() const;      // 提前多久提醒(小时)
     int getIntervalTime() const;      // 每次提醒间隔时间(分钟)
+    QString getReminderType() const;  // 提醒方式
     ~AddTag();
 
 private slots:

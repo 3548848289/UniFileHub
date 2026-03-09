@@ -65,13 +65,6 @@
        </property>
       </widget>
      </item>
-     <item>
-      <widget class="QPushButton" name="saveWithEncodingButton">
-       <property name="text">
-        <string>以该编码保存</string>
-       </property>
-      </widget>
-     </item>
     </layout>
    </item>
    <item>

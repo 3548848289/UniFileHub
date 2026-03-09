@@ -69,12 +69,9 @@ void Setting::loadSettings() {
 
     ui->file_backup_lineEdit1->setText(settings.value("file_backup/backup_dir").toString());
 
-    int reminderIndex = ui->tag_schedule_comboBox->findText(
-        settings.value("tag_schedule/reminder_type", "Popup").toString());
-    if (reminderIndex != -1)
-        ui->tag_schedule_comboBox->setCurrentIndex(reminderIndex);
 
-    QTime showtime = QTime(0, 0).addSecs(settings.value("tag_schedule/show_time", 0).toInt());
+
+    QTime showtime = QTime(0, 0).addSecs(settings.value("tag_schedule/show_time", 60).toInt());
     ui->tag_schedule_timeEdit3->setTime(showtime);
 
     ui->email_service_lineEdit_1->setText(settings.value("EmailConfig/host").toString());
@@ -94,8 +91,8 @@ void Setting::loadSettings() {
     ui->personal_drive_lineEdit->setText(settings.value("PersonalDrive/DefaultDir").toString());
     
     // 设置标签计划的默认时间值
-    // 通知显示时间默认5秒
-    int showTimeInSeconds = settings.value("tag_schedule/show_time", 5).toInt();
+    // 通知显示时间默认1分钟
+    int showTimeInSeconds = settings.value("tag_schedule/show_time", 60).toInt();
     QTime showTime(showTimeInSeconds / 3600, (showTimeInSeconds % 3600) / 60, showTimeInSeconds % 60);
     ui->tag_schedule_timeEdit3->setTime(showTime);
 }
@@ -129,7 +126,7 @@ void Setting::saveSettings() {
         settings.setValue("file_backup/backup_dir", backupDir);
 
 
-    settings.setValue("tag_schedule/reminder_type", ui->tag_schedule_comboBox->currentText());
+
 
     QTime showTime = ui->tag_schedule_timeEdit3->time();
     int showTimeInSeconds = showTime.hour() * 3600 + showTime.minute() * 60 + showTime.second();

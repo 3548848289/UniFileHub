@@ -58,7 +58,7 @@
            <item>
             <widget class="QLabel" name="downloadHistoryLabel">
              <property name="text">
-              <string>下载历史</string>
+              <string>历史记录</string>
              </property>
              <property name="font">
               <font>
@@ -91,7 +91,31 @@
           </layout>
          </item>
          <item>
-          <widget class="QTableView" name="downloadHistoryTableView"/>
+          <widget class="QTabWidget" name="historyTabWidget">
+           <property name="currentIndex">
+            <number>0</number>
+           </property>
+           <widget class="QWidget" name="downloadTab">
+            <attribute name="title">
+             <string>下载历史</string>
+            </attribute>
+            <layout class="QVBoxLayout" name="verticalLayout_3">
+             <item>
+              <widget class="QTableView" name="downloadHistoryTableView"/>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="uploadTab">
+            <attribute name="title">
+             <string>上传历史</string>
+            </attribute>
+            <layout class="QVBoxLayout" name="verticalLayout_4">
+             <item>
+              <widget class="QTableView" name="uploadHistoryTableView"/>
+             </item>
+            </layout>
+           </widget>
+          </widget>
          </item>
         </layout>
        </widget>

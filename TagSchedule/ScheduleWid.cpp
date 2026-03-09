@@ -95,13 +95,12 @@ void ScheduleWid::checkExpiration()
     qDebug() << "ScheduleWid::checkExpiration";
 
     QList<FilePathInfo> files = dbservice.dbTags().getFilePathsByTag("全部");
-    QString reminderType = SettingManager::Instance().tag_schedule_reminder_type();
     const QDateTime now = QDateTime::currentDateTime();
 
     for (auto &file : files)
     {
-        // 跳过没有设置提醒时间的文件
-        if (file.reminderTime <= 0 || !file.expirationDate.isValid())
+        // 跳过没有设置提醒时间的文件或不提醒的文件
+        if (file.reminderTime <= 0 || !file.expirationDate.isValid() || file.reminderType == "不提醒")
             continue;
 
         int reminderSeconds = file.reminderTime * 3600; // 小时转换为秒
@@ -122,15 +121,19 @@ void ScheduleWid::checkExpiration()
         if (currentIndex > file.lastReminderIndex)
         {
             QVariantMap data;
-            data["tag"] = file.tagName;
+            // 将 tagName 包装成 QStringList
+            QStringList tagList;
+            tagList.append(file.tagName);
+            data["tag"] = tagList;
             data["annotation"] = file.annotation;
             data["expirationDate"] = file.expirationDate;
 
-            if (reminderType == "弹窗提醒")
+            // 使用每个标签的独立提醒方式
+            if (file.reminderType == "弹窗提醒")
             {
                 manager->notify("到期提醒", file.filePath, data);
             }
-            else if (reminderType == "邮件提醒")
+            else if (file.reminderType == "邮件提醒")
             {
                 const QString allDetails = QString("标签: %1\n备注: %2\n到期时间: %3")
                                                .arg(file.tagName)

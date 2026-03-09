@@ -9,6 +9,8 @@
 #include <QMimeData>
 #include <QTextCodec>
 #include <QFileDialog>
+#include <QSignalBlocker>
+#include <QTimer>
 
 // TextTab 实现
 TextTab::TextTab(const QString &filePath, QWidget *parent)  : TabAbstract(filePath, parent), m_currentCodecName("UTF-8"), m_isSwitchingPreviewMode(false)
@@ -107,20 +109,6 @@ TextTab::TextTab(const QString &filePath, QWidget *parent)  : TabAbstract(filePa
     
     // 连接HTML预览模式切换信号
     connect(controlWidtxt, &ControlWidTXT::htmlPreviewToggled, this, &TextTab::onHtmlPreviewToggled);
-    
-    // 连接以该编码保存信号
-    connect(controlWidtxt, &ControlWidTXT::saveWithEncodingRequested, this, [this]() {
-        QString filePath = getCurrentFilePath();
-        if (!filePath.isEmpty()) {
-            saveToFile(filePath);
-        } else {
-            // 如果没有文件路径，弹出保存对话框
-            QString fileName = QFileDialog::getSaveFileName(this, "保存文件", QString(), "文本文件 (*.txt);;所有文件 (*.*)");
-            if (!fileName.isEmpty()) {
-                saveToFile(fileName);
-            }
-        }
-    });
 
     // 连接Tab缩进字符数变化信号
     connect(controlWidtxt, &ControlWidTXT::tabIndentChanged, this, [this](int indent) {
@@ -222,7 +210,6 @@ void TextTab::saveToFile(const QString &fileName)
 
     // 使用辅助函数根据当前编码编码内容
     QByteArray content = encodeContent(getContent());
-
 
     file.write(content);
     file.close();
@@ -424,8 +411,10 @@ void TextTab::onEncodingChanged(const QString& codecName)
 
 void TextTab::onMdPreviewToggled(bool enabled)
 {
+    bool wasModified = isModified; // 保存修改状态，切换视图不应改变该状态
     m_isSwitchingPreviewMode = true; // 设置标志位，防止textChanged信号更新m_originalPlainText
-    
+    QSignalBlocker blockerEdit(textEdit);
+    QSignalBlocker blockerDoc(textEdit->document()); // 同时阻塞 document，防止 contentsChanged 等信号
     if (enabled) {
         // 保存原始纯文本内容
         m_originalPlainText = textEdit->toPlainText();
@@ -443,8 +432,11 @@ void TextTab::onMdPreviewToggled(bool enabled)
             m_syntaxHighlighter->setDocument(textEdit->document());
         }
     }
-    
-    m_isSwitchingPreviewMode = false; // 重置标志位
+    // 延迟到下一事件循环再恢复，确保任何延迟触发的 textChanged 仍能看到 m_isSwitchingPreviewMode=true
+    QTimer::singleShot(0, this, [this, wasModified]() {
+        m_isSwitchingPreviewMode = false;
+        setContentModified(wasModified);
+    });
 }
 
 void TextTab::onHtmlPreviewToggled(bool enabled)
@@ -452,19 +444,19 @@ void TextTab::onHtmlPreviewToggled(bool enabled)
     Q_ASSERT(textEdit != nullptr);
     Q_ASSERT(m_syntaxHighlighter != nullptr);
     
-    m_isSwitchingPreviewMode = true; // 设置标志位，防止textChanged信号更新m_originalPlainText
-    
+    bool wasModified = isModified; // 保存修改状态，切换视图不应改变该状态
+    m_isSwitchingPreviewMode = true;
+    QSignalBlocker blockerEdit(textEdit);
+    QSignalBlocker blockerDoc(textEdit->document());
     if (enabled) {
-        // 启用HTML预览模式，设置为HTML内容
         textEdit->setText(m_originalPlainText);
-        // m_syntaxHighlighter->setEnabled(false); // 禁用语法高亮
     } else {
-        // 禁用HTML预览模式，恢复为纯文本
         textEdit->setPlainText(m_originalPlainText);
-        // m_syntaxHighlighter->setEnabled(true); // 启用语法高亮
     }
-    
-    m_isSwitchingPreviewMode = false; // 重置标志位
+    QTimer::singleShot(0, this, [this, wasModified]() {
+        m_isSwitchingPreviewMode = false;
+        setContentModified(wasModified);
+    });
 }
 
 

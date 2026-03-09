@@ -20,7 +20,6 @@ ControlWidTXT::ControlWidTXT(QWidget *parent) :
     ui->encodingDisplayLabel->setToolTip("点击修改编码方式");
     ui->fontSizeDisplayLabel->setToolTip("点击修改字体大小");
     ui->statsDisplayLabel->setToolTip("显示当前文本的行数和字符数");
-    ui->saveWithEncodingButton->setToolTip("以当前编码保存文件");
     ui->textExcerptEdit->setToolTip("显示当前文本的摘录");
 
     // 设置文本摘录编辑框的高度
@@ -30,7 +29,6 @@ ControlWidTXT::ControlWidTXT(QWidget *parent) :
     connect(ui->tabIndentDisplayLabel, &ClickableLabel::clicked, this, &ControlWidTXT::onTabIndentLabelClicked);
     connect(ui->encodingDisplayLabel, &ClickableLabel::clicked, this, &ControlWidTXT::onEncodingLabelClicked);
     connect(ui->fontSizeDisplayLabel, &ClickableLabel::clicked, this, &ControlWidTXT::onFontSizeLabelClicked);
-    connect(ui->saveWithEncodingButton, &QPushButton::clicked, this, &ControlWidTXT::saveWithEncodingRequested);
     connect(ui->mdPreviewCheckBox, &QCheckBox::toggled, this, &ControlWidTXT::mdPreviewToggled);
     connect(ui->htmlPreviewCheckBox, &QCheckBox::toggled, this, &ControlWidTXT::htmlPreviewToggled);
 }

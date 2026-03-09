@@ -81,8 +81,8 @@ QLocalServer* createLocalServer(MainWindow *w) {
 // ================= 托盘初始化 =================
 QSystemTrayIcon* createTray(MainWindow *w, QApplication &app) {
     QSystemTrayIcon *trayIcon = new QSystemTrayIcon(w);
-    trayIcon->setIcon(QIcon::fromTheme("utilities-system-monitor"));
-    trayIcon->setToolTip("SmartDesk");
+    trayIcon->setIcon(QIcon("://conf/UniFileHub.png"));
+    trayIcon->setToolTip("UniFileHub");
 
     QMenu *trayMenu = new QMenu;
     QAction *showAction = new QAction("显示主窗口", trayMenu);
@@ -148,8 +148,8 @@ QSystemTrayIcon* createTray(MainWindow *w, QApplication &app) {
     QObject::connect(quitAction, &QAction::triggered, &app, &QApplication::quit);
 
     trayIcon->show();
-    trayIcon->showMessage("SmartDesk", "程序已最小化到托盘",
-                          QIcon::fromTheme("utilities-system-monitor"), 3000);
+    trayIcon->showMessage("UniFileHub", "程序已最小化到托盘",
+                          QIcon("://conf/UniFileHub.png"), 3000);
 
     return trayIcon;
 }

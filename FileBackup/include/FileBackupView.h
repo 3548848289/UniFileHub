@@ -6,6 +6,7 @@
 #include <QMenu>
 #include <QToolTip>
 #include <QListView>
+#include <QDesktopServices>
 
 #include "FileRestoreWid.h"
 #include "../../manager/include/dbService.h"
@@ -31,14 +32,9 @@ private slots:
     void on_backupList_itemClicked(QListWidgetItem *item);
     void on_fileListComboBox_currentIndexChanged(int index);
 
-
-    void on_pushButton_clicked();
-
     void on_backupList_customContextMenuRequested(const QPoint &pos);
 
     void on_refreshBtn_clicked();
-
-    void on_openInFileSystemBtn_clicked();
 
 signals:
     void s_fileopen(const QString &filePath);

@@ -80,7 +80,8 @@ bool dbManager::initializeTables() {
                 reminder_time INTEGER DEFAULT 0,
                 interval_time INTEGER DEFAULT 0,
                 notify_display_time TEXT,
-                last_reminder_index INTEGER DEFAULT -1
+                last_reminder_index INTEGER DEFAULT -1,
+                reminder_type TEXT DEFAULT '弹窗提醒'
             );
         )"},
         {"Tags", R"(

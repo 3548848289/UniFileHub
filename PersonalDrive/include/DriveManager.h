@@ -8,6 +8,7 @@
 #include <QFileInfo>
 #include <QDir>
 #include "../../manager/include/dbDriveDownload.h"
+#include "../../manager/include/dbDriveUpload.h"
 
 class DriveApiClient;
 class DriveItem;
@@ -86,6 +87,22 @@ public:
     
     // 通过保存路径获取记录ID
     int getRecordIdBySavePath(const QString &savePath);
+    
+    // ========== 上传记录管理 ==========
+    // 添加上传记录
+    void addUploadRecord(int fileId, const QString &fileName, qint64 fileSize, const QString &localPath, int parentId);
+    
+    // 获取上传历史
+    QList<DriveUploadRecord> getUploadHistory();
+    
+    // 清空上传历史
+    bool clearUploadHistory();
+    
+    // 更新上传状态
+    bool updateUploadStatus(int recordId, const QString &status);
+    
+    // 通过本地路径获取记录ID
+    int getRecordIdByLocalPath(const QString &localPath);
 
 signals:
     // 文件列表更新信号
@@ -103,6 +120,9 @@ signals:
     
     // 文件上传进度信号
     void uploadProgress(int progress);
+    
+    // 文件上传失败信号
+    void uploadFailed(const QString &errorMessage);
     
     // 文件下载进度信号
     void downloadProgress(int progress);
@@ -159,6 +179,10 @@ private:
     // 下载历史管理
     dbDriveDownload *m_dbDriveDownload;
     QMap<int, int> m_downloadRecordMap; // 文件ID -> 记录ID的映射
+    
+    // 上传记录管理
+    dbDriveUpload *m_dbDriveUpload;
+    QMap<QString, int> m_uploadRecordMap; // 本地路径 -> 记录ID的映射
 };
 
 #endif // DRIVEMANAGER_H

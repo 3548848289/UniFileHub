@@ -46,10 +46,12 @@ private slots:
 
     void on_NewFloderBtn_clicked();
     
-    // 下载历史相关
+    // 历史记录相关
     void onClearHistoryBtnClicked();
     void onDownloadSuccess(const QString &filePath);
     void onDownloadFailed(const QString &errorMessage);
+    void onUploadSuccess(const QString &message);
+    void onUploadFailed(const QString &errorMessage);
 
 private:
     QFileSystemBreadcrumbBar* breadcrumb;
@@ -58,6 +60,7 @@ private:
     Ui::DriveView *ui;
     QStandardItemModel * m_model;
     QStandardItemModel * m_downloadHistoryModel;
+    QStandardItemModel * m_uploadHistoryModel;
     DriveManager *m_driveManager;
     int m_currentDirId;
 
@@ -65,6 +68,7 @@ private:
     void updateFileList(const QList<DriveItem *> &fileList);
     void buildBreadcrumbPath();
     void loadDownloadHistory();
+    void loadUploadHistory();
 };
 
 #endif // DRIVEVIEW_H
