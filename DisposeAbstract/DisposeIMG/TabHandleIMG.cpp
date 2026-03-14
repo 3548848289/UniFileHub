@@ -232,6 +232,26 @@ bool TabHandleIMG::eventFilter(QObject* watched, QEvent* event)
                 addTextToImage(text, scenePos);
             return true;
         }
+    } else if (watched == view && event->type() == QEvent::Wheel) {
+        QWheelEvent* wheelEvent = static_cast<QWheelEvent*>(event);
+        if (wheelEvent->modifiers() & Qt::ControlModifier) {
+            // 获取当前缩放滑块的值
+            int currentValue = controlFrame->getScaleSliderValue();
+            // 根据滚轮方向调整缩放值
+            int delta = wheelEvent->angleDelta().y() > 0 ? 5 : -5;
+            int newValue = currentValue + delta;
+            // 确保值在滑块范围内
+            if (newValue < controlFrame->getScaleSliderMinimum())
+                newValue = controlFrame->getScaleSliderMinimum();
+            if (newValue > controlFrame->getScaleSliderMaximum())
+                newValue = controlFrame->getScaleSliderMaximum();
+            // 设置新的缩放值
+            controlFrame->setScaleSliderValue(newValue);
+            // 更新缩放值
+            scaleValue = newValue / 50.0;
+            updateTransformations(angle, scaleValue, shearValue, translateValue);
+            return true;
+        }
     }
     return QWidget::eventFilter(watched, event);
 }

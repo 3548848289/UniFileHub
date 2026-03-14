@@ -33,6 +33,21 @@ void ControlFrame::setScaleSliderValue(int value)
     ui->scaleSlider->setValue(value);
 }
 
+int ControlFrame::getScaleSliderValue()
+{
+    return ui->scaleSlider->value();
+}
+
+int ControlFrame::getScaleSliderMinimum()
+{
+    return ui->scaleSlider->minimum();
+}
+
+int ControlFrame::getScaleSliderMaximum()
+{
+    return ui->scaleSlider->maximum();
+}
+
 void ControlFrame::on_exportButton_clicked()
 {
     QString filePath = QFileDialog::getSaveFileName(this, tr("Save Image"), "", tr("Images (*.png *.jpg *.bmp)"));

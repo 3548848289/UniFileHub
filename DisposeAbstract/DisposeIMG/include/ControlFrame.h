@@ -20,6 +20,9 @@ public:
     ~ControlFrame();  // 需要定义析构函数来清理 UI
 
     void setScaleSliderValue(int value);
+    int getScaleSliderValue();
+    int getScaleSliderMinimum();
+    int getScaleSliderMaximum();
 signals:
     void rotateChanged(int value);
     void scaleChanged(int value);

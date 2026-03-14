@@ -43,6 +43,19 @@ void ClipboardHistoryManager::loadHistory(int hours) {
 bool ClipboardHistoryManager::addItem(std::unique_ptr<ClipboardItem> item) {
     if (!item) return false;
 
+    // 去重检查：与最近添加的几个项目比较（检查最近5个）
+    const int CHECK_RECENT_COUNT = 2;
+    QString newItemSerialized = item->serialize();
+    
+    int checkCount = 0;
+    for (auto it = m_items.rbegin(); it != m_items.rend() && checkCount < CHECK_RECENT_COUNT; ++it, ++checkCount) {
+        // 比较序列化后的内容
+        if ((*it)->serialize() == newItemSerialized) {
+            // 发现重复项，不添加
+            return false;
+        }
+    }
+
     m_items.push_back(std::move(item));
     return true;
 }
