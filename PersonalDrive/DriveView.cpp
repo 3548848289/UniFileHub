@@ -50,6 +50,14 @@ DriveView::DriveView(QWidget *parent): QWidget(parent), ui(new Ui::DriveView), m
     ui->tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->tableView->horizontalHeader()->setStretchLastSection(true);
     ui->tableView->verticalHeader()->setVisible(false);
+    
+    // 启用拖拽功能
+    ui->tableView->setAcceptDrops(true);
+    ui->tableView->setDropIndicatorShown(true);
+    ui->tableView->setDragDropMode(QAbstractItemView::DropOnly);
+    
+    // 为tableView安装事件过滤器
+    ui->tableView->installEventFilter(this);
 
 
     // ===== 4. Delegate =====
@@ -536,5 +544,64 @@ void DriveView::onUploadFailed(const QString &errorMessage) {
     qDebug() << "文件上传失败:" << errorMessage;
     // 上传状态更新已由DriveManager在onError中处理
     loadUploadHistory();
+}
+
+void DriveView::dragEnterEvent(QDragEnterEvent *event)
+{
+    if (event->mimeData()->hasUrls()) {
+        event->acceptProposedAction();
+    }
+}
+
+void DriveView::dropEvent(QDropEvent *event)
+{
+    const QMimeData *mimeData = event->mimeData();
+    if (!mimeData->hasUrls()) {
+        return;
+    }
+    
+    QList<QUrl> urls = mimeData->urls();
+    for (const QUrl &url : urls) {
+        QString filePath = url.toLocalFile();
+        QFileInfo fileInfo(filePath);
+        
+        if (fileInfo.isFile()) {
+            // 上传文件
+            DriveManager::Instance().uploadFile(filePath, m_currentDirId);
+        }
+        // 文件夹暂时不管
+    }
+}
+
+bool DriveView::eventFilter(QObject *obj, QEvent *event)
+{
+    if (obj == ui->tableView) {
+        if (event->type() == QEvent::DragEnter) {
+            QDragEnterEvent *dragEnterEvent = static_cast<QDragEnterEvent*>(event);
+            if (dragEnterEvent->mimeData()->hasUrls()) {
+                dragEnterEvent->acceptProposedAction();
+                return true;
+            }
+        } else if (event->type() == QEvent::Drop) {
+            QDropEvent *dropEvent = static_cast<QDropEvent*>(event);
+            const QMimeData *mimeData = dropEvent->mimeData();
+            if (mimeData->hasUrls()) {
+                QList<QUrl> urls = mimeData->urls();
+                for (const QUrl &url : urls) {
+                    QString filePath = url.toLocalFile();
+                    QFileInfo fileInfo(filePath);
+                    
+                    if (fileInfo.isFile()) {
+                        // 上传文件
+                        DriveManager::Instance().uploadFile(filePath, m_currentDirId);
+                    }
+                    // 文件夹暂时不管
+                }
+                dropEvent->acceptProposedAction();
+                return true;
+            }
+        }
+    }
+    return QWidget::eventFilter(obj, event);
 }
 

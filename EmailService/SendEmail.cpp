@@ -17,6 +17,10 @@ SendEmail::SendEmail(QWidget *parent): QWidget(parent), ui(new Ui::SendEmail)
 {
     ui->setupUi(this);
     ui->attachments->setContextMenuPolicy(Qt::CustomContextMenu);
+    
+    // 启用拖拽功能
+    ui->attachments->setAcceptDrops(true);
+    ui->attachments->setDropIndicatorShown(true);
 
     QSettings m_settings("settings.ini", QSettings::IniFormat);
     ui->host->setText(m_settings.value("EmailConfig/host", "localhost").toString());
@@ -169,5 +173,31 @@ void SendEmail::on_attachments_customContextMenuRequested(const QPoint &pos)
     });
     contextMenu.addAction(removeAction);
     contextMenu.exec(ui->attachments->viewport()->mapToGlobal(pos));
+}
+
+void SendEmail::dragEnterEvent(QDragEnterEvent *event) {
+    if (event->mimeData()->hasUrls()) {
+        event->acceptProposedAction();
+    }
+}
+
+void SendEmail::dropEvent(QDropEvent *event) {
+    const QMimeData *mimeData = event->mimeData();
+    if (mimeData->hasUrls()) {
+        QList<QUrl> urlList = mimeData->urls();
+        for (const QUrl &url : urlList) {
+            QString filePath = url.toLocalFile();
+            if (!filePath.isEmpty()) {
+                QFileInfo fileInfo(filePath);
+                QString fileName = fileInfo.fileName();
+
+                QListWidgetItem* item = new QListWidgetItem(fileName);
+                item->setData(Qt::UserRole, filePath);
+                item->setToolTip(filePath);
+                ui->attachments->addItem(item);
+            }
+        }
+        event->acceptProposedAction();
+    }
 }
 

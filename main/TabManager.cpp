@@ -3,6 +3,8 @@
 #include <QDesktopServices>
 #include <QUrl>
 #include <QFileInfo>
+#include <QDragEnterEvent>
+#include <QDropEvent>
 
 TabManager::TabManager(QTabWidget* parentTabWidget, QObject* parent) : QObject(parent), tabWidget(parentTabWidget)
 {
@@ -511,6 +513,10 @@ void TabManager::updateLayout() {
                 // 设置右键菜单策略
                 viewTabs[i][j]->setContextMenuPolicy(Qt::CustomContextMenu);
                 
+                // 启用拖拽功能
+                viewTabs[i][j]->setAcceptDrops(true);
+                // viewTabs[i][j]->setDropIndicatorShown(true);
+                
                 // 连接信号，跟踪当前活动标签
                 connect(viewTabs[i][j], &QTabWidget::currentChanged, this, [this, i, j]() {
                     if (viewTabs[i][j]->currentWidget()) {
@@ -831,6 +837,46 @@ bool TabManager::eventFilter(QObject *obj, QEvent *event) {
                     return QObject::eventFilter(obj, event);
                 }
             }
+        }
+    }
+    // 处理拖拽事件
+    else if (event->type() == QEvent::DragEnter) {
+        QDragEnterEvent *dragEnterEvent = static_cast<QDragEnterEvent*>(event);
+        if (dragEnterEvent->mimeData()->hasUrls()) {
+            dragEnterEvent->acceptProposedAction();
+            return true;
+        }
+    }
+    else if (event->type() == QEvent::Drop) {
+        QDropEvent *dropEvent = static_cast<QDropEvent*>(event);
+        if (dropEvent->mimeData()->hasUrls()) {
+            QList<QUrl> urls = dropEvent->mimeData()->urls();
+            for (const QUrl &url : urls) {
+                if (url.isLocalFile()) {
+                    QString filePath = url.toLocalFile();
+                    // 找到当前拖拽目标对应的视图位置
+                    int targetRow = -1;
+                    int targetCol = -1;
+                    for (int i = 0; i < viewTabs.size(); ++i) {
+                        for (int j = 0; j < viewTabs[i].size(); ++j) {
+                            if (viewTabs[i][j] && (obj == viewTabs[i][j] || obj == viewTabs[i][j]->tabBar())) {
+                                targetRow = i;
+                                targetCol = j;
+                                break;
+                            }
+                        }
+                        if (targetRow != -1) break;
+                    }
+                    // 如果找到目标位置，在该位置打开文件
+                    if (targetRow != -1 && targetCol != -1) {
+                        openFileInPosition(filePath, targetRow, targetCol);
+                    } else {
+                        // 否则在当前活动视图中打开文件
+                        openFileInActiveView(filePath);
+                    }
+                }
+            }
+            return true;
         }
     }
     return QObject::eventFilter(obj, event);

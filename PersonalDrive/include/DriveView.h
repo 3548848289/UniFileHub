@@ -5,6 +5,9 @@
 #include <QStandardItemModel>
 #include <QAbstractItemView>
 #include <QMap>
+#include <QDragEnterEvent>
+#include <QDropEvent>
+#include <QMimeData>
 #include "../../Resources/ThirdParty/QFileSystemBreadcrumbBar/QFileSystemBreadcrumbBar.h"
 
 namespace Ui {
@@ -69,6 +72,11 @@ private:
     void buildBreadcrumbPath();
     void loadDownloadHistory();
     void loadUploadHistory();
+
+protected:
+    void dragEnterEvent(QDragEnterEvent *event) override;
+    void dropEvent(QDropEvent *event) override;
+    bool eventFilter(QObject *obj, QEvent *event) override;
 };
 
 #endif // DRIVEVIEW_H

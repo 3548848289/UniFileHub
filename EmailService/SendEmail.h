@@ -6,7 +6,10 @@
 #include <QMenu>
 #include <QTimer>
 #include <QString>
+#include <QMimeData>
 #include <QQueue>
+#include <QDragEnterEvent>
+#include <QDropEvent>
 namespace SimpleMail { class MimeMessage; class Server; }
 namespace Ui { class SendEmail; }
 
@@ -38,6 +41,10 @@ private:
     bool m_isSending = false;
 
     void processNextEmailInQueue();
+
+protected:
+    void dragEnterEvent(QDragEnterEvent *event) override;
+    void dropEvent(QDropEvent *event) override;
 };
 
 #endif // SENDEMAIL_H

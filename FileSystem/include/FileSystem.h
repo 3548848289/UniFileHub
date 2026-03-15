@@ -7,6 +7,11 @@
 #include <QListWidgetItem>
 #include <QFileDialog>
 #include <QStandardPaths>
+#include <QDrag>
+#include <QMimeData>
+#include <QDragEnterEvent>
+#include <QDirIterator>
+#include <QDropEvent>
 #include "TagItemDelegate.h"
 #include "../../manager/include/dbService.h"
 #include "../../manager/include/ServerManager.h"
@@ -41,6 +46,10 @@ private:
     void loadFileMetadata(const QString &filePath);
     void saveExpirationDate(const QString &filePath, const QDate &expirationDate);
     bool eventFilter(QObject *watched, QEvent *event);
+
+protected:
+    void dragEnterEvent(QDragEnterEvent *event) override;
+    void dropEvent(QDropEvent *event) override;
 
     ServerManager* serverManager;
 
