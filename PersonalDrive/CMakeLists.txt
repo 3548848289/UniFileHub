@@ -6,6 +6,7 @@ set(SCHEDULE_SOURCES
    DriveFolder.cpp
    DriveManager.cpp
    DriveViewDelegate.cpp
+   HistoryDelegate.cpp
 )
 
 set(SCHEDULE_HEADERS
@@ -17,6 +18,7 @@ set(SCHEDULE_HEADERS
     include/DriveManager.h
     include/DriveViewDelegate.h
     include/DriveRoles.h
+    include/HistoryDelegate.h
 
 )
 
@@ -29,6 +31,10 @@ qt_add_library(mytxt_drive STATIC
 target_link_libraries(mytxt_drive PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::Network
+    Qt${QT_VERSION_MAJOR}::Multimedia
+    Qt${QT_VERSION_MAJOR}::MultimediaWidgets
+    Qt${QT_VERSION_MAJOR}::Pdf
+    Qt${QT_VERSION_MAJOR}::PdfWidgets
     mytxt_setting
 )
 

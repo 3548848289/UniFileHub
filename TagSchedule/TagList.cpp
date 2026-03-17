@@ -4,9 +4,9 @@
 #include <QMenu>
 #include <QAction>
 #include <QFileDialog>
-#include <QProcess>
 #include <QMessageBox>
 #include "../manager/include/dbService.h"
+#include "../manager/include/FileLocationHelper.h"
 
 TagList::TagList(const FilePathInfo &fileInfo, QWidget *parent)
     : QWidget(parent), ui(new Ui::TagList), fileInfo(fileInfo), dbservice(dbService::instance("./SmartDesk.db"))
@@ -99,12 +99,8 @@ void TagList::onPreviewAction()
 
 void TagList::onOpenLocationAction()
 {
-    // 打开文件所在位置
-    QFileInfo fileInfoObj(fileInfo.filePath);
-    QString path = fileInfoObj.path();
-
-    // 使用系统默认的文件管理器打开路径
-    QProcess::startDetached("explorer.exe", QStringList() << "/select," << fileInfo.filePath);
+    // 打开文件所在位置并选中该文件
+    FileLocationHelper::openFileLocationWithSelection(fileInfo.filePath);
 }
 
 void TagList::onDetailAction()

@@ -1,4 +1,5 @@
 #include "./include/TagItemDelegate.h"
+#include "../manager/include/FileLocationHelper.h"
 
 TagItemDelegate::TagItemDelegate(QObject *parent, ServerManager *serverManager)
     : QStyledItemDelegate(parent), serverManager(serverManager),
@@ -219,9 +220,7 @@ void TagItemDelegate::onOpenInExplorer(QAbstractItemModel *model, const QModelIn
     }
     QFileSystemModel *fileSystemModel = qobject_cast<QFileSystemModel*>(model);
     QString filePath = fileSystemModel->filePath(index);
-    QFileInfo fileInfo(filePath);
-    if (!fileInfo.exists()) return;
-    QProcess::startDetached("explorer.exe", {"/select,", QDir::toNativeSeparators(filePath)});
+    FileLocationHelper::openFileLocationWithSelection(filePath);
 }
 
 void TagItemDelegate::onTagDeleted(const QString &filePath) {

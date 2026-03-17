@@ -9,6 +9,7 @@
 #include <QUrl>
 #include <QDebug>
 #include <QRegularExpression>
+#include "../manager/include/FileLocationHelper.h"
 
 ClipboardController::ClipboardController(QObject *parent)
     : QObject(parent), m_view(nullptr)
@@ -102,7 +103,7 @@ void ClipboardController::openFileLocation(ClipboardItem* item)
     if (serialized.startsWith("FILE_DATA:")) {
         QStringList filePaths = serialized.mid(10).split(";");
         if (!filePaths.isEmpty()) {
-            QDesktopServices::openUrl(QUrl::fromLocalFile(filePaths.first()));
+            FileLocationHelper::openFileLocation(filePaths.first());
         }
     }
 }

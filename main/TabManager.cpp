@@ -5,6 +5,7 @@
 #include <QFileInfo>
 #include <QDragEnterEvent>
 #include <QDropEvent>
+#include "../manager/include/FileLocationHelper.h"
 
 TabManager::TabManager(QTabWidget* parentTabWidget, QObject* parent) : QObject(parent), tabWidget(parentTabWidget)
 {
@@ -574,9 +575,7 @@ void TabManager::updateLayout() {
                         if (auto* tab = qobject_cast<TabAbstract*>(widget)) {
                             QString filePath = tab->getCurrentFilePath();
                             if (!filePath.isEmpty()) {
-                                QFileInfo fileInfo(filePath);
-                                QString folderPath = fileInfo.absolutePath();
-                                QDesktopServices::openUrl(QUrl::fromLocalFile(folderPath));
+                                FileLocationHelper::openFileLocation(filePath);
                             }
                         }
                     } else if (selectedAction == openInFileSystem) {

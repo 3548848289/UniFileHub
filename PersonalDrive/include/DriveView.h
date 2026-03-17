@@ -55,6 +55,14 @@ private slots:
     void onDownloadFailed(const QString &errorMessage);
     void onUploadSuccess(const QString &message);
     void onUploadFailed(const QString &errorMessage);
+    
+    // 下载历史 Delegate 按钮点击
+    void onDownloadHistoryOpenLocationClicked(int row);
+    void onDownloadHistoryPreviewClicked(int row);
+    
+    // 上传历史 Delegate 按钮点击
+    void onUploadHistoryOpenLocationClicked(int row);
+    void onUploadHistoryPreviewClicked(int row);
 
 private:
     QFileSystemBreadcrumbBar* breadcrumb;

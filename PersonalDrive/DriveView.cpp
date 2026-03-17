@@ -5,7 +5,12 @@
 #include "include/DriveFile.h"
 #include "include/DriveFolder.h"
 #include "include/DriveViewDelegate.h"
+#include "include/HistoryDelegate.h"
 #include "../../Setting/include/SettingManager.h"
+#include "../../Setting/include/Setting.h"
+#include "../../main/include/TabFactory.h"
+#include "../../main/include/TabManager.h"
+#include "../../manager/include/FileLocationHelper.h"
 #include <QFileDialog>
 #include <QDebug>
 #include <QMessageBox>
@@ -13,6 +18,8 @@
 #include <QInputDialog>
 #include <QDateTime>
 #include <QStandardPaths>
+#include <QDesktopServices>
+#include <QUrl>
 
 DriveView::DriveView(QWidget *parent): QWidget(parent), ui(new Ui::DriveView), m_currentDirId(0)
 {
@@ -117,10 +124,62 @@ DriveView::DriveView(QWidget *parent): QWidget(parent), ui(new Ui::DriveView), m
     ui->downloadHistoryTableView->setModel(m_downloadHistoryModel);
     ui->downloadHistoryTableView->horizontalHeader()->setStretchLastSection(false);
     ui->downloadHistoryTableView->verticalHeader()->setVisible(false);
+    ui->downloadHistoryTableView->setMouseTracking(true);
+    ui->downloadHistoryTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->downloadHistoryTableView->setSelectionMode(QAbstractItemView::SingleSelection);
+    ui->downloadHistoryTableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    
+    // 为下载历史添加 Delegate
+    auto downloadHistoryDelegate = new HistoryDelegate(this);
+    ui->downloadHistoryTableView->setItemDelegate(downloadHistoryDelegate);
+    
+    connect(ui->downloadHistoryTableView, &QTableView::entered,
+            this, [=](const QModelIndex &index) {
+                downloadHistoryDelegate->setHoverRow(index.row());
+                ui->downloadHistoryTableView->viewport()->update();
+            });
+    
+    connect(ui->downloadHistoryTableView, &QTableView::viewportEntered,
+            this, [=]() {
+                downloadHistoryDelegate->setHoverRow(-1);
+                ui->downloadHistoryTableView->viewport()->update();
+            });
+    
+    connect(downloadHistoryDelegate, &HistoryDelegate::openLocationClicked,
+            this, &DriveView::onDownloadHistoryOpenLocationClicked);
+    
+    connect(downloadHistoryDelegate, &HistoryDelegate::previewClicked,
+            this, &DriveView::onDownloadHistoryPreviewClicked);
     
     ui->uploadHistoryTableView->setModel(m_uploadHistoryModel);
     ui->uploadHistoryTableView->horizontalHeader()->setStretchLastSection(false);
     ui->uploadHistoryTableView->verticalHeader()->setVisible(false);
+    ui->uploadHistoryTableView->setMouseTracking(true);
+    ui->uploadHistoryTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->uploadHistoryTableView->setSelectionMode(QAbstractItemView::SingleSelection);
+    ui->uploadHistoryTableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    
+    // 为上传历史添加 Delegate
+    auto uploadHistoryDelegate = new HistoryDelegate(this);
+    ui->uploadHistoryTableView->setItemDelegate(uploadHistoryDelegate);
+    
+    connect(ui->uploadHistoryTableView, &QTableView::entered,
+            this, [=](const QModelIndex &index) {
+                uploadHistoryDelegate->setHoverRow(index.row());
+                ui->uploadHistoryTableView->viewport()->update();
+            });
+    
+    connect(ui->uploadHistoryTableView, &QTableView::viewportEntered,
+            this, [=]() {
+                uploadHistoryDelegate->setHoverRow(-1);
+                ui->uploadHistoryTableView->viewport()->update();
+            });
+    
+    connect(uploadHistoryDelegate, &HistoryDelegate::openLocationClicked,
+            this, &DriveView::onUploadHistoryOpenLocationClicked);
+    
+    connect(uploadHistoryDelegate, &HistoryDelegate::previewClicked,
+            this, &DriveView::onUploadHistoryPreviewClicked);
     
     // 设置默认分割比例
     ui->splitter->setSizes({300, 150});
@@ -192,10 +251,19 @@ void DriveView::onItemDoubleClicked(const QModelIndex &index)
                 QString downloadPath = SettingManager::Instance().personal_drive_download_dir();
                 QDir dir(downloadPath);
                 
-                // 如果设置的路径为空，则使用用户路径
+                // 如果设置的路径为空，提示用户设置下载目录
                 if (downloadPath.isEmpty()) {
-                    downloadPath = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
-                    dir.setPath(downloadPath);
+                    int reply = QMessageBox::question(this, tr("提示"), tr("下载目录未设置，是否前往设置？"),
+                                                    QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+                    if (reply == QMessageBox::Yes) {
+                        Setting *setting = new Setting();
+                        setting->show();
+                        return;
+                    } else {
+                        // 使用用户路径作为默认值
+                        downloadPath = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
+                        dir.setPath(downloadPath);
+                    }
                 }
                 
                 // 确保目录存在
@@ -235,11 +303,20 @@ void DriveView::onActionClicked(int row, int action)
             QString downloadPath = SettingManager::Instance().personal_drive_download_dir();
             QDir dir(downloadPath);
             
-            // 如果设置的路径为空，则使用用户路径
+            // 如果设置的路径为空，提示用户设置下载目录
             if (downloadPath.isEmpty()) {
-                downloadPath = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
-                dir.setPath(downloadPath);
-            }
+                    int reply = QMessageBox::question(this, tr("提示"), tr("下载目录未设置，是否前往设置？"),
+                                                QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+                    if (reply == QMessageBox::Yes) {
+                        Setting *setting = new Setting();
+                        setting->show();
+                        return;
+                    } else {
+                        // 使用用户路径作为默认值
+                        downloadPath = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
+                        dir.setPath(downloadPath);
+                    }
+                }
             
             // 确保目录存在
             if (!dir.exists()) {
@@ -530,6 +607,21 @@ void DriveView::onDownloadFailed(const QString &errorMessage) {
     qDebug() << "文件下载失败:" << errorMessage;
     // 下载状态更新已由DriveManager在onError中处理
     loadDownloadHistory();
+    
+    // 如果是文件不存在的错误，提示用户刷新文件列表
+    if (errorMessage.contains("404") || errorMessage.contains("不存在") || 
+        errorMessage.contains("not found", Qt::CaseInsensitive)) {
+        QMessageBox::StandardButton reply = QMessageBox::warning(
+            this, 
+            tr("文件不存在"), 
+            tr("该文件可能已被删除或移动。\n是否刷新文件列表以获取最新状态？"),
+            QMessageBox::Yes | QMessageBox::No
+        );
+        
+        if (reply == QMessageBox::Yes) {
+            on_RefreshBtn_clicked();
+        }
+    }
 }
 
 // 上传成功处理
@@ -603,5 +695,143 @@ bool DriveView::eventFilter(QObject *obj, QEvent *event)
         }
     }
     return QWidget::eventFilter(obj, event);
+}
+
+// 下载历史 Delegate - 打开文件所在位置
+void DriveView::onDownloadHistoryOpenLocationClicked(int row)
+{
+    if (row < 0 || row >= m_downloadHistoryModel->rowCount()) {
+        return;
+    }
+    
+    QString filePath = m_downloadHistoryModel->item(row, 3)->text(); // 保存路径在第4列
+    
+    if (filePath.isEmpty()) {
+        QMessageBox::warning(this, tr("错误"), tr("文件路径为空"));
+        return;
+    }
+    
+    QFileInfo fileInfo(filePath);
+    if (!fileInfo.exists()) {
+        QMessageBox::warning(this, tr("错误"), tr("文件不存在: %1").arg(filePath));
+        return;
+    }
+    
+    // 打开文件所在文件夹
+    FileLocationHelper::openFileLocation(filePath);
+}
+
+// 下载历史 Delegate - 预览文件
+void DriveView::onDownloadHistoryPreviewClicked(int row)
+{
+    if (row < 0 || row >= m_downloadHistoryModel->rowCount()) {
+        return;
+    }
+    
+    QString filePath = m_downloadHistoryModel->item(row, 3)->text(); // 保存路径在第4列
+    
+    if (filePath.isEmpty()) {
+        QMessageBox::warning(this, tr("错误"), tr("文件路径为空"));
+        return;
+    }
+    
+    QFileInfo fileInfo(filePath);
+    if (!fileInfo.exists()) {
+        QMessageBox::warning(this, tr("错误"), tr("文件不存在: %1").arg(filePath));
+        return;
+    }
+    
+    // 使用TabFactory创建对应的标签页来预览文件
+    TabAbstract* newTab = TabFactory::create(filePath);
+    if (!newTab) {
+        // 用户取消或文件类型不支持
+        return;
+    }
+    
+    newTab->loadFromFile(filePath);
+    
+    // 获取TabManager并添加标签页
+    QWidget *parent = this->parentWidget();
+    while (parent) {
+        TabManager *tabManager = parent->findChild<TabManager*>();
+        if (tabManager) {
+            QString displayName = fileInfo.fileName();
+            tabManager->addTab(newTab, displayName, filePath);
+            return;
+        }
+        parent = parent->parentWidget();
+    }
+    
+    // 如果找不到TabManager，直接打开文件
+    QDesktopServices::openUrl(QUrl::fromLocalFile(filePath));
+}
+
+// 上传历史 Delegate - 打开文件所在位置
+void DriveView::onUploadHistoryOpenLocationClicked(int row)
+{
+    if (row < 0 || row >= m_uploadHistoryModel->rowCount()) {
+        return;
+    }
+    
+    QString filePath = m_uploadHistoryModel->item(row, 3)->text(); // 本地路径在第4列
+    
+    if (filePath.isEmpty()) {
+        QMessageBox::warning(this, tr("错误"), tr("文件路径为空"));
+        return;
+    }
+    
+    QFileInfo fileInfo(filePath);
+    if (!fileInfo.exists()) {
+        QMessageBox::warning(this, tr("错误"), tr("文件不存在: %1").arg(filePath));
+        return;
+    }
+    
+    // 打开文件所在文件夹
+    FileLocationHelper::openFileLocation(filePath);
+}
+
+// 上传历史 Delegate - 预览文件
+void DriveView::onUploadHistoryPreviewClicked(int row)
+{
+    if (row < 0 || row >= m_uploadHistoryModel->rowCount()) {
+        return;
+    }
+    
+    QString filePath = m_uploadHistoryModel->item(row, 3)->text(); // 本地路径在第4列
+    
+    if (filePath.isEmpty()) {
+        QMessageBox::warning(this, tr("错误"), tr("文件路径为空"));
+        return;
+    }
+    
+    QFileInfo fileInfo(filePath);
+    if (!fileInfo.exists()) {
+        QMessageBox::warning(this, tr("错误"), tr("文件不存在: %1").arg(filePath));
+        return;
+    }
+    
+    // 使用TabFactory创建对应的标签页来预览文件
+    TabAbstract* newTab = TabFactory::create(filePath);
+    if (!newTab) {
+        // 用户取消或文件类型不支持
+        return;
+    }
+    
+    newTab->loadFromFile(filePath);
+    
+    // 获取TabManager并添加标签页
+    QWidget *parent = this->parentWidget();
+    while (parent) {
+        TabManager *tabManager = parent->findChild<TabManager*>();
+        if (tabManager) {
+            QString displayName = fileInfo.fileName() + tr(" (预览)");
+            tabManager->addTab(newTab, displayName, filePath);
+            return;
+        }
+        parent = parent->parentWidget();
+    }
+    
+    // 如果找不到TabManager，直接打开文件
+    QDesktopServices::openUrl(QUrl::fromLocalFile(filePath));
 }
 

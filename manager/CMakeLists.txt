@@ -12,6 +12,7 @@ set(MANAGER_SOURCES
     dbClipboard.cpp
     dbDriveDownload.cpp
     dbDriveUpload.cpp
+    FileLocationHelper.cpp
 
     include/dbOnlineDoc.h
     include/dbBackupRecord.h
@@ -23,6 +24,7 @@ set(MANAGER_SOURCES
     include/dbClipboard.h
     include/dbDriveDownload.h
     include/dbDriveUpload.h
+    include/FileLocationHelper.h
 
 )
 
