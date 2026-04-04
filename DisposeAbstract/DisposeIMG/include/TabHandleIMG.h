@@ -1,22 +1,24 @@
-#ifndef TABHANDLEIMG_H
+﻿#ifndef TABHANDLEIMG_H
 #define TABHANDLEIMG_H
 
-#include <QGraphicsView>
-#include <QGraphicsScene>
-#include <QVBoxLayout>
-#include <QLabel>
-#include <QSplitter>
-#include <QMouseEvent>
+#include <QDebug>
 #include <QEvent>
-#include <QLineEdit>
-#include <QTimer>
+#include <QGraphicsScene>
+#include <QGraphicsView>
 #include <QInputDialog>
-#include <QtSvgWidgets/QGraphicsSvgItem>
+#include <QLineEdit>
+#include <QMouseEvent>
+#include <QSplitter>
+#include <QTimer>
+#include <QVBoxLayout>
+
 #include "../../main/include/TabAbstract.h"
 #include "ControlFrame.h"
-#include "PixItem.h"
 #include "DrawTool.h"
+#include "DrawToolPanel.h"
+#include "PixItem.h"
 
+class QGraphicsItem;
 class QZipReader;
 
 class TabHandleIMG : public TabAbstract
@@ -24,50 +26,70 @@ class TabHandleIMG : public TabAbstract
     Q_OBJECT
 
 public:
-    explicit TabHandleIMG(const QString& filePath, QWidget *parent = nullptr);
+    explicit TabHandleIMG(const QString &filePath, QWidget *parent = nullptr);
 
-    virtual void setContent(const QString &text) override {}
-    virtual QString getContent() const override {  return " "; }
+    void setContent(const QString &text) override { Q_UNUSED(text); }
+    QString getContent() const override { return QStringLiteral(" "); }
     void loadFromFile(const QString &fileName) override;
-    void loadFromInternet(const QByteArray &content) override{ }
+    void loadFromInternet(const QByteArray &content) override { Q_UNUSED(content); }
     void saveToFile(const QString &fileName);
-    void ControlWidget(bool judge){
-        qDebug() << "TabHandleCSV: Showing control frame!";
+    void ControlWidget(bool judge)
+    {
+        Q_UNUSED(judge);
+        qDebug() << "TabHandleIMG: Showing control frame!";
     }
 
     void test();
 
 public slots:
     void showControlFrame(ControlFrame *controlFrame);
-    void onTextAdded(const QString &text, const QPointF &position);
 
 protected:
-    void resizeEvent(QResizeEvent *event);
-    bool eventFilter(QObject *watched, QEvent *event);
+    void resizeEvent(QResizeEvent *event) override;
+    bool eventFilter(QObject *watched, QEvent *event) override;
+
 private:
+    enum class ToolMode {
+        None,
+        Select,
+        Rect,
+        Line,
+        Watermark
+    };
+
+    void setupEditorLayout();
+    void setupToolConnections();
+    void setToolPanelVisible(bool visible);
+    void applyToolSelection(const QString &toolKey);
+    void updateToolMode(ToolMode mode);
+    void setSceneItemsInteractive(bool interactive);
+    void requestExport();
+    void copyToClipboard();
+    void clearOverlayItems();
+    QImage renderCompositeImage() const;
+    int defaultWatermarkPointSize() const;
+    bool shouldHandleToolClick(const QPointF &scenePos) const;
     void updateTransformations(int angle, qreal scale, qreal shear, qreal translate);
     void addTextToImage(const QString &text, const QPointF &position);
     void exportImage(const QString &filePath);
-    
-    // XMind 支持：从 XMind 文件中提取缩略图
+
     bool loadXmindThumbnail(const QString &fileName);
     QByteArray extractFileFromZip(const QString &zipPath, const QString &fileNameInZip);
 
-
-    QGraphicsView *view;
-    QGraphicsScene *scene;
-    PixItem *pixItem;
-    // QGraphicsSvgItem * svgItem;
-    ControlFrame *controlFrame;
+    QGraphicsView *view = nullptr;
+    QGraphicsScene *scene = nullptr;
+    QGraphicsItem *contentItem = nullptr;
+    PixItem *pixItem = nullptr;
+    QWidget *editorArea = nullptr;
+    ControlFrame *controlFrame = nullptr;
+    DrawToolPanel *drawToolPanel = nullptr;
     DrawTool *drawTool = nullptr;
     bool watermarkMode = false;
-    int angle;
-    qreal scaleValue;
-    qreal shearValue;
-    qreal translateValue;
-    QGraphicsTextItem *textItem;
-    
-    // XMind 相关
+    ToolMode currentToolMode = ToolMode::None;
+    int angle = 0;
+    qreal scaleValue = 1.0;
+    qreal shearValue = 0.0;
+    qreal translateValue = 0.0;
     bool isXmindFile = false;
 };
 

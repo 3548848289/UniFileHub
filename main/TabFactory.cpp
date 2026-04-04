@@ -60,6 +60,7 @@ const QMap<QString, std::function<TabAbstract*(const QString&)>> TabFactory::fac
     { "flv",   [](const QString& f){ return new TabHandleVideo(f); } },
     { "webm",  [](const QString& f){ return new TabHandleVideo(f); } },
     { "mp3",   [](const QString& f){ return new TabHandleVideo(f); } },
+    { "h264",   [](const QString& f){ return new TabHandleVideo(f); } },
 
     // --- PDF类 ---
     { "pdf",  [](const QString& f){ return new TabHandlePDF(f); } },

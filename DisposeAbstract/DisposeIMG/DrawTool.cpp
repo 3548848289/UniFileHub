@@ -1,9 +1,10 @@
-#include "include/DrawTool.h"
+﻿#include "include/DrawTool.h"
 
+#include <QGraphicsItem>
+#include <QGraphicsLineItem>
+#include <QGraphicsRectItem>
 #include <QGraphicsScene>
 #include <QGraphicsView>
-#include <QGraphicsRectItem>
-#include <QGraphicsLineItem>
 
 namespace {
 QRectF normalizedRect(const QPointF &a, const QPointF &b)
@@ -14,13 +15,13 @@ QRectF normalizedRect(const QPointF &a, const QPointF &b)
     const qreal bottom = qMax(a.y(), b.y());
     return QRectF(QPointF(left, top), QPointF(right, bottom));
 }
-} // namespace
+}
 
 DrawTool::DrawTool(QGraphicsView *view, QGraphicsScene *scene, QObject *parent)
     : QObject(parent), view(view), scene(scene)
 {
     pen.setWidth(2);
-    pen.setColor(QColor(220, 38, 38)); // red-ish, visible on images
+    pen.setColor(QColor(220, 38, 38));
     pen.setCosmetic(true);
 }
 
@@ -51,6 +52,26 @@ QPointF DrawTool::mapToScene(const QPoint &viewPos) const
     return view->mapToScene(viewPos);
 }
 
+bool DrawTool::shouldStartDrawing(const QPointF &scenePos) const
+{
+    if (!scene) {
+        return false;
+    }
+
+    const QList<QGraphicsItem *> items = scene->items(scenePos);
+    for (QGraphicsItem *item : items) {
+        if (!item) {
+            continue;
+        }
+        if (item->flags().testFlag(QGraphicsItem::ItemIsMovable)
+            || item->flags().testFlag(QGraphicsItem::ItemIsSelectable)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 void DrawTool::beginShape(const QPointF &scenePos)
 {
     if (!scene) {
@@ -63,16 +84,14 @@ void DrawTool::beginShape(const QPointF &scenePos)
     clearInProgress();
 
     switch (currentShape) {
-    case Shape::Rect: {
+    case Shape::Rect:
         rectItem = scene->addRect(QRectF(scenePos, scenePos), pen, Qt::NoBrush);
-        rectItem->setZValue(1000);
+        setupFinishedItem(rectItem);
         break;
-    }
-    case Shape::Line: {
+    case Shape::Line:
         lineItem = scene->addLine(QLineF(scenePos, scenePos), pen);
-        lineItem->setZValue(1000);
+        setupFinishedItem(lineItem);
         break;
-    }
     }
 }
 
@@ -81,6 +100,7 @@ void DrawTool::updateShape(const QPointF &scenePos)
     if (!drawing) {
         return;
     }
+
     switch (currentShape) {
     case Shape::Rect:
         if (rectItem) {
@@ -100,29 +120,42 @@ void DrawTool::endShape(const QPointF &scenePos)
     if (!drawing) {
         return;
     }
+
     updateShape(scenePos);
     drawing = false;
 
-    // Keep the finished item in scene; only clear the "in progress" pointers.
     rectItem = nullptr;
     lineItem = nullptr;
 }
 
 void DrawTool::clearInProgress()
 {
-    // If there is an in-progress item, remove it (only happens when switching modes mid-draw).
-    if (scene) {
-        if (rectItem) {
-            scene->removeItem(rectItem);
-            delete rectItem;
-            rectItem = nullptr;
-        }
-        if (lineItem) {
-            scene->removeItem(lineItem);
-            delete lineItem;
-            lineItem = nullptr;
-        }
+    if (!scene) {
+        return;
     }
+
+    if (rectItem) {
+        scene->removeItem(rectItem);
+        delete rectItem;
+        rectItem = nullptr;
+    }
+    if (lineItem) {
+        scene->removeItem(lineItem);
+        delete lineItem;
+        lineItem = nullptr;
+    }
+}
+
+void DrawTool::setupFinishedItem(QGraphicsItem *item)
+{
+    if (!item) {
+        return;
+    }
+
+    item->setZValue(1000);
+    item->setFlags(QGraphicsItem::ItemIsMovable
+                   | QGraphicsItem::ItemIsSelectable
+                   | QGraphicsItem::ItemSendsGeometryChanges);
 }
 
 bool DrawTool::handleMousePress(const QPoint &viewPos, Qt::MouseButton button)
@@ -130,7 +163,13 @@ bool DrawTool::handleMousePress(const QPoint &viewPos, Qt::MouseButton button)
     if (!enabled || button != Qt::LeftButton) {
         return false;
     }
-    beginShape(mapToScene(viewPos));
+
+    const QPointF scenePos = mapToScene(viewPos);
+    if (!shouldStartDrawing(scenePos)) {
+        return false;
+    }
+
+    beginShape(scenePos);
     return true;
 }
 
@@ -142,6 +181,7 @@ bool DrawTool::handleMouseMove(const QPoint &viewPos, Qt::MouseButtons buttons)
     if (!(buttons & Qt::LeftButton)) {
         return false;
     }
+
     updateShape(mapToScene(viewPos));
     return true;
 }
@@ -152,9 +192,9 @@ bool DrawTool::handleMouseRelease(const QPoint &viewPos, Qt::MouseButton button)
         return false;
     }
     if (!drawing) {
-        return true;
+        return false;
     }
+
     endShape(mapToScene(viewPos));
     return true;
 }
-

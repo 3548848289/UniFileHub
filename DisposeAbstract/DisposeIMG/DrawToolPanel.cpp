@@ -12,6 +12,7 @@ DrawToolPanel::DrawToolPanel(QWidget *parent)
 
     toolButtonGroup = new QButtonGroup(this);
     toolButtonGroup->setExclusive(true);
+    toolButtonGroup->addButton(ui->selectButton);
     toolButtonGroup->addButton(ui->rectButton);
     toolButtonGroup->addButton(ui->lineButton);
     toolButtonGroup->addButton(ui->watermarkButton);
@@ -26,6 +27,9 @@ DrawToolPanel::~DrawToolPanel()
 
 void DrawToolPanel::setupConnections()
 {
+    connect(ui->selectButton, &QPushButton::clicked, this, [this]() {
+        emit toolSelected(QStringLiteral("select"));
+    });
     connect(ui->rectButton, &QPushButton::clicked, this, [this]() {
         emit toolSelected(QStringLiteral("rect"));
     });
@@ -36,6 +40,8 @@ void DrawToolPanel::setupConnections()
         emit toolSelected(QStringLiteral("watermark"));
     });
     connect(ui->exportButton, &QPushButton::clicked, this, &DrawToolPanel::exportRequested);
+    connect(ui->copyButton, &QPushButton::clicked, this, &DrawToolPanel::copyRequested);
+    connect(ui->clearButton, &QPushButton::clicked, this, &DrawToolPanel::clearRequested);
 }
 
 void DrawToolPanel::clearSelection()
@@ -45,6 +51,7 @@ void DrawToolPanel::clearSelection()
     }
 
     toolButtonGroup->setExclusive(false);
+    ui->selectButton->setChecked(false);
     ui->rectButton->setChecked(false);
     ui->lineButton->setChecked(false);
     ui->watermarkButton->setChecked(false);
@@ -53,6 +60,9 @@ void DrawToolPanel::clearSelection()
 
 QString DrawToolPanel::currentToolKey() const
 {
+    if (ui->selectButton->isChecked()) {
+        return QStringLiteral("select");
+    }
     if (ui->rectButton->isChecked()) {
         return QStringLiteral("rect");
     }

@@ -1,19 +1,27 @@
-#include "include/TabHandleIMG.h"
-#include "include/WaterMark.h"
-#include <QHBoxLayout>
-#include <QtSvgWidgets/QGraphicsSvgItem>
-#include <QtSvg/QSvgRenderer>
-#include <QtCore/private/qzipreader_p.h>
-#include <QBuffer>
-#include <QDir>
-#include <QStandardPaths>
+﻿#include "include/TabHandleIMG.h"
 
-TabHandleIMG::TabHandleIMG(const QString& filePath, QWidget *parent)
-    : TabAbstract(filePath, parent), angle(0), scaleValue(1), shearValue(0), translateValue(0)
+#include "include/WaterMark.h"
+
+#include <QFileDialog>
+#include <QFileInfo>
+#include <QFont>
+#include <QGuiApplication>
+#include <QGraphicsItem>
+#include <QHBoxLayout>
+#include <QImage>
+#include <QMessageBox>
+#include <QPainter>
+#include <QClipboard>
+#include <QWheelEvent>
+#include <QtCore/private/qzipreader_p.h>
+#include <QtSvg/QSvgRenderer>
+#include <QtSvgWidgets/QGraphicsSvgItem>
+
+TabHandleIMG::TabHandleIMG(const QString &filePath, QWidget *parent)
+    : TabAbstract(filePath, parent)
 {
-    QSplitter* splitter = new QSplitter(Qt::Vertical, this);
-    scene = new QGraphicsScene;
-    view = new QGraphicsView;
+    scene = new QGraphicsScene(this);
+    view = new QGraphicsView(this);
     view->setScene(scene);
     view->installEventFilter(this);
     if (view->viewport()) {
@@ -21,139 +29,329 @@ TabHandleIMG::TabHandleIMG(const QString& filePath, QWidget *parent)
     }
 
     controlFrame = new ControlFrame(this);
-    splitter->addWidget(view);
-    splitter->addWidget(controlFrame);
-    splitter->setSizes({700, 100});
+    drawToolPanel = new DrawToolPanel(this);
+    drawToolPanel->hide();
+    drawTool = new DrawTool(view, scene, this);
 
-    QVBoxLayout* layout = new QVBoxLayout(this);
-    layout->addWidget(splitter);
-    setLayout(layout);
+    setupEditorLayout();
+    setupToolConnections();
 
     setWindowTitle(tr("Graphics Item Transformation"));
     showControlFrame(controlFrame);
-
     setContentModified(false);
-
-    connect(controlFrame, &ControlFrame::textAdded, this, &TabHandleIMG::onTextAdded);
-    connect(controlFrame, &ControlFrame::exportRequested, this, &TabHandleIMG::exportImage);
-
-    drawTool = new DrawTool(view, scene, this);
-    connect(controlFrame, &ControlFrame::watermarkModeToggled, this, [this](bool enabled) {
-        watermarkMode = enabled;
-        if (drawTool) {
-            drawTool->setEnabled(false);
-        }
-    });
-    connect(controlFrame, &ControlFrame::drawModeToggled, this, [this](bool enabled) {
-        if (drawTool) {
-            drawTool->setEnabled(enabled);
-        }
-        watermarkMode = false;
-    });
-    connect(controlFrame, &ControlFrame::finishDrawingRequested, this, [this]() {
-        if (drawTool) {
-            drawTool->finish();
-            drawTool->setEnabled(false);
-        }
-    });
-    connect(controlFrame, &ControlFrame::drawShapeChanged, this, [this](const QString &shapeKey) {
-        if (!drawTool) return;
-        if (shapeKey == "line") {
-            drawTool->setShape(DrawTool::Shape::Line);
-        } else {
-            drawTool->setShape(DrawTool::Shape::Rect);
-        }
-    });
 }
 
+void TabHandleIMG::setupEditorLayout()
+{
+    QSplitter *splitter = new QSplitter(Qt::Vertical, this);
+
+    editorArea = new QWidget(this);
+    QHBoxLayout *editorLayout = new QHBoxLayout(editorArea);
+    editorLayout->setContentsMargins(0, 0, 0, 0);
+    editorLayout->setSpacing(12);
+    editorLayout->addWidget(view, 1);
+    editorLayout->addWidget(drawToolPanel, 0, Qt::AlignTop);
+
+    splitter->addWidget(editorArea);
+    splitter->addWidget(controlFrame);
+    splitter->setSizes({700, 120});
+
+    QVBoxLayout *layout = new QVBoxLayout(this);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->addWidget(splitter);
+    setLayout(layout);
+}
+
+void TabHandleIMG::setupToolConnections()
+{
+    connect(controlFrame, &ControlFrame::drawPanelToggled, this, &TabHandleIMG::setToolPanelVisible);
+    connect(drawToolPanel, &DrawToolPanel::toolSelected, this, &TabHandleIMG::applyToolSelection);
+    connect(drawToolPanel, &DrawToolPanel::exportRequested, this, &TabHandleIMG::requestExport);
+    connect(drawToolPanel, &DrawToolPanel::copyRequested, this, &TabHandleIMG::copyToClipboard);
+    connect(drawToolPanel, &DrawToolPanel::clearRequested, this, &TabHandleIMG::clearOverlayItems);
+}
+
+void TabHandleIMG::setToolPanelVisible(bool visible)
+{
+    if (drawToolPanel) {
+        drawToolPanel->setVisible(visible);
+    }
+
+    if (visible) {
+        return;
+    }
+
+    if (drawToolPanel) {
+        drawToolPanel->clearSelection();
+    }
+    updateToolMode(ToolMode::None);
+}
+
+void TabHandleIMG::applyToolSelection(const QString &toolKey)
+{
+    if (toolKey == QStringLiteral("select")) {
+        updateToolMode(ToolMode::Select);
+        return;
+    }
+    if (toolKey == QStringLiteral("rect")) {
+        updateToolMode(ToolMode::Rect);
+        return;
+    }
+    if (toolKey == QStringLiteral("line")) {
+        updateToolMode(ToolMode::Line);
+        return;
+    }
+    if (toolKey == QStringLiteral("watermark")) {
+        updateToolMode(ToolMode::Watermark);
+        return;
+    }
+
+    updateToolMode(ToolMode::None);
+}
+
+void TabHandleIMG::updateToolMode(ToolMode mode)
+{
+    currentToolMode = mode;
+    watermarkMode = (mode == ToolMode::Watermark);
+
+    if (drawTool) {
+        drawTool->finish();
+        drawTool->setEnabled(false);
+        if (mode == ToolMode::Rect) {
+            drawTool->setShape(DrawTool::Shape::Rect);
+            drawTool->setEnabled(true);
+        } else if (mode == ToolMode::Line) {
+            drawTool->setShape(DrawTool::Shape::Line);
+            drawTool->setEnabled(true);
+        }
+    }
+
+    setSceneItemsInteractive(mode == ToolMode::Select);
+}
+
+void TabHandleIMG::setSceneItemsInteractive(bool interactive)
+{
+    if (!scene) {
+        return;
+    }
+
+    const QList<QGraphicsItem *> items = scene->items();
+    for (QGraphicsItem *item : items) {
+        if (!item || item == contentItem) {
+            continue;
+        }
+
+        QGraphicsItem::GraphicsItemFlags flags = item->flags();
+        flags.setFlag(QGraphicsItem::ItemIsMovable, interactive);
+        flags.setFlag(QGraphicsItem::ItemIsSelectable, interactive);
+        flags.setFlag(QGraphicsItem::ItemSendsGeometryChanges, interactive);
+        item->setFlags(flags);
+    }
+}
+
+void TabHandleIMG::requestExport()
+{
+    const QString filePath = QFileDialog::getSaveFileName(
+        this,
+        tr("Save Image"),
+        QString(),
+        tr("Images (*.png *.jpg *.bmp)"));
+    if (!filePath.isEmpty()) {
+        exportImage(filePath);
+    }
+}
+
+void TabHandleIMG::copyToClipboard()
+{
+    const QImage image = renderCompositeImage();
+    if (image.isNull()) {
+        return;
+    }
+
+    if (QClipboard *clipboard = QGuiApplication::clipboard()) {
+        clipboard->setImage(image);
+    }
+}
+
+void TabHandleIMG::clearOverlayItems()
+{
+    if (!scene) {
+        return;
+    }
+
+    if (drawTool) {
+        drawTool->finish();
+    }
+
+    QList<QGraphicsItem *> itemsToDelete;
+    const QList<QGraphicsItem *> items = scene->items();
+    for (QGraphicsItem *item : items) {
+        if (!item || item == contentItem) {
+            continue;
+        }
+        itemsToDelete.append(item);
+    }
+
+    for (QGraphicsItem *item : itemsToDelete) {
+        scene->removeItem(item);
+        delete item;
+    }
+
+    if (!itemsToDelete.isEmpty()) {
+        setContentModified(true);
+    }
+
+    setSceneItemsInteractive(currentToolMode == ToolMode::Select);
+}
+
+QImage TabHandleIMG::renderCompositeImage() const
+{
+    if (!scene) {
+        return QImage();
+    }
+
+    const QRectF sceneRect = scene->itemsBoundingRect();
+    if (sceneRect.isEmpty()) {
+        return QImage();
+    }
+
+    const QRect imageRect = sceneRect.toAlignedRect();
+    QImage image(imageRect.size(), QImage::Format_ARGB32);
+    image.fill(Qt::white);
+
+    QPainter painter(&image);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.translate(-sceneRect.topLeft());
+    scene->render(&painter);
+    painter.end();
+
+    return image;
+}
+
+int TabHandleIMG::defaultWatermarkPointSize() const
+{
+    QRectF targetRect;
+    if (contentItem) {
+        targetRect = contentItem->boundingRect();
+    } else if (scene) {
+        targetRect = scene->itemsBoundingRect();
+    }
+
+    const qreal minDimension = qMin(targetRect.width(), targetRect.height());
+    if (minDimension <= 0) {
+        return 18;
+    }
+
+    return qBound(12, qRound(minDimension * 0.04), 72);
+}
 
 void TabHandleIMG::loadFromFile(const QString &fileName)
 {
     scene->clear();
+    contentItem = nullptr;
+    pixItem = nullptr;
     isXmindFile = false;
 
-    QFileInfo fileInfo(fileName);
-    QString suffix = fileInfo.suffix().toLower();
+    const QFileInfo fileInfo(fileName);
+    const QString suffix = fileInfo.suffix().toLower();
 
-    auto fitItemInView = [this](QGraphicsItem* item) {
-        if (!item) return;
-        scene->setSceneRect(item->boundingRect());
+    auto fitItemInView = [this](QGraphicsItem *item) {
+        if (!item) {
+            return;
+        }
+
+        scene->setSceneRect(item->sceneBoundingRect());
         item->setPos(0, 0);
-        QTimer::singleShot(0, this, [this, item]() {
-            view->fitInView(item, Qt::KeepAspectRatio);
-
+        QTimer::singleShot(0, this, [this]() {
+            if (!scene || !view || scene->sceneRect().isEmpty()) {
+                return;
+            }
+            view->fitInView(scene->sceneRect(), Qt::KeepAspectRatio);
             QTimer::singleShot(0, this, [this]() {
-                double scaleFactor = view->transform().m11();
-                int sliderVal = static_cast<int>(scaleFactor * 50.0);
+                if (!view || !controlFrame) {
+                    return;
+                }
+                const double scaleFactor = view->transform().m11();
+                const int sliderVal = static_cast<int>(scaleFactor * 50.0);
                 controlFrame->setScaleSliderValue(sliderVal);
             });
-
         });
     };
 
-    // XMind 文件处理
-    if (suffix == "xmind") {
-        if (loadXmindThumbnail(fileName)) {
-            return;
-        }
-        // 如果加载缩略图失败，继续尝试其他方式
+    if (suffix == QStringLiteral("xmind") && loadXmindThumbnail(fileName)) {
+        setSceneItemsInteractive(currentToolMode == ToolMode::Select);
+        return;
     }
 
-    if (suffix == "svg") {
-        QGraphicsSvgItem* svgItem = new QGraphicsSvgItem(fileName);
+    if (suffix == QStringLiteral("svg")) {
+        QGraphicsSvgItem *svgItem = new QGraphicsSvgItem(fileName);
         if (!svgItem->renderer()->isValid()) {
             QMessageBox::warning(this, tr("加载错误"), tr("SVG 文件无法打开: %1").arg(fileName));
             delete svgItem;
             return;
         }
+        contentItem = svgItem;
         scene->addItem(svgItem);
         fitItemInView(svgItem);
-    } else {
-        QPixmap* pixmap = new QPixmap(fileName);
-        if (pixmap->isNull()) {
-            QMessageBox::warning(this, tr("加载错误"), tr("%1 文件无法打开").arg(fileName));
-            delete pixmap;
-            return;
-        }
-        pixItem = new PixItem(pixmap);
-        scene->addItem(pixItem);
-        fitItemInView(pixItem);
+        setSceneItemsInteractive(currentToolMode == ToolMode::Select);
+        return;
     }
+
+    QPixmap pixmap(fileName);
+    if (pixmap.isNull()) {
+        QMessageBox::warning(this, tr("加载错误"), tr("%1 文件无法打开").arg(fileName));
+        return;
+    }
+
+    pixItem = new PixItem(&pixmap);
+    contentItem = pixItem;
+    scene->addItem(pixItem);
+    fitItemInView(pixItem);
+    setSceneItemsInteractive(currentToolMode == ToolMode::Select);
 }
 
 bool TabHandleIMG::loadXmindThumbnail(const QString &fileName)
 {
-    // XMind 文件是 ZIP 格式，缩略图通常位于 Thumbnails/thumbnail.png
-    QStringList possiblePaths = {
-        "Thumbnails/thumbnail.png",
-        "Thumbnails/thumbnail.jpg",
-        "thumbnail.png",
-        "thumbnail.jpg"
+    const QStringList possiblePaths = {
+        QStringLiteral("Thumbnails/thumbnail.png"),
+        QStringLiteral("Thumbnails/thumbnail.jpg"),
+        QStringLiteral("thumbnail.png"),
+        QStringLiteral("thumbnail.jpg")
     };
-    
+
     for (const QString &pathInZip : possiblePaths) {
-        QByteArray thumbnailData = extractFileFromZip(fileName, pathInZip);
-        if (!thumbnailData.isEmpty()) {
-            QPixmap pixmap;
-            if (pixmap.loadFromData(thumbnailData)) {
-                pixItem = new PixItem(new QPixmap(pixmap));
-                scene->addItem(pixItem);
-                
-                scene->setSceneRect(pixItem->boundingRect());
-                pixItem->setPos(0, 0);
-                QTimer::singleShot(0, this, [this]() {
-                    view->fitInView(pixItem, Qt::KeepAspectRatio);
-                    double scaleFactor = view->transform().m11();
-                    int sliderVal = static_cast<int>(scaleFactor * 50.0);
-                    controlFrame->setScaleSliderValue(sliderVal);
-                });
-                
-                isXmindFile = true;
-                return true;
-            }
+        const QByteArray thumbnailData = extractFileFromZip(fileName, pathInZip);
+        if (thumbnailData.isEmpty()) {
+            continue;
         }
+
+        QPixmap pixmap;
+        if (!pixmap.loadFromData(thumbnailData)) {
+            continue;
+        }
+
+        pixItem = new PixItem(&pixmap);
+        contentItem = pixItem;
+        scene->addItem(pixItem);
+        scene->setSceneRect(pixItem->sceneBoundingRect());
+        pixItem->setPos(0, 0);
+        QTimer::singleShot(0, this, [this]() {
+            if (!scene || !view || scene->sceneRect().isEmpty()) {
+                return;
+            }
+            view->fitInView(scene->sceneRect(), Qt::KeepAspectRatio);
+            if (!controlFrame) {
+                return;
+            }
+            const double scaleFactor = view->transform().m11();
+            const int sliderVal = static_cast<int>(scaleFactor * 50.0);
+            controlFrame->setScaleSliderValue(sliderVal);
+        });
+
+        isXmindFile = true;
+        return true;
     }
-    
+
     return false;
 }
 
@@ -163,49 +361,40 @@ QByteArray TabHandleIMG::extractFileFromZip(const QString &zipPath, const QStrin
     if (!zipReader.exists()) {
         return QByteArray();
     }
-    
-    QByteArray fileData = zipReader.fileData(fileNameInZip);
+
+    const QByteArray fileData = zipReader.fileData(fileNameInZip);
     zipReader.close();
-    
     return fileData;
 }
 
-
-
-void TabHandleIMG::saveToFile(const QString &fileName) {
+void TabHandleIMG::saveToFile(const QString &fileName)
+{
     exportImage(fileName);
 }
 
 void TabHandleIMG::test()
 {
-    // controlFrame->show();
-    qDebug() << "TabHandleCSV: Showing control frame!";
+    qDebug() << "TabHandleIMG: Showing control frame!";
 }
-
-void TabHandleIMG::onTextAdded(const QString &text, const QPointF &position) {
-    addTextToImage(text, position);
-}
-
-
 
 void TabHandleIMG::showControlFrame(ControlFrame *controlFrame)
 {
-        connect(controlFrame, &ControlFrame::rotateChanged, this, [=](int value) {
-            angle = value;
-            updateTransformations(value, scaleValue, shearValue, translateValue);
-        });
-        connect(controlFrame, &ControlFrame::scaleChanged, this, [=](int value) {
-            scaleValue = value / 50.0;
-            updateTransformations(angle, scaleValue, shearValue, translateValue);
-        });
-        connect(controlFrame, &ControlFrame::shearChanged, this, [=](int value) {
-            shearValue = value / 10.0;
-            updateTransformations(angle, scaleValue, shearValue, translateValue);
-        });
-        connect(controlFrame, &ControlFrame::translateChanged, this, [=](int value) {
-            translateValue = value;
-            updateTransformations(angle, scaleValue, shearValue, translateValue);
-        });
+    connect(controlFrame, &ControlFrame::rotateChanged, this, [this](int value) {
+        angle = value;
+        updateTransformations(angle, scaleValue, shearValue, translateValue);
+    });
+    connect(controlFrame, &ControlFrame::scaleChanged, this, [this](int value) {
+        scaleValue = value / 50.0;
+        updateTransformations(angle, scaleValue, shearValue, translateValue);
+    });
+    connect(controlFrame, &ControlFrame::shearChanged, this, [this](int value) {
+        shearValue = value / 10.0;
+        updateTransformations(angle, scaleValue, shearValue, translateValue);
+    });
+    connect(controlFrame, &ControlFrame::translateChanged, this, [this](int value) {
+        translateValue = value;
+        updateTransformations(angle, scaleValue, shearValue, translateValue);
+    });
 }
 
 void TabHandleIMG::updateTransformations(int angle, qreal scale, qreal shear, qreal translate)
@@ -217,28 +406,14 @@ void TabHandleIMG::updateTransformations(int angle, qreal scale, qreal shear, qr
     view->translate(translate, translate);
 }
 
-// void TabHandleIMG::updateTransformations(int angle, qreal scale, qreal shear, qreal translate)
-// {
-//     QTransform transform;
-//     transform.translate(translate, translate);
-//     transform.shear(shear, 0);
-//     transform.scale(scale, scale);
-//     transform.rotate(angle);
+void TabHandleIMG::addTextToImage(const QString &text, const QPointF &position)
+{
+    WaterMark *item = new WaterMark(text);
+    item->setFont(QFont(QStringLiteral("Arial"), defaultWatermarkPointSize()));
+    item->setPos(position + QPointF(0, -12));
+    scene->addItem(item);
 
-//     if (pixItem)
-//         pixItem->setTransform(transform);
-// }
-
-
-void TabHandleIMG::addTextToImage(const QString &text, const QPointF &position) {
-    WaterMark* textItem = new WaterMark(text);
-    QPointF offset(0, -12);
-    textItem->setFont(QFont("Arial", 12));
-
-    textItem->setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable);
-    textItem->setPos(position + offset);
-    scene->addItem(textItem);
-
+    setSceneItemsInteractive(currentToolMode == ToolMode::Select);
     setContentModified(true);
 }
 
@@ -246,78 +421,105 @@ void TabHandleIMG::resizeEvent(QResizeEvent *event)
 {
     QWidget::resizeEvent(event);
     if (view && scene && !scene->items().isEmpty()) {
-        view->fitInView(scene->sceneRect(), Qt::KeepAspectRatio);
+        view->fitInView(scene->itemsBoundingRect(), Qt::KeepAspectRatio);
     }
 }
 
-bool TabHandleIMG::eventFilter(QObject* watched, QEvent* event)
+bool TabHandleIMG::shouldHandleToolClick(const QPointF &scenePos) const
+{
+    if (!scene) {
+        return false;
+    }
+
+    const QList<QGraphicsItem *> items = scene->items(scenePos);
+    for (QGraphicsItem *item : items) {
+        if (!item) {
+            continue;
+        }
+        if (item->flags().testFlag(QGraphicsItem::ItemIsMovable)
+            || item->flags().testFlag(QGraphicsItem::ItemIsSelectable)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool TabHandleIMG::eventFilter(QObject *watched, QEvent *event)
 {
     const bool isViewTarget = (watched == view || watched == view->viewport());
 
     if (isViewTarget && event->type() == QEvent::MouseButtonPress) {
-        QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
+        auto *mouseEvent = static_cast<QMouseEvent *>(event);
+        const QPointF scenePos = view->mapToScene(mouseEvent->pos());
+
         if (drawTool && drawTool->isEnabled()) {
             return drawTool->handleMousePress(mouseEvent->pos(), mouseEvent->button());
         }
-        if (watermarkMode && mouseEvent->button() == Qt::LeftButton) {
-            const QPointF scenePos = view->mapToScene(mouseEvent->pos());
+
+        if (watermarkMode && mouseEvent->button() == Qt::LeftButton && shouldHandleToolClick(scenePos)) {
             bool ok = false;
             const QString text = QInputDialog::getText(
-                this, tr("输入文字"), tr("请输入水印文字:"), QLineEdit::Normal, "", &ok);
+                this,
+                tr("输入水印"),
+                tr("请输入水印内容"),
+                QLineEdit::Normal,
+                QString(),
+                &ok);
             if (ok && !text.isEmpty()) {
                 addTextToImage(text, scenePos);
             }
             return true;
         }
     } else if (isViewTarget && event->type() == QEvent::Wheel) {
-        QWheelEvent* wheelEvent = static_cast<QWheelEvent*>(event);
+        auto *wheelEvent = static_cast<QWheelEvent *>(event);
         if (wheelEvent->modifiers() & Qt::ControlModifier) {
-            // 获取当前缩放滑块的值
-            int currentValue = controlFrame->getScaleSliderValue();
-            // 根据滚轮方向调整缩放值
-            int delta = wheelEvent->angleDelta().y() > 0 ? 5 : -5;
+            const int currentValue = controlFrame->getScaleSliderValue();
+            const int delta = wheelEvent->angleDelta().y() > 0 ? 5 : -5;
             int newValue = currentValue + delta;
-            // 确保值在滑块范围内
-            if (newValue < controlFrame->getScaleSliderMinimum())
+            if (newValue < controlFrame->getScaleSliderMinimum()) {
                 newValue = controlFrame->getScaleSliderMinimum();
-            if (newValue > controlFrame->getScaleSliderMaximum())
+            }
+            if (newValue > controlFrame->getScaleSliderMaximum()) {
                 newValue = controlFrame->getScaleSliderMaximum();
-            // 设置新的缩放值
+            }
             controlFrame->setScaleSliderValue(newValue);
-            // 更新缩放值
             scaleValue = newValue / 50.0;
             updateTransformations(angle, scaleValue, shearValue, translateValue);
             return true;
         }
     } else if (isViewTarget && event->type() == QEvent::MouseMove) {
         if (drawTool && drawTool->isEnabled()) {
-            QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
+            auto *mouseEvent = static_cast<QMouseEvent *>(event);
             return drawTool->handleMouseMove(mouseEvent->pos(), mouseEvent->buttons());
         }
     } else if (isViewTarget && event->type() == QEvent::MouseButtonRelease) {
         if (drawTool && drawTool->isEnabled()) {
-            QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
-            return drawTool->handleMouseRelease(mouseEvent->pos(), mouseEvent->button());
+            auto *mouseEvent = static_cast<QMouseEvent *>(event);
+            const bool handled = drawTool->handleMouseRelease(mouseEvent->pos(), mouseEvent->button());
+            if (handled) {
+                setSceneItemsInteractive(currentToolMode == ToolMode::Select);
+                setContentModified(true);
+            }
+            return handled;
         }
     }
+
     return QWidget::eventFilter(watched, event);
 }
 
-void TabHandleIMG::exportImage(const QString &filePath) {
-    QRectF sceneRect = scene->itemsBoundingRect();
-    QRect imageRect = sceneRect.toAlignedRect();
-    QImage image(imageRect.size(), QImage::Format_ARGB32);
-    image.fill(Qt::white);
-
-    // 将 scene 渲染到 QImage
-    QPainter painter(&image);
-    painter.setRenderHint(QPainter::Antialiasing);
-    painter.translate(-sceneRect.topLeft());
-    scene->render(&painter);
-    painter.end();
+void TabHandleIMG::exportImage(const QString &filePath)
+{
+    const QImage image = renderCompositeImage();
+    if (image.isNull()) {
+        return;
+    }
 
     if (!image.save(filePath)) {
         QMessageBox::warning(this, tr("保存失败"), tr("无法保存图像到 %1").arg(filePath));
+        return;
     }
+
     setContentModified(false);
 }
+

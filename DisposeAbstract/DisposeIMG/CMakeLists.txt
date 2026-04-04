@@ -1,7 +1,8 @@
-set(SCHEDULE_SOURCES
+﻿set(SCHEDULE_SOURCES
    TabHandleIMG.cpp
    ControlFrame.cpp
    DrawTool.cpp
+   DrawToolPanel.cpp
    PixItem.cpp
    WaterMark.cpp
 )
@@ -10,6 +11,7 @@ set(SCHEDULE_HEADERS
     include/TabHandleIMG.h
     include/ControlFrame.h
     include/DrawTool.h
+    include/DrawToolPanel.h
     include/PixItem.h
     include/WaterMark.h
 )
@@ -19,7 +21,7 @@ qt_add_library(mytxt_img STATIC
     ${SCHEDULE_SOURCES}
     ${SCHEDULE_HEADERS}
     ui/ControlFrame.ui
-
+    ui/DrawToolPanel.ui
 )
 
 

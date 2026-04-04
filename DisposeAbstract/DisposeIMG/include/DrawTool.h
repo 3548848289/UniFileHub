@@ -1,15 +1,15 @@
-#ifndef DRAWTOOL_H
+﻿#ifndef DRAWTOOL_H
 #define DRAWTOOL_H
 
 #include <QObject>
 #include <QPen>
 #include <QPointer>
 
+class QGraphicsItem;
+class QGraphicsLineItem;
+class QGraphicsRectItem;
 class QGraphicsScene;
 class QGraphicsView;
-class QGraphicsItem;
-class QGraphicsRectItem;
-class QGraphicsLineItem;
 
 class DrawTool : public QObject
 {
@@ -38,10 +38,12 @@ public:
 
 private:
     QPointF mapToScene(const QPoint &viewPos) const;
+    bool shouldStartDrawing(const QPointF &scenePos) const;
     void beginShape(const QPointF &scenePos);
     void updateShape(const QPointF &scenePos);
     void endShape(const QPointF &scenePos);
     void clearInProgress();
+    void setupFinishedItem(QGraphicsItem *item);
 
     QPointer<QGraphicsView> view;
     QPointer<QGraphicsScene> scene;
@@ -58,4 +60,3 @@ private:
 };
 
 #endif // DRAWTOOL_H
-

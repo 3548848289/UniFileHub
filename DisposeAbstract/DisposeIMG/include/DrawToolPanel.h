@@ -23,6 +23,8 @@ public:
 signals:
     void toolSelected(const QString &toolKey);
     void exportRequested();
+    void copyRequested();
+    void clearRequested();
 
 private:
     void setupConnections();
