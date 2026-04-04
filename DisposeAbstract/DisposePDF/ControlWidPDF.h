@@ -30,6 +30,8 @@ signals:
     void pageChanged(int pageNumber);
     // 缩放模式变化信号
     void zoomModeChanged(const QString &mode);
+    // 滚动模式变化信号
+    void scrollModeChanged(bool enabled);
 
 private slots:
     // 按钮点击槽函数
@@ -39,6 +41,8 @@ private slots:
     void on_pageLineEdit_editingFinished();
     // 缩放模式变化槽函数
     void on_zoomComboBox_currentTextChanged(const QString &arg1);
+    // 滚动模式复选框状态变化槽函数
+    void on_scrollModeCheckBox_stateChanged(int state);
 
 private:
     Ui::ControlWidPDF *ui;

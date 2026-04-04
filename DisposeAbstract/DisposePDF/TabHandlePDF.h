@@ -33,6 +33,8 @@ private slots:
     void goToNextPage();
     void goToPage(int pageNumber);
     void changeZoomMode(const QString &mode);
+    // 滚动模式变化槽函数
+    void changeScrollMode(bool enabled);
 
 private:
     QPdfDocument *pdfDoc;

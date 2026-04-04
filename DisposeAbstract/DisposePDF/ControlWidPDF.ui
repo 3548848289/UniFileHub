@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>PDF 控制</string>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,1,1,1,2,20,1">
+  <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,1,1,1,2,20,1,1">
    <item>
     <widget class="QPushButton" name="prevPageButton">
      <property name="text">
@@ -70,6 +70,13 @@
       </size>
      </property>
     </spacer>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="scrollModeCheckBox">
+     <property name="text">
+      <string>滚动模式</string>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="QComboBox" name="zoomComboBox">

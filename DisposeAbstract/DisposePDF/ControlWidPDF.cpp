@@ -85,3 +85,10 @@ void ControlWidPDF::on_zoomComboBox_currentTextChanged(const QString &arg1)
 {
     emit zoomModeChanged(arg1);
 }
+
+// 滚动模式复选框状态变化
+void ControlWidPDF::on_scrollModeCheckBox_stateChanged(int state)
+{
+    bool enabled = (state == Qt::Checked);
+    emit scrollModeChanged(enabled);
+}

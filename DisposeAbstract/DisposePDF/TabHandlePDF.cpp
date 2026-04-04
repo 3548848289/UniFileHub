@@ -4,6 +4,7 @@
 #include <QBuffer>
 #include <QSplitter>
 #include <QPdfPageNavigator>
+#include <QTimer>
 
 TabHandlePDF::TabHandlePDF(const QString &filePath, QWidget *parent)
     : TabAbstract(filePath, parent),
@@ -38,6 +39,7 @@ TabHandlePDF::TabHandlePDF(const QString &filePath, QWidget *parent)
     connect(controlWidPDF, &ControlWidPDF::nextPageRequested, this, &TabHandlePDF::goToNextPage);
     connect(controlWidPDF, &ControlWidPDF::pageChanged, this, &TabHandlePDF::goToPage);
     connect(controlWidPDF, &ControlWidPDF::zoomModeChanged, this, &TabHandlePDF::changeZoomMode);
+    connect(controlWidPDF, &ControlWidPDF::scrollModeChanged, this, &TabHandlePDF::changeScrollMode);
 
     if (!filePath.isEmpty()) {
         loadFromFile(filePath);
@@ -70,6 +72,13 @@ void TabHandlePDF::loadFromFile(const QString &fileName)
     int totalPages = pdfDoc->pageCount();
     controlWidPDF->setTotalPages(totalPages);
     controlWidPDF->setCurrentPage(1);
+    
+    // 使用QTimer延迟执行布局调整，确保PDF内容完全加载
+    QTimer::singleShot(100, this, [this]() {
+        pdfView->setZoomMode(QPdfView::ZoomMode::FitToWidth);
+        pdfView->resize(pdfView->size());
+        pdfView->update();
+    });
 }
 
 
@@ -96,6 +105,13 @@ void TabHandlePDF::loadFromInternet(const QByteArray &content)
     int totalPages = pdfDoc->pageCount();
     controlWidPDF->setTotalPages(totalPages);
     controlWidPDF->setCurrentPage(1);
+    
+    // 使用QTimer延迟执行布局调整，确保PDF内容完全加载
+    QTimer::singleShot(100, this, [this]() {
+        pdfView->setZoomMode(QPdfView::ZoomMode::FitToWidth);
+        pdfView->resize(pdfView->size());
+        pdfView->update();
+    });
 }
 
 
@@ -162,5 +178,20 @@ void TabHandlePDF::changeZoomMode(const QString &mode)
         pdfView->setZoomMode(QPdfView::ZoomMode::Custom);
         int zoomPercentage = mode.left(mode.length() - 1).toInt();
         pdfView->setZoomFactor(zoomPercentage / 100.0);
+    }
+}
+
+// 改变滚动模式
+void TabHandlePDF::changeScrollMode(bool enabled)
+{
+    if (enabled)
+    {
+        // 滚动模式：多页显示
+        pdfView->setPageMode(QPdfView::PageMode::MultiPage);
+    }
+    else
+    {
+        // 单页模式：一次显示一页
+        pdfView->setPageMode(QPdfView::PageMode::SinglePage);
     }
 }
