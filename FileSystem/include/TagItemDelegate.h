@@ -13,6 +13,9 @@
 #include <QMap>
 #include <QClipboard>
 #include <QProcess>
+#include <QInputDialog>
+#include <QLineEdit>
+#include <QFileInfo>
 
 #include "../../TagSchedule/include/TagDetail.h"
 #include "../../manager/include/dbService.h"
@@ -43,6 +46,7 @@ private slots:
     void onNewTagTriggered(QAbstractItemModel *model, const QModelIndex &index);
     void onOpenFileTriggered(QAbstractItemModel *model, const QModelIndex &index);
     void onDeleteFileTriggered(QAbstractItemModel *model, const QModelIndex &index);
+    void onRenameTriggered(QAbstractItemModel *model, const QModelIndex &index);
     void onCommitTriggered(QAbstractItemModel *model, const QModelIndex &index);
     void onCopyPathTriggered(QAbstractItemModel *model, const QModelIndex &index);
     void onOpenInExplorer(QAbstractItemModel *model, const QModelIndex &index);

@@ -140,29 +140,21 @@ void MainWindow::initConnect() {
 
 
     connect(schedule_wid, &ScheduleWid::openInFileSystemRequested, this, [=](const QString &filePath){
-        // 切换到文件系统视图
         ui->stackedWidget->setCurrentWidget(file_system);
-        // 跳转到文件所在路径
         QFileInfo fileInfo(filePath);
         QString directoryPath = fileInfo.path();
         file_system->changePath(directoryPath);
     });
 
-    // 连接文件备份的文件系统打开信号
     connect(file_backup_view, &FileBackupView::openInFileSystemRequested, this, [=](const QString &filePath){
-        // 切换到文件系统视图
         ui->stackedWidget->setCurrentWidget(file_system);
-        // 跳转到文件所在路径
         QFileInfo fileInfo(filePath);
         QString directoryPath = fileInfo.path();
         file_system->changePath(directoryPath);
     });
 
-    // 连接TabManager的文件系统打开信号
     connect(tabManager, &TabManager::openInFileSystemRequested, this, [=](const QString &filePath){
-        // 切换到文件系统视图
         ui->stackedWidget->setCurrentWidget(file_system);
-        // 跳转到文件所在路径
         QFileInfo fileInfo(filePath);
         QString directoryPath = fileInfo.path();
         file_system->changePath(directoryPath);

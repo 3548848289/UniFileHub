@@ -79,7 +79,7 @@ void DriveApiClient::uploadFile(const QString &filePath, int parentId)
     filePart.setHeader(QNetworkRequest::ContentDispositionHeader,
                        QVariant("form-data; name=\"file\"; filename=\"" + QFileInfo(filePath).fileName() + "\""));
     filePart.setBodyDevice(file);
-    file->setParent(multiPart); // 让 multiPart 管理 file 生命周期
+    file->setParent(multiPart);
     multiPart->append(filePart);
 
     // 父目录ID部分
@@ -92,7 +92,7 @@ void DriveApiClient::uploadFile(const QString &filePath, int parentId)
     QNetworkRequest request = createRequest(url);
 
     QNetworkReply *reply = m_networkManager->post(request, multiPart);
-    multiPart->setParent(reply); // 让 reply 管理 multiPart 生命周期
+    multiPart->setParent(reply);
 
     connect(reply, &QNetworkReply::finished, this, [=]() {
         reply->deleteLater();

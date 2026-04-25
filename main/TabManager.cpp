@@ -113,23 +113,23 @@ void TabManager::closeTab(int row, int col, int index) {
             QWidget* widget = currentTabWidget->widget(index);
             if (!widget) return;
 
-            QSignalBlocker blocker(currentTabWidget);  // 阻止 removeTab 触发信号
+            QSignalBlocker blocker(currentTabWidget);
 
             if (auto* sendEmailTab = qobject_cast<SendEmail*>(widget)) {
                 currentTabWidget->removeTab(index);
-                sendEmailTab->deleteLater();
+                // sendEmailTab->deleteLater();
                 return;
             }
 
             if (auto* clipboard = qobject_cast<ClipboardView*>(widget)) {
                 currentTabWidget->removeTab(index);
-                clipboard->deleteLater();
+                // clipboard->deleteLater();
                 return;
             }
 
             if (auto* driveView = qobject_cast<DriveView*>(widget)) {
                 currentTabWidget->removeTab(index);
-                driveView->deleteLater();
+                // driveView->deleteLater();
                 return;
             }
 
@@ -394,7 +394,7 @@ TabAbstract* TabManager::createTabByFileName(const QString &fileName)
 void TabManager::openSharedCSVTab(SharedView* sharedView)
 {
     // TabManager 自己有 createTabByFileName 方法
-    TabAbstract* newTab = createTabByFileName("shared.csv"); // 临时名字
+    TabAbstract* newTab = createTabByFileName("shared.csv");
     TabHandleCSV* csvTab = qobject_cast<TabHandleCSV*>(newTab);
     if (!csvTab) return;
 
@@ -403,7 +403,6 @@ void TabManager::openSharedCSVTab(SharedView* sharedView)
     sharedView->bindTab(csvTab);
 }
 
-// TabManager.cpp
 void TabManager::findInCurrentTab(QWidget* parent)
 {
     auto currentTab = getCurrentTab<TabAbstract>();

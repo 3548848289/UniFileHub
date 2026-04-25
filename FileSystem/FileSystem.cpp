@@ -25,6 +25,8 @@ FileSystem::FileSystem(QWidget *parent)
     ui->treeView->setStyleSheet("QTreeView::item { height: 30px; }");
     ui->treeView->setModel(fileSystemModel);
     ui->treeView->setHeaderHidden(true);
+    ui->treeView->setEditTriggers(QAbstractItemView::EditKeyPressed);
+    ui->treeView->setExpandsOnDoubleClick(true);
     for (int i = 1; i < fileSystemModel->columnCount(); ++i) {
         ui->treeView->setColumnHidden(i, true);
     }
@@ -43,6 +45,7 @@ FileSystem::FileSystem(QWidget *parent)
     ui->treeView->setItemDelegate(tagItemdelegate);
 
     connect(ui->treeView, &QTreeView::clicked, this, &FileSystem::onItemClicked);
+    connect(ui->treeView, &QTreeView::doubleClicked, this, &FileSystem::onItemDoubleClicked);
     connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &FileSystem::onSelectionChanged);
 
     connect(tagItemdelegate, &TagItemDelegate::openFileRequested, this, [=](const QString &filePath){
@@ -118,6 +121,24 @@ void FileSystem::onItemClicked(const QModelIndex &index) {
     QTimer::singleShot(0, this, [this]() {
         ui->treeView->setFocus();
     });
+}
+
+void FileSystem::onItemDoubleClicked(const QModelIndex &index)
+{
+    if (!index.isValid() || tagItemdelegate->isButtonClicked) {
+        tagItemdelegate->isButtonClicked = false;
+        return;
+    }
+
+    if (!fileSystemModel->isDir(index)) {
+        return;
+    }
+
+    if (ui->treeView->isExpanded(index)) {
+        ui->treeView->collapse(index);
+    } else {
+        ui->treeView->expand(index);
+    }
 }
 
 

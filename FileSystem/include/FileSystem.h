@@ -33,6 +33,7 @@ public:
 
 private slots:
     void onItemClicked(const QModelIndex &index);
+    void onItemDoubleClicked(const QModelIndex &index);
     // void on_goButton_clicked();
     void onSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
 
