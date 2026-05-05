@@ -69,7 +69,7 @@ private:
     QImage renderCompositeImage() const;
     int defaultWatermarkPointSize() const;
     bool shouldHandleToolClick(const QPointF &scenePos) const;
-    void updateTransformations(int angle, qreal scale, qreal shear, qreal translate);
+    void updateTransformations(int angle, qreal scale);
     void addTextToImage(const QString &text, const QPointF &position);
     void exportImage(const QString &filePath);
 
@@ -88,8 +88,6 @@ private:
     ToolMode currentToolMode = ToolMode::None;
     int angle = 0;
     qreal scaleValue = 1.0;
-    qreal shearValue = 0.0;
-    qreal translateValue = 0.0;
     bool isXmindFile = false;
 };
 

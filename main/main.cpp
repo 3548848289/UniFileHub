@@ -10,11 +10,65 @@
 #include <QLocalServer>
 #include <QLocalSocket>
 #include <QTimer>
+#include <QTranslator>
+#include <QLocale>
+#include <QLibraryInfo>
+#include <QDir>
+#include <QFileInfo>
 #include "mainwindow.h"
 #include "../../Setting/include/SettingManager.h"
 #include "../../Setting/include/IconManager.h"
 
 #define SERVER_NAME "SmartDesk_Server"
+
+namespace {
+
+QString appTranslationBaseName()
+{
+    return QLocale::system().language() == QLocale::Chinese
+               ? "UniFileHub_zh_CN"
+               : "UniFileHub_En";
+}
+
+QString appTranslationDirectory()
+{
+    const QDir appDir(QCoreApplication::applicationDirPath());
+    const QString baseName = appTranslationBaseName();
+    const QStringList candidateDirs = {
+        appDir.filePath("translations"),
+        appDir.filePath("../translations")
+    };
+
+    for (const QString &dirPath : candidateDirs) {
+        if (QFileInfo::exists(QDir(dirPath).filePath(baseName + ".qm"))) {
+            return QDir(dirPath).absolutePath();
+        }
+    }
+
+    return appDir.filePath("translations");
+}
+
+void installTranslators(QApplication &app)
+{
+    static QTranslator appTranslator;
+    static QTranslator qtTranslator;
+
+    const QString baseName = appTranslationBaseName();
+    const QString translationDir = appTranslationDirectory();
+
+    if (appTranslator.load(baseName, translationDir)) {
+        app.installTranslator(&appTranslator);
+    }
+
+    if (QLocale::system().language() == QLocale::Chinese) {
+        const QString qtTranslationsPath = QLibraryInfo::path(QLibraryInfo::TranslationsPath);
+        if (qtTranslator.load(QLocale("zh_CN"), "qtbase", "_", qtTranslationsPath)) {
+            app.installTranslator(&qtTranslator);
+        }
+    }
+}
+
+}
 
 bool connectToRunningInstance() {
     QLocalSocket socket;
@@ -159,6 +213,7 @@ QSystemTrayIcon* createTray(MainWindow *w, QApplication &app) {
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
+    installTranslators(app);
 
     // if (connectToRunningInstance()) {
     //     return 0;

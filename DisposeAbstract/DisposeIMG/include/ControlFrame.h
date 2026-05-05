@@ -1,7 +1,6 @@
 ﻿#ifndef CONTROLFRAME_H
 #define CONTROLFRAME_H
 
-#include <QSlider>
 #include <QWidget>
 
 #include "../../Setting/include/SettingManager.h"
@@ -18,16 +17,19 @@ public:
     explicit ControlFrame(QWidget *parent = nullptr);
     ~ControlFrame();
 
-    void setScaleSliderValue(int value);
-    int getScaleSliderValue();
-    int getScaleSliderMinimum();
-    int getScaleSliderMaximum();
+    void setScalePercentValue(int value);
+    int getScalePercentValue() const;
+    int getScalePercentMinimum() const;
+    int getScalePercentMaximum() const;
+    void setRotateSliderValue(int value);
+    int getRotateSliderValue();
+    int getRotateSliderMinimum();
+    int getRotateSliderMaximum();
 
 signals:
     void rotateChanged(int value);
     void scaleChanged(int value);
-    void shearChanged(int value);
-    void translateChanged(int value);
+    void resetRequested();
     void drawPanelToggled(bool visible);
 
 private:

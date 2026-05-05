@@ -54,7 +54,7 @@ void TabHandleIMG::setupEditorLayout()
 
     splitter->addWidget(editorArea);
     splitter->addWidget(controlFrame);
-    splitter->setSizes({700, 120});
+    splitter->setSizes({780, 40});
 
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -251,6 +251,8 @@ void TabHandleIMG::loadFromFile(const QString &fileName)
     contentItem = nullptr;
     pixItem = nullptr;
     isXmindFile = false;
+    angle = 0;
+    scaleValue = 1.0;
 
     const QFileInfo fileInfo(fileName);
     const QString suffix = fileInfo.suffix().toLower();
@@ -271,9 +273,11 @@ void TabHandleIMG::loadFromFile(const QString &fileName)
                 if (!view || !controlFrame) {
                     return;
                 }
-                const double scaleFactor = view->transform().m11();
-                const int sliderVal = static_cast<int>(scaleFactor * 50.0);
-                controlFrame->setScaleSliderValue(sliderVal);
+                scaleValue = view->transform().m11();
+                const int scalePercent = static_cast<int>(scaleValue * 100.0 + 0.5);
+                angle = 0;
+                controlFrame->setRotateSliderValue(0);
+                controlFrame->setScalePercentValue(scalePercent);
             });
         });
     };
@@ -343,9 +347,11 @@ bool TabHandleIMG::loadXmindThumbnail(const QString &fileName)
             if (!controlFrame) {
                 return;
             }
-            const double scaleFactor = view->transform().m11();
-            const int sliderVal = static_cast<int>(scaleFactor * 50.0);
-            controlFrame->setScaleSliderValue(sliderVal);
+            scaleValue = view->transform().m11();
+            const int scalePercent = static_cast<int>(scaleValue * 100.0 + 0.5);
+            angle = 0;
+            controlFrame->setRotateSliderValue(0);
+            controlFrame->setScalePercentValue(scalePercent);
         });
 
         isXmindFile = true;
@@ -381,29 +387,26 @@ void TabHandleIMG::showControlFrame(ControlFrame *controlFrame)
 {
     connect(controlFrame, &ControlFrame::rotateChanged, this, [this](int value) {
         angle = value;
-        updateTransformations(angle, scaleValue, shearValue, translateValue);
+        updateTransformations(angle, scaleValue);
     });
     connect(controlFrame, &ControlFrame::scaleChanged, this, [this](int value) {
-        scaleValue = value / 50.0;
-        updateTransformations(angle, scaleValue, shearValue, translateValue);
+        scaleValue = value / 100.0;
+        updateTransformations(angle, scaleValue);
     });
-    connect(controlFrame, &ControlFrame::shearChanged, this, [this](int value) {
-        shearValue = value / 10.0;
-        updateTransformations(angle, scaleValue, shearValue, translateValue);
-    });
-    connect(controlFrame, &ControlFrame::translateChanged, this, [this](int value) {
-        translateValue = value;
-        updateTransformations(angle, scaleValue, shearValue, translateValue);
+    connect(controlFrame, &ControlFrame::resetRequested, this, [this, controlFrame]() {
+        angle = 0;
+        scaleValue = 1.0;
+        controlFrame->setRotateSliderValue(0);
+        controlFrame->setScalePercentValue(100);
+        updateTransformations(angle, scaleValue);
     });
 }
 
-void TabHandleIMG::updateTransformations(int angle, qreal scale, qreal shear, qreal translate)
+void TabHandleIMG::updateTransformations(int angle, qreal scale)
 {
     view->resetTransform();
     view->rotate(angle);
     view->scale(scale, scale);
-    view->shear(shear, 0);
-    view->translate(translate, translate);
 }
 
 void TabHandleIMG::addTextToImage(const QString &text, const QPointF &position)
@@ -420,9 +423,6 @@ void TabHandleIMG::addTextToImage(const QString &text, const QPointF &position)
 void TabHandleIMG::resizeEvent(QResizeEvent *event)
 {
     QWidget::resizeEvent(event);
-    if (view && scene && !scene->items().isEmpty()) {
-        view->fitInView(scene->itemsBoundingRect(), Qt::KeepAspectRatio);
-    }
 }
 
 bool TabHandleIMG::shouldHandleToolClick(const QPointF &scenePos) const
@@ -474,18 +474,32 @@ bool TabHandleIMG::eventFilter(QObject *watched, QEvent *event)
     } else if (isViewTarget && event->type() == QEvent::Wheel) {
         auto *wheelEvent = static_cast<QWheelEvent *>(event);
         if (wheelEvent->modifiers() & Qt::ControlModifier) {
-            const int currentValue = controlFrame->getScaleSliderValue();
+            const int currentValue = controlFrame->getScalePercentValue();
             const int delta = wheelEvent->angleDelta().y() > 0 ? 5 : -5;
             int newValue = currentValue + delta;
-            if (newValue < controlFrame->getScaleSliderMinimum()) {
-                newValue = controlFrame->getScaleSliderMinimum();
+            if (newValue < controlFrame->getScalePercentMinimum()) {
+                newValue = controlFrame->getScalePercentMinimum();
             }
-            if (newValue > controlFrame->getScaleSliderMaximum()) {
-                newValue = controlFrame->getScaleSliderMaximum();
+            if (newValue > controlFrame->getScalePercentMaximum()) {
+                newValue = controlFrame->getScalePercentMaximum();
             }
-            controlFrame->setScaleSliderValue(newValue);
-            scaleValue = newValue / 50.0;
-            updateTransformations(angle, scaleValue, shearValue, translateValue);
+            controlFrame->setScalePercentValue(newValue);
+            scaleValue = newValue / 100.0;
+            updateTransformations(angle, scaleValue);
+            return true;
+        } else if (wheelEvent->modifiers() & Qt::ShiftModifier) {
+            const int currentValue = controlFrame->getRotateSliderValue();
+            const int delta = wheelEvent->angleDelta().y() > 0 ? -10 : 10;
+            int newValue = currentValue + delta;
+            if (newValue < controlFrame->getRotateSliderMinimum()) {
+                newValue = controlFrame->getRotateSliderMinimum();
+            }
+            if (newValue > controlFrame->getRotateSliderMaximum()) {
+                newValue = controlFrame->getRotateSliderMaximum();
+            }
+            controlFrame->setRotateSliderValue(newValue);
+            angle = newValue;
+            updateTransformations(angle, scaleValue);
             return true;
         }
     } else if (isViewTarget && event->type() == QEvent::MouseMove) {
@@ -522,4 +536,3 @@ void TabHandleIMG::exportImage(const QString &filePath)
 
     setContentModified(false);
 }
-
