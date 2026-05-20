@@ -257,6 +257,11 @@
         <source>100%</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposePSD/ui/ControlWidPSD.ui" line="64"/>
+        <source>导出</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ControlWidTXT</name>
@@ -1299,7 +1304,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <location filename="../MoreFunction/MoreFunction.ui" line="85"/>
-        <source>UniFileHub1.0</source>
+        <source>UniFileHub1.0.0511</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2249,35 +2254,63 @@ li.checked::marker { content: &quot;\2612&quot;; }
 <context>
     <name>TabHandlePSD</name>
     <message>
-        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="64"/>
-        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="72"/>
-        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="78"/>
-        <source>加载错误</source>
+        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="60"/>
+        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="68"/>
+        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="74"/>
+        <source>加载失败</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="64"/>
-        <source>无法打开文件: %1</source>
+        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="60"/>
+        <source>无法打开文件：%1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="72"/>
-        <source>不是有效的 PSD 文件。</source>
+        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="68"/>
+        <source>这不是有效的 PSD 文件。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="78"/>
+        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="74"/>
         <source>PSD 文件读取失败。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="104"/>
-        <source>信息</source>
+        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="101"/>
+        <source>提示</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="104"/>
-        <source>PSD文件仅支持查看，不支持编辑和保存。</source>
+        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="101"/>
+        <source>PSD 文件仅支持查看，不支持直接保存编辑内容。</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="160"/>
+        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="171"/>
+        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="184"/>
+        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="188"/>
+        <source>导出 PNG</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="160"/>
+        <source>当前没有可导出的 PSD 图像。</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="173"/>
+        <source>PNG 图片 (*.png)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="184"/>
+        <source>PNG 导出失败。</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="188"/>
+        <source>PNG 导出成功。</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

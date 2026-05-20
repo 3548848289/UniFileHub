@@ -38,6 +38,7 @@ protected:
 private:
     void fitItemInView(QGraphicsItem* item);
     void registerPSDHandler();
+    void exportToPng();
 
     QGraphicsView *view;
     QGraphicsScene *scene;

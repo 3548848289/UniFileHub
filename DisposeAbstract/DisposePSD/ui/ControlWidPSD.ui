@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>80</height>
+    <width>520</width>
+    <height>96</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -25,9 +25,6 @@
      </item>
      <item>
       <widget class="QSlider" name="zoomSlider">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
        <property name="minimum">
         <number>10</number>
        </property>
@@ -43,11 +40,14 @@
        <property name="value">
         <number>100</number>
        </property>
-       <property name="tickInterval">
-        <number>50</number>
+       <property name="orientation">
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="tickPosition">
-        <enum>QSlider::TicksBelow</enum>
+        <enum>QSlider::TickPosition::TicksBelow</enum>
+       </property>
+       <property name="tickInterval">
+        <number>50</number>
        </property>
       </widget>
      </item>
@@ -58,30 +58,21 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QPushButton" name="exportButton">
+       <property name="text">
+        <string>导出</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
   </layout>
  </widget>
  <resources/>
- <connections>
-  <connection>
-   <sender>zoomSlider</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>ControlWidPSD</receiver>
-   <slot>on_zoomSlider_valueChanged(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>200</x>
-     <y>40</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>200</x>
-     <y>40</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
  <slots>
+  <slot>on_exportButton_clicked()</slot>
   <slot>on_zoomSlider_valueChanged(int)</slot>
  </slots>
 </ui>

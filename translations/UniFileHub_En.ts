@@ -265,6 +265,11 @@
         <source>100%</source>
         <translation>100%</translation>
     </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposePSD/ui/ControlWidPSD.ui" line="64"/>
+        <source>导出</source>
+        <translation type="unfinished">Export</translation>
+    </message>
 </context>
 <context>
     <name>ControlWidTXT</name>
@@ -1318,8 +1323,12 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <location filename="../MoreFunction/MoreFunction.ui" line="85"/>
+        <source>UniFileHub1.0.0511</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>UniFileHub1.0</source>
-        <translation>UniFileHub 1.0</translation>
+        <translation type="vanished">UniFileHub 1.0</translation>
     </message>
 </context>
 <context>
@@ -2291,36 +2300,84 @@ Message</translation>
 <context>
     <name>TabHandlePSD</name>
     <message>
-        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="64"/>
-        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="72"/>
-        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="78"/>
         <source>加载错误</source>
-        <translation>Load Error</translation>
+        <translation type="vanished">Load Error</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="64"/>
         <source>无法打开文件: %1</source>
-        <translation>Unable to open file: %1</translation>
+        <translation type="vanished">Unable to open file: %1</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="72"/>
         <source>不是有效的 PSD 文件。</source>
-        <translation>Not a valid PSD file.</translation>
+        <translation type="vanished">Not a valid PSD file.</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="78"/>
+        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="60"/>
+        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="68"/>
+        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="74"/>
+        <source>加载失败</source>
+        <translation type="unfinished">Load Failed</translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="60"/>
+        <source>无法打开文件：%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="68"/>
+        <source>这不是有效的 PSD 文件。</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="74"/>
         <source>PSD 文件读取失败。</source>
         <translation>Failed to read PSD file.</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="104"/>
-        <source>信息</source>
-        <translation>Information</translation>
+        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="101"/>
+        <source>提示</source>
+        <translation type="unfinished">Info</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="104"/>
+        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="101"/>
+        <source>PSD 文件仅支持查看，不支持直接保存编辑内容。</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="160"/>
+        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="171"/>
+        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="184"/>
+        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="188"/>
+        <source>导出 PNG</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="160"/>
+        <source>当前没有可导出的 PSD 图像。</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="173"/>
+        <source>PNG 图片 (*.png)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="184"/>
+        <source>PNG 导出失败。</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposePSD/TabHandlePSD.cpp" line="188"/>
+        <source>PNG 导出成功。</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>信息</source>
+        <translation type="vanished">Information</translation>
+    </message>
+    <message>
         <source>PSD文件仅支持查看，不支持编辑和保存。</source>
-        <translation>PSD files are view-only. Editing and saving are not supported.</translation>
+        <translation type="vanished">PSD files are view-only. Editing and saving are not supported.</translation>
     </message>
 </context>
 <context>

@@ -23,9 +23,11 @@ private:
 
 signals:
     void zoomValueChanged(int value);
+    void exportRequested();
 
 private slots:
     void on_zoomSlider_valueChanged(int value);
+    void on_exportButton_clicked();
 };
 
 #endif // CONTROLWIDPSD_H

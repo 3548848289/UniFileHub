@@ -403,10 +403,26 @@ QByteArray TextTab::encodeContent(const QString &text) const
 void TextTab::onEncodingChanged(const QString& codecName)
 {
     setCurrentCodecName(codecName);
-    // 重新加载文件以应用新编码
-    if (!getCurrentFilePath().isEmpty()) {
-        loadFromFile(getCurrentFilePath());
+    const QString filePath = getCurrentFilePath();
+    if (filePath.isEmpty()) {
+        return;
     }
+
+    // 切换编码只应刷新显示，不应把当前编辑状态误判成“未保存”
+    const bool wasModified = isModified;
+    m_isSwitchingPreviewMode = true;
+
+    loadFromFile(filePath);
+
+    // textChanged 在切换标志位下会被忽略，所以这里手动补一次统计信息
+    int lineCount = textEdit->document()->blockCount();
+    int charCount = textEdit->toPlainText().length();
+    controlWidtxt->updateTextStatistics(lineCount, charCount);
+
+    QTimer::singleShot(0, this, [this, wasModified]() {
+        m_isSwitchingPreviewMode = false;
+        setContentModified(wasModified);
+    });
 }
 
 void TextTab::onMdPreviewToggled(bool enabled)
@@ -458,5 +474,4 @@ void TextTab::onHtmlPreviewToggled(bool enabled)
         setContentModified(wasModified);
     });
 }
-
 

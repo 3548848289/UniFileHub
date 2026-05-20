@@ -20,8 +20,8 @@ void BreadcrumbNodeHelper::populateChildren(BreadcrumbNode *node, bool showFiles
         QDir dir(node->fullPath);
         if (!dir.exists()) return;
 
-        QDir::Filters filter = QDir::Dirs | QDir::NoDotAndDotDot;
-        if (showFiles) filter |= QDir::Files;
+        QDir::Filters filter = QDir::Dirs | QDir::NoDotAndDotDot | QDir::Hidden | QDir::System;
+        if (showFiles) filter |= QDir::Files | QDir::Hidden | QDir::System;
 
         QFileInfoList entries = dir.entryInfoList(filter, QDir::Name | QDir::DirsFirst);
         for (const QFileInfo& f : entries) {

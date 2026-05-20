@@ -83,6 +83,7 @@ void QBreadcrumbBar::parsePath(const QString& pathText) {
     p.replace("\\", "/");
     p = QDir::cleanPath(p);
 
+
     if (!p.isEmpty() && p != "/") { // / 已经是根了
         QStringList parts = p.split("/", Qt::SkipEmptyParts);
         QString pathAccumulate = "/";

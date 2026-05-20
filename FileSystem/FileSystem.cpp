@@ -13,8 +13,9 @@ FileSystem::FileSystem(QWidget *parent)
         userDir = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
 
     QDir dir(userDir);
-    QString currentDir = dir.absolutePath();
+    currentDir = dir.absolutePath();
 
+    fileSystemModel->setFilter(QDir::AllDirs | QDir::Files | QDir::NoDotAndDotDot | QDir::Hidden | QDir::System);
     fileSystemModel->setRootPath(currentDir);
     fileSystemModel->setReadOnly(false); // 允许修改文件系统
     
@@ -171,13 +172,16 @@ void FileSystem::onSelectionChanged(const QItemSelection &selected, const QItemS
 void FileSystem::changePath(const QString& path){
     QFileInfo fileInfo(path);
     if (fileInfo.exists() && fileInfo.isDir()) {
-        ui->treeView->setRootIndex(fileSystemModel->index(path));
+        QModelIndex newRootIndex = fileSystemModel->setRootPath(path);
+        ui->treeView->setRootIndex(newRootIndex);
         // 更新面包屑路径
         breadcrumb->setPath(path);
         // 更新当前目录记录
         currentDir = path;
     } else {
-        QMessageBox::warning(this, "", "改路径不是有效路径，请重新输入");
+        qDebug() << "FileSystem::changePath currentDir: " << currentDir;
+        QMessageBox::warning(this, "", "该路径不是有效路径，请重新输入");
+        breadcrumb->setPath(currentDir);
     }
 }
 
