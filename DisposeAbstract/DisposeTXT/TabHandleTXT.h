@@ -52,6 +52,7 @@ private:
     
     // 辅助函数：将字符串根据当前编码转换为字节数组
     QByteArray encodeContent(const QString &text) const;
+    void updateTextStatistics();
 
 public:
     bool eventFilter(QObject *obj, QEvent *event) override;
@@ -74,6 +75,7 @@ public slots:
     
     // 处理HTML预览模式切换
     void onHtmlPreviewToggled(bool enabled);
+    void onRefreshRequested();
     
     // 右键菜单槽函数
 

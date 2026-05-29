@@ -31,6 +31,7 @@ ControlWidTXT::ControlWidTXT(QWidget *parent) :
     connect(ui->fontSizeDisplayLabel, &ClickableLabel::clicked, this, &ControlWidTXT::onFontSizeLabelClicked);
     connect(ui->mdPreviewCheckBox, &QCheckBox::toggled, this, &ControlWidTXT::mdPreviewToggled);
     connect(ui->htmlPreviewCheckBox, &QCheckBox::toggled, this, &ControlWidTXT::htmlPreviewToggled);
+    connect(ui->RefreshBtn, &QPushButton::clicked, this, &ControlWidTXT::refreshRequested);
 }
 
 ControlWidTXT::~ControlWidTXT()

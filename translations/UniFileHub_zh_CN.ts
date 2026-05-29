@@ -291,17 +291,22 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeTXT/ControlWidTXT.ui" line="75"/>
+        <location filename="../DisposeAbstract/DisposeTXT/ControlWidTXT.ui" line="83"/>
+        <source>刷新</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeTXT/ControlWidTXT.ui" line="118"/>
         <source>HTML预览模式</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeTXT/ControlWidTXT.ui" line="82"/>
+        <location filename="../DisposeAbstract/DisposeTXT/ControlWidTXT.ui" line="125"/>
         <source>md文件预览模式</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeTXT/ControlWidTXT.ui" line="97"/>
+        <location filename="../DisposeAbstract/DisposeTXT/ControlWidTXT.ui" line="140"/>
         <source>文本摘录</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1304,7 +1309,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <location filename="../MoreFunction/MoreFunction.ui" line="85"/>
-        <source>UniFileHub1.0.0511</source>
+        <source>UniFileHub1.0.0521</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2527,13 +2532,23 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeTXT/TabHandleTXT.cpp" line="288"/>
+        <location filename="../DisposeAbstract/DisposeTXT/TabHandleTXT.cpp" line="290"/>
         <source>查找</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeTXT/TabHandleTXT.cpp" line="288"/>
+        <location filename="../DisposeAbstract/DisposeTXT/TabHandleTXT.cpp" line="290"/>
         <source>找不到此单词</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeTXT/TabHandleTXT.cpp" line="495"/>
+        <source>刷新文本</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeTXT/TabHandleTXT.cpp" line="496"/>
+        <source>当前有未保存修改，刷新会用磁盘内容覆盖当前文本。是否继续？</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

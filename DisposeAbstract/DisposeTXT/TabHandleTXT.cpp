@@ -11,6 +11,7 @@
 #include <QFileDialog>
 #include <QSignalBlocker>
 #include <QTimer>
+#include <QTextCursor>
 
 // TextTab 实现
 TextTab::TextTab(const QString &filePath, QWidget *parent)  : TabAbstract(filePath, parent), m_currentCodecName("UTF-8"), m_isSwitchingPreviewMode(false)
@@ -109,6 +110,7 @@ TextTab::TextTab(const QString &filePath, QWidget *parent)  : TabAbstract(filePa
     
     // 连接HTML预览模式切换信号
     connect(controlWidtxt, &ControlWidTXT::htmlPreviewToggled, this, &TextTab::onHtmlPreviewToggled);
+    connect(controlWidtxt, &ControlWidTXT::refreshRequested, this, &TextTab::onRefreshRequested);
 
     // 连接Tab缩进字符数变化信号
     connect(controlWidtxt, &ControlWidTXT::tabIndentChanged, this, [this](int indent) {
@@ -125,9 +127,7 @@ TextTab::TextTab(const QString &filePath, QWidget *parent)  : TabAbstract(filePa
     });
 
     // 初始化文本统计信息
-    int lineCount = textEdit->document()->blockCount();
-    int charCount = textEdit->toPlainText().length();
-    controlWidtxt->updateTextStatistics(lineCount, charCount);
+    updateTextStatistics();
 
     // 初始化编码为UTF-8
     setCurrentCodecName("UTF-8");
@@ -196,6 +196,7 @@ void TextTab::loadFromFile(const QString &fileName)
 
     setContent(text);
     m_originalPlainText = text;
+    updateTextStatistics();
     setContentModified(false);
 }
 
@@ -224,6 +225,7 @@ void TextTab::loadFromInternet(const QByteArray &content)
     qDebug() << "Converted text:" << text;
     setContent(text);
     m_originalPlainText = text;
+    updateTextStatistics();
 }
 
 void TextTab::findNext(const QString &str, Qt::CaseSensitivity cs)
@@ -415,9 +417,7 @@ void TextTab::onEncodingChanged(const QString& codecName)
     loadFromFile(filePath);
 
     // textChanged 在切换标志位下会被忽略，所以这里手动补一次统计信息
-    int lineCount = textEdit->document()->blockCount();
-    int charCount = textEdit->toPlainText().length();
-    controlWidtxt->updateTextStatistics(lineCount, charCount);
+    updateTextStatistics();
 
     QTimer::singleShot(0, this, [this, wasModified]() {
         m_isSwitchingPreviewMode = false;
@@ -475,3 +475,59 @@ void TextTab::onHtmlPreviewToggled(bool enabled)
     });
 }
 
+void TextTab::updateTextStatistics()
+{
+    const int lineCount = textEdit->document()->blockCount();
+    const int charCount = textEdit->toPlainText().length();
+    controlWidtxt->updateTextStatistics(lineCount, charCount);
+}
+
+void TextTab::onRefreshRequested()
+{
+    const QString filePath = getCurrentFilePath();
+    if (filePath.isEmpty()) {
+        return;
+    }
+
+    if (isModified) {
+        const auto reply = QMessageBox::question(
+            this,
+            tr("刷新文本"),
+            tr("当前有未保存修改，刷新会用磁盘内容覆盖当前文本。是否继续？"),
+            QMessageBox::Yes | QMessageBox::No,
+            QMessageBox::No
+        );
+        if (reply != QMessageBox::Yes) {
+            return;
+        }
+    }
+
+    const QTextCursor previousCursor = textEdit->textCursor();
+    const int previousScrollValue = textEdit->verticalScrollBar()->value();
+    const int previousHorizontalScrollValue = textEdit->horizontalScrollBar()->value();
+    const bool wasModified = isModified;
+
+    m_isSwitchingPreviewMode = true;
+    loadFromFile(filePath);
+
+    QTextCursor restoredCursor = textEdit->textCursor();
+    const int documentLength = textEdit->document()->characterCount();
+    const int selectionStart = previousCursor.selectionStart();
+    const int selectionEnd = previousCursor.selectionEnd();
+    const bool hadSelection = previousCursor.hasSelection();
+
+    restoredCursor.setPosition(qMin(previousCursor.position(), documentLength - 1));
+    if (hadSelection) {
+        restoredCursor.setPosition(qMin(selectionStart, documentLength - 1));
+        restoredCursor.setPosition(qMin(selectionEnd, documentLength - 1), QTextCursor::KeepAnchor);
+    }
+    textEdit->setTextCursor(restoredCursor);
+
+    textEdit->verticalScrollBar()->setValue(qMin(previousScrollValue, textEdit->verticalScrollBar()->maximum()));
+    textEdit->horizontalScrollBar()->setValue(qMin(previousHorizontalScrollValue, textEdit->horizontalScrollBar()->maximum()));
+
+    QTimer::singleShot(0, this, [this, wasModified]() {
+        m_isSwitchingPreviewMode = false;
+        setContentModified(wasModified && isModified);
+    });
+}
