@@ -1347,7 +1347,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <location filename="../MoreFunction/MoreFunction.ui" line="85"/>
-        <source>UniFileHub1.0.0521</source>
+        <source>UniFileHub1.0.0530</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

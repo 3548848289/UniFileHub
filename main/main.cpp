@@ -213,6 +213,7 @@ QSystemTrayIcon* createTray(MainWindow *w, QApplication &app) {
 
 
 int main(int argc, char *argv[]) {
+
     QApplication app(argc, argv);
     installTranslators(app);
 
