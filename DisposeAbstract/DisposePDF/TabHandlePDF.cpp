@@ -1,45 +1,54 @@
 #include "TabHandlePDF.h"
 #include "ControlWidPDF.h"
-#include <QDir>
+
 #include <QBuffer>
-#include <QSplitter>
 #include <QPdfPageNavigator>
 #include <QTimer>
 
 TabHandlePDF::TabHandlePDF(const QString &filePath, QWidget *parent)
-    : TabAbstract(filePath, parent),
-    isShowControl(false)
+    : TabAbstract(filePath, parent)
+    , pdfDoc(new QPdfDocument(this))
+    , searchModel(new QPdfSearchModel(this))
+    , pdfView(new QPdfView(this))
+    , mainLayout(new QVBoxLayout(this))
+    , isShowControl(false)
+    , m_zoomPercentage(100)
+    , m_currentSearchResultIndex(-1)
+    , controlWidPDF(new ControlWidPDF(this))
+    , splitter(new QSplitter(Qt::Vertical, this))
 {
-    mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(0, 0, 0, 0);
 
-    pdfDoc = new QPdfDocument(this);
-    pdfView = new QPdfView(this);
     pdfView->setDocument(pdfDoc);
+    pdfView->setSearchModel(searchModel);
     pdfView->setPageMode(QPdfView::PageMode::MultiPage);
-    pdfView->setZoomMode(QPdfView::ZoomMode::FitInView);
+    pdfView->setZoomMode(QPdfView::ZoomMode::FitToWidth);
     pdfView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    searchModel->setDocument(pdfDoc);
 
-    // 创建控制窗口
-    controlWidPDF = new ControlWidPDF(this);
-
-    // 创建分割器并添加PDF视图和控制窗口
-    splitter = new QSplitter(Qt::Vertical, this);
     splitter->addWidget(pdfView);
     splitter->addWidget(controlWidPDF);
-    splitter->setSizes({800, 60});
+    splitter->setSizes({800, 92});
 
     mainLayout->addWidget(splitter);
-    mainLayout->setContentsMargins(0,0,0,0);
+    mainLayout->setContentsMargins(0, 0, 0, 0);
 
     setContentModified(false);
 
-    // 连接信号槽
     connect(controlWidPDF, &ControlWidPDF::prevPageRequested, this, &TabHandlePDF::goToPrevPage);
     connect(controlWidPDF, &ControlWidPDF::nextPageRequested, this, &TabHandlePDF::goToNextPage);
     connect(controlWidPDF, &ControlWidPDF::pageChanged, this, &TabHandlePDF::goToPage);
-    connect(controlWidPDF, &ControlWidPDF::zoomModeChanged, this, &TabHandlePDF::changeZoomMode);
+    connect(controlWidPDF, &ControlWidPDF::searchTextChanged, this, &TabHandlePDF::updateSearchText);
+    connect(controlWidPDF, &ControlWidPDF::searchPreviousRequested, this, &TabHandlePDF::findPreviousSearchResult);
+    connect(controlWidPDF, &ControlWidPDF::searchNextRequested, this, &TabHandlePDF::findNextSearchResult);
+    connect(controlWidPDF, &ControlWidPDF::fitToWidthChanged, this, &TabHandlePDF::changeFitToWidth);
+    connect(controlWidPDF, &ControlWidPDF::zoomValueChanged, this, &TabHandlePDF::changeZoomValue);
     connect(controlWidPDF, &ControlWidPDF::scrollModeChanged, this, &TabHandlePDF::changeScrollMode);
+    connect(searchModel, &QPdfSearchModel::countChanged, this, &TabHandlePDF::updateSearchResultInfo);
+    connect(searchModel, &QAbstractItemModel::modelReset, this, &TabHandlePDF::updateSearchResultInfo);
+    connect(pdfView->pageNavigator(), &QPdfPageNavigator::currentPageChanged, this, [this](int page) {
+        controlWidPDF->setCurrentPage(page + 1);
+    });
 
     if (!filePath.isEmpty()) {
         loadFromFile(filePath);
@@ -58,7 +67,7 @@ QString TabHandlePDF::getContent() const
 
 void TabHandlePDF::loadFromFile(const QString &fileName)
 {
-    QPdfDocument::Error err = pdfDoc->load(fileName);
+    const QPdfDocument::Error err = pdfDoc->load(fileName);
     if (err != QPdfDocument::Error::None) {
         QMessageBox::warning(this, tr("打开失败"),
                              tr("无法加载 PDF 文件：%1").arg(fileName));
@@ -66,21 +75,22 @@ void TabHandlePDF::loadFromFile(const QString &fileName)
     }
 
     pdfView->setPageMode(QPdfView::PageMode::SinglePage);
-    pdfView->setZoomMode(QPdfView::ZoomMode::FitInView);
 
-    // 更新控制窗口的页码信息
-    int totalPages = pdfDoc->pageCount();
+    const int totalPages = pdfDoc->pageCount();
     controlWidPDF->setTotalPages(totalPages);
     controlWidPDF->setCurrentPage(1);
-    
-    // 使用QTimer延迟执行布局调整，确保PDF内容完全加载
+
+    m_zoomPercentage = 100;
+    resetSearch();
+    controlWidPDF->setZoomPercentage(m_zoomPercentage);
+    controlWidPDF->setFitToWidthChecked(true);
+
     QTimer::singleShot(100, this, [this]() {
-        pdfView->setZoomMode(QPdfView::ZoomMode::FitToWidth);
+        changeFitToWidth(true);
         pdfView->resize(pdfView->size());
         pdfView->update();
     });
 }
-
 
 void TabHandlePDF::loadFromInternet(const QByteArray &content)
 {
@@ -99,22 +109,22 @@ void TabHandlePDF::loadFromInternet(const QByteArray &content)
     }
 
     pdfView->setPageMode(QPdfView::PageMode::SinglePage);
-    pdfView->setZoomMode(QPdfView::ZoomMode::FitInView);
 
-    // 更新控制窗口的页码信息
-    int totalPages = pdfDoc->pageCount();
+    const int totalPages = pdfDoc->pageCount();
     controlWidPDF->setTotalPages(totalPages);
     controlWidPDF->setCurrentPage(1);
-    
-    // 使用QTimer延迟执行布局调整，确保PDF内容完全加载
+
+    m_zoomPercentage = 100;
+    resetSearch();
+    controlWidPDF->setZoomPercentage(m_zoomPercentage);
+    controlWidPDF->setFitToWidthChecked(true);
+
     QTimer::singleShot(100, this, [this]() {
-        pdfView->setZoomMode(QPdfView::ZoomMode::FitToWidth);
+        changeFitToWidth(true);
         pdfView->resize(pdfView->size());
         pdfView->update();
     });
 }
-
-
 
 void TabHandlePDF::saveToFile(const QString &fileName)
 {
@@ -127,71 +137,148 @@ void TabHandlePDF::ControlWidget(bool judge)
     controlWidPDF->setVisible(judge);
 }
 
-// 跳转到指定页码
 void TabHandlePDF::goToPage(int pageNumber)
 {
-    if (pageNumber < 1 || pageNumber > pdfDoc->pageCount())
+    if (pageNumber < 1 || pageNumber > pdfDoc->pageCount()) {
         return;
+    }
 
     controlWidPDF->setCurrentPage(pageNumber);
 
     if (pdfView->pageNavigator()) {
-        // QPdfPageNavigator使用0-based索引，而我们的界面使用1-based页码
-        pdfView->pageNavigator()->jump(pageNumber - 1, QPointF(0,0), 1.0);
+        pdfView->pageNavigator()->jump(pageNumber - 1, QPointF(0, 0), 1.0);
     }
 }
 
-
-
-// 上一页
 void TabHandlePDF::goToPrevPage()
 {
-    int current = controlWidPDF->getCurrentPage();
-    if (current > 1)
+    const int current = controlWidPDF->getCurrentPage();
+    if (current > 1) {
         goToPage(current - 1);
+    }
 }
 
-// 下一页
 void TabHandlePDF::goToNextPage()
 {
-    int current = controlWidPDF->getCurrentPage();
-    int total = pdfDoc->pageCount();
-    if (current < total)
+    const int current = controlWidPDF->getCurrentPage();
+    const int total = pdfDoc->pageCount();
+    if (current < total) {
         goToPage(current + 1);
+    }
 }
 
-
-// 改变缩放模式
-void TabHandlePDF::changeZoomMode(const QString &mode)
+void TabHandlePDF::changeFitToWidth(bool enabled)
 {
-    if (mode == "适应窗口")
-    {
-        pdfView->setZoomMode(QPdfView::ZoomMode::FitInView);
-    }
-    else if (mode == "适应宽度")
-    {
+    if (enabled) {
         pdfView->setZoomMode(QPdfView::ZoomMode::FitToWidth);
+        pdfView->update();
+        return;
     }
-    else if (mode.endsWith("%"))
-    {
-        // 处理百分比缩放
-        pdfView->setZoomMode(QPdfView::ZoomMode::Custom);
-        int zoomPercentage = mode.left(mode.length() - 1).toInt();
-        pdfView->setZoomFactor(zoomPercentage / 100.0);
-    }
+
+    changeZoomValue(m_zoomPercentage);
 }
 
-// 改变滚动模式
+void TabHandlePDF::changeZoomValue(int zoomPercentage)
+{
+    if (zoomPercentage < 50) {
+        zoomPercentage = 50;
+    } else if (zoomPercentage > 200) {
+        zoomPercentage = 200;
+    }
+
+    m_zoomPercentage = zoomPercentage;
+    pdfView->setZoomMode(QPdfView::ZoomMode::Custom);
+    pdfView->setZoomFactor(m_zoomPercentage / 100.0);
+    pdfView->update();
+}
+
 void TabHandlePDF::changeScrollMode(bool enabled)
 {
-    if (enabled)
-    {
-        // 滚动模式：多页显示
+    if (enabled) {
         pdfView->setPageMode(QPdfView::PageMode::MultiPage);
-    }
-    else
-    {
-        // 单页模式：一次显示一页
+    } else {
         pdfView->setPageMode(QPdfView::PageMode::SinglePage);
     }
+}
+
+void TabHandlePDF::updateSearchText(const QString &text)
+{
+    m_currentSearchResultIndex = -1;
+    pdfView->setCurrentSearchResultIndex(-1);
+    searchModel->setSearchString(text.trimmed());
+    controlWidPDF->setSearchResultInfo(-1, 0);
+}
+
+void TabHandlePDF::findPreviousSearchResult()
+{
+    const int totalResults = searchModel->rowCount({});
+    if (totalResults <= 0) {
+        return;
+    }
+
+    int previousIndex = m_currentSearchResultIndex - 1;
+    if (m_currentSearchResultIndex < 0 || previousIndex < 0) {
+        previousIndex = totalResults - 1;
+    }
+
+    goToSearchResult(previousIndex);
+}
+
+void TabHandlePDF::findNextSearchResult()
+{
+    const int totalResults = searchModel->rowCount({});
+    if (totalResults <= 0) {
+        return;
+    }
+
+    int nextIndex = m_currentSearchResultIndex + 1;
+    if (m_currentSearchResultIndex < 0 || nextIndex >= totalResults) {
+        nextIndex = 0;
+    }
+
+    goToSearchResult(nextIndex);
+}
+
+void TabHandlePDF::updateSearchResultInfo()
+{
+    const int totalResults = searchModel->rowCount({});
+    if (totalResults <= 0) {
+        m_currentSearchResultIndex = -1;
+    } else if (m_currentSearchResultIndex >= totalResults) {
+        m_currentSearchResultIndex = totalResults - 1;
+    }
+
+    controlWidPDF->setSearchResultInfo(m_currentSearchResultIndex, totalResults);
+}
+
+void TabHandlePDF::resetSearch()
+{
+    m_currentSearchResultIndex = -1;
+    searchModel->setSearchString(QString());
+    pdfView->setCurrentSearchResultIndex(-1);
+    controlWidPDF->clearSearch();
+}
+
+void TabHandlePDF::goToSearchResult(int resultIndex)
+{
+    const int totalResults = searchModel->rowCount({});
+    if (resultIndex < 0 || resultIndex >= totalResults) {
+        return;
+    }
+
+    const QModelIndex index = searchModel->index(resultIndex, 0);
+    if (!index.isValid()) {
+        return;
+    }
+
+    const int page = index.data(int(QPdfSearchModel::Role::Page)).toInt();
+    const QPointF location = index.data(int(QPdfSearchModel::Role::Location)).toPointF();
+
+    if (pdfView->pageNavigator()) {
+        pdfView->pageNavigator()->jump(page, location);
+    }
+
+    pdfView->setCurrentSearchResultIndex(resultIndex);
+    m_currentSearchResultIndex = resultIndex;
+    controlWidPDF->setSearchResultInfo(m_currentSearchResultIndex, totalResults);
 }

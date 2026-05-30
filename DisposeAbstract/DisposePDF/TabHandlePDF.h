@@ -2,14 +2,13 @@
 #define TABHANDLEPDF_H
 
 #include "../../main/include/TabAbstract.h"
-#include <QPdfDocument>
-#include <QPdfView>
-#include <QVBoxLayout>
-#include <QFile>
 #include <QMessageBox>
+#include <QPdfDocument>
+#include <QPdfSearchModel>
+#include <QPdfView>
 #include <QSplitter>
+#include <QVBoxLayout>
 
-// 前向声明
 class ControlWidPDF;
 
 class TabHandlePDF : public TabAbstract
@@ -19,30 +18,36 @@ class TabHandlePDF : public TabAbstract
 public:
     explicit TabHandlePDF(const QString &filePath, QWidget *parent = nullptr);
 
-    // 必须实现 TabAbstract 的纯虚函数
-    void setContent(const QString &text) override;            // PDF 无需编辑，空实现
-    QString getContent() const override;                      // 返回空
-    void loadFromFile(const QString &fileName) override;       // 加载本地文件
-    void loadFromInternet(const QByteArray &content) override; // 加载网络内容
-    void saveToFile(const QString &fileName) override;         // 空实现
+    void setContent(const QString &text) override;
+    QString getContent() const override;
+    void loadFromFile(const QString &fileName) override;
+    void loadFromInternet(const QByteArray &content) override;
+    void saveToFile(const QString &fileName) override;
     void ControlWidget(bool judge) override;
 
 private slots:
-    // 翻页相关的槽函数
     void goToPrevPage();
     void goToNextPage();
     void goToPage(int pageNumber);
-    void changeZoomMode(const QString &mode);
-    // 滚动模式变化槽函数
+    void changeFitToWidth(bool enabled);
+    void changeZoomValue(int zoomPercentage);
     void changeScrollMode(bool enabled);
+    void updateSearchText(const QString &text);
+    void findPreviousSearchResult();
+    void findNextSearchResult();
+    void updateSearchResultInfo();
 
 private:
+    void resetSearch();
+    void goToSearchResult(int resultIndex);
+
     QPdfDocument *pdfDoc;
+    QPdfSearchModel *searchModel;
     QPdfView *pdfView;
     QVBoxLayout *mainLayout;
     bool isShowControl;
-
-    // 新增成员变量
+    int m_zoomPercentage;
+    int m_currentSearchResultIndex;
     ControlWidPDF *controlWidPDF;
     QSplitter *splitter;
 };

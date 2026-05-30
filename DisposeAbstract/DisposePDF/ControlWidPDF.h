@@ -14,37 +14,41 @@ class ControlWidPDF : public QWidget
 public:
     explicit ControlWidPDF(QWidget *parent = nullptr);
     ~ControlWidPDF();
-    
-    // 设置总页数
+
+    void clearSearch();
     void setTotalPages(int totalPages);
-    // 设置当前页码
     void setCurrentPage(int pageNumber);
-    // 获取当前页码
     int getCurrentPage() const;
+    void setFitToWidthChecked(bool checked);
+    void setZoomPercentage(int zoomPercentage);
+    void setSearchResultInfo(int currentResultIndex, int totalResults);
 
 signals:
-    // 翻页信号
     void prevPageRequested();
     void nextPageRequested();
-    // 页码跳转信号
     void pageChanged(int pageNumber);
-    // 缩放模式变化信号
-    void zoomModeChanged(const QString &mode);
-    // 滚动模式变化信号
+    void searchTextChanged(const QString &text);
+    void searchPreviousRequested();
+    void searchNextRequested();
+    void fitToWidthChanged(bool checked);
+    void zoomValueChanged(int value);
     void scrollModeChanged(bool enabled);
 
 private slots:
-    // 按钮点击槽函数
     void on_prevPageButton_clicked();
     void on_nextPageButton_clicked();
-    // 页码输入框变化槽函数
     void on_pageLineEdit_editingFinished();
-    // 缩放模式变化槽函数
-    void on_zoomComboBox_currentTextChanged(const QString &arg1);
-    // 滚动模式复选框状态变化槽函数
+    void on_searchLineEdit_textChanged(const QString &text);
+    void on_searchLineEdit_returnPressed();
+    void on_searchPrevButton_clicked();
+    void on_searchNextButton_clicked();
+    void on_chkFitToCheckBox_toggled(bool checked);
+    void on_zoomSlider_valueChanged(int value);
     void on_scrollModeCheckBox_stateChanged(int state);
 
 private:
+    void updateZoomDisplay(int zoomPercentage);
+
     Ui::ControlWidPDF *ui;
     int m_totalPages;
 };

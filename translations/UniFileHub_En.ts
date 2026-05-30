@@ -182,70 +182,89 @@
         <translation>PDF Control</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposePDF/ControlWidPDF.ui" line="20"/>
+        <location filename="../DisposeAbstract/DisposePDF/ControlWidPDF.ui" line="37"/>
+        <source>查找：</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposePDF/ControlWidPDF.ui" line="44"/>
+        <source>输入要查找的文本</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposePDF/ControlWidPDF.ui" line="60"/>
+        <source>上一个</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposePDF/ControlWidPDF.ui" line="73"/>
+        <source>下一个</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposePDF/ControlWidPDF.ui" line="89"/>
+        <source>0/0</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposePDF/ControlWidPDF.ui" line="112"/>
         <source>上一页</source>
         <translation>Previous Page</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposePDF/ControlWidPDF.ui" line="27"/>
+        <location filename="../DisposeAbstract/DisposePDF/ControlWidPDF.ui" line="131"/>
         <source>下一页</source>
         <translation>Next Page</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposePDF/ControlWidPDF.ui" line="34"/>
+        <location filename="../DisposeAbstract/DisposePDF/ControlWidPDF.ui" line="138"/>
         <source>页码：</source>
         <translation>Page:</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposePDF/ControlWidPDF.ui" line="50"/>
+        <location filename="../DisposeAbstract/DisposePDF/ControlWidPDF.ui" line="154"/>
         <source>1</source>
         <translation>1</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposePDF/ControlWidPDF.ui" line="57"/>
+        <location filename="../DisposeAbstract/DisposePDF/ControlWidPDF.ui" line="161"/>
         <source>/ 0</source>
         <translation>/ 0</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposePDF/ControlWidPDF.ui" line="77"/>
+        <location filename="../DisposeAbstract/DisposePDF/ControlWidPDF.ui" line="181"/>
         <source>滚动模式</source>
         <translation>Scroll Mode</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposePDF/ControlWidPDF.ui" line="84"/>
-        <location filename="../DisposeAbstract/DisposePDF/ControlWidPDF.ui" line="88"/>
+        <location filename="../DisposeAbstract/DisposePDF/ControlWidPDF.ui" line="188"/>
         <source>适应宽度</source>
         <translation>Fit Width</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposePDF/ControlWidPDF.ui" line="93"/>
         <source>50%</source>
-        <translation>50%</translation>
+        <translation type="vanished">50%</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposePDF/ControlWidPDF.ui" line="98"/>
         <source>75%</source>
-        <translation>75%</translation>
+        <translation type="vanished">75%</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposePDF/ControlWidPDF.ui" line="103"/>
+        <location filename="../DisposeAbstract/DisposePDF/ControlWidPDF.ui" line="202"/>
         <source>100%</source>
         <translation>100%</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposePDF/ControlWidPDF.ui" line="108"/>
         <source>125%</source>
-        <translation>125%</translation>
+        <translation type="vanished">125%</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposePDF/ControlWidPDF.ui" line="113"/>
         <source>150%</source>
-        <translation>150%</translation>
+        <translation type="vanished">150%</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposePDF/ControlWidPDF.ui" line="118"/>
         <source>200%</source>
-        <translation>200%</translation>
+        <translation type="vanished">200%</translation>
     </message>
 </context>
 <context>
@@ -2276,28 +2295,28 @@ Message</translation>
 <context>
     <name>TabHandlePDF</name>
     <message>
-        <location filename="../DisposeAbstract/DisposePDF/TabHandlePDF.cpp" line="63"/>
+        <location filename="../DisposeAbstract/DisposePDF/TabHandlePDF.cpp" line="72"/>
         <source>打开失败</source>
         <translation>Open Failed</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposePDF/TabHandlePDF.cpp" line="64"/>
+        <location filename="../DisposeAbstract/DisposePDF/TabHandlePDF.cpp" line="73"/>
         <source>无法加载 PDF 文件：%1</source>
         <translation>Unable to load PDF file: %1</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposePDF/TabHandlePDF.cpp" line="90"/>
-        <location filename="../DisposeAbstract/DisposePDF/TabHandlePDF.cpp" line="97"/>
+        <location filename="../DisposeAbstract/DisposePDF/TabHandlePDF.cpp" line="100"/>
+        <location filename="../DisposeAbstract/DisposePDF/TabHandlePDF.cpp" line="107"/>
         <source>加载失败</source>
         <translation>Load Failed</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposePDF/TabHandlePDF.cpp" line="90"/>
+        <location filename="../DisposeAbstract/DisposePDF/TabHandlePDF.cpp" line="100"/>
         <source>无法打开内存缓冲区</source>
         <translation>Unable to open memory buffer</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposePDF/TabHandlePDF.cpp" line="97"/>
+        <location filename="../DisposeAbstract/DisposePDF/TabHandlePDF.cpp" line="107"/>
         <source>无法加载 PDF 内容</source>
         <translation>Unable to load PDF content</translation>
     </message>

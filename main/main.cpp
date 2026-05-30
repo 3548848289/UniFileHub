@@ -23,11 +23,12 @@
 
 namespace {
 
+//先强制中文
 QString appTranslationBaseName()
 {
     return QLocale::system().language() == QLocale::Chinese
                ? "UniFileHub_zh_CN"
-               : "UniFileHub_En";
+               : "UniFileHub_zh_CN";
 }
 
 QString appTranslationDirectory()
