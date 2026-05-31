@@ -1,100 +1,362 @@
-UniFileHub 使用指南
-这是一款集成了文件管理、日程备忘、在线文档、邮件服务、手写绘图、剪贴板等多功能的软件，帮助用户高效管理和处理日常任务。
+# UniFileHub
 
-功能概览
+> 一款集文件管理、个人网盘、在线文档预览、邮件服务、备忘任务、剪贴板历史与绘图工具于一体的数字工作空间平台。
 
-1. 文件系统
-	文件系统模块支持多种类型文件的查看与操作，为用户提供便捷的文档处理能力：
-	1.1 文本类文件
-		- 普通文本文件（txt、ini等）：支持临时摘录文本、更改文本编码、Ctrl+F 查找功能。
-		- 代码与标记文件（.cpp、.md等）：提供语法高亮功能，支持HTML和Markdown预览模式。
-	1.2 表格类文件
-		- CSV文件：支持增加/删除行列，具备Ctrl+F查找功能。
-		- Xlsx文件：支持打开与查看，编辑功能正在完善中。
-	1.3 媒体类文件
-		- 图片文件（png、jpg、svg等）：支持水印添加，可通过右键调整水印大小与位置。
-		- 视频/音乐文件：支持播放功能（目前播放时可能会有轻微卡顿）。
-	1.4 专业类文件
-		- PSD文件：支持打开与查看。
-		- AI文件：通过PDF格式打开查看。
-		- PDF文件：支持打开与查看。
-		- Xmind文件：提取内部缩略图进行预览。
+---
 
-2. 文件资源管理器与内容预览区
-	提供直观的文件管理界面，方便用户快速访问和操作文件：
-	2.1 文件树结构
-		- 右侧文件树结构清晰直观，支持常用文件操作。
-		- 右键文件可新建备忘标签，快速关联任务。
-	2.2 文件操作
-		- 支持备份文件，并查看对应的历史记录。
-	2.3 内容预览
-		- 内容预览区可开启1×1至2×2布局，方便用户同时查看与比较多个文件。
+# 🇨🇳 中文
 
-3. 文件备份
-	帮助用户防止数据丢失，提供安全可靠的文件存储方案：
-	3.1 备份功能
-		- 自定义备份文件名与保存路径。
-		- 当源文件丢失时可通过备份还原。
-	3.2 云端存储
-		- 支持将备份文件上传至云端，便于多设备使用。
+## 🚀 项目简介
 
-4. 备忘标签
-	便于用户记录日常事项与任务，提供灵活的提醒功能：
-	4.1 标签管理
-		- 可针对每个文件设置标签、到期时间、详细信息。
-	4.2 提醒功能
-		- 提供多种提醒方式（弹出框、邮件提醒）。
-		- 可设置提醒的提前时间与提醒间隔，灵活控制通知频率。
+UniFileHub 是一款多功能一体化文件与效率管理工具，旨在为用户提供统一、高效的数字工作空间。
 
-5. 邮件服务
-	集成邮件收发功能，简化工作沟通流程：
-	5.1 邮件发送
-		- 支持快速分发邮件。
-	5.2 服务器配置
-		- 需要在「设置 → 邮件服务」中配置服务器：
-		  - 服务器地址：smtp.qq.com
-		  - 用户名：发送者邮箱账号
-		  - 密码：SMTP 服务专用密码
-		  - 端口：465
-	5.3 限制说明
-		- QQ 邮箱单封最大附件为 50M，每日总容量上限为 200M。
+项目集成了文件管理、个人网盘、在线文档预览、备忘任务、邮件服务、剪贴板历史以及绘图工具等功能，将分散的工作流程整合到一个平台中，帮助用户更高效地管理文件与日常任务。
 
-6. 剪贴板
-	提供历史管理与搜索功能，帮助用户高效复用已复制的内容：
-	6.1 内容记录
-		- 自动记录用户复制的内容，包括文本、图片、文件路径、链接等多种类型。
-	6.2 内容管理
-		- 可将历史内容一键复制、预览或打开来源位置。
-		- 允许用户将重要记录置顶，避免被新内容覆盖。
+---
 
-7. 用户登录
-	提供用户身份验证功能，确保个人数据的安全性：
-	7.1 登录与注册
-		- 支持用户注册新账号，注册时需上传头像。
-		- 支持用户账号登录，使用 JWT token 进行身份验证。
-		- 登录状态持久化，下次启动自动恢复登录状态。
-	7.2 其他功能
-		- 提供隐私政策查看功能。
-		- 提供忘记密码功能，可联系作者邮箱重置密码。
+## 🎉 首个正式版本发布
 
-8. 个人网盘
-	提供云端存储服务，方便用户随时随地访问文件：
-	8.1 文件管理
-		- 支持文件上传、下载、删除、重命名、移动等操作。
-		- 支持文件夹创建与管理。
-		- 提供文件列表查看和路径导航功能。
-	8.2 历史记录
-		- 记录文件上传历史，可查看上传状态。
-		- 记录文件下载历史，可查看下载状态和保存位置。
-	8.3 其他功能
-		- 处理文件重名情况，自动生成新文件名。
+UniFileHub 首个正式版本现已发布。
 
-未来计划
-        - 剪切板的同账号跨设备记录功能
-	- 个人网盘的文件移动功能
-	- 个人网盘的文件分享功能
-	- 文本编辑器针对于超大文件更流畅的支持
-    
-反馈与支持
-	- 如有问题或建议，请在 GitHub 提交 Issue，或联系开发团队。
-	- 版权所有 © 2026 UniFileHub 开发团队
+本版本实现了统一的文件与效率管理平台，集成文件管理、个人网盘、在线预览、备忘任务、邮件服务、剪贴板历史以及绘图功能，支持本地与云端协同使用，提供一体化工作空间体验。
+
+### 📦 发布包
+
+#### UniFileHubServer.tar.gz
+
+* UniFileHub 后端服务 Docker 离线镜像包
+* 适用于无云服务器或离线环境部署
+* 可通过 Docker 导入后直接运行
+
+```bash
+docker load -i UniFileHubServer.tar.gz
+```
+
+#### Windows
+
+* `.exe` 客户端安装包
+
+#### Linux
+
+* `.deb` 安装包（Debian / Ubuntu）
+
+---
+
+## ✨ 功能概览
+
+### 📁 文件系统
+
+支持多种文件格式的查看与处理。
+
+#### 文本类文件
+
+* TXT、INI 等纯文本文件
+* 文本编码切换
+* 临时文本摘录
+* Ctrl + F 搜索
+* HTML 预览
+* Markdown 预览
+* 代码语法高亮
+
+#### 表格类文件
+
+* CSV 文件编辑
+* 行列增删
+* Ctrl + F 搜索
+* XLSX 文件查看
+
+#### 媒体文件
+
+* PNG、JPG、SVG 等图片预览
+* 图片水印添加
+* 音频播放
+* 视频播放
+
+#### 专业文件
+
+* PSD 文件预览
+* AI 文件预览
+* PDF 文件查看
+* XMind 缩略图预览
+
+---
+
+### 📂 文件资源管理器
+
+#### 文件树管理
+
+* 树状目录浏览
+* 文件快速定位
+* 文件标签关联
+
+#### 文件操作
+
+* 文件备份
+* 历史版本查看
+
+#### 多窗口预览
+
+* 1×1 布局
+* 1×2 布局
+* 2×2 布局
+
+---
+
+### 💾 文件备份
+
+* 自定义备份名称
+* 自定义备份路径
+* 文件恢复
+* 云端备份同步
+
+---
+
+### 🏷️ 备忘标签
+
+* 文件关联标签
+* 到期时间设置
+* 任务详情记录
+* 弹窗提醒
+* 邮件提醒
+
+---
+
+### 📧 邮件服务
+
+支持 SMTP 邮件发送。
+
+示例配置：
+
+* SMTP Server：smtp.qq.com
+* Port：465
+* Username：邮箱账号
+* Password：SMTP 授权码
+
+---
+
+### 📋 剪贴板历史
+
+* 自动记录复制内容
+* 支持文本、图片、链接、文件路径
+* 历史搜索
+* 一键复制
+* 重要内容置顶
+
+---
+
+### 👤 用户系统
+
+* 用户注册
+* 用户登录
+* JWT 身份验证
+* 用户头像上传
+* 登录状态持久化
+
+---
+
+### ☁️ 个人网盘
+
+#### 文件管理
+
+* 上传
+* 下载
+* 删除
+* 重命名
+* 移动
+
+#### 文件夹管理
+
+* 创建文件夹
+* 路径导航
+
+#### 历史记录
+
+* 上传记录
+* 下载记录
+
+#### 其他功能
+
+* 自动处理重名文件
+
+---
+
+## 🛣️ 未来计划
+
+* 剪贴板跨设备同步
+* 网盘文件分享功能
+* 网盘文件移动优化
+* 超大文本文件性能优化
+* 更多在线协作能力
+
+---
+
+## 🤝 反馈与支持
+
+如果您遇到问题或有功能建议，欢迎提交 Issue 或 Pull Request。
+
+---
+
+© 2026 UniFileHub Team
+
+---
+
+# 🇺🇸 English
+
+## 🚀 Introduction
+
+UniFileHub is an all-in-one productivity and file management platform designed to provide a unified digital workspace.
+
+It integrates file management, personal cloud storage, document preview, task reminders, email services, clipboard history, and drawing tools into a single application, helping users organize files and daily tasks more efficiently.
+
+---
+
+## 🎉 First Official Release
+
+The first official release of UniFileHub is now available.
+
+This version delivers a unified productivity and file management platform, combining file management, personal cloud storage, online preview, task reminders, email services, clipboard history, and drawing tools, supporting both local and cloud-based workflows.
+
+### 📦 Release Packages
+
+#### UniFileHubServer.tar.gz
+
+* Offline Docker image package for the UniFileHub backend service
+* Designed for offline or self-hosted environments
+* Can be imported and run directly using Docker
+
+```bash
+docker load -i UniFileHubServer.tar.gz
+```
+
+#### Windows
+
+* `.exe` client installer
+
+#### Linux
+
+* `.deb` installation package (Debian / Ubuntu)
+
+---
+
+## ✨ Features
+
+### 📁 File System
+
+Supports viewing and processing various file formats.
+
+#### Text Files
+
+* TXT and INI files
+* Encoding switching
+* Temporary text extraction
+* Ctrl + F search
+* HTML preview
+* Markdown preview
+* Syntax highlighting
+
+#### Spreadsheet Files
+
+* CSV editing
+* Row and column management
+* Search support
+* XLSX viewing
+
+#### Media Files
+
+* Image preview
+* Watermark tools
+* Audio playback
+* Video playback
+
+#### Professional Files
+
+* PSD preview
+* AI preview
+* PDF viewer
+* XMind thumbnail preview
+
+---
+
+### 📂 File Explorer
+
+* Tree-based navigation
+* File tagging
+* Backup management
+* Version history
+* Multi-pane preview layouts
+
+---
+
+### 💾 Backup System
+
+* Custom backup names
+* Custom storage locations
+* File recovery
+* Cloud synchronization
+
+---
+
+### 🏷️ Memo Tags
+
+* File-level tags
+* Due dates
+* Detailed notes
+* Popup reminders
+* Email notifications
+
+---
+
+### 📧 Email Service
+
+SMTP-based email delivery support.
+
+---
+
+### 📋 Clipboard History
+
+* Automatic clipboard tracking
+* Text, image, link, and file path support
+* Search capability
+* Quick reuse
+* Pin important records
+
+---
+
+### 👤 User System
+
+* User registration
+* Authentication
+* JWT authorization
+* Avatar upload
+* Persistent login sessions
+
+---
+
+### ☁️ Personal Cloud Drive
+
+* Upload and download
+* Rename and delete
+* Move files
+* Folder management
+* Upload and download history
+* Automatic duplicate filename handling
+
+---
+
+## 🛣️ Roadmap
+
+* Cross-device clipboard synchronization
+* Cloud drive file sharing
+* Improved file movement support
+* Better large-text-file performance
+* Enhanced collaboration capabilities
+
+---
+
+## 🤝 Feedback & Support
+
+Issues and Pull Requests are welcome.
+
+---
+
+© 2026 UniFileHub Team
