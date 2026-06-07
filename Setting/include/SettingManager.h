@@ -55,6 +55,11 @@ public:
     // Token相关方法
     QString getToken();
     void setToken(const QString &token);
+    QString getRefreshToken();
+    void setRefreshToken(const QString &token);
+    QString getLoginUsername();
+    void setLoginUsername(const QString &username);
+    void clearLoginSession();
     
     // 窗口大小、位置和状态相关方法
     QSize getWindowSize();

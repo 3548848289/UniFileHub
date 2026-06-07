@@ -32,6 +32,7 @@ public:
     explicit WidgetFunctional(QWidget *parent = nullptr);
     ~WidgetFunctional();
     DInfo* getDInfo();
+    void tryRestoreLogin();
 
     void hideButton1();
     void toggleButtonVisibility(int buttonIndex);
@@ -43,6 +44,7 @@ signals:
     void sendEmailForm(SendEmail *form);
     void showClipboard(ClipboardView* clipboard);
     void showDrive(DriveView* drive);
+    void loginStateChanged();
     void buttonVisibilityChanged(int buttonIndex, bool isVisible);
 public slots:
     void on_pushButton_9_clicked();
@@ -57,9 +59,14 @@ private slots:
     void on_pushButton_8_clicked();
     void on_pushButton_10_clicked();
     void handleLoginSuccess(const QString& username);
+    void handleLogout();
+    void handleSessionValidated(const QJsonObject &response);
+    void handleSessionRefreshed(const QJsonObject &response);
+    void handleSessionError(const QString &error);
 
 
 private:
+    bool m_isRefreshingSession = false;
     QButtonGroup* btnGroup;
     QHBoxLayout* btnLayout;
     QVBoxLayout* mainLayout;

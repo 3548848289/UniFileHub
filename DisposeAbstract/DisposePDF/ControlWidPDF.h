@@ -20,6 +20,7 @@ public:
     void setCurrentPage(int pageNumber);
     int getCurrentPage() const;
     void setFitToWidthChecked(bool checked);
+    void setPageModeChecked(bool checked);
     void setZoomPercentage(int zoomPercentage);
     void setSearchResultInfo(int currentResultIndex, int totalResults);
 

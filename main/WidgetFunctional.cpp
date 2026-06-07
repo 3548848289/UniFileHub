@@ -12,6 +12,22 @@ DInfo* WidgetFunctional::getDInfo() {
     return dinfo;
 }
 
+void WidgetFunctional::tryRestoreLogin()
+{
+    const QString token = SettingManager::Instance().getToken().trimmed();
+    const QString refreshToken = SettingManager::Instance().getRefreshToken().trimmed();
+    if (token.isEmpty() || refreshToken.isEmpty()) {
+        return;
+    }
+
+    m_isRefreshingSession = false;
+    FlaskInfo *sessionInfo = new FlaskInfo(this);
+    connect(sessionInfo, &FlaskInfo::s_sessionValidated, this, &WidgetFunctional::handleSessionValidated);
+    connect(sessionInfo, &FlaskInfo::s_sessionRefreshed, this, &WidgetFunctional::handleSessionRefreshed);
+    connect(sessionInfo, &FlaskInfo::errorOccurred, this, &WidgetFunctional::handleSessionError);
+    sessionInfo->route_validateSession();
+}
+
 void WidgetFunctional::on_pushButton_1_clicked() {
     emit showFiletag();
 }
@@ -53,6 +69,10 @@ void WidgetFunctional::on_pushButton_8_clicked()
 
 void WidgetFunctional::on_pushButton_9_clicked()
 {
+    if (dinfo) {
+        dinfo->exec();
+        return;
+    }
 
     dlogin->exec();
 }
@@ -77,7 +97,72 @@ void WidgetFunctional::on_pushButton_10_clicked()
 
 void WidgetFunctional::handleLoginSuccess(const QString& username) {
     qDebug() << "Username in handleLoginSuccess:" << username;
+    if (dinfo) {
+        dinfo->deleteLater();
+        dinfo = nullptr;
+    }
     dinfo = new DInfo(username, this);
+    connect(dinfo, &DInfo::logoutRequested, this, &WidgetFunctional::handleLogout);
+    ui->pushButton_9->setText(QStringLiteral("你已\n登录"));
+    emit loginStateChanged();
+}
+
+void WidgetFunctional::handleSessionValidated(const QJsonObject &response)
+{
+    m_isRefreshingSession = false;
+    const QString username = response.value("username").toString().trimmed();
+    if (username.isEmpty()) {
+        SettingManager::Instance().clearLoginSession();
+        return;
+    }
+
+    SettingManager::Instance().setLoginUsername(username);
+    handleLoginSuccess(username);
+}
+
+void WidgetFunctional::handleSessionRefreshed(const QJsonObject &response)
+{
+    m_isRefreshingSession = false;
+    const QString token = response.value("access_token").toString().trimmed();
+    const QString username = response.value("username").toString().trimmed();
+    if (token.isEmpty() || username.isEmpty()) {
+        SettingManager::Instance().clearLoginSession();
+        return;
+    }
+
+    SettingManager::Instance().setToken(token);
+    SettingManager::Instance().setLoginUsername(username);
+    handleLoginSuccess(username);
+}
+
+void WidgetFunctional::handleLogout()
+{
+    SettingManager::Instance().clearLoginSession();
+    if (dinfo) {
+        dinfo->deleteLater();
+        dinfo = nullptr;
+    }
+
+    ui->pushButton_9->setText(QStringLiteral("用户\n登录"));
+    emit loginStateChanged();
+}
+
+void WidgetFunctional::handleSessionError(const QString &error)
+{
+    Q_UNUSED(error);
+    if (!m_isRefreshingSession && !SettingManager::Instance().getRefreshToken().trimmed().isEmpty()) {
+        m_isRefreshingSession = true;
+        FlaskInfo *refreshInfo = new FlaskInfo(this);
+        connect(refreshInfo, &FlaskInfo::s_sessionRefreshed, this, &WidgetFunctional::handleSessionRefreshed);
+        connect(refreshInfo, &FlaskInfo::errorOccurred, this, &WidgetFunctional::handleSessionError);
+        refreshInfo->route_refreshSession();
+        return;
+    }
+
+    m_isRefreshingSession = false;
+    SettingManager::Instance().clearLoginSession();
+    ui->pushButton_9->setText(QStringLiteral("用户\n登录"));
+    emit loginStateChanged();
 }
 
 WidgetFunctional::WidgetFunctional(QWidget *parent)
@@ -134,11 +219,13 @@ WidgetFunctional::WidgetFunctional(QWidget *parent)
     ui->pushButton_8->setIcon(IconManager::icon(IconManager::Icon::Clipboard, QSize(24,24)));
     ui->pushButton_9->setIcon(IconManager::icon(IconManager::Icon::Login, QSize(24,24)));
     ui->pushButton_10->setIcon(IconManager::icon(IconManager::Icon::More, QSize(24,24)));
+    ui->pushButton_9->setText(QStringLiteral("用户\n登录"));
 
     // ui->pushButton_7->hide(); //暂时不隐藏
     form = new SendEmail();
     clipboard = ClipboardComponentFactory::createClipboardComponent();
     dlogin = new DLogin();
+    dinfo = nullptr;
     drive = new DriveView();
 
     connect(dlogin, &DLogin::loginSuccessful, this, &WidgetFunctional::handleLoginSuccess);

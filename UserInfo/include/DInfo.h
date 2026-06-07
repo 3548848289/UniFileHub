@@ -28,9 +28,13 @@ public:
     ~DInfo();
     QPixmap getStoredAvatar() const;
 
+signals:
+    void logoutRequested();
+
 
 private slots:
     void on_saveButton_clicked();
+    void on_logoutButton_clicked();
 
 private:
     QString username;

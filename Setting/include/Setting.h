@@ -30,6 +30,7 @@ private slots:
     void on_file_system_Btn_clicked();
     void on_file_backup_Btn_clicked();
     void on_personal_drive_Btn_clicked();
+    void on_server_config_replaceBtn_clicked();
     void on_all_setting_iconColorBtn_clicked();
     void on_all_setting_secondaryIconColorBtn_clicked();
 

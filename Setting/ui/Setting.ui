@@ -194,7 +194,7 @@
          </item>
         </widget>
        </item>
-       <item row="3" column="0">
+       <item row="4" column="0">
         <widget class="QLabel" name="all_setting_label4">
          <property name="text">
           <string>图标颜色</string>
@@ -405,7 +405,7 @@
        <item row="4" column="1">
         <widget class="QLineEdit" name="email_service_lineEdit_5"/>
        </item>
-       <item row="5" column="0">
+       <item row="6" column="0">
         <widget class="QLabel" name="email_service_label_6">
          <property name="text">
           <string>收件人</string>
@@ -539,7 +539,7 @@
      </widget>
      <widget class="QWidget" name="server_config">
       <layout class="QGridLayout" name="gridLayout_10">
-       <item row="3" column="0">
+       <item row="4" column="0">
         <widget class="QLabel" name="server_config_label5">
          <property name="text">
           <string>共享文档</string>
@@ -553,27 +553,27 @@
          </property>
         </widget>
        </item>
-       <item row="5" column="0">
+       <item row="6" column="0">
         <widget class="QLabel" name="server_confi_label6">
          <property name="text">
           <string>用户信息</string>
          </property>
         </widget>
        </item>
-       <item row="3" column="2">
+       <item row="4" column="2">
         <widget class="QLineEdit" name="server_config_lineEdit3"/>
        </item>
-       <item row="2" column="0">
+       <item row="3" column="0">
         <widget class="QLabel" name="server_config_label4">
          <property name="text">
           <string>提交文件</string>
          </property>
         </widget>
        </item>
-       <item row="5" column="2">
+       <item row="6" column="2">
         <widget class="QLineEdit" name="server_config_lineEdit4"/>
        </item>
-       <item row="1" column="0">
+       <item row="2" column="0">
         <widget class="QLabel" name="server_config_label3">
          <property name="text">
           <string>云端备份</string>
@@ -593,20 +593,41 @@
          </property>
         </widget>
        </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="server_config_replaceLabel">
+         <property name="text">
+          <string>一键改IP</string>
+         </property>
+        </widget>
+       </item>
        <item row="1" column="2">
-        <widget class="QLineEdit" name="server_config_lineEdit1"/>
+        <layout class="QHBoxLayout" name="horizontalLayout_server_config_replace">
+         <item>
+          <widget class="QLineEdit" name="server_config_replaceLineEdit"/>
+         </item>
+         <item>
+          <widget class="QPushButton" name="server_config_replaceBtn">
+           <property name="text">
+            <string>确定</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
        <item row="2" column="2">
+        <widget class="QLineEdit" name="server_config_lineEdit1"/>
+       </item>
+       <item row="3" column="2">
         <widget class="QLineEdit" name="server_config_lineEdit2"/>
        </item>
-       <item row="4" column="0">
+       <item row="5" column="0">
         <widget class="QLabel" name="server_config_label6">
          <property name="text">
           <string>个人网盘</string>
          </property>
         </widget>
        </item>
-       <item row="4" column="2">
+       <item row="5" column="2">
         <widget class="QLineEdit" name="server_config_lineEdit5"/>
        </item>
       </layout>

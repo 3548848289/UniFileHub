@@ -4,6 +4,7 @@
 #include <QCoreApplication>
 #include <QSettings>
 #include <QColorDialog>
+#include <QUrl>
 #include "include/IconManager.h"
 
 Setting::Setting(QWidget *parent) : QWidget(parent), ui(new Ui::Setting)
@@ -225,5 +226,55 @@ void Setting::on_personal_drive_Btn_clicked()
         selectedDir.replace("\\", "/");
         ui->personal_drive_lineEdit->setText(selectedDir);
     }
+}
+
+void Setting::on_server_config_replaceBtn_clicked()
+{
+    const QString inputIp = ui->server_config_replaceLineEdit->text().trimmed();
+    if (inputIp.isEmpty()) {
+        return;
+    }
+
+    auto replaceHost = [&inputIp](QLineEdit *lineEdit) {
+        QUrl url(lineEdit->text().trimmed());
+        if (url.isValid() && !url.scheme().isEmpty()) {
+            url.setHost(inputIp);
+            lineEdit->setText(url.toString());
+            return;
+        }
+
+        QString text = lineEdit->text().trimmed();
+        int schemePos = text.indexOf("://");
+        if (schemePos >= 0) {
+            int hostStart = schemePos + 3;
+            int hostEnd = text.indexOf(':', hostStart);
+            if (hostEnd < 0) {
+                hostEnd = text.indexOf('/', hostStart);
+            }
+            if (hostEnd < 0) {
+                hostEnd = text.size();
+            }
+            text.replace(hostStart, hostEnd - hostStart, inputIp);
+            lineEdit->setText(text);
+            return;
+        }
+
+        int hostEnd = text.indexOf(':');
+        if (hostEnd < 0) {
+            hostEnd = text.indexOf('/');
+        }
+        if (hostEnd < 0) {
+            lineEdit->setText(inputIp);
+            return;
+        }
+        text.replace(0, hostEnd, inputIp);
+        lineEdit->setText(text);
+    };
+
+    replaceHost(ui->server_config_lineEdit1);
+    replaceHost(ui->server_config_lineEdit2);
+    replaceHost(ui->server_config_lineEdit3);
+    replaceHost(ui->server_config_lineEdit4);
+    replaceHost(ui->server_config_lineEdit5);
 }
 

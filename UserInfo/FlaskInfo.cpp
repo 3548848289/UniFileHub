@@ -1,4 +1,5 @@
 #include "include/FlaskInfo.h"
+#include <QTimer>
 
 FlaskInfo::FlaskInfo(QObject *parent) : QObject(parent)
 {
@@ -33,6 +34,18 @@ void FlaskInfo::route_loadUserInfo(const QString &username)
     sendRequest(QUrl(address + "/info/get_user_info"), json, "load_user_info");
 }
 
+void FlaskInfo::route_validateSession()
+{
+    sendGetRequest(QUrl(address + "/user/me"), "validate_session",
+                   SettingManager::Instance().getToken().trimmed());
+}
+
+void FlaskInfo::route_refreshSession()
+{
+    sendGetRequest(QUrl(address + "/user/refresh"), "refresh_session",
+                   SettingManager::Instance().getRefreshToken().trimmed());
+}
+
 void FlaskInfo::route_updateUserInfo(const QString &username, const QMap<QString, QVariant> &userInfo)
 {
     QJsonObject json;
@@ -52,9 +65,29 @@ void FlaskInfo::sendRequest(const QUrl &url, const QJsonObject &json, const QStr
 {
     QNetworkRequest request(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    request.setTransferTimeout(kRequestTimeoutMs);
 
     QByteArray data = QJsonDocument(json).toJson();
+    emit requestStarted(action);
     QNetworkReply *reply = networkManager->post(request, data);
+
+    connect(reply, &QNetworkReply::finished, this, [this, reply, action]() {
+        handleResponse(reply, action);
+    });
+}
+
+void FlaskInfo::sendGetRequest(const QUrl &url, const QString &action, const QString &bearerToken)
+{
+    QNetworkRequest request(url);
+    request.setTransferTimeout(kRequestTimeoutMs);
+    if (!bearerToken.isEmpty()) {
+        request.setRawHeader("Authorization", QString("Bearer %1").arg(bearerToken).toUtf8());
+    }
+
+    emit requestStarted(action);
+    QNetworkReply *reply = (action == "refresh_session")
+        ? networkManager->post(request, QByteArray())
+        : networkManager->get(request);
 
     connect(reply, &QNetworkReply::finished, this, [this, reply, action]() {
         handleResponse(reply, action);
@@ -63,6 +96,7 @@ void FlaskInfo::sendRequest(const QUrl &url, const QJsonObject &json, const QStr
 
 void FlaskInfo::handleResponse(QNetworkReply *reply, const QString &action)
 {
+    emit requestFinished(action);
     // 先读取响应数据
     QByteArray responseData = reply->readAll();
     QJsonDocument jsonDoc = QJsonDocument::fromJson(responseData);
@@ -93,6 +127,8 @@ void FlaskInfo::handleResponse(QNetworkReply *reply, const QString &action)
             H_LoginAct(jsonRes);  // 登录失败 JSON 包含错误信息
         } else if (action == "register") {
             H_RegisterAct(jsonRes); // 让注册函数自己解析 error/message
+        } else if (action == "validate_session" || action == "refresh_session") {
+            emit errorOccurred(msg);
         } else {
             emit errorOccurred(msg);
         }
@@ -117,6 +153,10 @@ void FlaskInfo::handleResponse(QNetworkReply *reply, const QString &action)
         H_UpdateAct(jsonRes);
     } else if (action == "load_user_info") {
         H_LoadAct(jsonRes);
+    } else if (action == "validate_session") {
+        emit s_sessionValidated(jsonRes);
+    } else if (action == "refresh_session") {
+        emit s_sessionRefreshed(jsonRes);
     }
 
     reply->deleteLater();

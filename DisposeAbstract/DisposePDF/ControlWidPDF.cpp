@@ -9,12 +9,14 @@ ControlWidPDF::ControlWidPDF(QWidget *parent)
     , m_totalPages(0)
 {
     ui->setupUi(this);
+    ui->scrollModeCheckBox->setText(QStringLiteral("页面模式"));
 
     ui->zoomSlider->setRange(50, 200);
     ui->zoomSlider->setSingleStep(10);
     ui->zoomSlider->setPageStep(10);
     ui->zoomSlider->setValue(100);
     ui->chkFitToCheckBox->setChecked(true);
+    ui->scrollModeCheckBox->setChecked(false);
     updateZoomDisplay(100);
     clearSearch();
 }
@@ -60,6 +62,12 @@ void ControlWidPDF::setFitToWidthChecked(bool checked)
 {
     QSignalBlocker blocker(ui->chkFitToCheckBox);
     ui->chkFitToCheckBox->setChecked(checked);
+}
+
+void ControlWidPDF::setPageModeChecked(bool checked)
+{
+    QSignalBlocker blocker(ui->scrollModeCheckBox);
+    ui->scrollModeCheckBox->setChecked(checked);
 }
 
 void ControlWidPDF::setZoomPercentage(int zoomPercentage)

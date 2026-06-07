@@ -3,6 +3,7 @@
 #include "../manager/include/dbService.h"
 #include "../Setting/include/ThemeManager.h"
 #include "../Setting/include/SettingManager.h"
+#include <QTimer>
 
 void MainWindow::initCoreWidgets() {
     loginButton = new QPushButton(this);
@@ -37,6 +38,26 @@ void MainWindow::initCoreWidgets() {
 }
 
 void MainWindow::initConnect() {
+    connect(widgetfunc, &WidgetFunctional::loginStateChanged, this, [this]() {
+        auto refreshAvatar = [this]() {
+            DInfo *dinfo = widgetfunc->getDInfo();
+            if (dinfo != nullptr) {
+                QPixmap avatar = dinfo->getStoredAvatar();
+                if (!avatar.isNull()) {
+                    loginButton->setIcon(QIcon(avatar.scaled(30, 30, Qt::KeepAspectRatio, Qt::SmoothTransformation)));
+                    loginButton->setIconSize(QSize(15, 15));
+                    return;
+                }
+            }
+
+            loginButton->setIcon(IconManager::icon(IconManager::Icon::Login, QSize(24,24)));
+            loginButton->setIconSize(loginButton->size());
+        };
+
+        refreshAvatar();
+        QTimer::singleShot(300, this, refreshAvatar);
+    });
+
     connect(widgetfunc, &WidgetFunctional::showFiletag, this, [this] {
         togglePanel(file_system);
     });
@@ -273,6 +294,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     
     tabManager->openFile(":/conf/help.txt");
     recentFilesManager->populateRecentFilesMenu(ui->recentFile);
+    widgetfunc->tryRestoreLogin();
 
     // 默认关闭在线文档
     QAction *action = findChild<QAction*>("Function4");

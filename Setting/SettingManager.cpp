@@ -130,6 +130,28 @@ void SettingManager::setToken(const QString &token) {
     settings.setValue("user/token", token);
 }
 
+QString SettingManager::getRefreshToken() {
+    return settings.value("user/refresh_token", "").toString();
+}
+
+void SettingManager::setRefreshToken(const QString &token) {
+    settings.setValue("user/refresh_token", token);
+}
+
+QString SettingManager::getLoginUsername() {
+    return settings.value("user/username", "").toString();
+}
+
+void SettingManager::setLoginUsername(const QString &username) {
+    settings.setValue("user/username", username);
+}
+
+void SettingManager::clearLoginSession() {
+    settings.remove("user/token");
+    settings.remove("user/refresh_token");
+    settings.remove("user/username");
+}
+
 QSize SettingManager::getWindowSize() {
     int width = settings.value("window/width", 1000).toInt();
     int height = settings.value("window/height", 600).toInt();

@@ -39,6 +39,8 @@ private slots:
     void on_avatar_pushButton_clicked();
     void on_registerBtn_clicked();
     void on_loginBtn_clicked();
+    void onRequestStarted(const QString &action);
+    void onRequestFinished(const QString &action);
     void onPrivacyPolicyClicked();
     void onForgotPasswordClicked();
 
@@ -48,6 +50,9 @@ private slots:
     void onAvatarDownloaded(const QByteArray &data, const QString &action);
 
 private:
+    void updateSubmitButtonState();
+    void setBusyState(bool busy, const QString &action = QString());
+
     Ui::DLogin *ui;                           // UI pointer
     FlaskInfo *flaskinfo;            // NetworkManager for handling requests
 
@@ -58,6 +63,9 @@ private:
     QPoint startPos;                          // Start position for moving window
 
     QString m_token;  // 保存登录后的 JWT
+
+    bool m_isBusy = false;
+    QString m_busyAction;
 
     // Private member functions for handling UI and network
     void handleLoginSuccess(const QJsonObject &jsonObject);

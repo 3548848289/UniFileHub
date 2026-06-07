@@ -106,3 +106,9 @@ void DInfo::on_saveButton_clicked()
     flaskInfo->route_updateUserInfo(username, userInfo);
 }
 
+void DInfo::on_logoutButton_clicked()
+{
+    emit logoutRequested();
+    close();
+}
+

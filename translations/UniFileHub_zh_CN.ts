@@ -337,62 +337,67 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../UserInfo/ui/DInfo.ui" line="44"/>
+        <location filename="../UserInfo/ui/DInfo.ui" line="47"/>
         <source>头像</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../UserInfo/ui/DInfo.ui" line="51"/>
+        <location filename="../UserInfo/ui/DInfo.ui" line="148"/>
         <source>名称</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../UserInfo/ui/DInfo.ui" line="61"/>
+        <location filename="../UserInfo/ui/DInfo.ui" line="155"/>
         <source>座右铭</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../UserInfo/ui/DInfo.ui" line="71"/>
+        <location filename="../UserInfo/ui/DInfo.ui" line="162"/>
         <source>账号</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../UserInfo/ui/DInfo.ui" line="78"/>
+        <location filename="../UserInfo/ui/DInfo.ui" line="54"/>
         <source>性别</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../UserInfo/ui/DInfo.ui" line="86"/>
+        <location filename="../UserInfo/ui/DInfo.ui" line="130"/>
         <source>Male</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../UserInfo/ui/DInfo.ui" line="91"/>
+        <location filename="../UserInfo/ui/DInfo.ui" line="135"/>
         <source>Female</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../UserInfo/ui/DInfo.ui" line="96"/>
+        <location filename="../UserInfo/ui/DInfo.ui" line="140"/>
         <source>Other</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../UserInfo/ui/DInfo.ui" line="126"/>
+        <location filename="../UserInfo/ui/DInfo.ui" line="122"/>
         <source>生日</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../UserInfo/ui/DInfo.ui" line="136"/>
+        <location filename="../UserInfo/ui/DInfo.ui" line="67"/>
         <source>住址</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../UserInfo/ui/DInfo.ui" line="146"/>
+        <location filename="../UserInfo/ui/DInfo.ui" line="87"/>
         <source>公司</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../UserInfo/ui/DInfo.ui" line="156"/>
+        <location filename="../UserInfo/ui/DInfo.ui" line="181"/>
+        <source>退出登录</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../UserInfo/ui/DInfo.ui" line="80"/>
         <source>保存</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1260,12 +1265,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="340"/>
+        <location filename="../main/mainwindow.cpp" line="362"/>
         <source>Open File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="341"/>
+        <location filename="../main/mainwindow.cpp" line="363"/>
         <source>All Files (*);;CSV Files (*.csv);;Text Files (*.txt)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1600,7 +1605,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <location filename="../Setting/ui/Setting.ui" line="104"/>
-        <location filename="../Setting/ui/Setting.ui" line="605"/>
+        <location filename="../Setting/ui/Setting.ui" line="626"/>
         <source>个人网盘</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1815,12 +1820,22 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/Setting.cpp" line="36"/>
-        <source>配置已保存</source>
+        <location filename="../Setting/ui/Setting.ui" line="599"/>
+        <source>一键改IP</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Setting/ui/Setting.ui" line="611"/>
+        <source>确定</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../Setting/Setting.cpp" line="37"/>
+        <source>配置已保存</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Setting/Setting.cpp" line="38"/>
         <source>是否需要重启程序以应用配置？</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2239,18 +2254,18 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposePDF/TabHandlePDF.cpp" line="100"/>
-        <location filename="../DisposeAbstract/DisposePDF/TabHandlePDF.cpp" line="107"/>
+        <location filename="../DisposeAbstract/DisposePDF/TabHandlePDF.cpp" line="101"/>
+        <location filename="../DisposeAbstract/DisposePDF/TabHandlePDF.cpp" line="108"/>
         <source>加载失败</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposePDF/TabHandlePDF.cpp" line="100"/>
+        <location filename="../DisposeAbstract/DisposePDF/TabHandlePDF.cpp" line="101"/>
         <source>无法打开内存缓冲区</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposePDF/TabHandlePDF.cpp" line="107"/>
+        <location filename="../DisposeAbstract/DisposePDF/TabHandlePDF.cpp" line="108"/>
         <source>无法加载 PDF 内容</source>
         <translation type="unfinished"></translation>
     </message>

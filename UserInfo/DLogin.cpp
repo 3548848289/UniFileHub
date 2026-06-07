@@ -10,6 +10,7 @@ DLogin::DLogin(QWidget *parent): QDialog(parent), ui(new Ui::DLogin)
 {
     ui->setupUi(this);
     this->setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint);
+    mousePressed = false;
     ui->loginBtn->setEnabled(false);
     ui->registerBtn->setEnabled(false);
     
@@ -42,6 +43,8 @@ DLogin::DLogin(QWidget *parent): QDialog(parent), ui(new Ui::DLogin)
 
     connect(flaskinfo, &FlaskInfo::s_loginRec, this, &DLogin::onLoginResponse);
     connect(flaskinfo, &FlaskInfo::s_registerRec, this, &DLogin::onRegisterResponse);
+    connect(flaskinfo, &FlaskInfo::requestStarted, this, &DLogin::onRequestStarted);
+    connect(flaskinfo, &FlaskInfo::requestFinished, this, &DLogin::onRequestFinished);
     connect(flaskinfo, &FlaskInfo::errorOccurred, this, &DLogin::onNetworkError);
     connect(flaskinfo, &FlaskInfo::avatarDownloaded, this, &DLogin::onAvatarDownloaded);
 
@@ -50,6 +53,44 @@ DLogin::DLogin(QWidget *parent): QDialog(parent), ui(new Ui::DLogin)
     connect(ui->forget_pushButton, &QPushButton::clicked, this, &DLogin::onForgotPasswordClicked);
 
 
+}
+
+void DLogin::updateSubmitButtonState()
+{
+    const bool accepted = ui->radioButton->isChecked();
+    ui->loginBtn->setEnabled(accepted && !m_isBusy);
+    ui->registerBtn->setEnabled(accepted && !m_isBusy);
+}
+
+void DLogin::setBusyState(bool busy, const QString &action)
+{
+    m_isBusy = busy;
+    m_busyAction = busy ? action : QString();
+
+    ui->username->setEnabled(!busy);
+    ui->password->setEnabled(!busy);
+    ui->avatar_pushButton->setEnabled(!busy);
+    ui->radioButton->setEnabled(!busy);
+    ui->resiger_pushButton->setEnabled(!busy);
+    ui->forget_pushButton->setEnabled(!busy);
+    ui->login_pushButton_2->setEnabled(!busy);
+    ui->exit_toolButton->setEnabled(!busy);
+
+    if (busy) {
+        if (action == "login") {
+            ui->statusLabel->setText(QStringLiteral("正在登录..."));
+            ui->loginBtn->setText(QStringLiteral("登录中..."));
+        } else if (action == "register") {
+            ui->statusLabel->setText(QStringLiteral("正在注册..."));
+            ui->registerBtn->setText(QStringLiteral("注册中..."));
+        }
+    } else {
+        ui->statusLabel->setText(QStringLiteral("欢迎"));
+        ui->loginBtn->setText(QStringLiteral("登录"));
+        ui->registerBtn->setText(QStringLiteral("注册"));
+    }
+
+    updateSubmitButtonState();
 }
 
 
@@ -75,15 +116,13 @@ void DLogin::on_radioButton_clicked() {
 
     if (ui->radioButton->isChecked()) {
         ui->loginBtn->setStyleSheet(QString("background-color: %1;").arg(secondaryColor));
-        ui->loginBtn->setEnabled(true);
         ui->registerBtn->setStyleSheet(QString("background-color: %1;").arg(secondaryColor));
-        ui->registerBtn->setEnabled(true);
     } else {
         ui->loginBtn->setStyleSheet(QString("background-color: %1;").arg(lightSecondaryColor));
-        ui->loginBtn->setEnabled(false);
         ui->registerBtn->setStyleSheet(QString("background-color: %1;").arg(lightSecondaryColor));
-        ui->registerBtn->setEnabled(false);
     }
+
+    updateSubmitButtonState();
 }
 
 void DLogin::on_exit_toolButton_clicked() {
@@ -115,6 +154,10 @@ DLogin::~DLogin() {
 
 void DLogin::on_loginBtn_clicked()
 {
+    if (m_isBusy) {
+        return;
+    }
+
     QString usernameText = ui->username->text();
     QString passwordText = ui->password->text();
 
@@ -128,6 +171,10 @@ void DLogin::on_loginBtn_clicked()
 
 void DLogin::on_registerBtn_clicked()
 {
+    if (m_isBusy) {
+        return;
+    }
+
     QString usernameText = ui->username->text();
     QString passwordText = ui->password->text();
 
@@ -159,6 +206,11 @@ void DLogin::onLoginResponse(const QJsonObject &response)
             m_token = response["access_token"].toString();
             SettingManager::Instance().setToken(m_token);
         }
+        if (response.contains("refresh_token")) {
+            SettingManager::Instance().setRefreshToken(response["refresh_token"].toString());
+        }
+
+        SettingManager::Instance().setLoginUsername(response["username"].toString());
 
         emit loginSuccessful(response["username"].toString());
         QMessageBox::information(this, "登录成功", "登录成功！欢迎回来");
@@ -173,6 +225,20 @@ void DLogin::onLoginResponse(const QJsonObject &response)
             errorMsg = "用户不存在，请先注册";
         }
         QMessageBox::warning(this, "登录失败", errorMsg);
+    }
+}
+
+void DLogin::onRequestStarted(const QString &action)
+{
+    if (action == "login" || action == "register") {
+        setBusyState(true, action);
+    }
+}
+
+void DLogin::onRequestFinished(const QString &action)
+{
+    if (action == "login" || action == "register") {
+        setBusyState(false);
     }
 }
 
@@ -203,6 +269,7 @@ void DLogin::onRegisterResponse(const QJsonObject &response)
 
 void DLogin::onNetworkError(const QString &error)
 {
+    setBusyState(false);
     // 优化网络错误提示语
     QString errorMsg = "网络连接失败，请检查您的网络设置后重试";
     if (error.contains("timeout")) {

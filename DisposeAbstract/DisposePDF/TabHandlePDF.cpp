@@ -74,7 +74,7 @@ void TabHandlePDF::loadFromFile(const QString &fileName)
         return;
     }
 
-    pdfView->setPageMode(QPdfView::PageMode::SinglePage);
+    pdfView->setPageMode(QPdfView::PageMode::MultiPage);
 
     const int totalPages = pdfDoc->pageCount();
     controlWidPDF->setTotalPages(totalPages);
@@ -84,6 +84,7 @@ void TabHandlePDF::loadFromFile(const QString &fileName)
     resetSearch();
     controlWidPDF->setZoomPercentage(m_zoomPercentage);
     controlWidPDF->setFitToWidthChecked(true);
+    controlWidPDF->setPageModeChecked(false);
 
     QTimer::singleShot(100, this, [this]() {
         changeFitToWidth(true);
@@ -108,7 +109,7 @@ void TabHandlePDF::loadFromInternet(const QByteArray &content)
         return;
     }
 
-    pdfView->setPageMode(QPdfView::PageMode::SinglePage);
+    pdfView->setPageMode(QPdfView::PageMode::MultiPage);
 
     const int totalPages = pdfDoc->pageCount();
     controlWidPDF->setTotalPages(totalPages);
@@ -118,6 +119,7 @@ void TabHandlePDF::loadFromInternet(const QByteArray &content)
     resetSearch();
     controlWidPDF->setZoomPercentage(m_zoomPercentage);
     controlWidPDF->setFitToWidthChecked(true);
+    controlWidPDF->setPageModeChecked(false);
 
     QTimer::singleShot(100, this, [this]() {
         changeFitToWidth(true);
@@ -195,9 +197,9 @@ void TabHandlePDF::changeZoomValue(int zoomPercentage)
 void TabHandlePDF::changeScrollMode(bool enabled)
 {
     if (enabled) {
-        pdfView->setPageMode(QPdfView::PageMode::MultiPage);
-    } else {
         pdfView->setPageMode(QPdfView::PageMode::SinglePage);
+    } else {
+        pdfView->setPageMode(QPdfView::PageMode::MultiPage);
     }
 }
 

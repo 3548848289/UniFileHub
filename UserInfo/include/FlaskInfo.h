@@ -23,13 +23,19 @@ public:
     void route_registerUser(const QString &username, const QString &password, const QByteArray &avatarData);
     void route_updateUserInfo(const QString &username, const QMap<QString, QVariant> &userInfo);
     void route_loadUserInfo(const QString &username);
+    void route_validateSession();
+    void route_refreshSession();
 
 signals:
     void s_loginRec(const QJsonObject &response);
     void s_registerRec(const QJsonObject &response);
     void s_updateRec(const QJsonObject &response);
     void s_loadRec(const QJsonObject &response);
+    void s_sessionValidated(const QJsonObject &response);
+    void s_sessionRefreshed(const QJsonObject &response);
 
+    void requestStarted(const QString &action);
+    void requestFinished(const QString &action);
     void errorOccurred(const QString &error);
     void avatarDownloaded(const QByteArray &data, const QString &action);
 
@@ -42,9 +48,11 @@ private slots:
     void fetchAvatarImage(const QString &url, const QString &action);
 
 private:
+    static constexpr int kRequestTimeoutMs = 1500;
     QString address;
     QNetworkAccessManager *networkManager;
     void sendRequest(const QUrl &url, const QJsonObject &json, const QString &action);
+    void sendGetRequest(const QUrl &url, const QString &action, const QString &bearerToken = QString());
     void handleResponse(QNetworkReply *reply, const QString &action);
 
 };
