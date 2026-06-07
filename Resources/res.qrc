@@ -30,5 +30,6 @@
         <file>Main/Email.svg</file>
         <file>conf/wibu6-rq54f-001.ico</file>
         <file>conf/UniFileHub.png</file>
+        <file>ClipBoard/cloud.svg</file>
     </qresource>
 </RCC>

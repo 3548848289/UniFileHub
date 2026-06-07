@@ -45,6 +45,7 @@ public:
     QString serverconfig_ip2();
     QString serverconfig_ip3();
     QString serverconfig_ip4();
+    QString clipboard_sync_server_ip();
     QString personal_drive_server_ip();
     QString personal_drive_download_dir();
     QString file_backup_IP();

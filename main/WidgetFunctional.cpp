@@ -104,6 +104,9 @@ void WidgetFunctional::handleLoginSuccess(const QString& username) {
     dinfo = new DInfo(username, this);
     connect(dinfo, &DInfo::logoutRequested, this, &WidgetFunctional::handleLogout);
     ui->pushButton_9->setText(QStringLiteral("你已\n登录"));
+    if (clipboard) {
+        clipboard->refreshCloudItems();
+    }
     emit loginStateChanged();
 }
 
@@ -144,6 +147,9 @@ void WidgetFunctional::handleLogout()
     }
 
     ui->pushButton_9->setText(QStringLiteral("用户\n登录"));
+    if (clipboard) {
+        clipboard->refreshCloudItems();
+    }
     emit loginStateChanged();
 }
 

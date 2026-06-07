@@ -32,6 +32,7 @@ public:
         MenuSearch,
         MenuSettings,
         Pin,
+        Cloud,
         Close
     };
 

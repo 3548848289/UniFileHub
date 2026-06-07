@@ -7,47 +7,57 @@ QMenu* ClipboardMenuBuilder::buildMenu(
     std::function<void()> previewCallback,
     std::function<void()> openLocationCallback,
     std::function<void()> deleteCallback,
-    std::function<void()> pinCallback   // 新增参数
-    )
+    std::function<void()> pinCallback,
+    std::function<void()> cloudSyncCallback,
+    std::function<void()> cloudUnsyncCallback)
 {
-    if (!item) return nullptr;
+    if (!item) {
+        return nullptr;
+    }
 
     QMenu* menu = new QMenu;
 
-    // 复制
-    QAction* copyAction = menu->addAction("复制到剪贴板");
-    QObject::connect(copyAction, &QAction::triggered, [copyCallback]{ if(copyCallback) copyCallback(); });
+    QAction* copyAction = menu->addAction(QStringLiteral("复制到剪切板"));
+    QObject::connect(copyAction, &QAction::triggered, [copyCallback]{ if (copyCallback) copyCallback(); });
 
-    // 图片预览
     bool canPreview = false;
-    if (item->type() == ClipboardItemType::Image) canPreview = true;
-    else if (item->type() == ClipboardItemType::File) {
+    if (item->type() == ClipboardItemType::Image) {
+        canPreview = true;
+    } else if (item->type() == ClipboardItemType::File) {
         auto* fileItem = static_cast<CliFile*>(item);
         canPreview = fileItem->isImageFile();
     } else if (item->type() == ClipboardItemType::Text) {
         auto* textItem = static_cast<CliText*>(item);
         canPreview = FileTypeDetector::isImageFile(textItem->text());
     }
+
     if (canPreview && previewCallback) {
-        QAction* previewAction = menu->addAction("预览图片");
+        QAction* previewAction = menu->addAction(QStringLiteral("预览图片"));
         QObject::connect(previewAction, &QAction::triggered, [previewCallback]{ previewCallback(); });
     }
 
-    // 打开文件位置
     if (item->type() == ClipboardItemType::File && openLocationCallback) {
-        QAction* openLocationAction = menu->addAction("打开文件位置");
+        QAction* openLocationAction = menu->addAction(QStringLiteral("打开文件位置"));
         QObject::connect(openLocationAction, &QAction::triggered, [openLocationCallback]{ openLocationCallback(); });
     }
 
-    // === 新增：置顶/取消置顶 ===
-    if (pinCallback) {
-        QAction* pinAction = menu->addAction(item->isPinned() ? "取消置顶" : "置顶");
+    if (item->type() == ClipboardItemType::Text && !item->isCloudItem() && cloudSyncCallback) {
+        QAction* cloudAction = menu->addAction(QStringLiteral("云端同步"));
+        QObject::connect(cloudAction, &QAction::triggered, [cloudSyncCallback]{ cloudSyncCallback(); });
+    }
+
+    if (item->isCloudItem() && cloudUnsyncCallback) {
+        QAction* cloudDeleteAction = menu->addAction(QStringLiteral("取消云端同步"));
+        QObject::connect(cloudDeleteAction, &QAction::triggered, [cloudUnsyncCallback]{ cloudUnsyncCallback(); });
+    }
+
+    if (pinCallback && !item->isCloudItem()) {
+        QAction* pinAction = menu->addAction(item->isPinned() ? QStringLiteral("取消置顶") : QStringLiteral("置顶"));
         QObject::connect(pinAction, &QAction::triggered, [pinCallback]{ pinCallback(); });
     }
 
-    // 删除
     if (deleteCallback) {
-        QAction* deleteAction = menu->addAction("删除");
+        QAction* deleteAction = menu->addAction(QStringLiteral("删除"));
         QObject::connect(deleteAction, &QAction::triggered, [deleteCallback]{ deleteCallback(); });
     }
 

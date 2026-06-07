@@ -44,6 +44,7 @@ static QString iconPath(IconManager::Icon icon)
     case IconManager::Icon::MenuSearch: return ":/Menu/search.svg";
     case IconManager::Icon::MenuSettings: return ":/Menu/settings.svg";
     case IconManager::Icon::Pin: return ":/ClipBoard/pin.svg";
+    case IconManager::Icon::Cloud: return ":/ClipBoard/cloud.svg";
     case IconManager::Icon::Close: return ":/Menu/file_close.svg";
     }
     return {};

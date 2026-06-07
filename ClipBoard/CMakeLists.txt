@@ -15,6 +15,7 @@ set(SETTING_SOURCES
     ClipboardController.cpp
     ClipboardComponentFactory.cpp
     ClipboardItemDelegate.cpp
+    ClipboardCloudClient.cpp
 )
 
 set(SETTING_HEADERS
@@ -34,6 +35,7 @@ set(SETTING_HEADERS
     include/ClipboardController.h
     include/ClipboardComponentFactory.h
     include/ClipboardItemDelegate.h
+    include/ClipboardCloudClient.h
 
 )
 
@@ -50,6 +52,7 @@ qt_add_library(mytxt_clipboard STATIC
 
 target_link_libraries(mytxt_clipboard PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
+    Qt${QT_VERSION_MAJOR}::Network
 )
 
 target_include_directories(mytxt_clipboard PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
