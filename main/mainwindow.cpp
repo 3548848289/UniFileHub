@@ -429,3 +429,23 @@ void MainWindow::openFileFromCommandLine(const QString& filePath)
         tabManager->openFile(filePath);
     }
 }
+
+void MainWindow::on_actionTerminal_triggered()
+{
+    Q_INIT_RESOURCE(KodoTermThemes);
+    
+    auto *terminal = new KodoTerm(this);
+    
+#ifdef Q_OS_WIN
+    terminal->setProgram("powershell.exe");
+#else
+    terminal->setProgram("/bin/bash");
+#endif
+    
+    terminal->setTheme(TerminalTheme::loadKonsoleTheme(":/KodoTermThemes/konsole/Breeze.colorscheme"));
+    
+    tabManager->addWidgetTab(terminal, "终端");
+    terminal->show();
+    terminal->start();
+}
+

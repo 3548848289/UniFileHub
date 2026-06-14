@@ -47,7 +47,7 @@ target_include_directories(mytxt_main PRIVATE
 
 )
 
-# 链接 Qt 库
+# 链接 Qt 库和 KodoTerm
 target_link_libraries(mytxt_main PRIVATE
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Widgets
@@ -57,4 +57,5 @@ target_link_libraries(mytxt_main PRIVATE
     Qt${QT_VERSION_MAJOR}::Svg
     Qt${QT_VERSION_MAJOR}::Multimedia
     Qt${QT_VERSION_MAJOR}::MultimediaWidgets
+    KodoTerm::KodoTerm
 )

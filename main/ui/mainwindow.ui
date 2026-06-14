@@ -115,6 +115,7 @@
     <addaction name="actionshe"/>
     <addaction name="actionhelp"/>
     <addaction name="actionfind"/>
+    <addaction name="actionTerminal"/>
    </widget>
    <widget class="QMenu" name="menu_2">
     <property name="title">
@@ -400,6 +401,17 @@
    </property>
    <property name="menuRole">
     <enum>QAction::MenuRole::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionTerminal">
+   <property name="icon">
+    <iconset theme="utilities-terminal"/>
+   </property>
+   <property name="text">
+    <string>终端</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+T</string>
    </property>
   </action>
  </widget>

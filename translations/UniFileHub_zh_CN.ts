@@ -1028,240 +1028,250 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="121"/>
+        <location filename="../main/ui/mainwindow.ui" line="122"/>
         <source>视图</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="125"/>
+        <location filename="../main/ui/mainwindow.ui" line="126"/>
         <source>模型</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="138"/>
+        <location filename="../main/ui/mainwindow.ui" line="139"/>
         <source>句柄</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="158"/>
+        <location filename="../main/ui/mainwindow.ui" line="159"/>
         <source>打开</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="161"/>
+        <location filename="../main/ui/mainwindow.ui" line="162"/>
         <source>Ctrl+O</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="170"/>
+        <location filename="../main/ui/mainwindow.ui" line="171"/>
         <source>保存</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="173"/>
+        <location filename="../main/ui/mainwindow.ui" line="174"/>
         <source>Ctrl+S</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="181"/>
+        <location filename="../main/ui/mainwindow.ui" line="182"/>
         <source>关闭</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="184"/>
+        <location filename="../main/ui/mainwindow.ui" line="185"/>
         <source>Ctrl+W</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="193"/>
+        <location filename="../main/ui/mainwindow.ui" line="194"/>
         <source>下载</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="196"/>
+        <location filename="../main/ui/mainwindow.ui" line="197"/>
         <source>Ctrl+D</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="204"/>
+        <location filename="../main/ui/mainwindow.ui" line="205"/>
         <source>txt文件</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="207"/>
+        <location filename="../main/ui/mainwindow.ui" line="208"/>
         <source>Ctrl+N, Ctrl+T</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="215"/>
-        <location filename="../main/ui/mainwindow.ui" line="218"/>
+        <location filename="../main/ui/mainwindow.ui" line="216"/>
+        <location filename="../main/ui/mainwindow.ui" line="219"/>
         <source>csv文件</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="221"/>
+        <location filename="../main/ui/mainwindow.ui" line="222"/>
         <source>Ctrl+N, Ctrl+C</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="230"/>
+        <location filename="../main/ui/mainwindow.ui" line="231"/>
         <source>设置</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="233"/>
+        <location filename="../main/ui/mainwindow.ui" line="234"/>
         <source>Ctrl+,</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="238"/>
+        <location filename="../main/ui/mainwindow.ui" line="239"/>
         <source>撤销</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="241"/>
+        <location filename="../main/ui/mainwindow.ui" line="242"/>
         <source>Ctrl+Z</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="249"/>
+        <location filename="../main/ui/mainwindow.ui" line="250"/>
         <source>查找</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="252"/>
+        <location filename="../main/ui/mainwindow.ui" line="253"/>
         <source>Ctrl+F</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="257"/>
+        <location filename="../main/ui/mainwindow.ui" line="258"/>
         <source>重做</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="260"/>
+        <location filename="../main/ui/mainwindow.ui" line="261"/>
         <source>Ctrl+Y</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="265"/>
+        <location filename="../main/ui/mainwindow.ui" line="266"/>
         <source>剪切</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="268"/>
+        <location filename="../main/ui/mainwindow.ui" line="269"/>
         <source>Ctrl+X</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="273"/>
+        <location filename="../main/ui/mainwindow.ui" line="274"/>
         <source>复制</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="276"/>
+        <location filename="../main/ui/mainwindow.ui" line="277"/>
         <source>Ctrl+C</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="281"/>
+        <location filename="../main/ui/mainwindow.ui" line="282"/>
         <source>黏贴</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="284"/>
+        <location filename="../main/ui/mainwindow.ui" line="285"/>
         <source>Ctrl+V</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="289"/>
+        <location filename="../main/ui/mainwindow.ui" line="290"/>
         <source>全选</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="292"/>
+        <location filename="../main/ui/mainwindow.ui" line="293"/>
         <source>Ctrl+A</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="297"/>
-        <location filename="../main/ui/mainwindow.ui" line="300"/>
+        <location filename="../main/ui/mainwindow.ui" line="298"/>
+        <location filename="../main/ui/mainwindow.ui" line="301"/>
         <source>关闭文件标签</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="305"/>
-        <location filename="../main/ui/mainwindow.ui" line="308"/>
+        <location filename="../main/ui/mainwindow.ui" line="306"/>
+        <location filename="../main/ui/mainwindow.ui" line="309"/>
         <source>关闭文件备份</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="313"/>
-        <location filename="../main/ui/mainwindow.ui" line="316"/>
+        <location filename="../main/ui/mainwindow.ui" line="314"/>
+        <location filename="../main/ui/mainwindow.ui" line="317"/>
         <source>关闭备忘日程</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="321"/>
-        <location filename="../main/ui/mainwindow.ui" line="324"/>
+        <location filename="../main/ui/mainwindow.ui" line="322"/>
+        <location filename="../main/ui/mainwindow.ui" line="325"/>
         <source>关闭在线文档</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="329"/>
-        <location filename="../main/ui/mainwindow.ui" line="332"/>
+        <location filename="../main/ui/mainwindow.ui" line="330"/>
+        <location filename="../main/ui/mainwindow.ui" line="333"/>
         <source>关闭邮件服务</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="337"/>
-        <location filename="../main/ui/mainwindow.ui" line="340"/>
+        <location filename="../main/ui/mainwindow.ui" line="338"/>
+        <location filename="../main/ui/mainwindow.ui" line="341"/>
         <source>关闭用户登录</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="345"/>
-        <location filename="../main/ui/mainwindow.ui" line="348"/>
+        <location filename="../main/ui/mainwindow.ui" line="346"/>
+        <location filename="../main/ui/mainwindow.ui" line="349"/>
         <source>关闭更多功能</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="356"/>
-        <location filename="../main/ui/mainwindow.ui" line="359"/>
+        <location filename="../main/ui/mainwindow.ui" line="357"/>
+        <location filename="../main/ui/mainwindow.ui" line="360"/>
         <source>帮助</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="367"/>
+        <location filename="../main/ui/mainwindow.ui" line="368"/>
         <source>xlsx文件</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="370"/>
+        <location filename="../main/ui/mainwindow.ui" line="371"/>
         <source>Ctrl+N, Ctrl+X</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="375"/>
-        <location filename="../main/ui/mainwindow.ui" line="378"/>
+        <location filename="../main/ui/mainwindow.ui" line="376"/>
+        <location filename="../main/ui/mainwindow.ui" line="379"/>
         <source>关闭剪切字板</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="383"/>
-        <location filename="../main/ui/mainwindow.ui" line="386"/>
+        <location filename="../main/ui/mainwindow.ui" line="384"/>
+        <location filename="../main/ui/mainwindow.ui" line="387"/>
         <source>打开控制组件</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="391"/>
-        <location filename="../main/ui/mainwindow.ui" line="394"/>
+        <location filename="../main/ui/mainwindow.ui" line="392"/>
+        <location filename="../main/ui/mainwindow.ui" line="395"/>
         <source>关闭控制组件</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/ui/mainwindow.ui" line="399"/>
+        <location filename="../main/ui/mainwindow.ui" line="400"/>
         <source>关闭个人网盘</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/ui/mainwindow.ui" line="411"/>
+        <source>终端</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/ui/mainwindow.ui" line="414"/>
+        <source>Ctrl+Alt+T</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

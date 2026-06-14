@@ -32,7 +32,7 @@
 #include "../../FileSystem/include/FileSystem.h"
 #include "../../FileBackup/include/FileBackupView.h"
 #include "../../manager/include/dbService.h"
-
+#include "../../Resources/ThirdParty/KodoTerm/include/KodoTerm/KodoTerm.hpp"
 
 #include "TabManager.h"
 
@@ -58,6 +58,7 @@ private slots:
     void on_actionopen_triggered();
     void on_actionsave_triggered();
     void on_actionclose_triggered();
+    void on_actionTerminal_triggered();
     void handleFileDownload(const QString &fileName, const QByteArray &fileContent);
     void handleFilePathSent();
     void showUserInfoDialog();

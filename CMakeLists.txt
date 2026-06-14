@@ -10,6 +10,26 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
 
+# 添加第三方库（需要在 main 之前构建）
+add_subdirectory(Resources/ThirdParty/simple-mail/
+    ${CMAKE_CURRENT_BINARY_DIR}/Resources/ThirdParty/simple-mail)
+
+add_subdirectory(Resources/ThirdParty/QXlsx/
+    ${CMAKE_CURRENT_BINARY_DIR}/Resources/ThirdParty/QXlsx)
+
+add_subdirectory(Resources/ThirdParty/LmsgNotify/
+    ${CMAKE_CURRENT_BINARY_DIR}/Resources/ThirdParty/LmsgNotify)
+
+add_subdirectory(Resources/ThirdParty/QFileSystemBreadcrumbBar/
+    ${CMAKE_CURRENT_BINARY_DIR}/Resources/ThirdParty/QFileSystemBreadcrumbBar)
+
+add_subdirectory(Resources/ThirdParty/libqpsd/
+    ${CMAKE_CURRENT_BINARY_DIR}/Resources/ThirdParty/libqpsd)
+
+add_subdirectory(Resources/ThirdParty/KodoTerm/
+    ${CMAKE_CURRENT_BINARY_DIR}/Resources/ThirdParty/KodoTerm)
+
+
 # 添加子目录
 add_subdirectory(manager)
 add_subdirectory(FileBackup)
@@ -31,22 +51,6 @@ add_subdirectory(DisposeAbstract/DisposePDF)
 add_subdirectory(DisposeAbstract/DisposeDB)
 add_subdirectory(DisposeAbstract/DisposePSD)
 add_subdirectory(main)
-
-
-add_subdirectory(Resources/ThirdParty/simple-mail/
-    ${CMAKE_CURRENT_BINARY_DIR}/Resources/ThirdParty/simple-mail)
-
-add_subdirectory(Resources/ThirdParty/QXlsx/
-    ${CMAKE_CURRENT_BINARY_DIR}/Resources/ThirdParty/QXlsx)
-
-add_subdirectory(Resources/ThirdParty/LmsgNotify/
-    ${CMAKE_CURRENT_BINARY_DIR}/Resources/ThirdParty/LmsgNotify)
-
-add_subdirectory(Resources/ThirdParty/QFileSystemBreadcrumbBar/
-    ${CMAKE_CURRENT_BINARY_DIR}/Resources/ThirdParty/QFileSystemBreadcrumbBar)
-
-add_subdirectory(Resources/ThirdParty/libqpsd/
-    ${CMAKE_CURRENT_BINARY_DIR}/Resources/ThirdParty/libqpsd)
 
 
 qt_add_resources(RESOURCES
@@ -85,6 +89,7 @@ target_link_libraries(UniFileHub PRIVATE
     QXlsx::QXlsx
     LmsgNotify::LmsgNotify
     libqpsd
+    KodoTerm::KodoTerm
     Qt${QT_VERSION_MAJOR}::Widgets
 )
 
