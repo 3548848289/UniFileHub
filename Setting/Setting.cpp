@@ -6,24 +6,40 @@
 #include <QColorDialog>
 #include <QUrl>
 #include "include/IconManager.h"
+#include "../Resources/ThirdParty/KodoTerm/include/KodoTerm/KodoTermConfig.hpp"
 
 Setting::Setting(QWidget *parent) : QWidget(parent), ui(new Ui::Setting)
     , settings("settings.ini", QSettings::IniFormat)
 {
     ui->setupUi(this);
     is_modified = false;
-    loadSettings();
     ui->stackedWidget->setCurrentIndex(0);
     ui->treeWidget->setHeaderHidden(true);
 
     ui->tag_schedule_timeEdit3->setDisplayFormat("HH:mm");
+
+    // 初始化终端主题列表
+    initTerminalThemes();
 
     if (settings.status() == QSettings::NoError) {
         loadSettings();
     } else {
         qDebug() << "Settings file status: " << settings.status();
     }
-    loadSettings();
+}
+
+void Setting::initTerminalThemes() {
+    // 添加默认主题
+    ui->terminal_theme_combo->addItem("Default");
+    
+    // 只加载 Konsole 主题（.colorscheme 文件）
+    auto themes = TerminalTheme::builtInThemes();
+    for (const auto &info : themes) {
+        // 只添加 Konsole 主题
+        if (info.format == TerminalTheme::ThemeFormat::Konsole) {
+            ui->terminal_theme_combo->addItem(info.name, info.path);
+        }
+    }
 }
 
 
@@ -50,6 +66,20 @@ void Setting::loadSettings() {
     ui->all_setting_comboBox->setCurrentIndex(settings.value("all_setting/theme", 0).toInt());
 
     ui->all_setting_checkBox->setChecked(settings.value("all_setting/fenableray", true).toBool());
+    
+    // 加载终端设置
+    ui->terminal_font_combo->setCurrentFont(QFont(settings.value("terminal/font_family", "Consolas").toString()));
+    ui->terminal_font_size_spin->setValue(settings.value("terminal/font_size", 14).toInt());
+    QString themeName = settings.value("terminal/theme", "Default").toString();
+    int themeIndex = ui->terminal_theme_combo->findText(themeName);
+    if (themeIndex >= 0) {
+        ui->terminal_theme_combo->setCurrentIndex(themeIndex);
+    }
+    
+    // 加载终端类型设置
+    QString terminalType = settings.value("terminal/type", "powershell").toString();
+    ui->terminal_checkbox_powershell->setChecked(terminalType == "powershell");
+    ui->terminal_checkbox_cmd->setChecked(terminalType == "cmd");
     
     // 加载图标颜色设置
     QString iconColor = settings.value("all_setting/icon_color", "#7598db").toString();
@@ -103,6 +133,15 @@ void Setting::saveSettings() {
     settings.setValue("all_setting/theme", ui->all_setting_comboBox->currentIndex());
 
     settings.setValue("all_setting/fenableray", ui->all_setting_checkBox->isChecked());
+    
+    // 保存终端设置
+    settings.setValue("terminal/font_family", ui->terminal_font_combo->currentFont().family());
+    settings.setValue("terminal/font_size", ui->terminal_font_size_spin->value());
+    settings.setValue("terminal/theme", ui->terminal_theme_combo->currentText());
+    
+    // 保存终端类型设置
+    QString terminalType = ui->terminal_checkbox_powershell->isChecked() ? "powershell" : "cmd";
+    settings.setValue("terminal/type", terminalType);
     
     // 保存图标颜色设置
     settings.setValue("all_setting/icon_color", ui->all_setting_iconColorBtn->styleSheet().section("background-color: ", 1, 1).section("; color", 0, 0));
@@ -276,5 +315,17 @@ void Setting::on_server_config_replaceBtn_clicked()
     replaceHost(ui->server_config_lineEdit3);
     replaceHost(ui->server_config_lineEdit4);
     replaceHost(ui->server_config_lineEdit5);
+}
+
+void Setting::on_terminal_checkbox_powershell_stateChanged(int state) {
+    if (state == Qt::Checked) {
+        ui->terminal_checkbox_cmd->setChecked(false);
+    }
+}
+
+void Setting::on_terminal_checkbox_cmd_stateChanged(int state) {
+    if (state == Qt::Checked) {
+        ui->terminal_checkbox_powershell->setChecked(false);
+    }
 }
 

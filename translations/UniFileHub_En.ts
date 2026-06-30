@@ -1607,7 +1607,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <location filename="../Setting/ui/Setting.ui" line="47"/>
-        <location filename="../Setting/ui/Setting.ui" line="108"/>
+        <location filename="../Setting/ui/Setting.ui" line="107"/>
         <source>默认使用目录</source>
         <translation>Default Directory</translation>
     </message>
@@ -1618,7 +1618,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <location filename="../Setting/ui/Setting.ui" line="57"/>
-        <location filename="../Setting/ui/Setting.ui" line="268"/>
+        <location filename="../Setting/ui/Setting.ui" line="282"/>
         <source>字体大小</source>
         <translation>Font Size</translation>
     </message>
@@ -1653,89 +1653,102 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation>Reminder Schedule</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="98"/>
+        <location filename="../Setting/ui/Setting.ui" line="97"/>
         <source>提前多久提醒</source>
         <translation>Reminder Advance Time</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="104"/>
-        <location filename="../Setting/ui/Setting.ui" line="626"/>
+        <location filename="../Setting/ui/Setting.ui" line="103"/>
+        <location filename="../Setting/ui/Setting.ui" line="697"/>
         <source>个人网盘</source>
         <translation>Personal Drive</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="114"/>
+        <location filename="../Setting/ui/Setting.ui" line="113"/>
         <source>剪切字板</source>
         <translation>Clipboard</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="118"/>
+        <location filename="../Setting/ui/Setting.ui" line="117"/>
         <source>初始</source>
         <translation>Initial</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="124"/>
+        <location filename="../Setting/ui/Setting.ui" line="138"/>
         <source>服务器配置</source>
         <translation>Server Configuration</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="128"/>
+        <location filename="../Setting/ui/Setting.ui" line="142"/>
         <source>IP地址</source>
         <translation>IP Address</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="144"/>
+        <location filename="../Setting/ui/Setting.ui" line="158"/>
         <source>托盘</source>
         <translation>System Tray</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="154"/>
+        <location filename="../Setting/ui/Setting.ui" line="168"/>
         <source>是否启用</source>
         <translation>Enable</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="161"/>
+        <location filename="../Setting/ui/Setting.ui" line="175"/>
         <source>全局字体大小</source>
         <translation>Global Font Size</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="174"/>
+        <location filename="../Setting/ui/Setting.ui" line="132"/>
+        <location filename="../Setting/ui/Setting.ui" line="188"/>
+        <location filename="../Setting/ui/Setting.ui" line="581"/>
         <source>主题</source>
         <translation>Theme</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="182"/>
+        <location filename="../Setting/ui/Setting.ui" line="123"/>
+        <source>终端</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Setting/ui/Setting.ui" line="127"/>
+        <location filename="../Setting/ui/Setting.ui" line="558"/>
+        <source>字体</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Setting/ui/Setting.ui" line="196"/>
         <source>跟随系统</source>
         <translation>Follow System</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="187"/>
+        <location filename="../Setting/ui/Setting.ui" line="201"/>
         <source>浅色模式</source>
         <translation>Light Mode</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="192"/>
+        <location filename="../Setting/ui/Setting.ui" line="206"/>
         <source>深色模式</source>
         <translation>Dark Mode</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="200"/>
+        <location filename="../Setting/ui/Setting.ui" line="214"/>
         <source>图标颜色</source>
         <translation>Icon Color</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="207"/>
         <location filename="../Setting/ui/Setting.ui" line="221"/>
+        <location filename="../Setting/ui/Setting.ui" line="235"/>
         <source>选择颜色</source>
         <translation>Choose Color</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="214"/>
+        <location filename="../Setting/ui/Setting.ui" line="228"/>
         <source>辅助图标颜色</source>
         <translation>Secondary Icon Color</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="232"/>
+        <location filename="../Setting/ui/Setting.ui" line="246"/>
         <source>默认
 启用
 目录</source>
@@ -1744,71 +1757,71 @@ Working
 Directory</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="247"/>
-        <location filename="../Setting/ui/Setting.ui" line="440"/>
-        <location filename="../Setting/ui/Setting.ui" line="505"/>
+        <location filename="../Setting/ui/Setting.ui" line="261"/>
+        <location filename="../Setting/ui/Setting.ui" line="454"/>
+        <location filename="../Setting/ui/Setting.ui" line="518"/>
         <source>选取
 路径</source>
         <translation>Select
 Path</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="278"/>
+        <location filename="../Setting/ui/Setting.ui" line="292"/>
         <source>csv文件</source>
         <translation>CSV Files</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="307"/>
+        <location filename="../Setting/ui/Setting.ui" line="321"/>
         <source>image文件</source>
         <translation>Image Files</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="314"/>
+        <location filename="../Setting/ui/Setting.ui" line="328"/>
         <source>xlsx文件</source>
         <translation>XLSX Files</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="321"/>
+        <location filename="../Setting/ui/Setting.ui" line="335"/>
         <source>txt文件</source>
         <translation>TXT Files</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="334"/>
+        <location filename="../Setting/ui/Setting.ui" line="348"/>
         <source>文件操作窗口可见性</source>
         <translation>File Control Panel Visibility</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="361"/>
+        <location filename="../Setting/ui/Setting.ui" line="375"/>
         <source>服务器</source>
         <translation>Server</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="371"/>
+        <location filename="../Setting/ui/Setting.ui" line="385"/>
         <source>用户名</source>
         <translation>Username</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="381"/>
+        <location filename="../Setting/ui/Setting.ui" line="395"/>
         <source>密码</source>
         <translation>Password</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="391"/>
+        <location filename="../Setting/ui/Setting.ui" line="405"/>
         <source>端口</source>
         <translation>Port</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="401"/>
+        <location filename="../Setting/ui/Setting.ui" line="415"/>
         <source>发件人</source>
         <translation>Sender</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="411"/>
+        <location filename="../Setting/ui/Setting.ui" line="425"/>
         <source>收件人</source>
         <translation>Recipient</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="428"/>
+        <location filename="../Setting/ui/Setting.ui" line="442"/>
         <source>程序
 备份
 目录</source>
@@ -1817,22 +1830,22 @@ Backup
 Directory</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="448"/>
+        <location filename="../Setting/ui/Setting.ui" line="462"/>
         <source>云端IP地址</source>
         <translation>Cloud IP Address</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="472"/>
+        <location filename="../Setting/ui/Setting.ui" line="485"/>
         <source>单位均为（时:分）</source>
         <translation>Unit: (hours:minutes)</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="479"/>
+        <location filename="../Setting/ui/Setting.ui" line="492"/>
         <source>通知消息显示时间</source>
         <translation>Notification Display Time</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="490"/>
+        <location filename="../Setting/ui/Setting.ui" line="503"/>
         <source>文件
 下载
 目录</source>
@@ -1841,62 +1854,77 @@ Download
 Directory</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="517"/>
+        <location filename="../Setting/ui/Setting.ui" line="530"/>
         <source>初始加载多久的记录</source>
         <translation>Initial History Load Time</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="534"/>
+        <location filename="../Setting/ui/Setting.ui" line="547"/>
         <source>单位：小时</source>
         <translation>Unit: Hours</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="545"/>
+        <location filename="../Setting/ui/Setting.ui" line="591"/>
+        <source>终端类型</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Setting/ui/Setting.ui" line="598"/>
+        <source>PowerShell</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Setting/ui/Setting.ui" line="605"/>
+        <source>CMD</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Setting/ui/Setting.ui" line="616"/>
         <source>共享文档</source>
         <translation>Shared Documents</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="552"/>
+        <location filename="../Setting/ui/Setting.ui" line="623"/>
         <source>IP端口</source>
         <translation>IP Port</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="559"/>
+        <location filename="../Setting/ui/Setting.ui" line="630"/>
         <source>用户信息</source>
         <translation>User Info</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="569"/>
+        <location filename="../Setting/ui/Setting.ui" line="640"/>
         <source>提交文件</source>
         <translation>Submit File</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="579"/>
+        <location filename="../Setting/ui/Setting.ui" line="650"/>
         <source>云端备份</source>
         <translation>Cloud Backup</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="592"/>
+        <location filename="../Setting/ui/Setting.ui" line="663"/>
         <source>例如：127.0.0.1:5000</source>
         <translation>e.g.: 127.0.0.1:5000</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="599"/>
+        <location filename="../Setting/ui/Setting.ui" line="670"/>
         <source>一键改IP</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="611"/>
+        <location filename="../Setting/ui/Setting.ui" line="682"/>
         <source>确定</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/Setting.cpp" line="37"/>
+        <location filename="../Setting/Setting.cpp" line="53"/>
         <source>配置已保存</source>
         <translation>Configuration Saved</translation>
     </message>
     <message>
-        <location filename="../Setting/Setting.cpp" line="38"/>
+        <location filename="../Setting/Setting.cpp" line="54"/>
         <source>是否需要重启程序以应用配置？</source>
         <translation>Restart the application to apply changes?</translation>
     </message>

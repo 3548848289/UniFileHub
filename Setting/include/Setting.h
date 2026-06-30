@@ -12,7 +12,7 @@
 #include <QMessageBox>
 #include <QProcess>
 #include <QStyleHints>
-
+#include "../../Resources/ThirdParty/KodoTerm/include/KodoTerm/KodoTermConfig.hpp"
 namespace Ui {
 class Setting;
 }
@@ -35,6 +35,9 @@ private slots:
     void on_all_setting_secondaryIconColorBtn_clicked();
 
     void on_all_setting_comboBox_currentIndexChanged(int index);
+    
+    void on_terminal_checkbox_powershell_stateChanged(int state);
+    void on_terminal_checkbox_cmd_stateChanged(int state);
 
 private:
     Ui::Setting *ui;
@@ -42,6 +45,7 @@ private:
     bool is_modified;
     void loadSettings();
     void saveSettings();
+    void initTerminalThemes();
 
     void closeEvent(QCloseEvent *event);
 };

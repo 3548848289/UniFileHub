@@ -69,6 +69,16 @@ public:
     void setWindowPosition(const QPoint &position);
     bool getWindowMaximized();
     void setWindowMaximized(bool maximized);
+    
+    // 终端配置相关方法
+    QString terminal_font_family();
+    void set_terminal_font_family(const QString &family);
+    int terminal_font_size();
+    void set_terminal_font_size(int size);
+    QString terminal_theme();
+    void set_terminal_theme(const QString &theme);
+    QString terminal_type();
+    void set_terminal_type(const QString &type);
 private:
     SettingManager();
     ~SettingManager();

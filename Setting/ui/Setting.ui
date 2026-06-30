@@ -92,7 +92,6 @@
       <property name="text">
        <string>备忘日程</string>
       </property>
- 
       <item>
        <property name="text">
         <string>提前多久提醒</string>
@@ -121,6 +120,21 @@
      </item>
      <item>
       <property name="text">
+       <string>终端</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>字体</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>主题</string>
+       </property>
+      </item>
+     </item>
+     <item>
+      <property name="text">
        <string>服务器配置</string>
       </property>
       <item>
@@ -134,7 +148,7 @@
    <item row="0" column="1">
     <widget class="QStackedWidget" name="stackedWidget">
      <property name="currentIndex">
-      <number>5</number>
+      <number>8</number>
      </property>
      <widget class="QWidget" name="all_setting">
       <layout class="QGridLayout" name="gridLayout_4">
@@ -456,7 +470,6 @@
      </widget>
      <widget class="QWidget" name="tag_schedule">
       <layout class="QGridLayout" name="gridLayout_8">
-
        <item row="3" column="1">
         <widget class="QTimeEdit" name="tag_schedule_timeEdit3"/>
        </item>
@@ -537,6 +550,64 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="terminal">
+       <layout class="QGridLayout" name="gridLayout_terminal">
+        <item row="0" column="0">
+         <widget class="QLabel" name="terminal_font_label">
+          <property name="text">
+           <string>字体</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QFontComboBox" name="terminal_font_combo"/>
+        </item>
+        <item row="0" column="2">
+         <widget class="QSpinBox" name="terminal_font_size_spin">
+          <property name="minimum">
+           <number>8</number>
+          </property>
+          <property name="maximum">
+           <number>72</number>
+          </property>
+          <property name="value">
+           <number>14</number>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="terminal_theme_label">
+          <property name="text">
+           <string>主题</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1" colspan="2">
+         <widget class="QComboBox" name="terminal_theme_combo"/>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="terminal_type_label">
+          <property name="text">
+           <string>终端类型</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QCheckBox" name="terminal_checkbox_powershell">
+          <property name="text">
+           <string>PowerShell</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="2">
+         <widget class="QCheckBox" name="terminal_checkbox_cmd">
+          <property name="text">
+           <string>CMD</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      <widget class="QWidget" name="server_config">
       <layout class="QGridLayout" name="gridLayout_10">
        <item row="4" column="0">

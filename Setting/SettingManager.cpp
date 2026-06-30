@@ -187,3 +187,36 @@ void SettingManager::setWindowMaximized(bool maximized) {
     settings.setValue("window/maximized", maximized);
 }
 
+// 终端配置相关方法
+QString SettingManager::terminal_font_family() {
+    return settings.value("terminal/font_family", "Consolas").toString();
+}
+
+void SettingManager::set_terminal_font_family(const QString &family) {
+    settings.setValue("terminal/font_family", family);
+}
+
+int SettingManager::terminal_font_size() {
+    return settings.value("terminal/font_size", 14).toInt();
+}
+
+void SettingManager::set_terminal_font_size(int size) {
+    settings.setValue("terminal/font_size", size);
+}
+
+QString SettingManager::terminal_theme() {
+    return settings.value("terminal/theme", "Default").toString();
+}
+
+void SettingManager::set_terminal_theme(const QString &theme) {
+    settings.setValue("terminal/theme", theme);
+}
+
+QString SettingManager::terminal_type() {
+    return settings.value("terminal/type", "powershell").toString();
+}
+
+void SettingManager::set_terminal_type(const QString &type) {
+    settings.setValue("terminal/type", type);
+}
+

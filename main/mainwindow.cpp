@@ -437,12 +437,40 @@ void MainWindow::on_actionTerminal_triggered()
     auto *terminal = new KodoTerm(this);
     
 #ifdef Q_OS_WIN
-    terminal->setProgram("powershell.exe");
+    QString terminalType = SettingManager::Instance().terminal_type();
+    terminal->setProgram(terminalType == "powershell" ? "powershell.exe" : "cmd.exe");
 #else
     terminal->setProgram("/bin/bash");
 #endif
     
-    terminal->setTheme(TerminalTheme::loadKonsoleTheme(":/KodoTermThemes/konsole/Breeze.colorscheme"));
+    // 从 SettingManager 获取配置
+    QString fontFamily = SettingManager::Instance().terminal_font_family();
+    int fontSize = SettingManager::Instance().terminal_font_size();
+    QString themeName = SettingManager::Instance().terminal_theme();
+    
+    // 设置字体
+    QFont font(fontFamily, fontSize);
+    font.setStyleHint(QFont::Monospace);
+    terminal->setFont(font);
+    
+    // 设置主题
+    if (themeName == "Default") {
+        terminal->setTheme(TerminalTheme::defaultTheme());
+    } else {
+        // 查找并加载选中的主题
+        auto themes = TerminalTheme::builtInThemes();
+        bool themeFound = false;
+        for (const auto &info : themes) {
+            if (info.name == themeName) {
+                terminal->setTheme(TerminalTheme::loadTheme(info.path));
+                themeFound = true;
+                break;
+            }
+        }
+        if (!themeFound) {
+            terminal->setTheme(TerminalTheme::defaultTheme());
+        }
+    }
     
     tabManager->addWidgetTab(terminal, "终端");
     terminal->show();
