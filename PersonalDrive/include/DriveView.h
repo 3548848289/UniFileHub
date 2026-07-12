@@ -81,6 +81,7 @@ private:
     void loadDownloadHistory();
     void loadUploadHistory();
 
+    QString formatFileSize(qint64 bytes);
 protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
     void dropEvent(QDropEvent *event) override;

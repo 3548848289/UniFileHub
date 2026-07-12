@@ -46,7 +46,7 @@ DriveView::DriveView(QWidget *parent): QWidget(parent), ui(new Ui::DriveView), m
     // ===== 2. Model =====
     m_model = new QStandardItemModel(this);
     m_model->setHorizontalHeaderLabels({
-        tr("名称"), tr("大小(字节)"), tr("上传时间")
+        tr("名称"), tr("大小"), tr("上传时间")
     });
 
     // ===== 3. TableView =====
@@ -113,12 +113,12 @@ DriveView::DriveView(QWidget *parent): QWidget(parent), ui(new Ui::DriveView), m
     // ===== 7. Download History =====
     m_downloadHistoryModel = new QStandardItemModel(this);
     m_downloadHistoryModel->setHorizontalHeaderLabels({
-        tr("文件名"), tr("大小(字节)"), tr("下载时间"), tr("保存路径"), tr("状态")
+        tr("文件名"), tr("大小"), tr("下载时间"), tr("保存路径"), tr("状态")
     });
     
     m_uploadHistoryModel = new QStandardItemModel(this);
     m_uploadHistoryModel->setHorizontalHeaderLabels({
-        tr("文件名"), tr("大小(字节)"), tr("上传时间"), tr("本地路径"), tr("状态")
+        tr("文件名"), tr("大小"), tr("上传时间"), tr("本地路径"), tr("状态")
     });
     
     ui->downloadHistoryTableView->setModel(m_downloadHistoryModel);
@@ -384,7 +384,7 @@ void DriveView::onOperationFailed(const QString &errorMessage)
 void DriveView::loadUploadHistory() {
     m_uploadHistoryModel->clear();
     m_uploadHistoryModel->setHorizontalHeaderLabels({
-        tr("文件名"), tr("大小(字节)"), tr("上传时间"), tr("本地路径"), tr("状态")
+        tr("文件名"), tr("大小"), tr("上传时间"), tr("本地路径"), tr("状态")
     });
     
     QList<DriveUploadRecord> records = m_driveManager->getUploadHistory();
@@ -426,7 +426,7 @@ void DriveView::loadUploadHistory() {
 void DriveView::loadDownloadHistory() {
     m_downloadHistoryModel->clear();
     m_downloadHistoryModel->setHorizontalHeaderLabels({
-        tr("文件名"), tr("大小(字节)"), tr("下载时间"), tr("保存路径"), tr("状态")
+        tr("文件名"), tr("大小"), tr("下载时间"), tr("保存路径"), tr("状态")
     });
     
     QList<DriveDownloadRecord> records = m_driveManager->getDownloadHistory();
@@ -557,7 +557,7 @@ void DriveView::updateFileList(const QList<DriveItem *> &fileList)
         if (!isDir) {
             DriveFile *file = dynamic_cast<DriveFile *>(item);
             if (file) {
-                sizeItem->setText(QString::number(file->getSize()));
+                sizeItem->setText(formatFileSize(file->getSize()));
             }
         }
 
@@ -833,5 +833,18 @@ void DriveView::onUploadHistoryPreviewClicked(int row)
     
     // 如果找不到TabManager，直接打开文件
     QDesktopServices::openUrl(QUrl::fromLocalFile(filePath));
+}
+
+QString DriveView::formatFileSize(qint64 bytes)
+{
+    if (bytes < 1024) {
+        return QString("%1 B").arg(bytes);
+    } else if (bytes < 1024 * 1024) {
+        return QString("%1 KB").arg(bytes / 1024.0, 0, 'f', 2);
+    } else if (bytes < 1024 * 1024 * 1024) {
+        return QString("%1 MB").arg(bytes / (1024.0 * 1024), 0, 'f', 2);
+    } else {
+        return QString("%1 GB").arg(bytes / (1024.0 * 1024 * 1024), 0, 'f', 2);
+    }
 }
 

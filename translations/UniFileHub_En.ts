@@ -96,11 +96,16 @@
     </message>
     <message>
         <location filename="../ClipBoard/ui/ClipboardView.ui" line="74"/>
+        <source>刷新</source>
+        <translation type="unfinished">Refresh</translation>
+    </message>
+    <message>
+        <location filename="../ClipBoard/ui/ClipboardView.ui" line="87"/>
         <source>保存</source>
         <translation>Save</translation>
     </message>
     <message>
-        <location filename="../ClipBoard/ui/ClipboardView.ui" line="87"/>
+        <location filename="../ClipBoard/ui/ClipboardView.ui" line="100"/>
         <source>清空</source>
         <translation>Clear</translation>
     </message>
@@ -623,13 +628,8 @@ Path</translation>
         <translation>Name</translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="49"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="116"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="121"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="387"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="429"/>
         <source>大小(字节)</source>
-        <translation>Size (bytes)</translation>
+        <translation type="vanished">Size (bytes)</translation>
     </message>
     <message>
         <location filename="../PersonalDrive/DriveView.cpp" line="49"/>
@@ -637,6 +637,15 @@ Path</translation>
         <location filename="../PersonalDrive/DriveView.cpp" line="387"/>
         <source>上传时间</source>
         <translation>Upload Time</translation>
+    </message>
+    <message>
+        <location filename="../PersonalDrive/DriveView.cpp" line="49"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="116"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="121"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="387"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="429"/>
+        <source>大小</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../PersonalDrive/DriveView.cpp" line="116"/>
@@ -834,22 +843,22 @@ Refresh file list to get the latest status?</translation>
 <context>
     <name>DriveViewDelegate</name>
     <message>
-        <location filename="../PersonalDrive/DriveViewDelegate.cpp" line="108"/>
+        <location filename="../PersonalDrive/DriveViewDelegate.cpp" line="116"/>
         <source>下载</source>
         <translation>Download</translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveViewDelegate.cpp" line="109"/>
+        <location filename="../PersonalDrive/DriveViewDelegate.cpp" line="117"/>
         <source>删除</source>
         <translation>Delete</translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveViewDelegate.cpp" line="110"/>
+        <location filename="../PersonalDrive/DriveViewDelegate.cpp" line="118"/>
         <source>重命名</source>
         <translation>Rename</translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveViewDelegate.cpp" line="111"/>
+        <location filename="../PersonalDrive/DriveViewDelegate.cpp" line="119"/>
         <source>移动</source>
         <translation>Move</translation>
     </message>
@@ -1362,7 +1371,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <location filename="../MoreFunction/MoreFunction.ui" line="85"/>
-        <source>UniFileHub1.0.0530</source>
+        <source>UniFileHub1.0.0705</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

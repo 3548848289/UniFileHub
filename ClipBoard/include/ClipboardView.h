@@ -31,6 +31,7 @@ public slots:
 private slots:
     void on_clearButton_clicked();
     void on_saveButton_clicked();
+    void on_refreshButton_clicked();
     void on_listWidget_itemDoubleClicked(QListWidgetItem *item);
     void on_listWidget_customContextMenuRequested(const QPoint &pos);
     void on_lineEdit_editingFinished();

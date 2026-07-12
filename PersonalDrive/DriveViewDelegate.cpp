@@ -43,6 +43,14 @@ void DriveViewDelegate::paint(QPainter *painter,
             painter->drawText(textRect, Qt::AlignVCenter | Qt::AlignLeft, text.toString());
         }
     }
+    // 绘制大小和时间列
+    else if (index.column() == 1 || index.column() == 2) {
+        QString text = index.data(Qt::DisplayRole).toString();
+        if (!text.isEmpty()) {
+            painter->setPen(option.palette.text().color());
+            painter->drawText(option.rect, Qt::AlignVCenter | Qt::AlignLeft, text);
+        }
+    }
 
     // -------------------
     // 绘制操作按钮 (hover 行)

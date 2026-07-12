@@ -18,7 +18,7 @@
     <number>0</number>
    </property>
    <item row="2" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout" stretch="2,3,1,1">
+    <layout class="QHBoxLayout" name="horizontalLayout" stretch="2,4,1,1,1">
      <item>
       <widget class="QComboBox" name="typeComboBox">
        <property name="sizePolicy">
@@ -61,6 +61,19 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="refreshButton">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>刷新</string>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QPushButton" name="saveButton">

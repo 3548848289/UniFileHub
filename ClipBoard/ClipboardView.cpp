@@ -304,6 +304,11 @@ void ClipboardView::on_saveButton_clicked()
     m_controller->saveHistory();
 }
 
+void ClipboardView::on_refreshButton_clicked()
+{
+    refreshCloudItems();
+}
+
 void ClipboardView::on_listWidget_itemDoubleClicked(QListWidgetItem *item)
 {
     if (!item) {
