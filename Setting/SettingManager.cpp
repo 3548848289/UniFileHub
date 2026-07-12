@@ -106,6 +106,11 @@ QString SettingManager::personal_drive_download_dir()
     return settings.value("PersonalDrive/DefaultDir").toString();
 }
 
+void SettingManager::set_personal_drive_download_dir(const QString &dir)
+{
+    settings.setValue("PersonalDrive/DefaultDir", dir);
+}
+
 void SettingManager::loadHistory()
 {
     int size = settings.beginReadArray("fileHistory");

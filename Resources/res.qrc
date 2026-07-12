@@ -18,6 +18,8 @@
         <file>PersonalDrive/delete.svg</file>
         <file>PersonalDrive/rename.svg</file>
         <file>PersonalDrive/move.svg</file>
+        <file>PersonalDrive/location.svg</file>
+        <file>PersonalDrive/preview.svg</file>
         <file>Main/FileSystem.svg</file>
         <file>Main/Clipboard.svg</file>
         <file>Main/OnlineDoc.svg</file>

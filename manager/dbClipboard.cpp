@@ -30,7 +30,7 @@ QList<DbClipRecord> dbClipboard::loadRecentNormalHistory(int hours) {
     query.prepare(R"(
         SELECT id, content, is_pinned FROM clipboard_history
         WHERE is_pinned = 0 AND datetime(timestamp) >= datetime('now', ?)
-        ORDER BY timestamp DESC
+        ORDER BY timestamp ASC, id ASC
     )");
     QString timeFilter = QString("-%1 hour").arg(hours);
     query.bindValue(0, timeFilter);

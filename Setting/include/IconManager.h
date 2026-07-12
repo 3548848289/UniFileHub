@@ -12,6 +12,8 @@ public:
         Delete,
         Rename,
         Move,
+        Location,
+        Preview,
         FileSystem,
         Clipboard,
         OnlineDoc,

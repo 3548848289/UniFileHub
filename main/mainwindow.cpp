@@ -3,6 +3,7 @@
 #include "../manager/include/dbService.h"
 #include "../Setting/include/ThemeManager.h"
 #include "../Setting/include/SettingManager.h"
+#include "../../PersonalDrive/include/DriveManager.h"
 #include <QTimer>
 
 void MainWindow::initCoreWidgets() {
@@ -141,6 +142,16 @@ void MainWindow::initConnect() {
 
     connect(file_system, &FileSystem::fileOpened, tabManager, &TabManager::openFile);
     connect(file_system, &FileSystem::deleteFileRequested, tabManager, &TabManager::deleteFile);
+    connect(file_system, &FileSystem::uploadToDriveRequested, this, [this](const QString &filePath) {
+        const QFileInfo fileInfo(filePath);
+        if (!fileInfo.exists() || !fileInfo.isFile()) {
+            QMessageBox::information(this, tr("提示"), tr("请选择一个本地文件上传到网盘。"));
+            return;
+        }
+
+        DriveManager::Instance().uploadFile(filePath, 0);
+        // QMessageBox::information(this, tr("提示"), tr("已开始上传到网盘根目录。"));
+    });
     connect(file_system, &FileSystem::fileSelectedByKeyboard, this, [this](const QString &filePath) {
         // 创建预览标签页
         TabAbstract* previewTab = TabFactory::create(filePath);
@@ -397,6 +408,7 @@ void MainWindow::onTabContextMenuRequested(const QPoint &pos) {
     QAction *closeCurrent = menu.addAction("关闭当前");
     QAction *closeOthers = menu.addAction("关闭其他");
     QAction *closeAll = menu.addAction("关闭全部");
+    QAction *uploadToDrive = menu.addAction("上传到网盘");
 
     QAction *selectedAction = menu.exec(tabWidget->tabBar()->mapToGlobal(pos));
     if (!selectedAction) return;
@@ -412,6 +424,28 @@ void MainWindow::onTabContextMenuRequested(const QPoint &pos) {
         for (int i = tabWidget->count() - 1; i >= 0; --i) {
             tabManager->closeTab(0, 0, i);
         }
+    } else if (selectedAction == uploadToDrive) {
+        QWidget *widget = tabWidget->widget(tabIndex);
+        auto *tab = qobject_cast<TabAbstract *>(widget);
+        if (!tab) {
+            QMessageBox::information(this, tr("提示"), tr("当前页签不是本地文件，无法上传到网盘。"));
+            return;
+        }
+
+        const QString filePath = tab->getCurrentFilePath();
+        if (filePath.isEmpty()) {
+            QMessageBox::information(this, tr("提示"), tr("当前页签还没有保存成文件，请先保存后再上传到网盘。"));
+            return;
+        }
+
+        const QFileInfo fileInfo(filePath);
+        if (!fileInfo.exists() || !fileInfo.isFile()) {
+            QMessageBox::information(this, tr("提示"), tr("当前页签对应的本地文件不存在，无法上传到网盘。"));
+            return;
+        }
+
+        DriveManager::Instance().uploadFile(filePath, 0);
+        // QMessageBox::information(this, tr("提示"), tr("已开始上传到网盘根目录。"));
     }
 
 }

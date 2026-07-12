@@ -54,15 +54,7 @@ ClipboardView::ClipboardView(ClipboardController* controller, QWidget *parent)
         }
 
         m_currentRightClickedItem = item;
-        copyItem();
-        if (auto w = this->window()) {
-            if (SettingManager::Instance().all_setting_fenable_tray()) {
-                w->hide();
-            } else {
-                w->showNormal();
-                w->setWindowState(Qt::WindowMinimized);
-            }
-        }
+        copyItemAndCollapseWindow();
     });
 
     connect(qApp, &QApplication::aboutToQuit, this, &ClipboardView::on_saveButton_clicked);
@@ -193,6 +185,20 @@ void ClipboardView::copyItem()
     }
 }
 
+void ClipboardView::copyItemAndCollapseWindow()
+{
+    copyItem();
+
+    if (auto w = this->window()) {
+        if (SettingManager::Instance().all_setting_fenable_tray()) {
+            w->hide();
+        } else {
+            w->showNormal();
+            w->setWindowState(Qt::WindowMinimized);
+        }
+    }
+}
+
 void ClipboardView::previewImage()
 {
     if (!m_currentRightClickedItem) {
@@ -315,16 +321,7 @@ void ClipboardView::on_listWidget_itemDoubleClicked(QListWidgetItem *item)
         return;
     }
     m_currentRightClickedItem = item;
-    copyItem();
-
-    if (auto w = this->window()) {
-        if (SettingManager::Instance().all_setting_fenable_tray()) {
-            w->hide();
-        } else {
-            w->showNormal();
-            w->setWindowState(Qt::WindowMinimized);
-        }
-    }
+    copyItemAndCollapseWindow();
 }
 
 void ClipboardView::on_listWidget_customContextMenuRequested(const QPoint &pos)
@@ -341,7 +338,7 @@ void ClipboardView::on_listWidget_customContextMenuRequested(const QPoint &pos)
 
     ClipboardMenuBuilder builder;
     QMenu* menu = builder.buildMenu(item,
-                                    [this]{ copyItem(); },
+                                    [this]{ copyItemAndCollapseWindow(); },
                                     [this]{ previewImage(); },
                                     [this]{ openFileLocation(); },
                                     [this]{ deleteItem(); },

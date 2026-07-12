@@ -57,6 +57,7 @@ private:
     void insertNewItem(ClipboardItem *newItem);
     ClipboardItem* findItemForListWidgetItem(QListWidgetItem* listItem);
     QListWidgetItem* findListWidgetItemForClipboardItem(ClipboardItem* item);
+    void copyItemAndCollapseWindow();
     void updateSequenceNumbers();
 };
 

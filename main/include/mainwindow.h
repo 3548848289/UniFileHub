@@ -16,7 +16,7 @@
 
 #include "RecentFilesManager.h"
 #include "WidgetFunctional.h"
-#include "finddialog.h"
+#include "FindDialog.h"
 #include "TabAbstract.h"
 #include "TabManager.h" // 包含LayoutType
 #include "../../DisposeAbstract/DisposeTXT/TabHandleTXT.h"

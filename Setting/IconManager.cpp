@@ -24,6 +24,8 @@ static QString iconPath(IconManager::Icon icon)
     case IconManager::Icon::Delete:   return ":/PersonalDrive/delete.svg";
     case IconManager::Icon::Rename:   return ":/PersonalDrive/rename.svg";
     case IconManager::Icon::Move:     return ":/PersonalDrive/move.svg";
+    case IconManager::Icon::Location: return ":/PersonalDrive/location.svg";
+    case IconManager::Icon::Preview:  return ":/PersonalDrive/preview.svg";
     case IconManager::Icon::FileSystem: return ":/Main/FileSystem.svg";
     case IconManager::Icon::Clipboard: return ":/Main/Clipboard.svg";
     case IconManager::Icon::OnlineDoc: return ":/Main/OnlineDoc.svg";

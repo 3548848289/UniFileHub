@@ -41,6 +41,13 @@
            </property>
           </widget>
          </item>
+         <item>
+          <widget class="QPushButton" name="ClearDriveBtn">
+           <property name="text">
+            <string>清空网盘</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </item>
       </layout>

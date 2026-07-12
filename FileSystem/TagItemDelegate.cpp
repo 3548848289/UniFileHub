@@ -91,6 +91,7 @@ void TagItemDelegate::showContextMenu(const QPoint &pos,
     auto *deleteAction = new QAction(QStringLiteral("删除文件"), &contextMenu);
     auto *newTagAction = new QAction(QStringLiteral("新建标签"), &contextMenu);
     auto *commitAction = new QAction(QStringLiteral("文件备份"), &contextMenu);
+    auto *uploadToDriveAction = new QAction(QStringLiteral("上传到网盘"), &contextMenu);
     auto *copyPathAction = new QAction(QStringLiteral("复制路径"), &contextMenu);
     auto *openInExplorerAction = new QAction(QStringLiteral("在文件夹中打开"), &contextMenu);
 
@@ -99,6 +100,7 @@ void TagItemDelegate::showContextMenu(const QPoint &pos,
     connect(deleteAction, &QAction::triggered, [this, model, index]() { onDeleteFileTriggered(model, index); });
     connect(newTagAction, &QAction::triggered, [this, model, index]() { onNewTagTriggered(model, index); });
     connect(commitAction, &QAction::triggered, [this, model, index]() { onCommitTriggered(model, index); });
+    connect(uploadToDriveAction, &QAction::triggered, [this, model, index]() { onUploadToDriveTriggered(model, index); });
     connect(copyPathAction, &QAction::triggered, [this, model, index]() { onCopyPathTriggered(model, index); });
     connect(openInExplorerAction, &QAction::triggered, [this, model, index]() { onOpenInExplorer(model, index); });
 
@@ -107,6 +109,7 @@ void TagItemDelegate::showContextMenu(const QPoint &pos,
     contextMenu.addAction(deleteAction);
     contextMenu.addAction(newTagAction);
     contextMenu.addAction(commitAction);
+    contextMenu.addAction(uploadToDriveAction);
     contextMenu.addAction(copyPathAction);
     contextMenu.addAction(openInExplorerAction);
     contextMenu.exec(pos);
@@ -220,6 +223,12 @@ void TagItemDelegate::onCommitTriggered(QAbstractItemModel *model, const QModelI
         dbservice.dbBackup().recordSubmission(filePath, backupFilePath);
     }
     commitDialog->deleteLater();
+}
+
+void TagItemDelegate::onUploadToDriveTriggered(QAbstractItemModel *model, const QModelIndex &index)
+{
+    const QString filePath = model->data(index, QFileSystemModel::FilePathRole).toString();
+    emit uploadToDriveRequested(filePath);
 }
 
 void TagItemDelegate::addTag(const QAbstractItemModel *model, const QModelIndex &index, AddTag &tagDialog)

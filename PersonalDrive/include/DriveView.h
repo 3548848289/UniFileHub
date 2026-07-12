@@ -46,6 +46,7 @@ private slots:
     void onActionClicked(int row, int action);
 
     void on_RefreshBtn_clicked();
+    void on_ClearDriveBtn_clicked();
 
     void on_NewFloderBtn_clicked();
     
@@ -74,12 +75,18 @@ private:
     QStandardItemModel * m_uploadHistoryModel;
     DriveManager *m_driveManager;
     int m_currentDirId;
+    bool m_clearDriveRequested = false;
+    bool m_isClearingDrive = false;
+    int m_pendingClearDeleteCount = 0;
+    int m_clearDriveFailedCount = 0;
 
     void loadFileList(int parentId);
     void updateFileList(const QList<DriveItem *> &fileList);
     void buildBreadcrumbPath();
     void loadDownloadHistory();
     void loadUploadHistory();
+    void beginClearDrive(const QList<DriveItem *> &fileList);
+    void finishClearDrive();
 
     QString formatFileSize(qint64 bytes);
 protected:

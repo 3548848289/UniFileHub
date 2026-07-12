@@ -48,6 +48,7 @@ public:
     QString clipboard_sync_server_ip();
     QString personal_drive_server_ip();
     QString personal_drive_download_dir();
+    void set_personal_drive_download_dir(const QString &dir);
     QString file_backup_IP();
     int all_setting_theme();
     QString all_setting_icon_color();

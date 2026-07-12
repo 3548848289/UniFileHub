@@ -43,6 +43,7 @@ signals:
     void filebackuplistOpened();
     void tagopened();
     void fileSelectedByKeyboard(const QString &filePath);
+    void uploadToDriveRequested(const QString &filePath);
 private:
     void loadFileMetadata(const QString &filePath);
     void saveExpirationDate(const QString &filePath, const QDate &expirationDate);

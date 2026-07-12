@@ -49,8 +49,8 @@ void HistoryDelegate::paint(QPainter *painter,
 
         // 按钮
         static const IconManager::Icon icons[] = {
-            IconManager::Icon::File,  // 打开文件所在位置
-            IconManager::Icon::Folder     // 预览
+            IconManager::Icon::Location,  // 打开文件所在位置
+            IconManager::Icon::Preview    // 预览
         };
 
         for (int i = 0; i < btnCount; ++i) {

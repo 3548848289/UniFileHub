@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>500</width>
+    <width>550</width>
     <height>400</height>
    </rect>
   </property>
@@ -148,7 +148,7 @@
    <item row="0" column="1">
     <widget class="QStackedWidget" name="stackedWidget">
      <property name="currentIndex">
-      <number>8</number>
+      <number>9</number>
      </property>
      <widget class="QWidget" name="all_setting">
       <layout class="QGridLayout" name="gridLayout_4">
@@ -551,63 +551,63 @@
       </layout>
      </widget>
      <widget class="QWidget" name="terminal">
-       <layout class="QGridLayout" name="gridLayout_terminal">
-        <item row="0" column="0">
-         <widget class="QLabel" name="terminal_font_label">
-          <property name="text">
-           <string>字体</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QFontComboBox" name="terminal_font_combo"/>
-        </item>
-        <item row="0" column="2">
-         <widget class="QSpinBox" name="terminal_font_size_spin">
-          <property name="minimum">
-           <number>8</number>
-          </property>
-          <property name="maximum">
-           <number>72</number>
-          </property>
-          <property name="value">
-           <number>14</number>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="terminal_theme_label">
-          <property name="text">
-           <string>主题</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1" colspan="2">
-         <widget class="QComboBox" name="terminal_theme_combo"/>
-        </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="terminal_type_label">
-          <property name="text">
-           <string>终端类型</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="1">
-         <widget class="QCheckBox" name="terminal_checkbox_powershell">
-          <property name="text">
-           <string>PowerShell</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="2">
-         <widget class="QCheckBox" name="terminal_checkbox_cmd">
-          <property name="text">
-           <string>CMD</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
+      <layout class="QGridLayout" name="gridLayout_terminal">
+       <item row="0" column="0">
+        <widget class="QLabel" name="terminal_font_label">
+         <property name="text">
+          <string>字体</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QFontComboBox" name="terminal_font_combo"/>
+       </item>
+       <item row="0" column="2">
+        <widget class="QSpinBox" name="terminal_font_size_spin">
+         <property name="minimum">
+          <number>8</number>
+         </property>
+         <property name="maximum">
+          <number>72</number>
+         </property>
+         <property name="value">
+          <number>14</number>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="terminal_theme_label">
+         <property name="text">
+          <string>主题</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1" colspan="2">
+        <widget class="QComboBox" name="terminal_theme_combo"/>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="terminal_type_label">
+         <property name="text">
+          <string>终端类型</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QCheckBox" name="terminal_checkbox_powershell">
+         <property name="text">
+          <string>PowerShell</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2">
+        <widget class="QCheckBox" name="terminal_checkbox_cmd">
+         <property name="text">
+          <string>CMD</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
      <widget class="QWidget" name="server_config">
       <layout class="QGridLayout" name="gridLayout_10">
        <item row="4" column="0">
@@ -701,14 +701,14 @@
        <item row="5" column="2">
         <widget class="QLineEdit" name="server_config_lineEdit5"/>
        </item>
-       <item row="6" column="0">
+       <item row="7" column="0">
         <widget class="QLabel" name="server_config_label7">
          <property name="text">
           <string>云端剪切板</string>
          </property>
         </widget>
        </item>
-       <item row="6" column="2">
+       <item row="7" column="2">
         <widget class="QLineEdit" name="server_config_lineEdit6"/>
        </item>
       </layout>

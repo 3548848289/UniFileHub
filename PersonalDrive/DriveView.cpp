@@ -253,7 +253,7 @@ void DriveView::onItemDoubleClicked(const QModelIndex &index)
                 
                 // 如果设置的路径为空，提示用户设置下载目录
                 if (downloadPath.isEmpty()) {
-                    int reply = QMessageBox::question(this, tr("提示"), tr("下载目录未设置，是否前往设置？"),
+                    int reply = QMessageBox::question(this, tr("提示"), tr("下载目录未设置，是否前往设置？\n若点击“否”，下载目录将设置在用户目录下"),
                                                     QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
                     if (reply == QMessageBox::Yes) {
                         Setting *setting = new Setting();
@@ -262,6 +262,7 @@ void DriveView::onItemDoubleClicked(const QModelIndex &index)
                     } else {
                         // 使用用户路径作为默认值
                         downloadPath = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
+                        SettingManager::Instance().set_personal_drive_download_dir(downloadPath);
                         dir.setPath(downloadPath);
                     }
                 }
@@ -283,6 +284,11 @@ void DriveView::onItemDoubleClicked(const QModelIndex &index)
 void DriveView::onFileListUpdated(const QList<DriveItem *> &fileList)
 {
     updateFileList(fileList);
+
+    if (m_clearDriveRequested && m_currentDirId == 0 && !m_isClearingDrive) {
+        m_clearDriveRequested = false;
+        beginClearDrive(fileList);
+    }
 }
 
 
@@ -305,7 +311,7 @@ void DriveView::onActionClicked(int row, int action)
             
             // 如果设置的路径为空，提示用户设置下载目录
             if (downloadPath.isEmpty()) {
-                    int reply = QMessageBox::question(this, tr("提示"), tr("下载目录未设置，是否前往设置？"),
+                    int reply = QMessageBox::question(this, tr("提示"), tr("下载目录未设置，是否前往设置？\n若点击“否”，下载目录将设置在用户目录下"),
                                                 QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
                     if (reply == QMessageBox::Yes) {
                         Setting *setting = new Setting();
@@ -314,6 +320,7 @@ void DriveView::onActionClicked(int row, int action)
                     } else {
                         // 使用用户路径作为默认值
                         downloadPath = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
+                        SettingManager::Instance().set_personal_drive_download_dir(downloadPath);
                         dir.setPath(downloadPath);
                     }
                 }
@@ -371,12 +378,35 @@ void DriveView::onActionClicked(int row, int action)
 void DriveView::onOperationSuccess(const QString &message)
 {
     qDebug() << "操作成功:" << message;
+
+    if (m_isClearingDrive && message.contains(QStringLiteral("删除成功"))) {
+        if (m_pendingClearDeleteCount > 0) {
+            --m_pendingClearDeleteCount;
+        }
+        if (m_pendingClearDeleteCount == 0) {
+            finishClearDrive();
+        }
+        return;
+    }
+
     QMessageBox::information(this, tr("提示"), message);
 }
 
 void DriveView::onOperationFailed(const QString &errorMessage)
 {
     qDebug() << "操作失败:" << errorMessage;
+
+    if (m_isClearingDrive) {
+        ++m_clearDriveFailedCount;
+        if (m_pendingClearDeleteCount > 0) {
+            --m_pendingClearDeleteCount;
+        }
+        if (m_pendingClearDeleteCount == 0) {
+            finishClearDrive();
+        }
+        return;
+    }
+
     QMessageBox::warning(this, tr("错误"), errorMessage);
 }
 
@@ -582,6 +612,28 @@ void DriveView::on_RefreshBtn_clicked()
     loadUploadHistory();
 }
 
+void DriveView::on_ClearDriveBtn_clicked()
+{
+    if (m_isClearingDrive) {
+        return;
+    }
+
+    if (QMessageBox::question(this,
+                              tr("确认清空"),
+                              tr("确定要清空整个网盘吗？此操作会逐个删除根目录下的项目。"))
+        != QMessageBox::Yes) {
+        return;
+    }
+
+    if (m_currentDirId != 0) {
+        m_clearDriveRequested = true;
+        loadFileList(0);
+        return;
+    }
+
+    beginClearDrive(m_driveManager->getCurrentFileList());
+}
+
 void DriveView::on_NewFloderBtn_clicked()
 {
     // 弹出对话框让用户输入文件夹名称
@@ -596,6 +648,47 @@ void DriveView::on_NewFloderBtn_clicked()
 }
 
 // 下载成功处理
+void DriveView::beginClearDrive(const QList<DriveItem *> &fileList)
+{
+    QList<int> itemIds;
+    itemIds.reserve(fileList.size());
+    for (DriveItem *item : fileList) {
+        if (item) {
+            itemIds.append(item->getId());
+        }
+    }
+
+    if (itemIds.isEmpty()) {
+        QMessageBox::information(this, tr("提示"), tr("网盘已经是空的。"));
+        return;
+    }
+
+    m_isClearingDrive = true;
+    m_pendingClearDeleteCount = itemIds.size();
+    m_clearDriveFailedCount = 0;
+    ui->ClearDriveBtn->setEnabled(false);
+
+    for (int itemId : itemIds) {
+        m_driveManager->deleteItem(itemId);
+    }
+}
+
+void DriveView::finishClearDrive()
+{
+    m_isClearingDrive = false;
+    m_clearDriveRequested = false;
+    ui->ClearDriveBtn->setEnabled(true);
+    on_RefreshBtn_clicked();
+
+    if (m_clearDriveFailedCount == 0) {
+        QMessageBox::information(this, tr("提示"), tr("网盘已清空。"));
+    } else {
+        QMessageBox::warning(this,
+                             tr("提示"),
+                             tr("清空网盘已结束，但仍有 %1 个项目删除失败。").arg(m_clearDriveFailedCount));
+    }
+}
+
 void DriveView::onDownloadSuccess(const QString &filePath) {
     qDebug() << "文件下载成功:" << filePath;
     // 下载状态更新已由DriveManager在onFileDownloaded中处理
@@ -718,7 +811,7 @@ void DriveView::onDownloadHistoryOpenLocationClicked(int row)
     }
     
     // 打开文件所在文件夹
-    FileLocationHelper::openFileLocation(filePath);
+    FileLocationHelper::openFileLocationWithSelection(filePath);
 }
 
 // 下载历史 Delegate - 预览文件
@@ -787,7 +880,7 @@ void DriveView::onUploadHistoryOpenLocationClicked(int row)
     }
     
     // 打开文件所在文件夹
-    FileLocationHelper::openFileLocation(filePath);
+    FileLocationHelper::openFileLocationWithSelection(filePath);
 }
 
 // 上传历史 Delegate - 预览文件

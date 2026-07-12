@@ -6,6 +6,7 @@
 #include <QDragEnterEvent>
 #include <QDropEvent>
 #include "../manager/include/FileLocationHelper.h"
+#include "../../PersonalDrive/include/DriveManager.h"
 
 TabManager::TabManager(QTabWidget* parentTabWidget, QObject* parent) : QObject(parent), tabWidget(parentTabWidget)
 {
@@ -553,6 +554,7 @@ void TabManager::updateLayout() {
                     QAction *openContainingFolder = menu.addAction("打开文件所在位置");
                     // 添加"在文件系统打开"选项
                     QAction *openInFileSystem = menu.addAction("在文件系统打开");
+                    QAction *uploadToDrive = menu.addAction("上传到网盘");
 
                     QAction *selectedAction = menu.exec(currentTabWidget->tabBar()->mapToGlobal(pos));
                     if (!selectedAction) return;
@@ -586,6 +588,28 @@ void TabManager::updateLayout() {
                                 emit openInFileSystemRequested(filePath);
                             }
                         }
+                    } else if (selectedAction == uploadToDrive) {
+                        QWidget* widget = currentTabWidget->widget(tabIndex);
+                        auto* tab = qobject_cast<TabAbstract*>(widget);
+                        if (!tab) {
+                            QMessageBox::information(currentTabWidget, tr("提示"), tr("当前页签不是本地文件，无法上传到网盘。"));
+                            return;
+                        }
+
+                        const QString filePath = tab->getCurrentFilePath();
+                        if (filePath.isEmpty()) {
+                            QMessageBox::information(currentTabWidget, tr("提示"), tr("当前页签还没有保存成文件，请先保存后再上传到网盘。"));
+                            return;
+                        }
+
+                        const QFileInfo fileInfo(filePath);
+                        if (!fileInfo.exists() || !fileInfo.isFile()) {
+                            QMessageBox::information(currentTabWidget, tr("提示"), tr("当前页签对应的本地文件不存在，无法上传到网盘。"));
+                            return;
+                        }
+
+                        DriveManager::Instance().uploadFile(filePath, 0);
+                        // QMessageBox::information(currentTabWidget, tr("提示"), tr("已开始上传到网盘根目录。"));
                     }
                 });
             }

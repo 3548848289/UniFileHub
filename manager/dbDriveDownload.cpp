@@ -58,7 +58,7 @@ QList<DriveDownloadRecord> dbDriveDownload::getDownloadHistory(int limit) {
     query.prepare(QString(R"(
         SELECT id, file_id, file_name, file_size, save_path, download_time, download_status, file_type
         FROM %1
-        ORDER BY download_time DESC
+        ORDER BY download_time DESC, id DESC
         LIMIT :limit
     )").arg(TABLE_NAME));
     

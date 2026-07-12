@@ -197,12 +197,12 @@ void DriveManager::downloadFile(int fileId, const QString &savePath)
 
                 // 添加下载记录（使用处理后的实际保存路径）
                 addDownloadRecord(fileId, file->getName(), file->getSize(), finalPath);
+                m_apiClient->downloadFile(fileId, finalPath);
                 break;
             }
         }
     }
     
-    m_apiClient->downloadFile(fileId, savePath);
 }
 
 void DriveManager::getPath(int dirId)
