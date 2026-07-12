@@ -119,6 +119,7 @@ void Setting::loadSettings() {
     ui->server_config_lineEdit3->setText(settings.value("ServerConfig/IP3", "http://43.139.86.56:5003/").toString());
     ui->server_config_lineEdit4->setText(settings.value("ServerConfig/IP4", "http://43.139.86.56:5001/").toString());
     ui->server_config_lineEdit5->setText(settings.value("PersonalDrive/ServerIP", "http://127.0.0.1:5005/").toString());
+    ui->server_config_lineEdit6->setText(settings.value("ClipboardSync/ServerIP", "http://127.0.0.1:5006/").toString());
     ui->personal_drive_lineEdit->setText(settings.value("PersonalDrive/DefaultDir").toString());
     
     // 设置标签计划的默认时间值
@@ -186,6 +187,7 @@ void Setting::saveSettings() {
     settings.setValue("ServerConfig/IP3", ui->server_config_lineEdit3->text());
     settings.setValue("ServerConfig/IP4", ui->server_config_lineEdit4->text());
     settings.setValue("PersonalDrive/ServerIP", ui->server_config_lineEdit5->text());
+    settings.setValue("ClipboardSync/ServerIP", ui->server_config_lineEdit6->text());
     
     QString personalDriveDir = ui->personal_drive_lineEdit->text();
     if (personalDriveDir.isEmpty())
@@ -315,6 +317,7 @@ void Setting::on_server_config_replaceBtn_clicked()
     replaceHost(ui->server_config_lineEdit3);
     replaceHost(ui->server_config_lineEdit4);
     replaceHost(ui->server_config_lineEdit5);
+    replaceHost(ui->server_config_lineEdit6);
 }
 
 void Setting::on_terminal_checkbox_powershell_stateChanged(int state) {

@@ -701,6 +701,16 @@
        <item row="5" column="2">
         <widget class="QLineEdit" name="server_config_lineEdit5"/>
        </item>
+       <item row="6" column="0">
+        <widget class="QLabel" name="server_config_label7">
+         <property name="text">
+          <string>云端剪切板</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="2">
+        <widget class="QLineEdit" name="server_config_lineEdit6"/>
+       </item>
       </layout>
      </widget>
     </widget>

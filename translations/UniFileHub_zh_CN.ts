@@ -1873,6 +1873,11 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../Setting/ui/Setting.ui" line="707"/>
+        <source>云端剪切板</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../Setting/Setting.cpp" line="53"/>
         <source>配置已保存</source>
         <translation type="unfinished"></translation>
