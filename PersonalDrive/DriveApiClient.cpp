@@ -43,7 +43,7 @@ void DriveApiClient::getFileList(int parentId)
     QNetworkRequest request = createRequest(url);
     
     QNetworkReply *reply = m_networkManager->get(request);
-    
+
     connect(reply, &QNetworkReply::finished, this, [=]() {
         reply->deleteLater();
         
@@ -120,6 +120,16 @@ void DriveApiClient::downloadFile(int fileId, const QString &savePath)
     QNetworkRequest request = createRequest(url);
 
     QNetworkReply *reply = m_networkManager->get(request);
+
+    connect(reply, &QNetworkReply::downloadProgress, this, [=](qint64 bytesReceived, qint64 bytesTotal) {
+        if (bytesTotal <= 0) {
+            emit downloadProgress(fileId, 0);
+            return;
+        }
+
+        const int progress = static_cast<int>(qMin<qint64>(100, bytesReceived * 100 / bytesTotal));
+        emit downloadProgress(fileId, progress);
+    });
 
     connect(reply, &QNetworkReply::finished, this, [=]() {
         reply->deleteLater();

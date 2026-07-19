@@ -1,4 +1,7 @@
 ﻿#include "include/HistoryDelegate.h"
+namespace {
+constexpr int kDownloadProgressRole = Qt::UserRole + 2;
+}
 
 HistoryDelegate::HistoryDelegate(QObject *parent)
     : QStyledItemDelegate(parent)
@@ -21,6 +24,40 @@ void HistoryDelegate::paint(QPainter *painter,
     // 背景
     if (option.state & QStyle::State_Selected) {
         painter->fillRect(option.rect, option.palette.highlight());
+    }
+
+    if (index.column() == index.model()->columnCount() - 2
+        && index.data(kDownloadProgressRole).isValid()) {
+        const int progress = qBound(0, index.data(kDownloadProgressRole).toInt(), 100);
+        const QString progressText = QString("%1%").arg(progress);
+        const QRect contentRect = option.rect.adjusted(8, 8, -8, -8);
+        const int textWidth = 42;
+        const int gap = 8;
+        const QRect textRect(contentRect.right() - textWidth + 1,
+                             contentRect.top(),
+                             textWidth,
+                             contentRect.height());
+        const QRect barRect(contentRect.left(),
+                            contentRect.center().y() - 4,
+                            qMax(20, contentRect.width() - textWidth - gap),
+                            8);
+        const int chunkWidth = barRect.width() * progress / 100;
+
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(QColor("#bae0ff"));
+        painter->drawRoundedRect(barRect, 4, 4);
+
+        if (chunkWidth > 0) {
+            QRect chunkRect = barRect;
+            chunkRect.setWidth(chunkWidth);
+            painter->setBrush(QColor("#1677ff"));
+            painter->drawRoundedRect(chunkRect, 4, 4);
+        }
+
+        painter->setPen(QColor("#003a8c"));
+        painter->drawText(textRect, Qt::AlignRight | Qt::AlignVCenter, progressText);
+        painter->restore();
+        return;
     }
 
     // 绘制普通文本内容（除了最后一列）

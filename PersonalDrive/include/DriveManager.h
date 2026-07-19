@@ -126,7 +126,7 @@ signals:
     void uploadFailed(const QString &errorMessage);
     
     // 文件下载进度信号
-    void downloadProgress(int progress);
+    void downloadProgress(int recordId, int progress);
     
     // 文件下载完成信号
     void fileDownloaded(const QString &filePath);

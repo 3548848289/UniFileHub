@@ -24,12 +24,18 @@
 #include <QHeaderView>
 #include <QScrollBar>
 #include <QResizeEvent>
-#include <QApplication>
 #include <QFrame>
 #include <QShowEvent>
 #include <QTabWidget>
+#include <QVBoxLayout>
 
-DriveView::DriveView(QWidget *parent): QWidget(parent), ui(new Ui::DriveView), m_statusLabel(nullptr), m_currentDirId(0)
+namespace {
+constexpr int kPathRole = Qt::UserRole;
+constexpr int kDownloadRecordIdRole = Qt::UserRole + 1;
+constexpr int kDownloadProgressRole = Qt::UserRole + 2;
+}
+
+DriveView::DriveView(QWidget *parent): QWidget(parent), ui(new Ui::DriveView), m_statusPopup(nullptr), m_statusLabel(nullptr), m_currentDirId(0)
 {
     ui->setupUi(this);
     this->setWindowTitle(tr("Personal Drive"));
@@ -41,11 +47,19 @@ DriveView::DriveView(QWidget *parent): QWidget(parent), ui(new Ui::DriveView), m
 
     ui->verticalLayout->insertWidget(0, breadcrumb);
 
-    m_statusLabel = new QLabel(this);
+    m_statusPopup = new QWidget(this);
+    m_statusPopup->setAttribute(Qt::WA_TransparentForMouseEvents);
+    m_statusPopup->setVisible(false);
+
+    auto statusLayout = new QVBoxLayout(m_statusPopup);
+    statusLayout->setContentsMargins(16, 10, 16, 10);
+    statusLayout->setSpacing(8);
+
+    m_statusLabel = new QLabel(m_statusPopup);
     m_statusLabel->setWordWrap(true);
     m_statusLabel->setAlignment(Qt::AlignCenter);
-    m_statusLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
-    m_statusLabel->setVisible(false);
+
+    statusLayout->addWidget(m_statusLabel);
 
     connect(breadcrumb, &QFileSystemBreadcrumbBar::pathClicked,
             this, [this](int clickedIndex, const QString&) {
@@ -120,6 +134,8 @@ DriveView::DriveView(QWidget *parent): QWidget(parent), ui(new Ui::DriveView), m
             this, &DriveView::onDownloadSuccess);
     connect(m_driveManager, &DriveManager::downloadFailed,
             this, &DriveView::onDownloadFailed);
+    connect(m_driveManager, &DriveManager::downloadProgress,
+            this, &DriveView::onDownloadProgress);
     connect(m_driveManager, &DriveManager::operationSuccess,
             this, &DriveView::onUploadSuccess);
     connect(m_driveManager, &DriveManager::uploadFailed,
@@ -128,12 +144,12 @@ DriveView::DriveView(QWidget *parent): QWidget(parent), ui(new Ui::DriveView), m
     // ===== 7. Download History =====
     m_downloadHistoryModel = new QStandardItemModel(this);
     m_downloadHistoryModel->setHorizontalHeaderLabels({
-        tr("文件名"), tr("大小"), tr("下载时间"), tr("保存路径"), tr("状态"), tr("操作")
+        tr("序号"), tr("文件名"), tr("大小"), tr("下载时间"), tr("状态"), tr("操作")
     });
     
     m_uploadHistoryModel = new QStandardItemModel(this);
     m_uploadHistoryModel->setHorizontalHeaderLabels({
-        tr("文件名"), tr("大小"), tr("上传时间"), tr("本地路径"), tr("状态"), tr("操作")
+        tr("序号"), tr("文件名"), tr("大小"), tr("上传时间"), tr("状态"), tr("操作")
     });
     
     ui->downloadHistoryTableView->setModel(m_downloadHistoryModel);
@@ -224,7 +240,7 @@ DriveView::~DriveView()
 
 void DriveView::showInlineMessage(const QString &message, bool isError)
 {
-    if (!m_statusLabel) {
+    if (!m_statusPopup || !m_statusLabel) {
         return;
     }
 
@@ -232,35 +248,81 @@ void DriveView::showInlineMessage(const QString &message, bool isError)
     const QString borderColor = isError ? "#ff4d4f" : "#52c41a";
     const QString textColor = isError ? "#a8071a" : "#135200";
 
-    m_statusLabel->setStyleSheet(QString(
-        "QLabel {"
+    m_statusPopup->setStyleSheet(QString(
+        "QWidget {"
         "background-color: %1;"
         "border: 1px solid %2;"
         "border-radius: 6px;"
+        "}"
+        "QLabel {"
+        "background: transparent;"
+        "border: none;"
         "color: %3;"
         "font-size: 13px;"
-        "padding: 10px 16px;"
         "}"
     ).arg(backgroundColor, borderColor, textColor));
-    m_statusLabel->setAutoFillBackground(false);
-    m_statusLabel->setFrameShape(QFrame::NoFrame);
-    m_statusLabel->setMargin(0);
+
     m_statusLabel->setText(isError ? tr("错误：%1").arg(message) : message);
     positionStatusPopup();
-    m_statusLabel->raise();
-    m_statusLabel->setVisible(true);
+    m_statusPopup->raise();
+    m_statusPopup->setVisible(true);
 
     const int serial = ++m_statusMessageSerial;
     QTimer::singleShot(3000, this, [this, serial]() {
-        if (m_statusLabel && serial == m_statusMessageSerial) {
-            m_statusLabel->setVisible(false);
+        if (m_statusPopup && serial == m_statusMessageSerial) {
+            m_statusPopup->setVisible(false);
         }
     });
 }
 
+void DriveView::updateDownloadHistoryProgress(int recordId, int progress)
+{
+    if (!m_downloadHistoryModel || recordId <= 0) {
+        return;
+    }
+
+    const int boundedProgress = qBound(0, progress, 100);
+    int targetRow = -1;
+    for (int row = 0; row < m_downloadHistoryModel->rowCount(); ++row) {
+        QStandardItem *statusItem = m_downloadHistoryModel->item(row, 4);
+        if (statusItem && statusItem->data(kDownloadRecordIdRole).toInt() == recordId) {
+            targetRow = row;
+            break;
+        }
+    }
+
+    if (targetRow < 0 && boundedProgress == 0) {
+        loadDownloadHistory();
+        for (int row = 0; row < m_downloadHistoryModel->rowCount(); ++row) {
+            QStandardItem *statusItem = m_downloadHistoryModel->item(row, 4);
+            if (statusItem && statusItem->data(kDownloadRecordIdRole).toInt() == recordId) {
+                targetRow = row;
+                break;
+            }
+        }
+    }
+
+    if (targetRow < 0) {
+        return;
+    }
+
+    QStandardItem *statusItem = m_downloadHistoryModel->item(targetRow, 4);
+    if (!statusItem) {
+        return;
+    }
+
+    statusItem->setText(tr("下载中 %1%").arg(boundedProgress));
+    statusItem->setData(boundedProgress, kDownloadProgressRole);
+    statusItem->setData(recordId, kDownloadRecordIdRole);
+    statusItem->setForeground(QBrush(Qt::blue));
+
+    const QModelIndex statusIndex = m_downloadHistoryModel->index(targetRow, 4);
+    ui->downloadHistoryTableView->viewport()->update(ui->downloadHistoryTableView->visualRect(statusIndex));
+}
+
 void DriveView::positionStatusPopup()
 {
-    if (!m_statusLabel) {
+    if (!m_statusPopup) {
         return;
     }
 
@@ -268,12 +330,12 @@ void DriveView::positionStatusPopup()
     const int popupMaxWidth = qMin(520, availableWidth);
     const int popupMinWidth = qMin(220, popupMaxWidth);
 
-    m_statusLabel->setMinimumWidth(popupMinWidth);
-    m_statusLabel->setMaximumWidth(popupMaxWidth);
-    m_statusLabel->adjustSize();
+    m_statusPopup->setMinimumWidth(popupMinWidth);
+    m_statusPopup->setMaximumWidth(popupMaxWidth);
+    m_statusPopup->adjustSize();
 
-    const int x = qMax(12, (width() - m_statusLabel->width()) / 2);
-    m_statusLabel->move(x, 50);
+    const int x = qMax(12, (width() - m_statusPopup->width()) / 2);
+    m_statusPopup->move(x, 50);
 }
 
 QString DriveView::ensureDownloadDirectory()
@@ -367,18 +429,17 @@ void DriveView::applyHistoryTableLayout(QTableView *tableView)
         return;
     }
 
+    const int indexWidth = 56;
     const int sizeWidth = 96;
     const int timeWidth = 166;
-    const int statusWidth = 92;
+    const int statusWidth = 122;
     const int actionWidth = 86;
-    const int flexibleWidth = qMax(360, totalWidth - sizeWidth - timeWidth - statusWidth - actionWidth);
-    const int fileNameWidth = qMax(160, flexibleWidth * 40 / 100);
-    const int pathWidth = qMax(200, flexibleWidth - fileNameWidth);
+    const int fileNameWidth = qMax(200, totalWidth - indexWidth - sizeWidth - timeWidth - statusWidth - actionWidth);
 
-    tableView->setColumnWidth(0, fileNameWidth);
-    tableView->setColumnWidth(1, sizeWidth);
-    tableView->setColumnWidth(2, timeWidth);
-    tableView->setColumnWidth(3, pathWidth);
+    tableView->setColumnWidth(0, indexWidth);
+    tableView->setColumnWidth(1, fileNameWidth);
+    tableView->setColumnWidth(2, sizeWidth);
+    tableView->setColumnWidth(3, timeWidth);
     tableView->setColumnWidth(4, statusWidth);
     tableView->setColumnWidth(5, actionWidth);
 }
@@ -390,9 +451,15 @@ void DriveView::on_PushFileBtn_clicked()
         downloadDir = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
     }
     
-    QString filePath = QFileDialog::getOpenFileName(this, "选择文件", downloadDir, "所有文件 (*.*)");
-    if (!filePath.isEmpty()) {
-        DriveManager::Instance().uploadFile(filePath, m_currentDirId);
+    QStringList filePaths = QFileDialog::getOpenFileNames(this, tr("选择文件"), downloadDir, tr("所有文件 (*.*)"));
+    if (filePaths.isEmpty()) {
+        return;
+    }
+
+    for (const QString &filePath : filePaths) {
+        if (!filePath.isEmpty()) {
+            DriveManager::Instance().uploadFile(filePath, m_currentDirId);
+        }
     }
 }
 
@@ -530,7 +597,9 @@ void DriveView::onOperationSuccess(const QString &message)
         ui->ClearDriveBtn->setEnabled(true);
     }
 
-    showInlineMessage(message);
+    if (message != tr("文件下载成功")) {
+        showInlineMessage(message);
+    }
 }
 
 void DriveView::onOperationFailed(const QString &errorMessage)
@@ -549,16 +618,19 @@ void DriveView::onOperationFailed(const QString &errorMessage)
 void DriveView::loadUploadHistory() {
     m_uploadHistoryModel->clear();
     m_uploadHistoryModel->setHorizontalHeaderLabels({
-        tr("文件名"), tr("大小"), tr("上传时间"), tr("本地路径"), tr("状态"), tr("操作")
+        tr("序号"), tr("文件名"), tr("大小"), tr("上传时间"), tr("状态"), tr("操作")
     });
     
     QList<DriveUploadRecord> records = m_driveManager->getUploadHistory();
     
+    int rowNumber = 1;
     for (const DriveUploadRecord &record : records) {
+        QStandardItem *indexItem = new QStandardItem(QString::number(rowNumber++));
         QStandardItem *fileNameItem = new QStandardItem(record.fileName);
+        fileNameItem->setToolTip(record.localPath);
+        fileNameItem->setData(record.localPath, kPathRole);
         QStandardItem *fileSizeItem = new QStandardItem(formatFileSize(record.fileSize));
         QStandardItem *uploadTimeItem = new QStandardItem(record.uploadTime.toString("yyyy-MM-dd HH:mm:ss"));
-        QStandardItem *localPathItem = new QStandardItem(record.localPath);
         
         // 根据状态设置显示文本和颜色
         QString statusText;
@@ -583,7 +655,7 @@ void DriveView::loadUploadHistory() {
         }
         
         QStandardItem *actionItem = new QStandardItem();
-        QList<QStandardItem*> items = {fileNameItem, fileSizeItem, uploadTimeItem, localPathItem, statusItem, actionItem};
+        QList<QStandardItem*> items = {indexItem, fileNameItem, fileSizeItem, uploadTimeItem, statusItem, actionItem};
         m_uploadHistoryModel->appendRow(items);
     }
 
@@ -594,16 +666,19 @@ void DriveView::loadUploadHistory() {
 void DriveView::loadDownloadHistory() {
     m_downloadHistoryModel->clear();
     m_downloadHistoryModel->setHorizontalHeaderLabels({
-        tr("文件名"), tr("大小"), tr("下载时间"), tr("保存路径"), tr("状态"), tr("操作")
+        tr("序号"), tr("文件名"), tr("大小"), tr("下载时间"), tr("状态"), tr("操作")
     });
     
     QList<DriveDownloadRecord> records = m_driveManager->getDownloadHistory();
     
+    int rowNumber = 1;
     for (const DriveDownloadRecord &record : records) {
+        QStandardItem *indexItem = new QStandardItem(QString::number(rowNumber++));
         QStandardItem *fileNameItem = new QStandardItem(record.fileName);
+        fileNameItem->setToolTip(record.savePath);
+        fileNameItem->setData(record.savePath, kPathRole);
         QStandardItem *fileSizeItem = new QStandardItem(formatFileSize(record.fileSize));
         QStandardItem *downloadTimeItem = new QStandardItem(record.downloadTime.toString("yyyy-MM-dd HH:mm:ss"));
-        QStandardItem *savePathItem = new QStandardItem(record.savePath);
         
         // 根据状态设置显示文本和颜色
         QString statusText;
@@ -617,6 +692,10 @@ void DriveView::loadDownloadHistory() {
             statusText = record.downloadStatus;
         }
         QStandardItem *statusItem = new QStandardItem(statusText);
+        statusItem->setData(record.id, kDownloadRecordIdRole);
+        if (record.downloadStatus == "downloading") {
+            statusItem->setData(0, kDownloadProgressRole);
+        }
         
         // 设置状态文本颜色
         if (record.downloadStatus == "downloading") {
@@ -628,7 +707,7 @@ void DriveView::loadDownloadHistory() {
         }
         
         QStandardItem *actionItem = new QStandardItem();
-        QList<QStandardItem*> items = {fileNameItem, fileSizeItem, downloadTimeItem, savePathItem, statusItem, actionItem};
+        QList<QStandardItem*> items = {indexItem, fileNameItem, fileSizeItem, downloadTimeItem, statusItem, actionItem};
         m_downloadHistoryModel->appendRow(items);
     }
 
@@ -791,6 +870,14 @@ void DriveView::onDownloadFailed(const QString &errorMessage) {
     }
 }
 
+void DriveView::onDownloadProgress(int recordId, int progress)
+{
+    if (progress <= 0) {
+        showInlineMessage(tr("文件下载中"));
+    }
+    updateDownloadHistoryProgress(recordId, progress);
+}
+
 // 上传成功处理
 void DriveView::onUploadSuccess(const QString &message) {
     qDebug() << "文件上传成功:" << message;
@@ -885,7 +972,8 @@ void DriveView::onDownloadHistoryOpenLocationClicked(int row)
         return;
     }
     
-    QString filePath = m_downloadHistoryModel->item(row, 3)->text(); // 保存路径在第4列
+    QStandardItem *fileNameItem = m_downloadHistoryModel->item(row, 1);
+    QString filePath = fileNameItem ? fileNameItem->data(kPathRole).toString() : QString();
     
     if (filePath.isEmpty()) {
         showInlineMessage(tr("文件路径为空"), true);
@@ -909,7 +997,8 @@ void DriveView::onDownloadHistoryPreviewClicked(int row)
         return;
     }
     
-    QString filePath = m_downloadHistoryModel->item(row, 3)->text(); // 保存路径在第4列
+    QStandardItem *fileNameItem = m_downloadHistoryModel->item(row, 1);
+    QString filePath = fileNameItem ? fileNameItem->data(kPathRole).toString() : QString();
     
     if (filePath.isEmpty()) {
         showInlineMessage(tr("文件路径为空"), true);
@@ -954,7 +1043,8 @@ void DriveView::onUploadHistoryOpenLocationClicked(int row)
         return;
     }
     
-    QString filePath = m_uploadHistoryModel->item(row, 3)->text(); // 本地路径在第4列
+    QStandardItem *fileNameItem = m_uploadHistoryModel->item(row, 1);
+    QString filePath = fileNameItem ? fileNameItem->data(kPathRole).toString() : QString();
     
     if (filePath.isEmpty()) {
         showInlineMessage(tr("文件路径为空"), true);
@@ -978,7 +1068,8 @@ void DriveView::onUploadHistoryPreviewClicked(int row)
         return;
     }
     
-    QString filePath = m_uploadHistoryModel->item(row, 3)->text(); // 本地路径在第4列
+    QStandardItem *fileNameItem = m_uploadHistoryModel->item(row, 1);
+    QString filePath = fileNameItem ? fileNameItem->data(kPathRole).toString() : QString();
     
     if (filePath.isEmpty()) {
         showInlineMessage(tr("文件路径为空"), true);

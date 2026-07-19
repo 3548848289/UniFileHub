@@ -67,6 +67,7 @@ signals:
     
     // 信号：文件下载失败
     void fileDownloadError(const QString &errorMessage);
+    void downloadProgress(int fileId, int progress);
     
     // 信号：文件夹创建成功
     void folderCreated(const QJsonObject &folderInfo);

@@ -67,6 +67,13 @@ void DriveManager::initialize()
     
     connect(m_apiClient, &DriveApiClient::fileDownloaded,
             this, &DriveManager::onFileDownloaded);
+    connect(m_apiClient, &DriveApiClient::downloadProgress,
+            this, [this](int fileId, int progress) {
+                const int recordId = m_downloadRecordMap.value(fileId, -1);
+                if (recordId > 0) {
+                    emit downloadProgress(recordId, progress);
+                }
+            });
     
     connect(m_apiClient, &DriveApiClient::itemDeleted,
             this, &DriveManager::onItemDeleted);
@@ -212,6 +219,10 @@ void DriveManager::downloadFile(int fileId, const QString &savePath)
 
                 // 添加下载记录（使用处理后的实际保存路径）
                 addDownloadRecord(fileId, file->getName(), file->getSize(), finalPath);
+                const int recordId = m_downloadRecordMap.value(fileId, -1);
+                if (recordId > 0) {
+                    emit downloadProgress(recordId, 0);
+                }
                 m_apiClient->downloadFile(fileId, finalPath);
                 break;
             }

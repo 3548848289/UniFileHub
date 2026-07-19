@@ -56,6 +56,7 @@ private slots:
     void onClearHistoryBtnClicked();
     void onDownloadSuccess(const QString &filePath);
     void onDownloadFailed(const QString &errorMessage);
+    void onDownloadProgress(int recordId, int progress);
     void onUploadSuccess(const QString &message);
     void onUploadFailed(const QString &errorMessage);
     
@@ -75,6 +76,7 @@ private:
     QStandardItemModel * m_model;
     QStandardItemModel * m_downloadHistoryModel;
     QStandardItemModel * m_uploadHistoryModel;
+    QWidget *m_statusPopup;
     QLabel *m_statusLabel;
     DriveManager *m_driveManager;
     int m_currentDirId;
@@ -88,6 +90,7 @@ private:
     void loadDownloadHistory();
     void loadUploadHistory();
     void showInlineMessage(const QString &message, bool isError = false);
+    void updateDownloadHistoryProgress(int recordId, int progress);
     QString ensureDownloadDirectory();
     void polishTableView(QTableView *tableView);
     void scheduleTableLayoutUpdate();
