@@ -1,4 +1,4 @@
-#include "include/DriveManager.h"
+﻿#include "include/DriveManager.h"
 #include "include/DriveApiClient.h"
 #include "include/DriveItem.h"
 #include "include/DriveFile.h"
@@ -70,6 +70,9 @@ void DriveManager::initialize()
     
     connect(m_apiClient, &DriveApiClient::itemDeleted,
             this, &DriveManager::onItemDeleted);
+
+    connect(m_apiClient, &DriveApiClient::driveCleared,
+            this, &DriveManager::onDriveCleared);
     
     connect(m_apiClient, &DriveApiClient::itemRenamed,
             this, &DriveManager::onItemRenamed);
@@ -91,6 +94,9 @@ void DriveManager::initialize()
             this, &DriveManager::onError);
     
     connect(m_apiClient, &DriveApiClient::itemDeleteError,
+            this, &DriveManager::onError);
+
+    connect(m_apiClient, &DriveApiClient::driveClearError,
             this, &DriveManager::onError);
     
     connect(m_apiClient, &DriveApiClient::itemRenameError,
@@ -144,6 +150,15 @@ void DriveManager::deleteItem(int itemId)
     }
     
     m_apiClient->deleteItem(itemId);
+}
+
+void DriveManager::clearDrive()
+{
+    if (!m_initialized) {
+        initialize();
+    }
+
+    m_apiClient->clearDrive();
 }
 
 void DriveManager::renameItem(int itemId, const QString &newName)
@@ -305,6 +320,15 @@ void DriveManager::onItemDeleted(int itemId)
     emit operationSuccess("删除成功");
 }
 
+void DriveManager::onDriveCleared(const QJsonObject &result)
+{
+    Q_UNUSED(result);
+
+    m_currentDirectoryId = 0;
+    getCurrentDirectoryFiles(m_currentDirectoryId);
+    emit operationSuccess("网盘已清空");
+}
+
 void DriveManager::onItemRenamed(const QJsonObject &itemInfo)
 {
     // 项目重命名成功，刷新当前目录
@@ -421,6 +445,10 @@ void DriveManager::addDownloadRecord(int fileId, const QString &fileName, qint64
 
 QList<DriveDownloadRecord> DriveManager::getDownloadHistory()
 {
+    if (!m_initialized) {
+        initialize();
+    }
+
     if (!m_dbDriveDownload) {
         return QList<DriveDownloadRecord>();
     }
@@ -484,6 +512,10 @@ void DriveManager::addUploadRecord(int fileId, const QString &fileName, qint64 f
 
 QList<DriveUploadRecord> DriveManager::getUploadHistory()
 {
+    if (!m_initialized) {
+        initialize();
+    }
+
     if (!m_dbDriveUpload) {
         return QList<DriveUploadRecord>();
     }

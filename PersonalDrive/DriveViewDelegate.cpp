@@ -1,4 +1,4 @@
-#include "include/DriveViewDelegate.h"
+﻿#include "include/DriveViewDelegate.h"
 
 
 DriveViewDelegate::DriveViewDelegate(QObject *parent)
@@ -109,7 +109,8 @@ bool DriveViewDelegate::editorEvent(QEvent *event,
     const int btnCount = 4;
 
     QRect rect = option.rect;
-    int x = rect.right() - btnCount * (btnSize + spacing);
+    int buttonsWidth = btnCount * btnSize + (btnCount - 1) * spacing;
+    int x = rect.right() - buttonsWidth;
     int y = rect.center().y() - btnSize / 2;
 
     static const QString tooltips[] = {

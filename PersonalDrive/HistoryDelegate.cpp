@@ -1,4 +1,4 @@
-#include "include/HistoryDelegate.h"
+﻿#include "include/HistoryDelegate.h"
 
 HistoryDelegate::HistoryDelegate(QObject *parent)
     : QStyledItemDelegate(parent)
@@ -83,7 +83,8 @@ bool HistoryDelegate::editorEvent(QEvent *event,
     const int btnCount = 2;
 
     QRect rect = option.rect;
-    int x = rect.right() - btnCount * (btnSize + spacing);
+    int buttonsWidth = btnCount * btnSize + (btnCount - 1) * spacing;
+    int x = rect.right() - buttonsWidth;
     int y = rect.center().y() - btnSize / 2;
 
     static const QString tooltips[] = {

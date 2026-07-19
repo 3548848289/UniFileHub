@@ -31,6 +31,7 @@ public:
     
     // 删除文件/文件夹
     void deleteItem(int itemId);
+    void clearDrive();
     
     // 重命名文件/文件夹
     void renameItem(int itemId, const QString &newName);
@@ -78,6 +79,8 @@ signals:
     
     // 信号：文件/文件夹删除失败
     void itemDeleteError(const QString &errorMessage);
+    void driveCleared(const QJsonObject &result);
+    void driveClearError(const QString &errorMessage);
     
     // 信号：文件/文件夹重命名成功
     void itemRenamed(const QJsonObject &itemInfo);

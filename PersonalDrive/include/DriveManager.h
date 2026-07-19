@@ -44,6 +44,7 @@ public:
     
     // 删除文件或文件夹
     void deleteItem(int itemId);
+    void clearDrive();
     
     // 重命名文件或文件夹
     void renameItem(int itemId, const QString &newName);
@@ -151,6 +152,7 @@ private slots:
     
     // 处理项目删除完成
     void onItemDeleted(int itemId);
+    void onDriveCleared(const QJsonObject &result);
     
     // 处理项目重命名完成
     void onItemRenamed(const QJsonObject &itemInfo);

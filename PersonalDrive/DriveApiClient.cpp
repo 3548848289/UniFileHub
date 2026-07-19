@@ -213,6 +213,40 @@ void DriveApiClient::deleteItem(int itemId)
     });
 }
 
+void DriveApiClient::clearDrive()
+{
+    QUrl url(QString("%1/api/drive/clear").arg(m_serverIp));
+    QNetworkRequest request = createRequest(url);
+
+    QNetworkReply *reply = m_networkManager->deleteResource(request);
+
+    connect(reply, &QNetworkReply::finished, this, [=]() {
+        reply->deleteLater();
+
+        const QByteArray responseBody = reply->readAll();
+        QJsonDocument doc = QJsonDocument::fromJson(responseBody);
+
+        if (reply->error() != QNetworkReply::NoError) {
+            if (doc.isObject()) {
+                const QString message = doc.object().value("msg").toString();
+                if (!message.isEmpty()) {
+                    emit driveClearError(message);
+                    return;
+                }
+            }
+            emit driveClearError(reply->errorString());
+            return;
+        }
+
+        if (!doc.isObject()) {
+            emit driveClearError("Invalid response format");
+            return;
+        }
+
+        emit driveCleared(doc.object());
+    });
+}
+
 void DriveApiClient::getPath(int dirId)
 {
     QUrl url(QString("%1/api/drive/path?dir_id=%2").arg(m_serverIp).arg(dirId));
