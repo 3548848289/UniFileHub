@@ -124,7 +124,7 @@ void TagList::onDetailAction()
 void TagList::onModifyPathAction()
 {
     // 选择新文件路径
-    QString newPath = QFileDialog::getOpenFileName(this, "选择新文件", "", "所有文件 (*.*)");
+    QString newPath = QFileDialog::getOpenFileName(this, "选择新文件", "", "所有文件 (*)");
     if (!newPath.isEmpty()) {
         QString oldFilePath = fileInfo.filePath;
 

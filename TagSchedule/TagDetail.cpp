@@ -77,7 +77,7 @@ TagDetail::~TagDetail()
 }
 
 void TagDetail::on_choosePathBtn_clicked() {
-    QString filePath = QFileDialog::getOpenFileName(this, tr("选择文件"), ".", tr("所有文件 (*.*)"));
+    QString filePath = QFileDialog::getOpenFileName(this, tr("选择文件"), ".", tr("所有文件 (*)"));
     if (!filePath.isEmpty()) {
         // 更新表格中的文件路径
         ui->tableWidget->setItem(0, 1, new QTableWidgetItem(filePath));

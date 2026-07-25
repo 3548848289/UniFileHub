@@ -13,6 +13,12 @@ DriveApiClient::DriveApiClient(QObject *parent)
     m_networkManager = new QNetworkAccessManager(this);
     // 初始化服务器IP缓存
     updateServerIpCache();
+    connect(&SettingManager::Instance(), &SettingManager::settingChanged,
+            this, [this](const QString &key, const QVariant &) {
+                if (key == QStringLiteral("PersonalDrive/ServerIP")) {
+                    updateServerIpCache();
+                }
+            });
 }
 
 DriveApiClient::~DriveApiClient()

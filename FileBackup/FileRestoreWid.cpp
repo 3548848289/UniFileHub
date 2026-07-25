@@ -68,7 +68,7 @@ void FileRestoreWid::on_saveasBtn_clicked()
 {
     QString suggestedName = QFileInfo(file_name).fileName();
     QString savePath = QFileDialog::getSaveFileName(
-        this, tr("另存为"), QDir::homePath() + "/" + suggestedName, tr("所有文件 (*.*)"));
+        this, tr("另存为"), QDir::homePath() + "/" + suggestedName, tr("所有文件 (*)"));
 
     if (savePath.isEmpty())
         return;

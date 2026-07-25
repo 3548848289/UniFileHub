@@ -2,23 +2,168 @@
 #include <QCoreApplication>
 #include <QFile>
 #include <QDir>
+#include <QFileInfo>
+#include <QIODevice>
+#include <QStandardPaths>
+#include <QStringList>
 
-QString SettingManager::getSettingsFilePath() {
-    return QCoreApplication::applicationDirPath() + "/settings.ini";
+namespace {
+
+const char kConfigDirName[] = "UniFileHub";
+const char kSettingsFileName[] = "settings.ini";
+
+QString legacySettingsFilePath()
+{
+    return QDir(QCoreApplication::applicationDirPath()).filePath(kSettingsFileName);
 }
 
-SettingManager::SettingManager() 
-    : settings(getSettingsFilePath(), QSettings::IniFormat) {
-    QString settingsPath = getSettingsFilePath();
-    QFile settingsFile(settingsPath);
-    
-    if (!settingsFile.exists()) {
-        QDir().mkpath(QCoreApplication::applicationDirPath());
-        QFile::copy(":/conf/settings.ini", settingsPath);
+QFile::Permissions userSettingsPermissions()
+{
+    return QFile::ReadOwner | QFile::WriteOwner | QFile::ReadUser | QFile::WriteUser;
+}
+
+bool canReadWriteFile(const QString &filePath)
+{
+    QFile file(filePath);
+    if (!file.exists()) {
+        return false;
     }
+
+    return file.open(QIODevice::ReadWrite | QIODevice::Text);
+}
+
+bool copyFileWithUserPermissions(const QString &sourcePath, const QString &targetPath)
+{
+    if (!QFile::copy(sourcePath, targetPath)) {
+        return false;
+    }
+
+    QFile::setPermissions(targetPath, userSettingsPermissions());
+    return canReadWriteFile(targetPath);
+}
+
+bool createDefaultSettingsFile(const QString &settingsPath)
+{
+    if (copyFileWithUserPermissions(":/conf/settings.ini", settingsPath)) {
+        return true;
+    }
+
+    QFile file(settingsPath);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        return false;
+    }
+
+    file.close();
+    QFile::setPermissions(settingsPath, userSettingsPermissions());
+    return canReadWriteFile(settingsPath);
+}
+
+bool prepareSettingsFile(const QString &settingsPath)
+{
+    const QFileInfo settingsInfo(settingsPath);
+    QDir settingsDir = settingsInfo.dir();
+    if (!settingsDir.exists() && !settingsDir.mkpath(".")) {
+        return false;
+    }
+
+    if (settingsInfo.exists()) {
+        QFile::setPermissions(settingsPath, userSettingsPermissions());
+
+        if (settingsInfo.size() == 0 && QFile::remove(settingsPath)) {
+            return createDefaultSettingsFile(settingsPath);
+        }
+
+        return canReadWriteFile(settingsPath);
+    }
+
+    const QString legacyPath = legacySettingsFilePath();
+    if (QDir::cleanPath(legacyPath) != QDir::cleanPath(settingsPath) &&
+        QFileInfo::exists(legacyPath) &&
+        copyFileWithUserPermissions(legacyPath, settingsPath)) {
+        return true;
+    }
+
+    return createDefaultSettingsFile(settingsPath);
+}
+
+QStringList settingsDirectoryCandidates()
+{
+    QStringList directories;
+
+    auto appendDirectory = [&directories](const QString &directoryPath) {
+        if (directoryPath.isEmpty()) {
+            return;
+        }
+
+        const QString cleanPath = QDir::cleanPath(directoryPath);
+        if (!directories.contains(cleanPath)) {
+            directories.append(cleanPath);
+        }
+    };
+
+    const QString genericConfigPath =
+        QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation);
+    if (!genericConfigPath.isEmpty()) {
+        appendDirectory(QDir(genericConfigPath).filePath(kConfigDirName));
+    }
+
+    const QString appConfigPath =
+        QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
+    if (!appConfigPath.isEmpty()) {
+        const QString configDir = QFileInfo(appConfigPath).fileName().compare(
+                                      kConfigDirName, Qt::CaseInsensitive) == 0
+                                      ? appConfigPath
+                                      : QDir(appConfigPath).filePath(kConfigDirName);
+        appendDirectory(configDir);
+    }
+
+    const QString homePath = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
+    if (!homePath.isEmpty()) {
+        appendDirectory(QDir(homePath).filePath(".unifilehub"));
+    }
+
+    appendDirectory(QCoreApplication::applicationDirPath());
+
+    return directories;
+}
+
+} // namespace
+
+QString SettingManager::getSettingsFilePath() {
+    const QStringList candidateDirs = settingsDirectoryCandidates();
+    for (const QString &dirPath : candidateDirs) {
+        const QString settingsPath = QDir(dirPath).filePath(kSettingsFileName);
+        if (prepareSettingsFile(settingsPath)) {
+            return settingsPath;
+        }
+    }
+
+    return QDir(QCoreApplication::applicationDirPath()).filePath(kSettingsFileName);
+}
+
+SettingManager::SettingManager()
+    : QObject(nullptr),
+      settings(getSettingsFilePath(), QSettings::IniFormat) {
+    QFile::setPermissions(settings.fileName(), userSettingsPermissions());
 }
 
 SettingManager::~SettingManager() {}
+
+QVariant SettingManager::value(const QString &key, const QVariant &defaultValue) const
+{
+    return settings.value(key, defaultValue);
+}
+
+void SettingManager::setValue(const QString &key, const QVariant &value)
+{
+    if (settings.value(key) == value) {
+        return;
+    }
+
+    settings.setValue(key, value);
+    settings.sync();
+    emit settingChanged(key, value);
+}
 
 int SettingManager::all_setting_font_size() {
     return settings.value("all_setting/font_size", 12).toInt();
@@ -58,7 +203,7 @@ bool SettingManager::file_see_csv()
 
 bool SettingManager::file_see_xlsx()
 {
-    return settings.value("file_see/slsx", true).toBool();
+    return settings.value("file_see/xlsx", true).toBool();
 }
 
 bool SettingManager::file_see_img()
@@ -87,6 +232,21 @@ int SettingManager::tag_schedule_show_time() {
 int SettingManager::clip_board_hours() {
     int hours = settings.value("clip_board/hours", 24).toInt();
     return hours;
+}
+
+bool SettingManager::clip_board_double_click_copy_minimize()
+{
+    return settings.value("clip_board/double_click_copy_minimize", true).toBool();
+}
+
+bool SettingManager::clip_board_ctrl_c_copy_minimize()
+{
+    return settings.value("clip_board/ctrl_c_copy_minimize", true).toBool();
+}
+
+bool SettingManager::clip_board_context_menu_copy_minimize()
+{
+    return settings.value("clip_board/context_menu_copy_minimize", true).toBool();
 }
 
 QString SettingManager::serverconfig_ip1()
@@ -124,7 +284,28 @@ QString SettingManager::personal_drive_download_dir()
 
 void SettingManager::set_personal_drive_download_dir(const QString &dir)
 {
-    settings.setValue("PersonalDrive/DefaultDir", dir);
+    setValue("PersonalDrive/DefaultDir", dir);
+}
+
+SettingManager::PersonalDriveNameConflictPolicy SettingManager::personal_drive_name_conflict_policy()
+{
+    const int policy = settings.value("PersonalDrive/NameConflictPolicy",
+                                      int(PersonalDriveNameConflictPolicy::Ask)).toInt();
+
+    switch (policy) {
+    case int(PersonalDriveNameConflictPolicy::Overwrite):
+        return PersonalDriveNameConflictPolicy::Overwrite;
+    case int(PersonalDriveNameConflictPolicy::AutoRename):
+        return PersonalDriveNameConflictPolicy::AutoRename;
+    case int(PersonalDriveNameConflictPolicy::Ask):
+    default:
+        return PersonalDriveNameConflictPolicy::Ask;
+    }
+}
+
+void SettingManager::set_personal_drive_name_conflict_policy(PersonalDriveNameConflictPolicy policy)
+{
+    setValue("PersonalDrive/NameConflictPolicy", int(policy));
 }
 
 void SettingManager::loadHistory()
@@ -146,6 +327,7 @@ void SettingManager::saveHistory()
         settings.setValue("path", fileHistory[i]);
     }
     settings.endArray();
+    settings.sync();
 }
 
 QString SettingManager::getToken() {
@@ -153,7 +335,7 @@ QString SettingManager::getToken() {
 }
 
 void SettingManager::setToken(const QString &token) {
-    settings.setValue("user/token", token);
+    setValue("user/token", token);
 }
 
 QString SettingManager::getRefreshToken() {
@@ -161,7 +343,7 @@ QString SettingManager::getRefreshToken() {
 }
 
 void SettingManager::setRefreshToken(const QString &token) {
-    settings.setValue("user/refresh_token", token);
+    setValue("user/refresh_token", token);
 }
 
 QString SettingManager::getLoginUsername() {
@@ -169,13 +351,14 @@ QString SettingManager::getLoginUsername() {
 }
 
 void SettingManager::setLoginUsername(const QString &username) {
-    settings.setValue("user/username", username);
+    setValue("user/username", username);
 }
 
 void SettingManager::clearLoginSession() {
     settings.remove("user/token");
     settings.remove("user/refresh_token");
     settings.remove("user/username");
+    settings.sync();
 }
 
 QSize SettingManager::getWindowSize() {
@@ -187,6 +370,7 @@ QSize SettingManager::getWindowSize() {
 void SettingManager::setWindowSize(const QSize &size) {
     settings.setValue("window/width", size.width());
     settings.setValue("window/height", size.height());
+    settings.sync();
 }
 
 QPoint SettingManager::getWindowPosition() {
@@ -198,6 +382,7 @@ QPoint SettingManager::getWindowPosition() {
 void SettingManager::setWindowPosition(const QPoint &position) {
     settings.setValue("window/x", position.x());
     settings.setValue("window/y", position.y());
+    settings.sync();
 }
 
 bool SettingManager::getWindowMaximized() {
@@ -206,6 +391,7 @@ bool SettingManager::getWindowMaximized() {
 
 void SettingManager::setWindowMaximized(bool maximized) {
     settings.setValue("window/maximized", maximized);
+    settings.sync();
 }
 
 // 终端配置相关方法
@@ -214,7 +400,7 @@ QString SettingManager::terminal_font_family() {
 }
 
 void SettingManager::set_terminal_font_family(const QString &family) {
-    settings.setValue("terminal/font_family", family);
+    setValue("terminal/font_family", family);
 }
 
 int SettingManager::terminal_font_size() {
@@ -222,7 +408,7 @@ int SettingManager::terminal_font_size() {
 }
 
 void SettingManager::set_terminal_font_size(int size) {
-    settings.setValue("terminal/font_size", size);
+    setValue("terminal/font_size", size);
 }
 
 QString SettingManager::terminal_theme() {
@@ -230,7 +416,7 @@ QString SettingManager::terminal_theme() {
 }
 
 void SettingManager::set_terminal_theme(const QString &theme) {
-    settings.setValue("terminal/theme", theme);
+    setValue("terminal/theme", theme);
 }
 
 QString SettingManager::terminal_type() {
@@ -238,6 +424,6 @@ QString SettingManager::terminal_type() {
 }
 
 void SettingManager::set_terminal_type(const QString &type) {
-    settings.setValue("terminal/type", type);
+    setValue("terminal/type", type);
 }
 

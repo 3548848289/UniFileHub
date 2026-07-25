@@ -2,6 +2,7 @@
 #include "xlsxdocument.h"
 #include "xlsxworkbook.h"
 #include "xlsxworksheet.h"
+#include "../../Setting/include/SettingManager.h"
 #include <QComboBox>
 #include <QSignalBlocker>
 
@@ -15,7 +16,14 @@ TabHandleXLSX::TabHandleXLSX(const QString& filePath, QWidget *parent) : TabAbst
 
     // 添加sheet切换下拉框
     sheetComboBox = new QComboBox(this);
+    sheetComboBox->setVisible(SettingManager::Instance().file_see_xlsx());
     connect(sheetComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &TabHandleXLSX::onSheetChanged);
+    connect(&SettingManager::Instance(), &SettingManager::settingChanged,
+            this, [this](const QString &key, const QVariant &value) {
+                if (key == QStringLiteral("file_see/xlsx")) {
+                    sheetComboBox->setVisible(value.toBool());
+                }
+            });
 
     QSplitter *splitter = new QSplitter(Qt::Vertical, this);
     splitter->addWidget(tableWidget);

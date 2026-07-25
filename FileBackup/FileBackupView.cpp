@@ -23,7 +23,7 @@ FileBackupView::FileBackupView(QWidget *parent) : QWidget(parent), ui(new Ui::Fi
             int index = ui->fileListComboBox->currentIndex();
             if (index != -1) {
                 choosed_file = ui->fileListComboBox->currentText();
-                QString newFilePath = QFileDialog::getOpenFileName(this, tr("选择新的文件路径"), "", tr("所有文件 (*.*)"));
+                QString newFilePath = QFileDialog::getOpenFileName(this, tr("选择新的文件路径"), "", tr("所有文件 (*)"));
                 if (!newFilePath.isEmpty() && newFilePath != choosed_file) {
                     if (dbservice.dbBackup().updateSubmissions(choosed_file, newFilePath)) {
                         ui->fileListComboBox->setItemData(index, newFilePath);
@@ -206,7 +206,7 @@ void FileBackupView::on_backupList_customContextMenuRequested(const QPoint &pos)
             file_restore_wid->exec();
         });
         connect(actionReplace, &QAction::triggered, this, [this, item, file]() {
-            QString newFilePath = QFileDialog::getOpenFileName(this, tr("选择文件"), "", tr("所有文件 (*.*)"));
+            QString newFilePath = QFileDialog::getOpenFileName(this, tr("选择文件"), "", tr("所有文件 (*)"));
             if (!newFilePath.isEmpty()) {
                 dbservice.dbBackup().updateFilePath(file, newFilePath);
                 item->setData(Qt::UserRole, newFilePath);

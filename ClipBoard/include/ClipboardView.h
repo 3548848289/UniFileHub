@@ -8,6 +8,7 @@
 #include "ClipboardItemDelegate.h"
 
 class ClipboardController;
+class QPropertyAnimation;
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class ClipboardView; }
@@ -20,6 +21,9 @@ public:
     explicit ClipboardView(ClipboardController* controller, QWidget *parent = nullptr);
     ~ClipboardView() override;
     void refreshCloudItems();
+
+protected:
+    bool eventFilter(QObject *watched, QEvent *event) override;
 
 public slots:
     void onItemAdded(ClipboardItem* item);
@@ -37,6 +41,7 @@ private slots:
     void on_lineEdit_editingFinished();
     void on_lineEdit_textChanged(const QString &text);
     void on_lineEdit_returnPressed();
+    void on_showPinnedCheckBox_toggled(bool checked);
     void copyItem();
     void previewImage();
     void deleteItem();
@@ -52,12 +57,21 @@ private:
     ClipboardController* m_controller;
     QListWidgetItem* m_currentRightClickedItem;
     QLabel *m_imagePreviewLabel;
+    QPropertyAnimation* m_smoothScrollAnimation;
+    int m_smoothScrollTarget;
 
     void initializeListWidget();
+    void initializeSmoothScrolling();
+    void smoothScrollBy(int delta);
     void insertNewItem(ClipboardItem *newItem);
+    void addItemToListWidget(ClipboardItem *item);
+    void applyItemFont(QListWidgetItem *listItem) const;
+    bool shouldDisplayItem(ClipboardItem *item) const;
+    ClipboardItemType currentFilterType() const;
     ClipboardItem* findItemForListWidgetItem(QListWidgetItem* listItem);
     QListWidgetItem* findListWidgetItemForClipboardItem(ClipboardItem* item);
-    void copyItemAndCollapseWindow();
+    void collapseWindow();
+    void copyItemAndMaybeCollapse(bool shouldCollapse);
     void updateSequenceNumbers();
 };
 

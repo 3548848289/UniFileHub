@@ -50,6 +50,12 @@ void ControlWidTXT::setCurrentCodecName(const QString &codecName)
     updateDisplayLabels();
 }
 
+void ControlWidTXT::setFontSize(int fontSize)
+{
+    m_fontSize = fontSize;
+    updateDisplayLabels();
+}
+
 void ControlWidTXT::updateTextStatistics(int lineCount, int charCount)
 {
     ui->statsDisplayLabel->setText(QString("%1 行, %2 字").arg(lineCount).arg(charCount));

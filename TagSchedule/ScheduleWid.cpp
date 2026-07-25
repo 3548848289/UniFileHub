@@ -23,6 +23,12 @@ ScheduleWid::ScheduleWid(QWidget *parent) : QWidget(parent), ui(new Ui::Schedule
     manager->setMaxCount(5);
     manager->setDisplayTime(showTime * 1000);
     manager->setNotifyWndSize(300, 80);
+    connect(&SettingManager::Instance(), &SettingManager::settingChanged,
+            this, [this](const QString &key, const QVariant &value) {
+                if (key == QStringLiteral("tag_schedule/show_time") && manager) {
+                    manager->setDisplayTime(value.toInt() * 1000);
+                }
+            });
     connect(manager, &NotifyManager::notifyDetail, [](const QVariantMap &data){
         QMessageBox msgbox(QMessageBox::Information,
                            QStringLiteral("具体信息"), data.value("title").toString());

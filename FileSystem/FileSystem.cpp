@@ -104,6 +104,16 @@ FileSystem::FileSystem(QWidget *parent)
     ui->treeView->installEventFilter(this);
     isMouseClick = false;
     isKeyboardSelection = false;
+
+    connect(&SettingManager::Instance(), &SettingManager::settingChanged,
+            this, [this](const QString &key, const QVariant &value) {
+                if (key == QStringLiteral("file_system/file_system_dir")) {
+                    const QString path = value.toString().trimmed();
+                    if (!path.isEmpty()) {
+                        changePath(path);
+                    }
+                }
+            });
 }
 
 

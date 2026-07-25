@@ -13,8 +13,10 @@
 #include "../../manager/include/FileLocationHelper.h"
 #include <QFileDialog>
 #include <QFile>
+#include <QFileInfo>
 #include <QDebug>
 #include <QMessageBox>
+#include <QComboBox>
 #include <QDir>
 #include <QInputDialog>
 #include <QLineEdit>
@@ -29,13 +31,27 @@
 #include <QResizeEvent>
 #include <QFrame>
 #include <QShowEvent>
+#include <QTabBar>
 #include <QTabWidget>
 #include <QVBoxLayout>
+#include <QApplication>
+#include <QByteArray>
+#include <QDrag>
+#include <QMouseEvent>
+#include <algorithm>
 
 namespace {
 constexpr int kPathRole = Qt::UserRole;
 constexpr int kDownloadRecordIdRole = Qt::UserRole + 1;
 constexpr int kDownloadProgressRole = Qt::UserRole + 2;
+constexpr int kHistoryKindRole = Qt::UserRole + 3;
+constexpr const char *kDriveDownloadMimeType = "application/x-unifilehub-drive-file-id";
+
+enum HistoryFilter {
+    HistoryAll = 0,
+    HistoryUpload = 1,
+    HistoryDownload = 2
+};
 
 QString uniqueLocalPath(const QString &path)
 {
@@ -111,11 +127,13 @@ DriveView::DriveView(QWidget *parent): QWidget(parent), ui(new Ui::DriveView), m
     
     // 启用拖拽功能
     ui->tableView->setAcceptDrops(true);
+    ui->tableView->viewport()->setAcceptDrops(true);
     ui->tableView->setDropIndicatorShown(true);
     ui->tableView->setDragDropMode(QAbstractItemView::DropOnly);
     
     // 为tableView安装事件过滤器
     ui->tableView->installEventFilter(this);
+    ui->tableView->viewport()->installEventFilter(this);
 
 
     // ===== 4. Delegate =====
@@ -167,13 +185,20 @@ DriveView::DriveView(QWidget *parent): QWidget(parent), ui(new Ui::DriveView), m
     // ===== 7. Download History =====
     m_downloadHistoryModel = new QStandardItemModel(this);
     m_downloadHistoryModel->setHorizontalHeaderLabels({
-        tr("序号"), tr("文件名"), tr("大小"), tr("下载时间"), tr("状态"), tr("操作")
+        tr("序号"), tr("类型"), tr("文件名"), tr("大小"), tr("时间"), tr("状态"), tr("操作")
     });
     
     m_uploadHistoryModel = new QStandardItemModel(this);
     m_uploadHistoryModel->setHorizontalHeaderLabels({
         tr("序号"), tr("文件名"), tr("大小"), tr("上传时间"), tr("状态"), tr("操作")
     });
+
+    m_historyFilterCombo = new QComboBox(this);
+    m_historyFilterCombo->addItem(tr("全部"), static_cast<int>(HistoryAll));
+    m_historyFilterCombo->addItem(tr("上传历史"), static_cast<int>(HistoryUpload));
+    m_historyFilterCombo->addItem(tr("下载历史"), static_cast<int>(HistoryDownload));
+    m_historyFilterCombo->setMinimumWidth(108);
+    ui->horizontalLayout_3->insertWidget(1, m_historyFilterCombo);
     
     ui->downloadHistoryTableView->setModel(m_downloadHistoryModel);
     ui->downloadHistoryTableView->horizontalHeader()->setStretchLastSection(false);
@@ -205,6 +230,9 @@ DriveView::DriveView(QWidget *parent): QWidget(parent), ui(new Ui::DriveView), m
     
     connect(downloadHistoryDelegate, &HistoryDelegate::previewClicked,
             this, &DriveView::onDownloadHistoryPreviewClicked);
+
+    ui->historyTabWidget->tabBar()->hide();
+    ui->historyTabWidget->setCurrentWidget(ui->downloadTab);
     
     ui->uploadHistoryTableView->setModel(m_uploadHistoryModel);
     ui->uploadHistoryTableView->horizontalHeader()->setStretchLastSection(false);
@@ -241,15 +269,13 @@ DriveView::DriveView(QWidget *parent): QWidget(parent), ui(new Ui::DriveView), m
     ui->splitter->setSizes({300, 150});
     
     // 加载下载历史和上传历史
-    loadDownloadHistory();
-    loadUploadHistory();
+    loadHistory();
 
     
     // 连接清空历史按钮
     connect(ui->clearHistoryBtn, &QPushButton::clicked, this, &DriveView::onClearHistoryBtnClicked);
-    connect(ui->historyTabWidget, &QTabWidget::currentChanged, this, [this]() {
-        scheduleTableLayoutUpdate();
-    });
+    connect(m_historyFilterCombo, QOverload<int>::of(&QComboBox::currentIndexChanged),
+            this, [this]() { loadHistory(); });
 
     QTimer::singleShot(0, this, [this]() {
         loadFileList(m_currentDirId);
@@ -305,9 +331,10 @@ void DriveView::updateDownloadHistoryProgress(int recordId, int progress)
     }
 
     const int boundedProgress = qBound(0, progress, 100);
+    const int statusColumn = m_downloadHistoryModel->columnCount() >= 7 ? 5 : 4;
     int targetRow = -1;
     for (int row = 0; row < m_downloadHistoryModel->rowCount(); ++row) {
-        QStandardItem *statusItem = m_downloadHistoryModel->item(row, 4);
+        QStandardItem *statusItem = m_downloadHistoryModel->item(row, statusColumn);
         if (statusItem && statusItem->data(kDownloadRecordIdRole).toInt() == recordId) {
             targetRow = row;
             break;
@@ -317,7 +344,7 @@ void DriveView::updateDownloadHistoryProgress(int recordId, int progress)
     if (targetRow < 0 && boundedProgress == 0) {
         loadDownloadHistory();
         for (int row = 0; row < m_downloadHistoryModel->rowCount(); ++row) {
-            QStandardItem *statusItem = m_downloadHistoryModel->item(row, 4);
+            QStandardItem *statusItem = m_downloadHistoryModel->item(row, statusColumn);
             if (statusItem && statusItem->data(kDownloadRecordIdRole).toInt() == recordId) {
                 targetRow = row;
                 break;
@@ -329,7 +356,7 @@ void DriveView::updateDownloadHistoryProgress(int recordId, int progress)
         return;
     }
 
-    QStandardItem *statusItem = m_downloadHistoryModel->item(targetRow, 4);
+    QStandardItem *statusItem = m_downloadHistoryModel->item(targetRow, statusColumn);
     if (!statusItem) {
         return;
     }
@@ -339,7 +366,7 @@ void DriveView::updateDownloadHistoryProgress(int recordId, int progress)
     statusItem->setData(recordId, kDownloadRecordIdRole);
     statusItem->setForeground(QBrush(Qt::blue));
 
-    const QModelIndex statusIndex = m_downloadHistoryModel->index(targetRow, 4);
+    const QModelIndex statusIndex = m_downloadHistoryModel->index(targetRow, statusColumn);
     ui->downloadHistoryTableView->viewport()->update(ui->downloadHistoryTableView->visualRect(statusIndex));
 }
 
@@ -453,18 +480,28 @@ void DriveView::applyHistoryTableLayout(QTableView *tableView)
     }
 
     const int indexWidth = 56;
+    const int typeWidth = tableView->model()->columnCount() >= 7 ? 76 : 0;
     const int sizeWidth = 96;
     const int timeWidth = 166;
     const int statusWidth = 122;
     const int actionWidth = 86;
-    const int fileNameWidth = qMax(200, totalWidth - indexWidth - sizeWidth - timeWidth - statusWidth - actionWidth);
+    const int fileNameWidth = qMax(200, totalWidth - indexWidth - typeWidth - sizeWidth - timeWidth - statusWidth - actionWidth);
 
     tableView->setColumnWidth(0, indexWidth);
-    tableView->setColumnWidth(1, fileNameWidth);
-    tableView->setColumnWidth(2, sizeWidth);
-    tableView->setColumnWidth(3, timeWidth);
-    tableView->setColumnWidth(4, statusWidth);
-    tableView->setColumnWidth(5, actionWidth);
+    if (tableView->model()->columnCount() >= 7) {
+        tableView->setColumnWidth(1, typeWidth);
+        tableView->setColumnWidth(2, fileNameWidth);
+        tableView->setColumnWidth(3, sizeWidth);
+        tableView->setColumnWidth(4, timeWidth);
+        tableView->setColumnWidth(5, statusWidth);
+        tableView->setColumnWidth(6, actionWidth);
+    } else {
+        tableView->setColumnWidth(1, fileNameWidth);
+        tableView->setColumnWidth(2, sizeWidth);
+        tableView->setColumnWidth(3, timeWidth);
+        tableView->setColumnWidth(4, statusWidth);
+        tableView->setColumnWidth(5, actionWidth);
+    }
 }
 
 bool DriveView::cloudNameExists(const QString &fileName) const
@@ -478,6 +515,119 @@ bool DriveView::cloudNameExists(const QString &fileName) const
     return false;
 }
 
+bool DriveView::hasUploadableLocalFiles(const QMimeData *mimeData) const
+{
+    if (!mimeData || !mimeData->hasUrls()) {
+        return false;
+    }
+    if (mimeData->hasFormat(kDriveDownloadMimeType)) {
+        return false;
+    }
+
+    const QList<QUrl> urls = mimeData->urls();
+    for (const QUrl &url : urls) {
+        const QString filePath = url.toLocalFile();
+        if (!filePath.isEmpty() && QFileInfo(filePath).isFile()) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void DriveView::uploadLocalFilesFromMimeData(const QMimeData *mimeData)
+{
+    if (!mimeData || !mimeData->hasUrls()) {
+        return;
+    }
+
+    const QList<QUrl> urls = mimeData->urls();
+    for (const QUrl &url : urls) {
+        const QString filePath = url.toLocalFile();
+        QFileInfo fileInfo(filePath);
+
+        if (fileInfo.isFile()) {
+            uploadFileWithConflictCheck(filePath);
+        }
+    }
+}
+
+bool DriveView::startDownloadDrag(const QModelIndex &index)
+{
+    if (!index.isValid()) {
+        return false;
+    }
+
+    if (index.column() == 3) {
+        return false;
+    }
+
+    QStandardItem *item = m_model->item(index.row(), 0);
+    if (!item || item->data(DriveRoles::RoleIsDir).toBool()) {
+        return false;
+    }
+
+    const int id = item->data(DriveRoles::RoleId).toInt();
+    QString fileName = item->data(DriveRoles::RoleText).toString();
+    if (fileName.isEmpty()) {
+        fileName = item->text();
+    }
+
+    if (id <= 0 || fileName.isEmpty()) {
+        return false;
+    }
+
+    QDrag drag(ui->tableView);
+    auto *mimeData = new QMimeData;
+    mimeData->setText(fileName);
+    mimeData->setData(kDriveDownloadMimeType, QByteArray::number(id));
+
+    QString downloadPath = SettingManager::Instance().personal_drive_download_dir();
+    if (downloadPath.isEmpty()) {
+        downloadPath = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
+    }
+    if (!downloadPath.isEmpty()) {
+        mimeData->setUrls({QUrl::fromLocalFile(QDir(downloadPath).absoluteFilePath(fileName))});
+    }
+
+    drag.setMimeData(mimeData);
+
+    bool reachedExternalTarget = false;
+    connect(&drag, &QDrag::targetChanged, &drag, [this, &reachedExternalTarget](QObject *target) {
+        auto *targetWidget = qobject_cast<QWidget *>(target);
+        if (!targetWidget) {
+            return;
+        }
+
+        const bool isDriveTableTarget =
+            targetWidget == ui->tableView
+            || targetWidget == ui->tableView->viewport()
+            || ui->tableView->isAncestorOf(targetWidget)
+            || ui->tableView->viewport()->isAncestorOf(targetWidget);
+
+        if (!isDriveTableTarget) {
+            reachedExternalTarget = true;
+        }
+    });
+
+    QRect rowRect = ui->tableView->visualRect(m_model->index(index.row(), 0));
+    for (int column = 1; column < m_model->columnCount(); ++column) {
+        rowRect = rowRect.united(ui->tableView->visualRect(m_model->index(index.row(), column)));
+    }
+    if (rowRect.isValid()) {
+        drag.setPixmap(ui->tableView->viewport()->grab(rowRect));
+        drag.setHotSpot(QPoint(16, qMax(1, rowRect.height() / 2)));
+    }
+
+    const Qt::DropAction action = drag.exec(Qt::CopyAction, Qt::CopyAction);
+    if (action == Qt::CopyAction || action == Qt::MoveAction || reachedExternalTarget) {
+        downloadFileWithConflictCheck(id, fileName);
+        showInlineMessage(tr("已开始下载：%1").arg(fileName));
+    }
+
+    return true;
+}
+
 void DriveView::uploadFileWithConflictCheck(const QString &filePath)
 {
     QFileInfo fileInfo(filePath);
@@ -489,6 +639,17 @@ void DriveView::uploadFileWithConflictCheck(const QString &filePath)
     if (!cloudNameExists(fileName)) {
         m_driveManager->uploadFile(filePath, m_currentDirId);
         return;
+    }
+
+    switch (SettingManager::Instance().personal_drive_name_conflict_policy()) {
+    case SettingManager::PersonalDriveNameConflictPolicy::Overwrite:
+        m_driveManager->uploadFile(filePath, m_currentDirId, fileName, true);
+        return;
+    case SettingManager::PersonalDriveNameConflictPolicy::AutoRename:
+        m_driveManager->uploadFile(filePath, m_currentDirId);
+        return;
+    case SettingManager::PersonalDriveNameConflictPolicy::Ask:
+        break;
     }
 
     const NameConflictChoice choice = NameConflictDialog::getChoice(
@@ -533,6 +694,17 @@ void DriveView::downloadFileWithConflictCheck(int fileId, const QString &fileNam
         return;
     }
 
+    switch (SettingManager::Instance().personal_drive_name_conflict_policy()) {
+    case SettingManager::PersonalDriveNameConflictPolicy::Overwrite:
+        m_driveManager->downloadFile(fileId, savePath, true);
+        return;
+    case SettingManager::PersonalDriveNameConflictPolicy::AutoRename:
+        m_driveManager->downloadFile(fileId, uniqueLocalPath(savePath), false);
+        return;
+    case SettingManager::PersonalDriveNameConflictPolicy::Ask:
+        break;
+    }
+
     const NameConflictChoice choice = NameConflictDialog::getChoice(
         this,
         fileName,
@@ -571,7 +743,7 @@ void DriveView::on_PushFileBtn_clicked()
         downloadDir = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
     }
     
-    QStringList filePaths = QFileDialog::getOpenFileNames(this, tr("选择文件"), downloadDir, tr("所有文件 (*.*)"));
+    QStringList filePaths = QFileDialog::getOpenFileNames(this, tr("选择文件"), downloadDir, tr("所有文件 (*)"));
     if (filePaths.isEmpty()) {
         return;
     }
@@ -606,24 +778,6 @@ void DriveView::onItemDoubleClicked(const QModelIndex &index)
     if (isDir) {
         // 如果是文件夹，进入文件夹
         loadFileList(id);
-    } else {
-        // 如果是文件，下载文件
-        DriveItem *driveItem = nullptr;
-        // 查找对应的DriveItem
-        for (DriveItem *currentItem : m_driveManager->getCurrentFileList()) {
-            if (currentItem->getId() == id) {
-                driveItem = currentItem;
-                break;
-            }
-        }
-        if (driveItem) {
-            DriveFile *driveFile = dynamic_cast<DriveFile*>(driveItem);
-            if (driveFile) {
-                QString fileName = driveFile->getName();
-                // 开始下载（下载记录由DriveManager在downloadFile中自动添加）
-                downloadFileWithConflictCheck(id, fileName);
-            }
-        }
     }
 }
 
@@ -718,125 +872,162 @@ void DriveView::onOperationFailed(const QString &errorMessage)
     showInlineMessage(errorMessage, true);
 }
 
-// 加载上传历史
-void DriveView::loadUploadHistory() {
-    m_uploadHistoryModel->clear();
-    m_uploadHistoryModel->setHorizontalHeaderLabels({
-        tr("序号"), tr("文件名"), tr("大小"), tr("上传时间"), tr("状态"), tr("操作")
-    });
-    
-    QList<DriveUploadRecord> records = m_driveManager->getUploadHistory();
-    
-    int rowNumber = 1;
-    for (const DriveUploadRecord &record : records) {
-        QStandardItem *indexItem = new QStandardItem(QString::number(rowNumber++));
-        QStandardItem *fileNameItem = new QStandardItem(record.fileName);
-        fileNameItem->setToolTip(record.localPath);
-        fileNameItem->setData(record.localPath, kPathRole);
-        QStandardItem *fileSizeItem = new QStandardItem(formatFileSize(record.fileSize));
-        QStandardItem *uploadTimeItem = new QStandardItem(record.uploadTime.toString("yyyy-MM-dd HH:mm:ss"));
-        
-        // 根据状态设置显示文本和颜色
-        QString statusText;
-        if (record.uploadStatus == "uploading") {
-            statusText = tr("上传中");
-        } else if (record.uploadStatus == "success") {
-            statusText = tr("上传成功");
-        } else if (record.uploadStatus == "failed") {
-            statusText = tr("上传失败");
-        } else {
-            statusText = record.uploadStatus;
-        }
-        QStandardItem *statusItem = new QStandardItem(statusText);
-        
-        // 设置状态文本颜色
-        if (record.uploadStatus == "uploading") {
-            statusItem->setForeground(QBrush(Qt::blue));
-        } else if (record.uploadStatus == "success") {
-            statusItem->setForeground(QBrush(Qt::green));
-        } else if (record.uploadStatus == "failed") {
-            statusItem->setForeground(QBrush(Qt::red));
-        }
-        
-        QStandardItem *actionItem = new QStandardItem();
-        QList<QStandardItem*> items = {indexItem, fileNameItem, fileSizeItem, uploadTimeItem, statusItem, actionItem};
-        m_uploadHistoryModel->appendRow(items);
-    }
-
-    scheduleTableLayoutUpdate();
-}
-
-// 加载下载历史
-void DriveView::loadDownloadHistory() {
+void DriveView::loadHistory()
+{
     m_downloadHistoryModel->clear();
     m_downloadHistoryModel->setHorizontalHeaderLabels({
-        tr("序号"), tr("文件名"), tr("大小"), tr("下载时间"), tr("状态"), tr("操作")
+        tr("序号"), tr("类型"), tr("文件名"), tr("大小"), tr("时间"), tr("状态"), tr("操作")
     });
-    
-    QList<DriveDownloadRecord> records = m_driveManager->getDownloadHistory();
-    
-    int rowNumber = 1;
-    for (const DriveDownloadRecord &record : records) {
-        QStandardItem *indexItem = new QStandardItem(QString::number(rowNumber++));
-        QStandardItem *fileNameItem = new QStandardItem(record.fileName);
-        fileNameItem->setToolTip(record.savePath);
-        fileNameItem->setData(record.savePath, kPathRole);
-        QStandardItem *fileSizeItem = new QStandardItem(formatFileSize(record.fileSize));
-        QStandardItem *downloadTimeItem = new QStandardItem(record.downloadTime.toString("yyyy-MM-dd HH:mm:ss"));
-        
-        // 根据状态设置显示文本和颜色
+
+    struct HistoryEntry {
+        HistoryFilter kind;
+        int recordId = -1;
+        QString fileName;
+        qint64 fileSize = 0;
+        QString path;
+        QDateTime time;
         QString statusText;
-        if (record.downloadStatus == "downloading") {
-            statusText = tr("下载中");
-        } else if (record.downloadStatus == "success") {
-            statusText = tr("下载成功");
-        } else if (record.downloadStatus == "failed") {
-            statusText = tr("下载失败");
-        } else {
-            statusText = record.downloadStatus;
+        QString rawStatus;
+    };
+
+    const int filter = m_historyFilterCombo ? m_historyFilterCombo->currentData().toInt() : HistoryAll;
+    QList<HistoryEntry> entries;
+
+    if (filter == HistoryAll || filter == HistoryUpload) {
+        const QList<DriveUploadRecord> uploadRecords = m_driveManager->getUploadHistory();
+        for (const DriveUploadRecord &record : uploadRecords) {
+            HistoryEntry entry;
+            entry.kind = HistoryUpload;
+            entry.fileName = record.fileName;
+            entry.fileSize = record.fileSize;
+            entry.path = record.localPath;
+            entry.time = record.uploadTime;
+            entry.rawStatus = record.uploadStatus;
+
+            if (record.uploadStatus == "uploading") {
+                entry.statusText = tr("上传中");
+            } else if (record.uploadStatus == "success") {
+                entry.statusText = tr("上传成功");
+            } else if (record.uploadStatus == "failed") {
+                entry.statusText = tr("上传失败");
+            } else {
+                entry.statusText = record.uploadStatus;
+            }
+
+            entries.append(entry);
         }
-        QStandardItem *statusItem = new QStandardItem(statusText);
-        statusItem->setData(record.id, kDownloadRecordIdRole);
-        if (record.downloadStatus == "downloading") {
+    }
+
+    if (filter == HistoryAll || filter == HistoryDownload) {
+        const QList<DriveDownloadRecord> downloadRecords = m_driveManager->getDownloadHistory();
+        for (const DriveDownloadRecord &record : downloadRecords) {
+            HistoryEntry entry;
+            entry.kind = HistoryDownload;
+            entry.recordId = record.id;
+            entry.fileName = record.fileName;
+            entry.fileSize = record.fileSize;
+            entry.path = record.savePath;
+            entry.time = record.downloadTime;
+            entry.rawStatus = record.downloadStatus;
+
+            if (record.downloadStatus == "downloading") {
+                entry.statusText = tr("下载中");
+            } else if (record.downloadStatus == "success") {
+                entry.statusText = tr("下载成功");
+            } else if (record.downloadStatus == "failed") {
+                entry.statusText = tr("下载失败");
+            } else {
+                entry.statusText = record.downloadStatus;
+            }
+
+            entries.append(entry);
+        }
+    }
+
+    std::sort(entries.begin(), entries.end(), [](const HistoryEntry &left, const HistoryEntry &right) {
+        if (left.time == right.time) {
+            return left.recordId > right.recordId;
+        }
+        return left.time > right.time;
+    });
+
+    int rowNumber = 1;
+    for (const HistoryEntry &entry : entries) {
+        QStandardItem *indexItem = new QStandardItem(QString::number(rowNumber++));
+        QStandardItem *typeItem = new QStandardItem(entry.kind == HistoryUpload ? tr("上传") : tr("下载"));
+        typeItem->setData(static_cast<int>(entry.kind), kHistoryKindRole);
+        QStandardItem *fileNameItem = new QStandardItem(entry.fileName);
+        fileNameItem->setToolTip(entry.path);
+        fileNameItem->setData(entry.path, kPathRole);
+        fileNameItem->setData(static_cast<int>(entry.kind), kHistoryKindRole);
+        QStandardItem *fileSizeItem = new QStandardItem(formatFileSize(entry.fileSize));
+        QStandardItem *timeItem = new QStandardItem(entry.time.toString("yyyy-MM-dd HH:mm:ss"));
+        QStandardItem *statusItem = new QStandardItem(entry.statusText);
+
+        if (entry.kind == HistoryDownload) {
+            statusItem->setData(entry.recordId, kDownloadRecordIdRole);
+        }
+        if (entry.kind == HistoryDownload && entry.rawStatus == "downloading") {
             statusItem->setData(0, kDownloadProgressRole);
         }
-        
+
         // 设置状态文本颜色
-        if (record.downloadStatus == "downloading") {
+        if (entry.rawStatus == "uploading" || entry.rawStatus == "downloading") {
             statusItem->setForeground(QBrush(Qt::blue));
-        } else if (record.downloadStatus == "success") {
+        } else if (entry.rawStatus == "success") {
             statusItem->setForeground(QBrush(Qt::green));
-        } else if (record.downloadStatus == "failed") {
+        } else if (entry.rawStatus == "failed") {
             statusItem->setForeground(QBrush(Qt::red));
         }
-        
+
         QStandardItem *actionItem = new QStandardItem();
-        QList<QStandardItem*> items = {indexItem, fileNameItem, fileSizeItem, downloadTimeItem, statusItem, actionItem};
+        QList<QStandardItem*> items = {indexItem, typeItem, fileNameItem, fileSizeItem, timeItem, statusItem, actionItem};
         m_downloadHistoryModel->appendRow(items);
     }
 
     scheduleTableLayoutUpdate();
 }
 
+// 加载上传历史
+void DriveView::loadUploadHistory()
+{
+    loadHistory();
+}
+
+// 加载下载历史
+void DriveView::loadDownloadHistory()
+{
+    loadHistory();
+}
+
 // 清空历史记录
 void DriveView::onClearHistoryBtnClicked() {
-    int currentIndex = ui->historyTabWidget->currentIndex();
-    
-    if (currentIndex == 0) {
-        // 清空下载历史
+    const int filter = m_historyFilterCombo ? m_historyFilterCombo->currentData().toInt() : HistoryAll;
+
+    if (filter == HistoryAll) {
+        if (QMessageBox::question(this, tr("确认清空"), tr("确定要清空全部历史记录吗？")) == QMessageBox::Yes) {
+            const bool downloadCleared = m_driveManager->clearDownloadHistory();
+            const bool uploadCleared = m_driveManager->clearUploadHistory();
+            loadHistory();
+            if (downloadCleared && uploadCleared) {
+                showInlineMessage(tr("全部历史已清空"));
+            } else {
+                showInlineMessage(tr("清空全部历史失败"), true);
+            }
+        }
+    } else if (filter == HistoryDownload) {
         if (QMessageBox::question(this, tr("确认清空"), tr("确定要清空所有下载历史记录吗？")) == QMessageBox::Yes) {
             if (m_driveManager->clearDownloadHistory()) {
-                loadDownloadHistory();
+                loadHistory();
                 showInlineMessage(tr("下载历史已清空"));
             } else {
                 showInlineMessage(tr("清空下载历史失败"), true);
             }
         }
-    } else if (currentIndex == 1) {
-        // 清空上传历史
+    } else if (filter == HistoryUpload) {
         if (QMessageBox::question(this, tr("确认清空"), tr("确定要清空所有上传历史记录吗？")) == QMessageBox::Yes) {
             if (m_driveManager->clearUploadHistory()) {
-                loadUploadHistory();
+                loadHistory();
                 showInlineMessage(tr("上传历史已清空"));
             } else {
                 showInlineMessage(tr("清空上传历史失败"), true);
@@ -919,8 +1110,7 @@ void DriveView::updateFileList(const QList<DriveItem *> &fileList)
 void DriveView::on_RefreshBtn_clicked()
 {
     loadFileList(m_currentDirId);
-    loadDownloadHistory();
-    loadUploadHistory();
+    loadHistory();
 }
 
 void DriveView::on_ClearDriveBtn_clicked()
@@ -1012,55 +1202,78 @@ void DriveView::resizeEvent(QResizeEvent *event)
 
 void DriveView::dragEnterEvent(QDragEnterEvent *event)
 {
-    if (event->mimeData()->hasUrls()) {
+    if (hasUploadableLocalFiles(event->mimeData())) {
+        event->acceptProposedAction();
+    }
+}
+
+void DriveView::dragMoveEvent(QDragMoveEvent *event)
+{
+    if (hasUploadableLocalFiles(event->mimeData())) {
         event->acceptProposedAction();
     }
 }
 
 void DriveView::dropEvent(QDropEvent *event)
 {
-    const QMimeData *mimeData = event->mimeData();
-    if (!mimeData->hasUrls()) {
+    if (!hasUploadableLocalFiles(event->mimeData())) {
         return;
     }
-    
-    QList<QUrl> urls = mimeData->urls();
-    for (const QUrl &url : urls) {
-        QString filePath = url.toLocalFile();
-        QFileInfo fileInfo(filePath);
-        
-        if (fileInfo.isFile()) {
-            // 上传文件
-            uploadFileWithConflictCheck(filePath);
-        }
-        // 文件夹暂时不管
-    }
+
+    uploadLocalFilesFromMimeData(event->mimeData());
+    event->acceptProposedAction();
 }
 
 bool DriveView::eventFilter(QObject *obj, QEvent *event)
 {
-    if (obj == ui->tableView) {
+    if (obj == ui->tableView || obj == ui->tableView->viewport()) {
+        if (event->type() == QEvent::MouseButtonPress) {
+            QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
+            if (mouseEvent->button() == Qt::LeftButton) {
+                QPoint position = mouseEvent->position().toPoint();
+                if (obj == ui->tableView) {
+                    position = ui->tableView->viewport()->mapFrom(ui->tableView, position);
+                }
+
+                m_dragStartPosition = position;
+                m_dragStartIndex = ui->tableView->indexAt(position);
+            }
+        } else if (event->type() == QEvent::MouseMove) {
+            QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
+            if ((mouseEvent->buttons() & Qt::LeftButton) && m_dragStartIndex.isValid()) {
+                QPoint position = mouseEvent->position().toPoint();
+                if (obj == ui->tableView) {
+                    position = ui->tableView->viewport()->mapFrom(ui->tableView, position);
+                }
+
+                if ((position - m_dragStartPosition).manhattanLength() >= QApplication::startDragDistance()) {
+                    const QPersistentModelIndex index = m_dragStartIndex;
+                    m_dragStartIndex = QPersistentModelIndex();
+                    if (startDownloadDrag(index)) {
+                        return true;
+                    }
+                }
+            }
+        } else if (event->type() == QEvent::MouseButtonRelease) {
+            m_dragStartIndex = QPersistentModelIndex();
+        }
+
         if (event->type() == QEvent::DragEnter) {
             QDragEnterEvent *dragEnterEvent = static_cast<QDragEnterEvent*>(event);
-            if (dragEnterEvent->mimeData()->hasUrls()) {
+            if (hasUploadableLocalFiles(dragEnterEvent->mimeData())) {
                 dragEnterEvent->acceptProposedAction();
+                return true;
+            }
+        } else if (event->type() == QEvent::DragMove) {
+            QDragMoveEvent *dragMoveEvent = static_cast<QDragMoveEvent*>(event);
+            if (hasUploadableLocalFiles(dragMoveEvent->mimeData())) {
+                dragMoveEvent->acceptProposedAction();
                 return true;
             }
         } else if (event->type() == QEvent::Drop) {
             QDropEvent *dropEvent = static_cast<QDropEvent*>(event);
-            const QMimeData *mimeData = dropEvent->mimeData();
-            if (mimeData->hasUrls()) {
-                QList<QUrl> urls = mimeData->urls();
-                for (const QUrl &url : urls) {
-                    QString filePath = url.toLocalFile();
-                    QFileInfo fileInfo(filePath);
-                    
-                    if (fileInfo.isFile()) {
-                        // 上传文件
-                        uploadFileWithConflictCheck(filePath);
-                    }
-                    // 文件夹暂时不管
-                }
+            if (hasUploadableLocalFiles(dropEvent->mimeData())) {
+                uploadLocalFilesFromMimeData(dropEvent->mimeData());
                 dropEvent->acceptProposedAction();
                 return true;
             }
@@ -1076,7 +1289,7 @@ void DriveView::onDownloadHistoryOpenLocationClicked(int row)
         return;
     }
     
-    QStandardItem *fileNameItem = m_downloadHistoryModel->item(row, 1);
+    QStandardItem *fileNameItem = m_downloadHistoryModel->item(row, 2);
     QString filePath = fileNameItem ? fileNameItem->data(kPathRole).toString() : QString();
     
     if (filePath.isEmpty()) {
@@ -1101,7 +1314,7 @@ void DriveView::onDownloadHistoryPreviewClicked(int row)
         return;
     }
     
-    QStandardItem *fileNameItem = m_downloadHistoryModel->item(row, 1);
+    QStandardItem *fileNameItem = m_downloadHistoryModel->item(row, 2);
     QString filePath = fileNameItem ? fileNameItem->data(kPathRole).toString() : QString();
     
     if (filePath.isEmpty()) {
@@ -1223,4 +1436,3 @@ QString DriveView::formatFileSize(qint64 bytes)
         return QString("%1 GB").arg(bytes / (1024.0 * 1024 * 1024), 0, 'f', 2);
     }
 }
-

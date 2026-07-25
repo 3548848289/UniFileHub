@@ -6,8 +6,11 @@
 #include <QAbstractItemView>
 #include <QMap>
 #include <QDragEnterEvent>
+#include <QDragMoveEvent>
 #include <QDropEvent>
 #include <QMimeData>
+#include <QPersistentModelIndex>
+#include <QPoint>
 #include <QTableView>
 #include "../../Resources/ThirdParty/QFileSystemBreadcrumbBar/QFileSystemBreadcrumbBar.h"
 
@@ -18,6 +21,7 @@ class DriveView;
 class DriveManager;
 class DriveItem;
 class QLabel;
+class QComboBox;
 
 class DriveView : public QWidget
 {
@@ -78,15 +82,19 @@ private:
     QStandardItemModel * m_uploadHistoryModel;
     QWidget *m_statusPopup;
     QLabel *m_statusLabel;
+    QComboBox *m_historyFilterCombo = nullptr;
     DriveManager *m_driveManager;
     int m_currentDirId;
     bool m_isClearDriveRequesting = false;
     bool m_layoutUpdatePending = false;
     int m_statusMessageSerial = 0;
+    QPoint m_dragStartPosition;
+    QPersistentModelIndex m_dragStartIndex;
 
     void loadFileList(int parentId);
     void updateFileList(const QList<DriveItem *> &fileList);
     void buildBreadcrumbPath();
+    void loadHistory();
     void loadDownloadHistory();
     void loadUploadHistory();
     void showInlineMessage(const QString &message, bool isError = false);
@@ -100,12 +108,16 @@ private:
     void uploadFileWithConflictCheck(const QString &filePath);
     void downloadFileWithConflictCheck(int fileId, const QString &fileName);
     bool cloudNameExists(const QString &fileName) const;
+    bool hasUploadableLocalFiles(const QMimeData *mimeData) const;
+    void uploadLocalFilesFromMimeData(const QMimeData *mimeData);
+    bool startDownloadDrag(const QModelIndex &index);
 
     QString formatFileSize(qint64 bytes);
 protected:
     void showEvent(QShowEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
     void dragEnterEvent(QDragEnterEvent *event) override;
+    void dragMoveEvent(QDragMoveEvent *event) override;
     void dropEvent(QDropEvent *event) override;
     bool eventFilter(QObject *obj, QEvent *event) override;
 };

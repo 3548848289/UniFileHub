@@ -59,6 +59,7 @@ public:
     void openSharedCSVTab(SharedView *sharedView);
     void findInCurrentTab(QWidget *parent);
     int addWidgetTab(QWidget *widget, const QString &displayName);
+    bool activateWidgetTab(QWidget *widget);
     // 删除当前预览标签页
     void removePreviewTab();
     // 设置当前预览标签页

@@ -100,6 +100,22 @@ void MainWindow::initConnect() {
         tabManager->openFile(":/conf/help.txt");
     });
 
+    QAction *openFolderAction = new QAction(tr("打开文件夹"), this);
+    openFolderAction->setIcon(IconManager::icon(IconManager::Icon::Folder, QSize(16, 16)));
+    ui->menufile->insertAction(ui->actionsave, openFolderAction);
+    connect(openFolderAction, &QAction::triggered, this, [this]() {
+        const QString folderPath = QFileDialog::getExistingDirectory(
+            this,
+            tr("打开文件夹"),
+            QString(),
+            QFileDialog::ShowDirsOnly
+        );
+
+        if (!folderPath.isEmpty()) {
+            openFolderInFileSystem(folderPath);
+        }
+    });
+
     connect(ui->actiondownload, &QAction::triggered, this, [this]() {
         ui->stackedWidget->setCurrentWidget(wonlinedoc);
         wonlinedoc->setCurrentTabIndex(1);
@@ -137,6 +153,9 @@ void MainWindow::initConnect() {
     connect(wonlinedoc->download_view, &DownloadView::fileDownloaded, this, &MainWindow::handleFileDownload);
 
     connect(recentFilesManager, &RecentFilesManager::fileOpened, tabManager, &TabManager::openFile);
+    connect(recentFilesManager, &RecentFilesManager::folderOpened, this, [this](const QString &folderPath) {
+        openFolderInFileSystem(folderPath);
+    });
     connect(tabManager, &TabManager::fileOpened,recentFilesManager, &RecentFilesManager::addFile);
 
 
@@ -295,6 +314,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     }
     
     // 设置菜单图标
+    ui->actionopen->setText(tr("打开文件"));
+    ui->actionopen->setToolTip(tr("打开文件"));
     ui->actionopen->setIcon(IconManager::icon(IconManager::Icon::MenuFileOpen, QSize(16, 16)));
     ui->actionsave->setIcon(IconManager::icon(IconManager::Icon::MenuFileSave, QSize(16, 16)));
     ui->actionclose->setIcon(IconManager::icon(IconManager::Icon::MenuFileClose, QSize(16, 16)));
@@ -341,6 +362,29 @@ void MainWindow::togglePanel(QWidget* target) {
     }
 }
 
+void MainWindow::openFolderInFileSystem(const QString &folderPath, bool addToHistory)
+{
+    const QFileInfo folderInfo(folderPath);
+    if (!folderInfo.exists() || !folderInfo.isDir()) {
+        QMessageBox::warning(this, tr("提示"), tr("该文件夹不存在或不是有效文件夹。"));
+        return;
+    }
+
+    const QString absolutePath = folderInfo.absoluteFilePath();
+    ui->stackedWidget->show();
+    ui->stackedWidget->setCurrentWidget(file_system);
+
+    if (auto *splitter = qobject_cast<QSplitter*>(centralWidget())) {
+        splitter->setSizes({60, 340, 600});
+    }
+
+    file_system->changePath(absolutePath);
+
+    if (addToHistory) {
+        recentFilesManager->addFolder(absolutePath);
+    }
+}
+
 void MainWindow::showUserInfoDialog() {
     DInfo *dinfo = widgetfunc->getDInfo();
     if (dinfo != nullptr) {
@@ -362,15 +406,25 @@ void MainWindow::showUserInfoDialog() {
 
 void MainWindow::showSetting()
 {
-    Setting *setting = new Setting();
-    setting->show();
+    if (setiing && tabManager->activateWidgetTab(setiing)) {
+        setiing->show();
+        return;
+    }
+
+    setiing = new Setting();
+    connect(setiing, &QObject::destroyed, this, [this]() {
+        setiing = nullptr;
+    });
+
+    tabManager->addWidgetTab(setiing, QStringLiteral("设置"));
+    setiing->show();
 }
 
 
 
 void MainWindow::on_actionopen_triggered()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), "",
+    QString fileName = QFileDialog::getOpenFileName(this, tr("打开文件"), "",
         tr("All Files (*);;CSV Files (*.csv);;Text Files (*.txt)"));
     if (fileName.isEmpty())
         return;

@@ -139,7 +139,7 @@ void SharedView::on_buildBtn_clicked()
 void SharedView::on_selectBtn_clicked()
 {
     QString filePath =
-        QFileDialog::getOpenFileName(this, tr("选择要共享的文件"), QDir::homePath(),tr("所有文件 (*.*)"));
+        QFileDialog::getOpenFileName(this, tr("选择要共享的文件"), QDir::homePath(), tr("所有文件 (*)"));
     if (filePath.isEmpty()) {
         QMessageBox::information(this, tr("提示"), tr("您未选择任何文件。"));
         return;

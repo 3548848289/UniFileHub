@@ -83,7 +83,7 @@ private:
     FileBackupView * file_backup_view;
     WOnlineDoc* wonlinedoc;
     WidgetFunctional* widgetfunc;
-    Setting * setiing;
+    Setting * setiing = nullptr;
     ScheduleWid * schedule_wid;
     FindDialog *findDialog;
 
@@ -92,6 +92,7 @@ private:
     void initMemubarLayout();
     void onTabContextMenuRequested(const QPoint &pos);
     void togglePanel(QWidget *target);
+    void openFolderInFileSystem(const QString &folderPath, bool addToHistory = true);
 };
 
 #endif // MAINWINDOW_H

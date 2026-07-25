@@ -5,12 +5,27 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
+#include <QTimer>
 #include <QUrl>
+#include <QVariant>
 
 ClipboardCloudClient::ClipboardCloudClient(QObject *parent)
     : QObject(parent),
-      m_networkManager(new QNetworkAccessManager(this))
+      m_networkManager(new QNetworkAccessManager(this)),
+      m_eventReconnectTimer(new QTimer(this))
 {
+    m_eventReconnectTimer->setSingleShot(true);
+    m_eventReconnectTimer->setInterval(3000);
+    connect(m_eventReconnectTimer, &QTimer::timeout,
+            this, &ClipboardCloudClient::restartEventStream);
+
+    connect(&SettingManager::Instance(), &SettingManager::settingChanged,
+            this, [this](const QString &key, const QVariant &) {
+                if (key == QStringLiteral("ClipboardSync/ServerIP") ||
+                    key == QStringLiteral("user/token")) {
+                    restartEventStream();
+                }
+            });
 }
 
 QString ClipboardCloudClient::serviceAddress() const
@@ -96,6 +111,115 @@ void ClipboardCloudClient::deleteItem(int cloudItemId)
                         [this](const QJsonDocument &) { emit deleteSucceeded(); },
                         [this](const QString &message) { emit deleteFailed(message); });
     });
+}
+
+void ClipboardCloudClient::startEventStream()
+{
+    m_eventStreamEnabled = true;
+    restartEventStream();
+}
+
+void ClipboardCloudClient::stopEventStream()
+{
+    m_eventStreamEnabled = false;
+    if (m_eventReconnectTimer) {
+        m_eventReconnectTimer->stop();
+    }
+    if (m_eventReply) {
+        QNetworkReply *reply = m_eventReply;
+        m_eventReply = nullptr;
+        reply->abort();
+        reply->deleteLater();
+    }
+    m_eventBuffer.clear();
+}
+
+void ClipboardCloudClient::restartEventStream()
+{
+    if (!m_eventStreamEnabled) {
+        return;
+    }
+
+    if (m_eventReconnectTimer) {
+        m_eventReconnectTimer->stop();
+    }
+    if (m_eventReply) {
+        QNetworkReply *reply = m_eventReply;
+        m_eventReply = nullptr;
+        reply->abort();
+        reply->deleteLater();
+    }
+    m_eventBuffer.clear();
+
+    if (serviceAddress().isEmpty() || token().isEmpty()) {
+        scheduleEventStreamReconnect();
+        return;
+    }
+
+    QNetworkRequest request(QUrl(serviceAddress() + "/clipboard/events"));
+    request.setRawHeader("Authorization", "Bearer " + token().toUtf8());
+    request.setRawHeader("Accept", "text/event-stream");
+    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+
+    m_eventReply = m_networkManager->get(request);
+    connect(m_eventReply, &QNetworkReply::readyRead, this, [this]() {
+        if (m_eventReply) {
+            processEventStreamBytes(m_eventReply->readAll());
+        }
+    });
+    connect(m_eventReply, &QNetworkReply::finished, this, [this]() {
+        if (!m_eventReply) {
+            return;
+        }
+        QNetworkReply *reply = m_eventReply;
+        m_eventReply = nullptr;
+        reply->deleteLater();
+        scheduleEventStreamReconnect();
+    });
+}
+
+void ClipboardCloudClient::scheduleEventStreamReconnect()
+{
+    if (!m_eventStreamEnabled || !m_eventReconnectTimer) {
+        return;
+    }
+    if (!m_eventReconnectTimer->isActive()) {
+        m_eventReconnectTimer->start();
+    }
+}
+
+void ClipboardCloudClient::processEventStreamBytes(const QByteArray &bytes)
+{
+    m_eventBuffer.append(bytes);
+    m_eventBuffer.replace("\r\n", "\n");
+
+    int separatorIndex = m_eventBuffer.indexOf("\n\n");
+    while (separatorIndex >= 0) {
+        const QByteArray block = m_eventBuffer.left(separatorIndex);
+        m_eventBuffer.remove(0, separatorIndex + 2);
+        processEventStreamBlock(block);
+        separatorIndex = m_eventBuffer.indexOf("\n\n");
+    }
+}
+
+void ClipboardCloudClient::processEventStreamBlock(const QByteArray &block)
+{
+    if (block.trimmed().isEmpty() || block.trimmed().startsWith(':')) {
+        return;
+    }
+
+    bool isClipboardChanged = false;
+    const QList<QByteArray> lines = block.split('\n');
+    for (const QByteArray &line : lines) {
+        if (line.trimmed() == QByteArrayLiteral("event: clipboard_changed")) {
+            isClipboardChanged = true;
+            break;
+        }
+    }
+
+    if (isClipboardChanged) {
+        emit cloudItemsChanged();
+    }
 }
 
 void ClipboardCloudClient::handleJsonReply(

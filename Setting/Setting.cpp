@@ -5,6 +5,12 @@
 #include <QSettings>
 #include <QColorDialog>
 #include <QUrl>
+#include <QCheckBox>
+#include <QComboBox>
+#include <QFontComboBox>
+#include <QSpinBox>
+#include <QTime>
+#include <QTimeEdit>
 #include "include/IconManager.h"
 #include "include/SettingManager.h"
 #include "../Resources/ThirdParty/KodoTerm/include/KodoTerm/KodoTermConfig.hpp"
@@ -18,15 +24,27 @@ Setting::Setting(QWidget *parent) : QWidget(parent), ui(new Ui::Setting)
     ui->treeWidget->setHeaderHidden(true);
 
     ui->tag_schedule_timeEdit3->setDisplayFormat("HH:mm");
+    ui->personal_drive_nameConflictComboBox->addItem(
+        tr("默认覆盖"),
+        int(SettingManager::PersonalDriveNameConflictPolicy::Overwrite));
+    ui->personal_drive_nameConflictComboBox->addItem(
+        tr("默认自动重命名"),
+        int(SettingManager::PersonalDriveNameConflictPolicy::AutoRename));
+    ui->personal_drive_nameConflictComboBox->addItem(
+        tr("默认弹出提示框"),
+        int(SettingManager::PersonalDriveNameConflictPolicy::Ask));
 
     // 初始化终端主题列表
     initTerminalThemes();
 
     if (settings.status() == QSettings::NoError) {
         loadSettings();
+        is_modified = false;
     } else {
         qDebug() << "Settings file status: " << settings.status();
     }
+
+    setupRealtimeBindings();
 }
 
 void Setting::initTerminalThemes() {
@@ -48,8 +66,13 @@ Setting::~Setting() {
     delete ui;
 }
 
-void Setting::closeEvent(QCloseEvent *event) {
+bool Setting::commitSettingsAndMaybeRestart()
+{
     saveSettings();
+    if (!is_modified) {
+        return true;
+    }
+
     QMessageBox::StandardButton reply;
     reply = QMessageBox::question(this,tr("配置已保存"),
         tr("是否需要重启程序以应用配置？"), QMessageBox::Yes | QMessageBox::No);
@@ -58,6 +81,12 @@ void Setting::closeEvent(QCloseEvent *event) {
         QCoreApplication::exit();
     }
 
+    is_modified = false;
+    return true;
+}
+
+void Setting::closeEvent(QCloseEvent *event) {
+    commitSettingsAndMaybeRestart();
     event->accept();
 }
 
@@ -100,6 +129,7 @@ void Setting::loadSettings() {
 
 
     ui->file_backup_lineEdit1->setText(settings.value("file_backup/backup_dir").toString());
+    ui->file_backup_lineEdit2->setText(settings.value("file_backup/IP", "127.0.0.1").toString());
 
 
 
@@ -114,6 +144,12 @@ void Setting::loadSettings() {
     ui->email_service_lineEdit_6->setText(settings.value("EmailConfig/received").toString());
 
     ui->clip_board_spinBox->setValue(settings.value("clip_board/hours", 24).toInt());
+    ui->clip_board_doubleClickMinimizeCheckBox->setChecked(
+        settings.value("clip_board/double_click_copy_minimize", true).toBool());
+    ui->clip_board_ctrlCMinimizeCheckBox->setChecked(
+        settings.value("clip_board/ctrl_c_copy_minimize", true).toBool());
+    ui->clip_board_contextMenuMinimizeCheckBox->setChecked(
+        settings.value("clip_board/context_menu_copy_minimize", true).toBool());
 
     ui->server_config_lineEdit1->setText(settings.value("ServerConfig/IP1", "http://43.139.86.56:5002/").toString());
     ui->server_config_lineEdit2->setText(settings.value("ServerConfig/IP2", "http://43.139.86.56:5000/").toString());
@@ -122,6 +158,15 @@ void Setting::loadSettings() {
     ui->server_config_lineEdit5->setText(settings.value("PersonalDrive/ServerIP", "http://127.0.0.1:5005/").toString());
     ui->server_config_lineEdit6->setText(settings.value("ClipboardSync/ServerIP", "http://127.0.0.1:5006/").toString());
     ui->personal_drive_lineEdit->setText(settings.value("PersonalDrive/DefaultDir").toString());
+    const int nameConflictPolicy = settings.value(
+        "PersonalDrive/NameConflictPolicy",
+        int(SettingManager::PersonalDriveNameConflictPolicy::Ask)).toInt();
+    int nameConflictIndex = ui->personal_drive_nameConflictComboBox->findData(nameConflictPolicy);
+    if (nameConflictIndex < 0) {
+        nameConflictIndex = ui->personal_drive_nameConflictComboBox->findData(
+            int(SettingManager::PersonalDriveNameConflictPolicy::Ask));
+    }
+    ui->personal_drive_nameConflictComboBox->setCurrentIndex(nameConflictIndex);
     
     // 设置标签计划的默认时间值
     // 通知显示时间默认1分钟
@@ -131,85 +176,172 @@ void Setting::loadSettings() {
 }
 
 void Setting::saveSettings() {
-    settings.setValue("all_setting/font_size", ui->all_setting_spinBox->value());
-    settings.setValue("all_setting/theme", ui->all_setting_comboBox->currentIndex());
+    auto setRestartValue = [this](const QString &key, const QVariant &value) {
+        if (settings.value(key) != value) {
+            settings.setValue(key, value);
+            is_modified = true;
+        }
+    };
 
-    settings.setValue("all_setting/fenableray", ui->all_setting_checkBox->isChecked());
+    setRestartValue("all_setting/font_size", ui->all_setting_spinBox->value());
+    setRestartValue("all_setting/theme", ui->all_setting_comboBox->currentIndex());
+
+    setRestartValue("all_setting/fenableray", ui->all_setting_checkBox->isChecked());
     
     // 保存终端设置
-    settings.setValue("terminal/font_family", ui->terminal_font_combo->currentFont().family());
-    settings.setValue("terminal/font_size", ui->terminal_font_size_spin->value());
-    settings.setValue("terminal/theme", ui->terminal_theme_combo->currentText());
+    setRealtimeValue("terminal/font_family", ui->terminal_font_combo->currentFont().family());
+    setRealtimeValue("terminal/font_size", ui->terminal_font_size_spin->value());
+    setRealtimeValue("terminal/theme", ui->terminal_theme_combo->currentText());
     
     // 保存终端类型设置
     QString terminalType = ui->terminal_checkbox_powershell->isChecked() ? "powershell" : "cmd";
-    settings.setValue("terminal/type", terminalType);
+    setRealtimeValue("terminal/type", terminalType);
     
     // 保存图标颜色设置
-    settings.setValue("all_setting/icon_color", ui->all_setting_iconColorBtn->styleSheet().section("background-color: ", 1, 1).section("; color", 0, 0));
-    settings.setValue("all_setting/secondary_icon_color", ui->all_setting_secondaryIconColorBtn->styleSheet().section("background-color: ", 1, 1).section("; color", 0, 0));
+    setRestartValue("all_setting/icon_color", ui->all_setting_iconColorBtn->styleSheet().section("background-color: ", 1, 1).section("; color", 0, 0));
+    setRestartValue("all_setting/secondary_icon_color", ui->all_setting_secondaryIconColorBtn->styleSheet().section("background-color: ", 1, 1).section("; color", 0, 0));
 
     QString filesystemDir = ui->file_system_lineEdit->text();
     if (filesystemDir.isEmpty())
         filesystemDir = settings.value("file_system/file_system_dir", QStandardPaths::writableLocation(QStandardPaths::HomeLocation)).toString();
-    else
-        settings.setValue("file_system/file_system_dir", filesystemDir);
+    setRealtimeValue("file_system/file_system_dir", filesystemDir);
 
-    settings.setValue("file_see/font_size", ui->file_see_spinBox->value());
-    settings.setValue("file_see/txt", ui->file_see_checkBox1->isChecked());
-    settings.setValue("file_see/csv", ui->file_see_checkBox2->isChecked());
-    settings.setValue("file_see/xlsx", ui->file_see_checkBox3->isChecked());
-    settings.setValue("file_see/img", ui->file_see_checkBox4->isChecked());
+    setRealtimeValue("file_see/font_size", ui->file_see_spinBox->value());
+    setRealtimeValue("file_see/txt", ui->file_see_checkBox1->isChecked());
+    setRealtimeValue("file_see/csv", ui->file_see_checkBox2->isChecked());
+    setRealtimeValue("file_see/xlsx", ui->file_see_checkBox3->isChecked());
+    setRealtimeValue("file_see/img", ui->file_see_checkBox4->isChecked());
 
     QString backupDir = ui->file_backup_lineEdit1->text();
     if (backupDir.isEmpty())
         backupDir = settings.value("file_backup/backup_dir", QCoreApplication::applicationDirPath() + "/user").toString();
-    else
-        settings.setValue("file_backup/backup_dir", backupDir);
+    setRealtimeValue("file_backup/backup_dir", backupDir);
+    setRealtimeValue("file_backup/IP", ui->file_backup_lineEdit2->text().trimmed());
 
 
 
 
     QTime showTime = ui->tag_schedule_timeEdit3->time();
     int showTimeInSeconds = showTime.hour() * 3600 + showTime.minute() * 60 + showTime.second();
-    settings.setValue("tag_schedule/show_time", showTimeInSeconds);
+    setRealtimeValue("tag_schedule/show_time", showTimeInSeconds);
 
-    QString emailHost = ui->email_service_lineEdit_1->text().trimmed();
-    QString emailUsername = ui->email_service_lineEdit_2->text().trimmed();
-    QString emailPassword = ui->email_service_lineEdit_3->text().trimmed();
-    QString emailPort = ui->email_service_lineEdit_4->text().trimmed();
-    QString emailSender = ui->email_service_lineEdit_5->text().trimmed();
-    QString emailReceived = ui->email_service_lineEdit_6->text().trimmed();
-    
-    if (!emailHost.isEmpty())
-        settings.setValue("EmailConfig/host", emailHost);
-    if (!emailUsername.isEmpty())
-        settings.setValue("EmailConfig/username", emailUsername);
-    if (!emailPassword.isEmpty())
-        settings.setValue("EmailConfig/password", emailPassword);
-    if (!emailPort.isEmpty())
-        settings.setValue("EmailConfig/port", emailPort);
-    if (!emailSender.isEmpty())
-        settings.setValue("EmailConfig/sender", emailSender);
-    if (!emailReceived.isEmpty())
-        settings.setValue("EmailConfig/received", emailReceived);
+    setRealtimeValue("EmailConfig/host", ui->email_service_lineEdit_1->text().trimmed());
+    setRealtimeValue("EmailConfig/username", ui->email_service_lineEdit_2->text().trimmed());
+    setRealtimeValue("EmailConfig/password", ui->email_service_lineEdit_3->text().trimmed());
+    setRealtimeValue("EmailConfig/port", ui->email_service_lineEdit_4->text().trimmed());
+    setRealtimeValue("EmailConfig/sender", ui->email_service_lineEdit_5->text().trimmed());
+    setRealtimeValue("EmailConfig/received", ui->email_service_lineEdit_6->text().trimmed());
 
-    settings.setValue("clip_board/hours", ui->clip_board_spinBox->value());
+    setRealtimeValue("clip_board/hours", ui->clip_board_spinBox->value());
+    setRealtimeValue("clip_board/double_click_copy_minimize",
+                     ui->clip_board_doubleClickMinimizeCheckBox->isChecked());
+    setRealtimeValue("clip_board/ctrl_c_copy_minimize",
+                     ui->clip_board_ctrlCMinimizeCheckBox->isChecked());
+    setRealtimeValue("clip_board/context_menu_copy_minimize",
+                     ui->clip_board_contextMenuMinimizeCheckBox->isChecked());
 
-    settings.setValue("ServerConfig/IP1", ui->server_config_lineEdit1->text());
-    settings.setValue("ServerConfig/IP2", ui->server_config_lineEdit2->text());
-    settings.setValue("ServerConfig/IP3", ui->server_config_lineEdit3->text());
-    settings.setValue("ServerConfig/IP4", ui->server_config_lineEdit4->text());
-    settings.setValue("PersonalDrive/ServerIP", ui->server_config_lineEdit5->text());
-    settings.setValue("ClipboardSync/ServerIP", ui->server_config_lineEdit6->text());
+    setRealtimeValue("ServerConfig/IP1", ui->server_config_lineEdit1->text().trimmed());
+    setRealtimeValue("ServerConfig/IP2", ui->server_config_lineEdit2->text().trimmed());
+    setRealtimeValue("ServerConfig/IP3", ui->server_config_lineEdit3->text().trimmed());
+    setRealtimeValue("ServerConfig/IP4", ui->server_config_lineEdit4->text().trimmed());
+    setRealtimeValue("PersonalDrive/ServerIP", ui->server_config_lineEdit5->text().trimmed());
+    setRealtimeValue("ClipboardSync/ServerIP", ui->server_config_lineEdit6->text().trimmed());
     
     QString personalDriveDir = ui->personal_drive_lineEdit->text();
     if (personalDriveDir.isEmpty())
         personalDriveDir = settings.value("PersonalDrive/DefaultDir", QStandardPaths::writableLocation(QStandardPaths::HomeLocation)).toString();
-    else
-        settings.setValue("PersonalDrive/DefaultDir", personalDriveDir);
+    setRealtimeValue("PersonalDrive/DefaultDir", personalDriveDir);
+    setRealtimeValue("PersonalDrive/NameConflictPolicy",
+                     ui->personal_drive_nameConflictComboBox->currentData().toInt());
     
     settings.sync();
+}
+
+void Setting::setRealtimeValue(const QString &key, const QVariant &value)
+{
+    SettingManager::Instance().setValue(key, value);
+    settings.setValue(key, value);
+    settings.sync();
+}
+
+void Setting::setupRealtimeBindings()
+{
+    auto bindLineEdit = [this](QLineEdit *lineEdit, const QString &key) {
+        connect(lineEdit, &QLineEdit::editingFinished, this, [this, lineEdit, key]() {
+            setRealtimeValue(key, lineEdit->text().trimmed());
+        });
+    };
+
+    bindLineEdit(ui->file_system_lineEdit, "file_system/file_system_dir");
+    bindLineEdit(ui->file_backup_lineEdit1, "file_backup/backup_dir");
+    bindLineEdit(ui->file_backup_lineEdit2, "file_backup/IP");
+    bindLineEdit(ui->email_service_lineEdit_1, "EmailConfig/host");
+    bindLineEdit(ui->email_service_lineEdit_2, "EmailConfig/username");
+    bindLineEdit(ui->email_service_lineEdit_3, "EmailConfig/password");
+    bindLineEdit(ui->email_service_lineEdit_4, "EmailConfig/port");
+    bindLineEdit(ui->email_service_lineEdit_5, "EmailConfig/sender");
+    bindLineEdit(ui->email_service_lineEdit_6, "EmailConfig/received");
+    bindLineEdit(ui->server_config_lineEdit1, "ServerConfig/IP1");
+    bindLineEdit(ui->server_config_lineEdit2, "ServerConfig/IP2");
+    bindLineEdit(ui->server_config_lineEdit3, "ServerConfig/IP3");
+    bindLineEdit(ui->server_config_lineEdit4, "ServerConfig/IP4");
+    bindLineEdit(ui->server_config_lineEdit5, "PersonalDrive/ServerIP");
+    bindLineEdit(ui->server_config_lineEdit6, "ClipboardSync/ServerIP");
+    bindLineEdit(ui->personal_drive_lineEdit, "PersonalDrive/DefaultDir");
+    connect(ui->personal_drive_nameConflictComboBox, qOverload<int>(&QComboBox::currentIndexChanged),
+            this, [this]() {
+                setRealtimeValue("PersonalDrive/NameConflictPolicy",
+                                 ui->personal_drive_nameConflictComboBox->currentData().toInt());
+            });
+
+    connect(ui->file_see_spinBox, qOverload<int>(&QSpinBox::valueChanged), this, [this](int value) {
+        setRealtimeValue("file_see/font_size", value);
+    });
+    connect(ui->file_see_checkBox1, &QCheckBox::toggled, this, [this](bool checked) {
+        setRealtimeValue("file_see/txt", checked);
+    });
+    connect(ui->file_see_checkBox2, &QCheckBox::toggled, this, [this](bool checked) {
+        setRealtimeValue("file_see/csv", checked);
+    });
+    connect(ui->file_see_checkBox3, &QCheckBox::toggled, this, [this](bool checked) {
+        setRealtimeValue("file_see/xlsx", checked);
+    });
+    connect(ui->file_see_checkBox4, &QCheckBox::toggled, this, [this](bool checked) {
+        setRealtimeValue("file_see/img", checked);
+    });
+
+    connect(ui->tag_schedule_timeEdit3, &QTimeEdit::timeChanged, this, [this](const QTime &time) {
+        setRealtimeValue("tag_schedule/show_time", time.hour() * 3600 + time.minute() * 60 + time.second());
+    });
+    connect(ui->clip_board_spinBox, qOverload<int>(&QSpinBox::valueChanged), this, [this](int value) {
+        setRealtimeValue("clip_board/hours", value);
+    });
+    connect(ui->clip_board_doubleClickMinimizeCheckBox, &QCheckBox::toggled, this, [this](bool checked) {
+        setRealtimeValue("clip_board/double_click_copy_minimize", checked);
+    });
+    connect(ui->clip_board_ctrlCMinimizeCheckBox, &QCheckBox::toggled, this, [this](bool checked) {
+        setRealtimeValue("clip_board/ctrl_c_copy_minimize", checked);
+    });
+    connect(ui->clip_board_contextMenuMinimizeCheckBox, &QCheckBox::toggled, this, [this](bool checked) {
+        setRealtimeValue("clip_board/context_menu_copy_minimize", checked);
+    });
+
+    connect(ui->terminal_font_combo, &QFontComboBox::currentFontChanged, this, [this](const QFont &font) {
+        setRealtimeValue("terminal/font_family", font.family());
+    });
+    connect(ui->terminal_font_size_spin, qOverload<int>(&QSpinBox::valueChanged), this, [this](int value) {
+        setRealtimeValue("terminal/font_size", value);
+    });
+    connect(ui->terminal_theme_combo, &QComboBox::currentTextChanged, this, [this](const QString &theme) {
+        setRealtimeValue("terminal/theme", theme);
+    });
+
+    connect(ui->all_setting_spinBox, qOverload<int>(&QSpinBox::valueChanged), this, [this](int) {
+        is_modified = true;
+    });
+    connect(ui->all_setting_checkBox, &QCheckBox::toggled, this, [this](bool) {
+        is_modified = true;
+    });
 }
 
 
@@ -233,6 +365,7 @@ void Setting::on_file_system_Btn_clicked()
     if (!selectedDir.isEmpty()) {
         selectedDir.replace("\\", "/");
         ui->file_system_lineEdit->setText(selectedDir);
+        setRealtimeValue("file_system/file_system_dir", selectedDir);
     }
 }
 
@@ -243,6 +376,7 @@ void Setting::on_file_backup_Btn_clicked()
     if (!selectedDir.isEmpty()) {
         selectedDir.replace("\\", "/");
         ui->file_backup_lineEdit1->setText(selectedDir);
+        setRealtimeValue("file_backup/backup_dir", selectedDir);
     }
 }
 
@@ -280,6 +414,7 @@ void Setting::on_personal_drive_Btn_clicked()
     if (!selectedDir.isEmpty()) {
         selectedDir.replace("\\", "/");
         ui->personal_drive_lineEdit->setText(selectedDir);
+        setRealtimeValue("PersonalDrive/DefaultDir", selectedDir);
     }
 }
 
@@ -332,17 +467,26 @@ void Setting::on_server_config_replaceBtn_clicked()
     replaceHost(ui->server_config_lineEdit4);
     replaceHost(ui->server_config_lineEdit5);
     replaceHost(ui->server_config_lineEdit6);
+
+    setRealtimeValue("ServerConfig/IP1", ui->server_config_lineEdit1->text().trimmed());
+    setRealtimeValue("ServerConfig/IP2", ui->server_config_lineEdit2->text().trimmed());
+    setRealtimeValue("ServerConfig/IP3", ui->server_config_lineEdit3->text().trimmed());
+    setRealtimeValue("ServerConfig/IP4", ui->server_config_lineEdit4->text().trimmed());
+    setRealtimeValue("PersonalDrive/ServerIP", ui->server_config_lineEdit5->text().trimmed());
+    setRealtimeValue("ClipboardSync/ServerIP", ui->server_config_lineEdit6->text().trimmed());
 }
 
 void Setting::on_terminal_checkbox_powershell_stateChanged(int state) {
     if (state == Qt::Checked) {
         ui->terminal_checkbox_cmd->setChecked(false);
+        setRealtimeValue("terminal/type", "powershell");
     }
 }
 
 void Setting::on_terminal_checkbox_cmd_stateChanged(int state) {
     if (state == Qt::Checked) {
         ui->terminal_checkbox_powershell->setChecked(false);
+        setRealtimeValue("terminal/type", "cmd");
     }
 }
 

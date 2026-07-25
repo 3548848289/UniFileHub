@@ -36,6 +36,10 @@ ClipboardController::ClipboardController(QObject *parent)
             this, &ClipboardController::handleCloudItemsFetched);
     connect(m_cloudClient, &ClipboardCloudClient::fetchFailed,
             this, &ClipboardController::errorMessageRequested);
+    connect(m_cloudClient, &ClipboardCloudClient::cloudItemsChanged,
+            this, &ClipboardController::refreshCloudItems);
+
+    m_cloudClient->startEventStream();
 }
 
 ClipboardController::~ClipboardController() = default;
@@ -125,6 +129,7 @@ void ClipboardController::openFileLocation(ClipboardItem* item)
 
 void ClipboardController::loadHistory(int hours)
 {
+    emit modelCleared();
     m_historyManager.loadHistory(hours);
 
     const auto& items = m_historyManager.items();
@@ -184,10 +189,10 @@ void ClipboardController::searchItems(const QString& query)
         }
     }
 
-    for (auto it = cloudItems.rbegin(); it != cloudItems.rend(); ++it) {
+    for (auto it = pinnedItems.rbegin(); it != pinnedItems.rend(); ++it) {
         emit itemAddedToModel(*it);
     }
-    for (auto it = pinnedItems.rbegin(); it != pinnedItems.rend(); ++it) {
+    for (auto it = cloudItems.rbegin(); it != cloudItems.rend(); ++it) {
         emit itemAddedToModel(*it);
     }
     for (auto it = normalItems.rbegin(); it != normalItems.rend(); ++it) {

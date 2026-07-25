@@ -5,6 +5,12 @@ FlaskInfo::FlaskInfo(QObject *parent) : QObject(parent)
 {
     address = SettingManager::Instance().serverconfig_ip4();
     networkManager = new QNetworkAccessManager(this);
+    connect(&SettingManager::Instance(), &SettingManager::settingChanged,
+            this, [this](const QString &key, const QVariant &value) {
+                if (key == QStringLiteral("ServerConfig/IP4")) {
+                    address = value.toString();
+                }
+            });
 }
 
 void FlaskInfo::route_loginUser(const QString &username, const QString &password)

@@ -13,6 +13,12 @@ ControlFrame::ControlFrame(QWidget *parent)
 
     const bool isShow = SettingManager::Instance().file_see_img();
     setVisible(isShow);
+    connect(&SettingManager::Instance(), &SettingManager::settingChanged,
+            this, [this](const QString &key, const QVariant &value) {
+                if (key == QStringLiteral("file_see/img")) {
+                    setVisible(value.toBool());
+                }
+            });
 }
 
 ControlFrame::~ControlFrame()

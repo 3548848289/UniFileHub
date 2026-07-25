@@ -208,7 +208,7 @@
          </item>
         </widget>
        </item>
-       <item row="4" column="0">
+       <item row="3" column="0">
         <widget class="QLabel" name="all_setting_label4">
          <property name="text">
           <string>图标颜色</string>
@@ -520,33 +520,119 @@
          </property>
         </widget>
        </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="personal_drive_nameConflictLabel">
+         <property name="text">
+          <string>上传/下载
+同名处理</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignmentFlag::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1" colspan="2">
+        <widget class="QComboBox" name="personal_drive_nameConflictComboBox"/>
+       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="clip_board">
-      <layout class="QGridLayout" name="gridLayout_9">
-       <item row="0" column="0">
-        <widget class="QLabel" name="clip_board_label1">
-         <property name="text">
-          <string>初始加载多久的记录</string>
+      <layout class="QVBoxLayout" name="clip_board_mainLayout">
+       <property name="spacing">
+        <number>12</number>
+       </property>
+       <item>
+        <layout class="QGridLayout" name="clip_board_historyLayout">
+         <property name="horizontalSpacing">
+          <number>10</number>
          </property>
+         <property name="verticalSpacing">
+          <number>6</number>
+         </property>
+         <item row="0" column="0">
+          <widget class="QLabel" name="clip_board_label1">
+           <property name="text">
+            <string>初始加载记录</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QSpinBox" name="clip_board_spinBox">
+           <property name="maximum">
+            <number>240</number>
+           </property>
+           <property name="value">
+            <number>24</number>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2">
+          <widget class="QLabel" name="clip_board_label2">
+           <property name="text">
+            <string>小时</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="3">
+          <spacer name="clip_board_historySpacer">
+           <property name="orientation">
+            <enum>Qt::Orientation::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="clip_board_copyGroupBox">
+         <property name="title">
+          <string>复制后窗口行为</string>
+         </property>
+         <layout class="QVBoxLayout" name="clip_board_copyLayout">
+          <property name="spacing">
+           <number>6</number>
+          </property>
+          <item>
+           <widget class="QCheckBox" name="clip_board_doubleClickMinimizeCheckBox">
+            <property name="text">
+             <string>双击复制时是否最小化。</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="clip_board_ctrlCMinimizeCheckBox">
+            <property name="text">
+             <string>CTRL+C 复制时是否最小化。</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="clip_board_contextMenuMinimizeCheckBox">
+            <property name="text">
+             <string>右键复制时是否最小化。</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </item>
-       <item row="0" column="1">
-        <widget class="QSpinBox" name="clip_board_spinBox">
-         <property name="maximum">
-          <number>240</number>
+       <item>
+        <spacer name="clip_board_bottomSpacer">
+         <property name="orientation">
+          <enum>Qt::Orientation::Vertical</enum>
          </property>
-         <property name="value">
-          <number>24</number>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
          </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="clip_board_label2">
-         <property name="text">
-          <string>单位：小时</string>
-         </property>
-        </widget>
+        </spacer>
        </item>
       </layout>
      </widget>

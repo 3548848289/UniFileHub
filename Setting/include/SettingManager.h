@@ -1,14 +1,24 @@
 #ifndef SETTINGMANAGER_H
 #define SETTINGMANAGER_H
 
-#include<QSettings>
-#include<QSize>
-#include<QPoint>
-#include<QString>
+#include <QObject>
+#include <QPoint>
+#include <QSettings>
+#include <QSize>
+#include <QString>
+#include <QVariant>
 
-class SettingManager
+class SettingManager : public QObject
 {
+    Q_OBJECT
 public:
+    enum class PersonalDriveNameConflictPolicy {
+        Overwrite = 0,
+        AutoRename = 1,
+        Ask = 2
+    };
+    Q_ENUM(PersonalDriveNameConflictPolicy)
+
     static QString getSettingsFilePath();
     
     static SettingManager& Instance()
@@ -19,6 +29,9 @@ public:
 
     SettingManager(const SettingManager&) = delete;
     SettingManager& operator=(const SettingManager&) = delete;
+
+    QVariant value(const QString &key, const QVariant &defaultValue = QVariant()) const;
+    void setValue(const QString &key, const QVariant &value);
 
     int all_setting_font_size();
     bool all_setting_fenable_tray();
@@ -41,6 +54,9 @@ public:
     void saveHistory();
 
     int clip_board_hours();
+    bool clip_board_double_click_copy_minimize();
+    bool clip_board_ctrl_c_copy_minimize();
+    bool clip_board_context_menu_copy_minimize();
 
     QString serverconfig_ip1();
     QString serverconfig_ip2();
@@ -50,6 +66,8 @@ public:
     QString personal_drive_server_ip();
     QString personal_drive_download_dir();
     void set_personal_drive_download_dir(const QString &dir);
+    PersonalDriveNameConflictPolicy personal_drive_name_conflict_policy();
+    void set_personal_drive_name_conflict_policy(PersonalDriveNameConflictPolicy policy);
     QString file_backup_IP();
     int all_setting_theme();
     QString all_setting_icon_color();
@@ -81,6 +99,8 @@ public:
     void set_terminal_theme(const QString &theme);
     QString terminal_type();
     void set_terminal_type(const QString &type);
+signals:
+    void settingChanged(const QString &key, const QVariant &value);
 private:
     SettingManager();
     ~SettingManager();

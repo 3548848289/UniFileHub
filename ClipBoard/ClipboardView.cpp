@@ -11,14 +11,20 @@
 #include "../Setting/include/IconManager.h"
 #include "../Setting/include/SettingManager.h"
 #include "../Setting/include/ThemeManager.h"
+#include <QAbstractAnimation>
 #include <QApplication>
+#include <QEasingCurve>
 #include <QFileInfo>
+#include <QFont>
 #include <QGuiApplication>
 #include <QMenu>
 #include <QMessageBox>
+#include <QPropertyAnimation>
 #include <QRegularExpression>
+#include <QScrollBar>
 #include <QShortcut>
 #include <QVariant>
+#include <QWheelEvent>
 
 Q_DECLARE_METATYPE(quintptr)
 
@@ -27,7 +33,9 @@ ClipboardView::ClipboardView(ClipboardController* controller, QWidget *parent)
       ui(new Ui::ClipboardView),
       m_controller(controller),
       m_currentRightClickedItem(nullptr),
-      m_imagePreviewLabel(nullptr)
+      m_imagePreviewLabel(nullptr),
+      m_smoothScrollAnimation(nullptr),
+      m_smoothScrollTarget(0)
 {
     ui->setupUi(this);
 
@@ -54,13 +62,20 @@ ClipboardView::ClipboardView(ClipboardController* controller, QWidget *parent)
         }
 
         m_currentRightClickedItem = item;
-        copyItemAndCollapseWindow();
+        copyItemAndMaybeCollapse(SettingManager::Instance().clip_board_ctrl_c_copy_minimize());
     });
 
     connect(qApp, &QApplication::aboutToQuit, this, &ClipboardView::on_saveButton_clicked);
 
     const int hours = SettingManager::Instance().clip_board_hours();
     m_controller->loadHistory(hours);
+
+    connect(&SettingManager::Instance(), &SettingManager::settingChanged,
+            this, [this](const QString &key, const QVariant &value) {
+                if (key == QStringLiteral("clip_board/hours") && m_controller) {
+                    m_controller->loadHistory(value.toInt());
+                }
+            });
 }
 
 ClipboardView::~ClipboardView()
@@ -78,6 +93,9 @@ void ClipboardView::refreshCloudItems()
 
 void ClipboardView::initializeListWidget()
 {
+    QFont listFont = QApplication::font();
+    listFont.setPointSize(SettingManager::Instance().all_setting_font_size());
+    ui->listWidget->setFont(listFont);
     ui->listWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
     ui->listWidget->setWordWrap(true);
     ui->listWidget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
@@ -115,39 +133,209 @@ void ClipboardView::initializeListWidget()
 
     ui->listWidget->setStyleSheet(style);
     ui->listWidget->setMouseTracking(true);
+
+    initializeSmoothScrolling();
+}
+
+void ClipboardView::initializeSmoothScrolling()
+{
+    QScrollBar* scrollBar = ui->listWidget->verticalScrollBar();
+    scrollBar->setSingleStep(24);
+
+    m_smoothScrollTarget = scrollBar->value();
+    m_smoothScrollAnimation = new QPropertyAnimation(scrollBar, "value", this);
+    m_smoothScrollAnimation->setDuration(160);
+    m_smoothScrollAnimation->setEasingCurve(QEasingCurve::OutCubic);
+    ui->listWidget->viewport()->installEventFilter(this);
+}
+
+bool ClipboardView::eventFilter(QObject* watched, QEvent* event)
+{
+    if (watched == ui->listWidget->viewport() && event->type() == QEvent::Wheel) {
+        auto* wheelEvent = static_cast<QWheelEvent*>(event);
+        if (wheelEvent->modifiers().testFlag(Qt::ControlModifier)) {
+            return QWidget::eventFilter(watched, event);
+        }
+
+        int delta = 0;
+        const QPoint pixelDelta = wheelEvent->pixelDelta();
+        if (!pixelDelta.isNull()) {
+            delta = -pixelDelta.y();
+        } else {
+            const int angleDelta = wheelEvent->angleDelta().y();
+            if (angleDelta != 0) {
+                const int pixelsPerStep = QApplication::wheelScrollLines()
+                                          * ui->listWidget->verticalScrollBar()->singleStep();
+                delta = -(angleDelta * pixelsPerStep) / 120;
+            }
+        }
+
+        if (delta != 0) {
+            smoothScrollBy(delta);
+            event->accept();
+            return true;
+        }
+    }
+
+    return QWidget::eventFilter(watched, event);
+}
+
+void ClipboardView::smoothScrollBy(int delta)
+{
+    QScrollBar* scrollBar = ui->listWidget->verticalScrollBar();
+    if (!scrollBar) {
+        return;
+    }
+
+    if (!m_smoothScrollAnimation) {
+        scrollBar->setValue(scrollBar->value() + delta);
+        return;
+    }
+
+    if (m_smoothScrollAnimation->state() != QAbstractAnimation::Running) {
+        m_smoothScrollTarget = scrollBar->value();
+    }
+
+    m_smoothScrollTarget = qBound(scrollBar->minimum(),
+                                  m_smoothScrollTarget + delta,
+                                  scrollBar->maximum());
+
+    m_smoothScrollAnimation->stop();
+    m_smoothScrollAnimation->setStartValue(scrollBar->value());
+    m_smoothScrollAnimation->setEndValue(m_smoothScrollTarget);
+    m_smoothScrollAnimation->start();
 }
 
 void ClipboardView::insertNewItem(ClipboardItem* newItem)
 {
+    if (!shouldDisplayItem(newItem)) {
+        return;
+    }
+
     QListWidgetItem* listItem = newItem->createListWidgetItem();
     const quintptr addr = reinterpret_cast<quintptr>(newItem);
     listItem->setData(Qt::UserRole, QVariant::fromValue<quintptr>(addr));
+    applyItemFont(listItem);
 
-    if (newItem->isCloudItem()) {
-        ui->listWidget->insertItem(0, listItem);
-    } else if (newItem->isPinned()) {
+    if (newItem->isPinned()) {
         int insertRow = 0;
         for (; insertRow < ui->listWidget->count(); ++insertRow) {
             QListWidgetItem* it = ui->listWidget->item(insertRow);
             ClipboardItem* ci = findItemForListWidgetItem(it);
-            if (!ci || (!ci->isCloudItem() && !ci->isPinned())) {
+            if (!ci || !ci->isPinned()) {
                 break;
             }
         }
         ui->listWidget->insertItem(insertRow, listItem);
         QIcon pinIcon = IconManager::icon(IconManager::Icon::Pin, QSize(16, 16));
         listItem->setIcon(pinIcon);
+    } else if (newItem->isCloudItem()) {
+        int insertRow = 0;
+        for (; insertRow < ui->listWidget->count(); ++insertRow) {
+            QListWidgetItem* it = ui->listWidget->item(insertRow);
+            ClipboardItem* ci = findItemForListWidgetItem(it);
+            if (!ci || (!ci->isPinned() && !ci->isCloudItem())) {
+                break;
+            }
+        }
+        ui->listWidget->insertItem(insertRow, listItem);
+        QIcon cloudIcon = IconManager::icon(IconManager::Icon::Cloud, QSize(16, 16));
+        listItem->setIcon(cloudIcon);
     } else {
         int insertRow = 0;
         for (; insertRow < ui->listWidget->count(); ++insertRow) {
             QListWidgetItem* it = ui->listWidget->item(insertRow);
             ClipboardItem* ci = findItemForListWidgetItem(it);
-            if (!ci || (!ci->isCloudItem() && !ci->isPinned())) {
+            if (!ci || (!ci->isPinned() && !ci->isCloudItem())) {
                 break;
             }
         }
         ui->listWidget->insertItem(insertRow, listItem);
     }
+}
+
+void ClipboardView::addItemToListWidget(ClipboardItem* item)
+{
+    if (!item) {
+        return;
+    }
+
+    QListWidgetItem* listItem = item->createListWidgetItem();
+    const quintptr addr = reinterpret_cast<quintptr>(item);
+    listItem->setData(Qt::UserRole, QVariant::fromValue<quintptr>(addr));
+    applyItemFont(listItem);
+    if (item->isPinned()) {
+        QIcon pinIcon = IconManager::icon(IconManager::Icon::Pin, QSize(24, 24));
+        listItem->setIcon(pinIcon);
+    } else if (item->isCloudItem()) {
+        QIcon cloudIcon = IconManager::icon(IconManager::Icon::Cloud, QSize(24, 24));
+        listItem->setIcon(cloudIcon);
+    }
+    ui->listWidget->addItem(listItem);
+}
+
+void ClipboardView::applyItemFont(QListWidgetItem* listItem) const
+{
+    if (!listItem) {
+        return;
+    }
+
+    QFont itemFont = ui->listWidget->font();
+    itemFont.setPointSize(SettingManager::Instance().all_setting_font_size());
+    listItem->setFont(itemFont);
+}
+
+ClipboardItemType ClipboardView::currentFilterType() const
+{
+    switch (ui->typeComboBox->currentIndex()) {
+    case 1:
+        return ClipboardItemType::Text;
+    case 2:
+        return ClipboardItemType::Image;
+    case 3:
+        return ClipboardItemType::File;
+    default:
+        return ClipboardItemType::Unknown;
+    }
+}
+
+bool ClipboardView::shouldDisplayItem(ClipboardItem* item) const
+{
+    if (!item) {
+        return false;
+    }
+    if (item->isPinned() && !ui->showPinnedCheckBox->isChecked()) {
+        return false;
+    }
+
+    const ClipboardItemType type = currentFilterType();
+    if (type != ClipboardItemType::Unknown && item->type() != type) {
+        return false;
+    }
+
+    const QString searchText = ui->lineEdit->text().trimmed();
+    if (searchText.isEmpty()) {
+        return true;
+    }
+
+    if (item->type() == ClipboardItemType::Text) {
+        CliText* textItem = dynamic_cast<CliText*>(item);
+        return textItem && textItem->text().contains(searchText, Qt::CaseInsensitive);
+    }
+
+    if (item->type() == ClipboardItemType::File) {
+        const QString serialized = item->serialize();
+        if (serialized.startsWith("FILE_DATA:")) {
+            const QStringList filePaths = serialized.mid(10).split(";").filter(QRegularExpression(".+"));
+            for (const QString& path : filePaths) {
+                if (QFileInfo(path).fileName().contains(searchText, Qt::CaseInsensitive)) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
 }
 
 ClipboardItem* ClipboardView::findItemForListWidgetItem(QListWidgetItem* listItem)
@@ -185,10 +373,16 @@ void ClipboardView::copyItem()
     }
 }
 
-void ClipboardView::copyItemAndCollapseWindow()
+void ClipboardView::copyItemAndMaybeCollapse(bool shouldCollapse)
 {
     copyItem();
+    if (shouldCollapse) {
+        collapseWindow();
+    }
+}
 
+void ClipboardView::collapseWindow()
+{
     if (auto w = this->window()) {
         if (SettingManager::Instance().all_setting_fenable_tray()) {
             w->hide();
@@ -321,7 +515,7 @@ void ClipboardView::on_listWidget_itemDoubleClicked(QListWidgetItem *item)
         return;
     }
     m_currentRightClickedItem = item;
-    copyItemAndCollapseWindow();
+    copyItemAndMaybeCollapse(SettingManager::Instance().clip_board_double_click_copy_minimize());
 }
 
 void ClipboardView::on_listWidget_customContextMenuRequested(const QPoint &pos)
@@ -338,7 +532,10 @@ void ClipboardView::on_listWidget_customContextMenuRequested(const QPoint &pos)
 
     ClipboardMenuBuilder builder;
     QMenu* menu = builder.buildMenu(item,
-                                    [this]{ copyItemAndCollapseWindow(); },
+                                    [this]{
+                                        copyItemAndMaybeCollapse(
+                                            SettingManager::Instance().clip_board_context_menu_copy_minimize());
+                                    },
                                     [this]{ previewImage(); },
                                     [this]{ openFileLocation(); },
                                     [this]{ deleteItem(); },
@@ -377,98 +574,13 @@ void ClipboardView::on_typeComboBox_currentIndexChanged(int index)
 
 void ClipboardView::filterItemsByType(ClipboardItemType type)
 {
-    if (!m_controller || !m_controller->getHistoryManager()) {
-        return;
-    }
-
-    ui->listWidget->clear();
-
-    auto addToListWidget = [this](ClipboardItem* item) {
-        QListWidgetItem* listItem = item->createListWidgetItem();
-        const quintptr addr = reinterpret_cast<quintptr>(item);
-        listItem->setData(Qt::UserRole, QVariant::fromValue<quintptr>(addr));
-        if (item->isCloudItem()) {
-            QIcon cloudIcon = IconManager::icon(IconManager::Icon::Cloud, QSize(16, 16));
-            listItem->setIcon(cloudIcon);
-        } else if (item->isPinned()) {
-            QIcon pinIcon = IconManager::icon(IconManager::Icon::Pin, QSize(16, 16));
-            listItem->setIcon(pinIcon);
-        }
-        ui->listWidget->addItem(listItem);
-    };
-
-    std::vector<ClipboardItem*> cloudItems;
-    std::vector<ClipboardItem*> pinnedItems;
-    std::vector<ClipboardItem*> normalItems;
-
-    const auto& items = m_controller->getHistoryManager()->items();
-    for (auto it = items.rbegin(); it != items.rend(); ++it) {
-        ClipboardItem* item = it->get();
-        if (type == ClipboardItemType::Unknown || item->type() == type) {
-            if (item->isCloudItem()) {
-                cloudItems.push_back(item);
-            } else if (item->isPinned()) {
-                pinnedItems.push_back(item);
-            } else {
-                normalItems.push_back(item);
-            }
-        }
-    }
-
-    for (auto* item : cloudItems) {
-        addToListWidget(item);
-    }
-    for (auto* item : pinnedItems) {
-        addToListWidget(item);
-    }
-    for (auto* item : normalItems) {
-        addToListWidget(item);
-    }
+    Q_UNUSED(type);
+    refreshAllItems();
 }
 
 void ClipboardView::onItemAdded(ClipboardItem* item)
 {
-    ClipboardItemType currentType = ClipboardItemType::Unknown;
-    switch (ui->typeComboBox->currentIndex()) {
-    case 1:
-        currentType = ClipboardItemType::Text;
-        break;
-    case 2:
-        currentType = ClipboardItemType::Image;
-        break;
-    case 3:
-        currentType = ClipboardItemType::File;
-        break;
-    default:
-        currentType = ClipboardItemType::Unknown;
-        break;
-    }
-
-    bool matchType = (currentType == ClipboardItemType::Unknown) || (item->type() == currentType);
-    QString searchText = ui->lineEdit->text().trimmed();
-    bool matchSearch = searchText.isEmpty();
-
-    if (!matchSearch) {
-        if (item->type() == ClipboardItemType::Text) {
-            CliText* textItem = dynamic_cast<CliText*>(item);
-            if (textItem && textItem->text().contains(searchText, Qt::CaseInsensitive)) {
-                matchSearch = true;
-            }
-        } else if (item->type() == ClipboardItemType::File) {
-            QString serialized = item->serialize();
-            if (serialized.startsWith("FILE_DATA:")) {
-                QStringList filePaths = serialized.mid(10).split(";").filter(QRegularExpression(".+"));
-                for (const QString& path : filePaths) {
-                    if (QFileInfo(path).fileName().contains(searchText, Qt::CaseInsensitive)) {
-                        matchSearch = true;
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    if (matchType && matchSearch) {
+    if (shouldDisplayItem(item)) {
         insertNewItem(item);
         updateSequenceNumbers();
     }
@@ -513,38 +625,34 @@ void ClipboardView::refreshAllItems()
     std::vector<ClipboardItem*> normalItems;
     const auto& items = m_controller->getHistoryManager()->items();
     for (auto it = items.rbegin(); it != items.rend(); ++it) {
-        if (it->get()->isCloudItem()) {
-            cloudItems.push_back(it->get());
-        } else if (it->get()->isPinned()) {
-            pinnedItems.push_back(it->get());
+        ClipboardItem* item = it->get();
+        if (!shouldDisplayItem(item)) {
+            continue;
+        }
+        if (item->isPinned()) {
+            pinnedItems.push_back(item);
+        } else if (item->isCloudItem()) {
+            cloudItems.push_back(item);
         } else {
-            normalItems.push_back(it->get());
+            normalItems.push_back(item);
         }
     }
 
-    auto addToListWidget = [this](ClipboardItem* item) {
-        QListWidgetItem* listItem = item->createListWidgetItem();
-        const quintptr addr = reinterpret_cast<quintptr>(item);
-        listItem->setData(Qt::UserRole, QVariant::fromValue<quintptr>(addr));
-        if (item->isCloudItem()) {
-            QIcon cloudIcon = IconManager::icon(IconManager::Icon::Cloud, QSize(24, 24));
-            listItem->setIcon(cloudIcon);
-        } else if (item->isPinned()) {
-            QIcon pinIcon = IconManager::icon(IconManager::Icon::Pin, QSize(24, 24));
-            listItem->setIcon(pinIcon);
-        }
-        ui->listWidget->addItem(listItem);
-    };
-
-    for (auto* item : cloudItems) {
-        addToListWidget(item);
-    }
     for (auto* item : pinnedItems) {
-        addToListWidget(item);
+        addItemToListWidget(item);
+    }
+    for (auto* item : cloudItems) {
+        addItemToListWidget(item);
     }
     for (auto* item : normalItems) {
-        addToListWidget(item);
+        addItemToListWidget(item);
     }
+}
+
+void ClipboardView::on_showPinnedCheckBox_toggled(bool checked)
+{
+    Q_UNUSED(checked);
+    refreshAllItems();
 }
 
 void ClipboardView::on_lineEdit_textChanged(const QString &text)
@@ -560,10 +668,5 @@ void ClipboardView::on_lineEdit_returnPressed()
 
 void ClipboardView::on_lineEdit_editingFinished()
 {
-    if (!m_controller) {
-        return;
-    }
-
-    QString searchText = ui->lineEdit->text().trimmed();
-    m_controller->searchItems(searchText);
+    refreshAllItems();
 }

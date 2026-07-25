@@ -89,7 +89,16 @@ private slots:
     void onhistoryFin(QNetworkReply* reply);
 
 private:
-    explicit ServerManager(QObject *parent = nullptr) : QObject(parent) {}
+    explicit ServerManager(QObject *parent = nullptr) : QObject(parent) {
+        connect(&SettingManager::Instance(), &SettingManager::settingChanged,
+                this, [](const QString &key, const QVariant &value) {
+                    if (key == QStringLiteral("ServerConfig/IP1")) {
+                        address1 = value.toString();
+                    } else if (key == QStringLiteral("ServerConfig/IP2")) {
+                        address2 = value.toString();
+                    }
+                });
+    }
     ~ServerManager() = default;
     QNetworkAccessManager networkManager;
     QString m_curdir;

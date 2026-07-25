@@ -84,6 +84,20 @@ TextTab::TextTab(const QString &filePath, QWidget *parent)  : TabAbstract(filePa
     QFont font = textEdit->font();
     font.setPointSize(fontSize);
     textEdit->setFont(font);
+    controlWidtxt->setFontSize(fontSize);
+    controlWidtxt->setVisible(SettingManager::Instance().file_see_txt());
+
+    connect(&SettingManager::Instance(), &SettingManager::settingChanged,
+            this, [this](const QString &key, const QVariant &value) {
+                if (key == QStringLiteral("file_see/font_size")) {
+                    QFont font = textEdit->font();
+                    font.setPointSize(value.toInt());
+                    textEdit->setFont(font);
+                    controlWidtxt->setFontSize(value.toInt());
+                } else if (key == QStringLiteral("file_see/txt")) {
+                    controlWidtxt->setVisible(value.toBool());
+                }
+            });
 
     connect(textEdit, &QTextEdit::textChanged, this, [this]() {
         // 如果正在切换预览模式，不更新m_originalPlainText

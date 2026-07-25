@@ -7,6 +7,7 @@
 #include <QDropEvent>
 #include "../manager/include/FileLocationHelper.h"
 #include "../../PersonalDrive/include/DriveManager.h"
+#include "../Setting/include/Setting.h"
 
 TabManager::TabManager(QTabWidget* parentTabWidget, QObject* parent) : QObject(parent), tabWidget(parentTabWidget)
 {
@@ -134,6 +135,13 @@ void TabManager::closeTab(int row, int col, int index) {
                 return;
             }
 
+            if (auto* setting = qobject_cast<Setting*>(widget)) {
+                if (!setting->commitSettingsAndMaybeRestart()) return;
+                currentTabWidget->removeTab(index);
+                setting->deleteLater();
+                return;
+            }
+
             if (auto* tab = qobject_cast<TabAbstract*>(widget)) {
                 if (!tab->confirmClose()) return;
                 QString filePath = tab->getCurrentFilePath();
@@ -172,6 +180,13 @@ void TabManager::closeTab(int row, int col, int index) {
     if (auto* driveView = qobject_cast<DriveView*>(widget)) {
         tabWidget->removeTab(index);
         driveView->deleteLater();
+        return;
+    }
+
+    if (auto* setting = qobject_cast<Setting*>(widget)) {
+        if (!setting->commitSettingsAndMaybeRestart()) return;
+        tabWidget->removeTab(index);
+        setting->deleteLater();
         return;
     }
 
@@ -383,6 +398,39 @@ int TabManager::addWidgetTab(QWidget* widget, const QString& displayName) {
     int index = tabWidget->addTab(widget, displayName);
     tabWidget->setCurrentIndex(index);
     return index;
+}
+
+bool TabManager::activateWidgetTab(QWidget *widget)
+{
+    if (!widget) {
+        return false;
+    }
+
+    for (int row = 0; row < viewTabs.size(); ++row) {
+        for (int col = 0; col < viewTabs[row].size(); ++col) {
+            QTabWidget *currentTabWidget = viewTabs[row][col];
+            if (!currentTabWidget) {
+                continue;
+            }
+
+            const int index = currentTabWidget->indexOf(widget);
+            if (index >= 0) {
+                activePosition = {row, col};
+                currentTabWidget->setCurrentIndex(index);
+                currentTabWidget->setFocus();
+                return true;
+            }
+        }
+    }
+
+    const int index = tabWidget ? tabWidget->indexOf(widget) : -1;
+    if (index >= 0) {
+        tabWidget->setCurrentIndex(index);
+        tabWidget->setFocus();
+        return true;
+    }
+
+    return false;
 }
 
 

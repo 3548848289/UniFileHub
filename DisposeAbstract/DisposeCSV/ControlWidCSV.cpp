@@ -13,6 +13,12 @@ ControlWidCSV::ControlWidCSV(QWidget *parent)
 
     bool isShow = SettingManager::Instance().file_see_csv();
     this->setVisible(isShow);
+    connect(&SettingManager::Instance(), &SettingManager::settingChanged,
+            this, [this](const QString &key, const QVariant &value) {
+                if (key == QStringLiteral("file_see/csv")) {
+                    setVisible(value.toBool());
+                }
+            });
 }
 
 ControlWidCSV::~ControlWidCSV() {

@@ -12,6 +12,7 @@
 #include <QMessageBox>
 #include <QProcess>
 #include <QStyleHints>
+#include <QVariant>
 #include "../../Resources/ThirdParty/KodoTerm/include/KodoTerm/KodoTermConfig.hpp"
 namespace Ui {
 class Setting;
@@ -24,6 +25,7 @@ class Setting : public QWidget
 public:
     explicit Setting(QWidget *parent = nullptr);
     ~Setting();
+    bool commitSettingsAndMaybeRestart();
 
 private slots:
     void on_treeWidget_itemClicked(QTreeWidgetItem *item, int column);
@@ -46,8 +48,10 @@ private:
     void loadSettings();
     void saveSettings();
     void initTerminalThemes();
+    void setupRealtimeBindings();
+    void setRealtimeValue(const QString &key, const QVariant &value);
 
-    void closeEvent(QCloseEvent *event);
+    void closeEvent(QCloseEvent *event) override;
 };
 
 

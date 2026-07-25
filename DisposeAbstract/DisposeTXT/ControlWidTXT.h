@@ -46,6 +46,7 @@ public:
 
     QString getCurrentCodecName() const;
     void setCurrentCodecName(const QString &codecName);
+    void setFontSize(int fontSize);
     void updateTextStatistics(int lineCount, int charCount);
     void updateTextExcerpt(const QString &excerpt);
 
