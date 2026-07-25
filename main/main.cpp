@@ -16,8 +16,8 @@
 #include <QDir>
 #include <QFileInfo>
 #include "mainwindow.h"
-#include "../../Setting/include/SettingManager.h"
-#include "../../Setting/include/IconManager.h"
+#include "../Setting/include/SettingManager.h"
+#include "../Setting/include/IconManager.h"
 
 #define SERVER_NAME "SmartDesk_Server"
 

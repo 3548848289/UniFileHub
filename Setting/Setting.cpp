@@ -6,10 +6,11 @@
 #include <QColorDialog>
 #include <QUrl>
 #include "include/IconManager.h"
+#include "include/SettingManager.h"
 #include "../Resources/ThirdParty/KodoTerm/include/KodoTerm/KodoTermConfig.hpp"
 
 Setting::Setting(QWidget *parent) : QWidget(parent), ui(new Ui::Setting)
-    , settings("settings.ini", QSettings::IniFormat)
+    , settings(SettingManager::getSettingsFilePath(), QSettings::IniFormat)
 {
     ui->setupUi(this);
     is_modified = false;
@@ -173,14 +174,27 @@ void Setting::saveSettings() {
     int showTimeInSeconds = showTime.hour() * 3600 + showTime.minute() * 60 + showTime.second();
     settings.setValue("tag_schedule/show_time", showTimeInSeconds);
 
-    settings.setValue("EmailConfig/host", ui->email_service_lineEdit_1->text());
-    settings.setValue("EmailConfig/username", ui->email_service_lineEdit_2->text());
-    settings.setValue("EmailConfig/password", ui->email_service_lineEdit_3->text());
-    settings.setValue("EmailConfig/port", ui->email_service_lineEdit_4->text());
-    settings.setValue("EmailConfig/sender", ui->email_service_lineEdit_5->text());
-    settings.setValue("EmailConfig/received", ui->email_service_lineEdit_6->text());
+    QString emailHost = ui->email_service_lineEdit_1->text().trimmed();
+    QString emailUsername = ui->email_service_lineEdit_2->text().trimmed();
+    QString emailPassword = ui->email_service_lineEdit_3->text().trimmed();
+    QString emailPort = ui->email_service_lineEdit_4->text().trimmed();
+    QString emailSender = ui->email_service_lineEdit_5->text().trimmed();
+    QString emailReceived = ui->email_service_lineEdit_6->text().trimmed();
+    
+    if (!emailHost.isEmpty())
+        settings.setValue("EmailConfig/host", emailHost);
+    if (!emailUsername.isEmpty())
+        settings.setValue("EmailConfig/username", emailUsername);
+    if (!emailPassword.isEmpty())
+        settings.setValue("EmailConfig/password", emailPassword);
+    if (!emailPort.isEmpty())
+        settings.setValue("EmailConfig/port", emailPort);
+    if (!emailSender.isEmpty())
+        settings.setValue("EmailConfig/sender", emailSender);
+    if (!emailReceived.isEmpty())
+        settings.setValue("EmailConfig/received", emailReceived);
 
-    settings.setValue("clip_board/hours", ui->clip_board_spinBox->text());
+    settings.setValue("clip_board/hours", ui->clip_board_spinBox->value());
 
     settings.setValue("ServerConfig/IP1", ui->server_config_lineEdit1->text());
     settings.setValue("ServerConfig/IP2", ui->server_config_lineEdit2->text());

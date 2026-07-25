@@ -97,6 +97,9 @@ private:
     void applyDriveTableLayout();
     void applyHistoryTableLayout(QTableView *tableView);
     void positionStatusPopup();
+    void uploadFileWithConflictCheck(const QString &filePath);
+    void downloadFileWithConflictCheck(int fileId, const QString &fileName);
+    bool cloudNameExists(const QString &fileName) const;
 
     QString formatFileSize(qint64 bytes);
 protected:

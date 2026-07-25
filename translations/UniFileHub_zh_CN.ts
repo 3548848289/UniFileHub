@@ -552,7 +552,7 @@
     <name>DriveView</name>
     <message>
         <location filename="../PersonalDrive/DriveView.ui" line="14"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="41"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="64"/>
         <source>Personal Drive</source>
         <translation type="unfinished"></translation>
     </message>
@@ -563,8 +563,8 @@
     </message>
     <message>
         <location filename="../PersonalDrive/DriveView.ui" line="33"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="844"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="846"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="948"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="950"/>
         <source>新建文件夹</source>
         <translation type="unfinished"></translation>
     </message>
@@ -599,220 +599,220 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="77"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="100"/>
         <source>名称</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="77"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="152"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="621"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="100"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="175"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="725"/>
         <source>上传时间</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="77"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="147"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="152"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="621"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="669"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="100"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="170"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="175"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="725"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="773"/>
         <source>大小</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="147"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="152"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="621"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="669"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="170"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="175"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="725"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="773"/>
         <source>文件名</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="147"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="669"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="170"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="773"/>
         <source>下载时间</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="147"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="152"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="621"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="669"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="170"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="175"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="725"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="773"/>
         <source>状态</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="560"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="664"/>
         <source>重命名</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="560"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="664"/>
         <source>请输入新名称:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="347"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="370"/>
         <source>下载目录未设置，已使用用户目录</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="77"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="147"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="152"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="621"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="669"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="100"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="170"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="175"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="725"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="773"/>
         <source>操作</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="147"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="152"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="621"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="669"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="170"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="175"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="725"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="773"/>
         <source>序号</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="265"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="288"/>
         <source>错误：%1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="352"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="375"/>
         <source>无法创建下载目录：%1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="454"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="574"/>
         <source>选择文件</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="454"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="574"/>
         <source>所有文件 (*.*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="574"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="678"/>
         <source>当前目录下已存在同名文件或文件夹</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="600"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="704"/>
         <source>文件下载成功</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="638"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="742"/>
         <source>上传中</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="640"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="744"/>
         <source>上传成功</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="642"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="746"/>
         <source>上传失败</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="686"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="790"/>
         <source>下载中</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="688"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="792"/>
         <source>下载成功</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="690"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="794"/>
         <source>下载失败</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="723"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="733"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="829"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="827"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="837"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="933"/>
         <source>确认清空</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="723"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="827"/>
         <source>确定要清空所有下载历史记录吗？</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="868"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="972"/>
         <source>该文件可能已被删除或移动，已刷新文件列表。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="726"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="830"/>
         <source>下载历史已清空</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="314"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="337"/>
         <source>下载中 %1%</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="728"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="832"/>
         <source>清空下载历史失败</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="733"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="837"/>
         <source>确定要清空所有上传历史记录吗？</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="736"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="840"/>
         <source>上传历史已清空</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="738"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="842"/>
         <source>清空上传历史失败</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="830"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="934"/>
         <source>确定要清空整个网盘吗？此操作会删除网盘中的所有文件和文件夹。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="845"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="949"/>
         <source>文件夹名称:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="876"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="980"/>
         <source>文件下载中</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="979"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1004"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1050"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1075"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1083"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1108"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1154"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1179"/>
         <source>文件路径为空</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="985"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1010"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1056"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1081"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1089"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1114"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1160"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1185"/>
         <source>文件不存在: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1099"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1203"/>
         <source> (预览)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1362,7 +1362,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <location filename="../MoreFunction/MoreFunction.ui" line="85"/>
-        <source>UniFileHub1.0.0719</source>
+        <source>UniFileHub1.0.0721</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1422,7 +1422,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
 <context>
     <name>RecentFilesManager</name>
     <message>
-        <location filename="../main/RecentFilesManager.cpp" line="65"/>
+        <location filename="../main/RecentFilesManager.cpp" line="66"/>
         <source>文件 %1 已不存在，可能已被清理</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1912,12 +1912,12 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/Setting.cpp" line="53"/>
+        <location filename="../Setting/Setting.cpp" line="54"/>
         <source>配置已保存</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/Setting.cpp" line="54"/>
+        <location filename="../Setting/Setting.cpp" line="55"/>
         <source>是否需要重启程序以应用配置？</source>
         <translation type="unfinished"></translation>
     </message>

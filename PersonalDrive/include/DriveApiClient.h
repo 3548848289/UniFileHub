@@ -21,10 +21,10 @@ public:
     void getFileList(int parentId = 0);
 
     // 文件上传
-    void uploadFile(const QString &filePath, int parentId = 0);
+    void uploadFile(const QString &filePath, int parentId = 0, const QString &targetName = QString(), bool overwrite = false);
     
     // 文件下载
-    void downloadFile(int fileId, const QString &savePath);
+    void downloadFile(int fileId, const QString &savePath, bool overwrite = false);
     
     // 创建文件夹
     void createFolder(const QString &folderName, int parentId = 0);

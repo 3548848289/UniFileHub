@@ -7,6 +7,7 @@ set(SCHEDULE_SOURCES
    DriveManager.cpp
    DriveViewDelegate.cpp
    HistoryDelegate.cpp
+   NameConflictDialog.cpp
 )
 
 set(SCHEDULE_HEADERS
@@ -19,6 +20,7 @@ set(SCHEDULE_HEADERS
     include/DriveViewDelegate.h
     include/DriveRoles.h
     include/HistoryDelegate.h
+    include/NameConflictDialog.h
 
 )
 

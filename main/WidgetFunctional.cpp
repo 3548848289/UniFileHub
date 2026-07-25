@@ -1,7 +1,7 @@
 #include "./include/WidgetFunctional.h"
 #include "ui/ui_WidgetFunctional.h"
 #include "../../ClipBoard/include/ClipboardComponentFactory.h"
-#include "../../Setting/include/ThemeManager.h"
+#include "../Setting/include/ThemeManager.h"
 
 WidgetFunctional::~WidgetFunctional()
 {

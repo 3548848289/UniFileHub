@@ -63,7 +63,7 @@ void DriveApiClient::getFileList(int parentId)
 }
 
 
-void DriveApiClient::uploadFile(const QString &filePath, int parentId)
+void DriveApiClient::uploadFile(const QString &filePath, int parentId, const QString &targetName, bool overwrite)
 {
     QFile *file = new QFile(filePath);
     if (!file->open(QIODevice::ReadOnly)) {
@@ -76,8 +76,10 @@ void DriveApiClient::uploadFile(const QString &filePath, int parentId)
 
     // 文件部分
     QHttpPart filePart;
+    QString uploadFileName = targetName.isEmpty() ? QFileInfo(filePath).fileName() : targetName;
+    uploadFileName.replace('"', '\'');
     filePart.setHeader(QNetworkRequest::ContentDispositionHeader,
-                       QVariant("form-data; name=\"file\"; filename=\"" + QFileInfo(filePath).fileName() + "\""));
+                       QVariant("form-data; name=\"file\"; filename=\"" + uploadFileName + "\""));
     filePart.setBodyDevice(file);
     file->setParent(multiPart);
     multiPart->append(filePart);
@@ -87,6 +89,18 @@ void DriveApiClient::uploadFile(const QString &filePath, int parentId)
     parentPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"parent_id\""));
     parentPart.setBody(QString::number(parentId).toUtf8());
     multiPart->append(parentPart);
+
+    QHttpPart overwritePart;
+    overwritePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"overwrite\""));
+    overwritePart.setBody(overwrite ? QByteArray("1") : QByteArray("0"));
+    multiPart->append(overwritePart);
+
+    if (!targetName.isEmpty()) {
+        QHttpPart targetNamePart;
+        targetNamePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"target_name\""));
+        targetNamePart.setBody(targetName.toUtf8());
+        multiPart->append(targetNamePart);
+    }
 
     QUrl url(QString("%1/api/drive/upload").arg(m_serverIp));
     QNetworkRequest request = createRequest(url);
@@ -112,7 +126,7 @@ void DriveApiClient::uploadFile(const QString &filePath, int parentId)
     });
 }
 
-void DriveApiClient::downloadFile(int fileId, const QString &savePath)
+void DriveApiClient::downloadFile(int fileId, const QString &savePath, bool overwrite)
 {
     qDebug() << "Downloading file with ID: " << fileId;  // 调试打印 fileId
 
@@ -148,7 +162,7 @@ void DriveApiClient::downloadFile(int fileId, const QString &savePath)
         int counter = 1;
 
         // 如果文件已存在，生成新的文件名
-        while (QFile::exists(finalPath)) {
+        while (!overwrite && QFile::exists(finalPath)) {
             QString newName;
             if (suffix.isEmpty()) {
                 newName = QString("%1 (%2)").arg(baseName).arg(counter);

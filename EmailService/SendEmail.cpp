@@ -10,6 +10,7 @@
 #include <QMessageBox>
 #include <QSslError>
 #include "SimpleMail.h"
+#include "../Setting/include/SettingManager.h"
 
 using namespace SimpleMail;
 
@@ -22,7 +23,7 @@ SendEmail::SendEmail(QWidget *parent): QWidget(parent), ui(new Ui::SendEmail)
     ui->attachments->setAcceptDrops(true);
     ui->attachments->setDropIndicatorShown(true);
 
-    QSettings m_settings("settings.ini", QSettings::IniFormat);
+    QSettings m_settings(SettingManager::getSettingsFilePath(), QSettings::IniFormat);
     ui->host->setText(m_settings.value("EmailConfig/host", "localhost").toString());
     ui->port->setValue(m_settings.value("EmailConfig/port", 465).toInt());
     ui->username->setText(m_settings.value("EmailConfig/username").toString());

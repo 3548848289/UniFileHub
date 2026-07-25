@@ -37,7 +37,7 @@ public:
     void getCurrentDirectoryFiles(int parentId = 0);
     
     // 上传文件到当前目录
-    void uploadFile(const QString &filePath, int parentId = 0);
+    void uploadFile(const QString &filePath, int parentId = 0, const QString &targetName = QString(), bool overwrite = false);
     
     // 创建新文件夹
     void createFolder(const QString &folderName, int parentId = 0);
@@ -53,7 +53,7 @@ public:
     void moveItem(int itemId, int newParentId);
     
     // 下载文件
-    void downloadFile(int fileId, const QString &savePath);
+    void downloadFile(int fileId, const QString &savePath, bool overwrite = false);
     
     // 获取当前目录ID
     int getCurrentDirectoryId() const;

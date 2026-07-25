@@ -125,7 +125,7 @@ void DriveManager::getCurrentDirectoryFiles(int parentId)
     m_apiClient->getFileList(parentId);
 }
 
-void DriveManager::uploadFile(const QString &filePath, int parentId)
+void DriveManager::uploadFile(const QString &filePath, int parentId, const QString &targetName, bool overwrite)
 {
     if (!m_initialized) {
         initialize();
@@ -135,10 +135,11 @@ void DriveManager::uploadFile(const QString &filePath, int parentId)
     QFileInfo fileInfo(filePath);
     if (fileInfo.exists()) {
         // 添加上传记录
-        addUploadRecord(0, fileInfo.fileName(), fileInfo.size(), filePath, parentId);
+        const QString uploadName = targetName.isEmpty() ? fileInfo.fileName() : targetName;
+        addUploadRecord(0, uploadName, fileInfo.size(), filePath, parentId);
     }
     
-    m_apiClient->uploadFile(filePath, parentId);
+    m_apiClient->uploadFile(filePath, parentId, targetName, overwrite);
 }
 
 void DriveManager::createFolder(const QString &folderName, int parentId)
@@ -186,7 +187,7 @@ void DriveManager::moveItem(int itemId, int newParentId)
     m_apiClient->moveItem(itemId, newParentId);
 }
 
-void DriveManager::downloadFile(int fileId, const QString &savePath)
+void DriveManager::downloadFile(int fileId, const QString &savePath, bool overwrite)
 {
     if (!m_initialized) {
         initialize();
@@ -206,7 +207,7 @@ void DriveManager::downloadFile(int fileId, const QString &savePath)
                 int counter = 1;
 
                 // 如果文件已存在，生成新的文件名
-                while (QFile::exists(finalPath)) {
+                while (!overwrite && QFile::exists(finalPath)) {
                     QString newName;
                     if (suffix.isEmpty()) {
                         newName = QString("%1 (%2)").arg(baseName).arg(counter);
@@ -223,7 +224,7 @@ void DriveManager::downloadFile(int fileId, const QString &savePath)
                 if (recordId > 0) {
                     emit downloadProgress(recordId, 0);
                 }
-                m_apiClient->downloadFile(fileId, finalPath);
+                m_apiClient->downloadFile(fileId, finalPath, overwrite);
                 break;
             }
         }

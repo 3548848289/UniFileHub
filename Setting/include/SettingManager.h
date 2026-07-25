@@ -4,18 +4,19 @@
 #include<QSettings>
 #include<QSize>
 #include<QPoint>
+#include<QString>
 
 class SettingManager
 {
 public:
-    // 获取单例实例的静态方法
+    static QString getSettingsFilePath();
+    
     static SettingManager& Instance()
     {
         static SettingManager instance;
         return instance;
     }
 
-    // 禁止拷贝构造和赋值
     SettingManager(const SettingManager&) = delete;
     SettingManager& operator=(const SettingManager&) = delete;
 

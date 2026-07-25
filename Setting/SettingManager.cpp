@@ -1,6 +1,22 @@
 #include "include/SettingManager.h"
+#include <QCoreApplication>
+#include <QFile>
+#include <QDir>
 
-SettingManager::SettingManager():settings("settings.ini", QSettings::IniFormat) {}
+QString SettingManager::getSettingsFilePath() {
+    return QCoreApplication::applicationDirPath() + "/settings.ini";
+}
+
+SettingManager::SettingManager() 
+    : settings(getSettingsFilePath(), QSettings::IniFormat) {
+    QString settingsPath = getSettingsFilePath();
+    QFile settingsFile(settingsPath);
+    
+    if (!settingsFile.exists()) {
+        QDir().mkpath(QCoreApplication::applicationDirPath());
+        QFile::copy(":/conf/settings.ini", settingsPath);
+    }
+}
 
 SettingManager::~SettingManager() {}
 

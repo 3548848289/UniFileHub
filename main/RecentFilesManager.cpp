@@ -1,4 +1,5 @@
 #include "RecentFilesManager.h"
+#include "../Setting/include/SettingManager.h"
 
 RecentFilesManager::RecentFilesManager(QObject *parent) : QObject(parent) {
     loadHistory();
@@ -22,7 +23,7 @@ void RecentFilesManager::addFile(const QString &filePath) {
 }
 
 void RecentFilesManager::loadHistory() {
-    QSettings settings("settings.ini", QSettings::IniFormat);
+    QSettings settings(SettingManager::getSettingsFilePath(), QSettings::IniFormat);
     int size = settings.beginReadArray("fileHistory");
     fileHistory.clear();
     for (int i = 0; i < size; ++i) {
@@ -35,7 +36,7 @@ void RecentFilesManager::loadHistory() {
 }
 
 void RecentFilesManager::saveHistory() {
-    QSettings settings("settings.ini", QSettings::IniFormat);
+    QSettings settings(SettingManager::getSettingsFilePath(), QSettings::IniFormat);
     settings.beginWriteArray("fileHistory");
     for (int i = 0; i < fileHistory.size(); ++i) {
         settings.setArrayIndex(i);

@@ -1,5 +1,6 @@
 #include "include/FileBackupWid.h"
 #include "ui/ui_FileBackupWid.h"
+#include "../Setting/include/SettingManager.h"
 
 FileBackupWid::FileBackupWid(const QString &filePath, QWidget *parent) :QDialog(parent),ui(new Ui::FileBackupWid), m_filePath(filePath)
 {
@@ -9,8 +10,8 @@ FileBackupWid::FileBackupWid(const QString &filePath, QWidget *parent) :QDialog(
     QString backupFileName = QFileInfo(filePath).baseName() + timeStamp + "." + QFileInfo(filePath).suffix();
 
 
-    QSettings settings("settings.ini", QSettings::IniFormat);
-    QString backupDir = settings.value("BackupDir", QCoreApplication::applicationDirPath() + "/user").toString();
+    QSettings settings(SettingManager::getSettingsFilePath(), QSettings::IniFormat);
+    QString backupDir = settings.value("file_backup/backup_dir", QCoreApplication::applicationDirPath() + "/user").toString();
 
     ui->edit_path->setText(backupDir);
     ui->edit_name->setText(backupFileName);

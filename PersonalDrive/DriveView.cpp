@@ -1,4 +1,4 @@
-﻿#include "include/DriveView.h"
+#include "include/DriveView.h"
 #include "ui_DriveView.h"
 #include "include/DriveManager.h"
 #include "include/DriveItem.h"
@@ -6,15 +6,18 @@
 #include "include/DriveFolder.h"
 #include "include/DriveViewDelegate.h"
 #include "include/HistoryDelegate.h"
-#include "../../Setting/include/SettingManager.h"
+#include "include/NameConflictDialog.h"
+#include "../Setting/include/SettingManager.h"
 #include "../../main/include/TabFactory.h"
 #include "../../main/include/TabManager.h"
 #include "../../manager/include/FileLocationHelper.h"
 #include <QFileDialog>
+#include <QFile>
 #include <QDebug>
 #include <QMessageBox>
 #include <QDir>
 #include <QInputDialog>
+#include <QLineEdit>
 #include <QDateTime>
 #include <QStandardPaths>
 #include <QDesktopServices>
@@ -33,6 +36,26 @@ namespace {
 constexpr int kPathRole = Qt::UserRole;
 constexpr int kDownloadRecordIdRole = Qt::UserRole + 1;
 constexpr int kDownloadProgressRole = Qt::UserRole + 2;
+
+QString uniqueLocalPath(const QString &path)
+{
+    QString finalPath = path;
+    QFileInfo fileInfo(path);
+    const QString baseName = fileInfo.baseName();
+    const QString suffix = fileInfo.completeSuffix();
+    const QString dirPath = fileInfo.path();
+    int counter = 1;
+
+    while (QFile::exists(finalPath)) {
+        const QString newName = suffix.isEmpty()
+            ? QStringLiteral("%1 (%2)").arg(baseName).arg(counter)
+            : QStringLiteral("%1 (%2).%3").arg(baseName).arg(counter).arg(suffix);
+        finalPath = QDir(dirPath).absoluteFilePath(newName);
+        ++counter;
+    }
+
+    return finalPath;
+}
 }
 
 DriveView::DriveView(QWidget *parent): QWidget(parent), ui(new Ui::DriveView), m_statusPopup(nullptr), m_statusLabel(nullptr), m_currentDirId(0)
@@ -444,6 +467,103 @@ void DriveView::applyHistoryTableLayout(QTableView *tableView)
     tableView->setColumnWidth(5, actionWidth);
 }
 
+bool DriveView::cloudNameExists(const QString &fileName) const
+{
+    const QList<DriveItem *> currentFiles = m_driveManager ? m_driveManager->getCurrentFileList() : QList<DriveItem *>();
+    for (DriveItem *item : currentFiles) {
+        if (item && item->getName().compare(fileName, Qt::CaseInsensitive) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void DriveView::uploadFileWithConflictCheck(const QString &filePath)
+{
+    QFileInfo fileInfo(filePath);
+    if (!fileInfo.isFile()) {
+        return;
+    }
+
+    const QString fileName = fileInfo.fileName();
+    if (!cloudNameExists(fileName)) {
+        m_driveManager->uploadFile(filePath, m_currentDirId);
+        return;
+    }
+
+    const NameConflictChoice choice = NameConflictDialog::getChoice(
+        this,
+        fileName,
+        QStringLiteral("当前云盘目录中已存在同名文件，请选择处理方式。"),
+        QStringLiteral("覆盖云盘文件"),
+        QStringLiteral("自动重命名上传"),
+        QStringLiteral("以该命名上传")
+    );
+
+    switch (choice.action) {
+    case NameConflictAction::Overwrite:
+        m_driveManager->uploadFile(filePath, m_currentDirId, fileName, true);
+        break;
+    case NameConflictAction::AutoRename:
+        m_driveManager->uploadFile(filePath, m_currentDirId);
+        break;
+    case NameConflictAction::CustomName:
+        if (cloudNameExists(choice.customName)) {
+            showInlineMessage(QStringLiteral("自定义名称仍与云盘文件重复，请换一个名称"), true);
+            return;
+        }
+        m_driveManager->uploadFile(filePath, m_currentDirId, choice.customName, false);
+        break;
+    case NameConflictAction::Cancel:
+        break;
+    }
+}
+
+void DriveView::downloadFileWithConflictCheck(int fileId, const QString &fileName)
+{
+    const QString downloadPath = ensureDownloadDirectory();
+    if (downloadPath.isEmpty()) {
+        return;
+    }
+
+    QDir dir(downloadPath);
+    const QString savePath = dir.absoluteFilePath(fileName);
+    if (!QFile::exists(savePath)) {
+        m_driveManager->downloadFile(fileId, savePath);
+        return;
+    }
+
+    const NameConflictChoice choice = NameConflictDialog::getChoice(
+        this,
+        fileName,
+        QStringLiteral("本地下载目录中已存在同名文件，请选择处理方式。"),
+        QStringLiteral("覆盖本地文件"),
+        QStringLiteral("自动重命名下载"),
+        QStringLiteral("以该命名下载")
+    );
+
+    switch (choice.action) {
+    case NameConflictAction::Overwrite:
+        m_driveManager->downloadFile(fileId, savePath, true);
+        break;
+    case NameConflictAction::AutoRename:
+        m_driveManager->downloadFile(fileId, uniqueLocalPath(savePath), false);
+        break;
+    case NameConflictAction::CustomName:
+        {
+            const QString customPath = dir.absoluteFilePath(choice.customName);
+            if (QFile::exists(customPath)) {
+                showInlineMessage(QStringLiteral("自定义名称仍与本地文件重复，请换一个名称"), true);
+                return;
+            }
+            m_driveManager->downloadFile(fileId, customPath);
+        }
+        break;
+    case NameConflictAction::Cancel:
+        break;
+    }
+}
+
 void DriveView::on_PushFileBtn_clicked()
 {
     QString downloadDir = SettingManager::Instance().personal_drive_download_dir();
@@ -458,7 +578,7 @@ void DriveView::on_PushFileBtn_clicked()
 
     for (const QString &filePath : filePaths) {
         if (!filePath.isEmpty()) {
-            DriveManager::Instance().uploadFile(filePath, m_currentDirId);
+            uploadFileWithConflictCheck(filePath);
         }
     }
 }
@@ -500,16 +620,8 @@ void DriveView::onItemDoubleClicked(const QModelIndex &index)
             DriveFile *driveFile = dynamic_cast<DriveFile*>(driveItem);
             if (driveFile) {
                 QString fileName = driveFile->getName();
-                QString downloadPath = ensureDownloadDirectory();
-                if (downloadPath.isEmpty()) {
-                    return;
-                }
-
-                QDir dir(downloadPath);
-                QString savePath = dir.absoluteFilePath(fileName);
-                
                 // 开始下载（下载记录由DriveManager在downloadFile中自动添加）
-                m_driveManager->downloadFile(id, savePath);
+                downloadFileWithConflictCheck(id, fileName);
             }
         }
     }
@@ -536,16 +648,8 @@ void DriveView::onActionClicked(int row, int action)
     case 0: // 下载
         if (!isDir) {
             QString fileName = item->text();
-            QString downloadPath = ensureDownloadDirectory();
-            if (downloadPath.isEmpty()) {
-                return;
-            }
-
-            QDir dir(downloadPath);
-            QString savePath = dir.absoluteFilePath(fileName);
-            
             // 开始下载（下载记录由DriveManager在downloadFile中自动添加）
-            m_driveManager->downloadFile(id, savePath);
+            downloadFileWithConflictCheck(id, fileName);
         } else {
             qDebug() << "不能下载文件夹，行：" << row;
         }
@@ -927,7 +1031,7 @@ void DriveView::dropEvent(QDropEvent *event)
         
         if (fileInfo.isFile()) {
             // 上传文件
-            DriveManager::Instance().uploadFile(filePath, m_currentDirId);
+            uploadFileWithConflictCheck(filePath);
         }
         // 文件夹暂时不管
     }
@@ -953,7 +1057,7 @@ bool DriveView::eventFilter(QObject *obj, QEvent *event)
                     
                     if (fileInfo.isFile()) {
                         // 上传文件
-                        DriveManager::Instance().uploadFile(filePath, m_currentDirId);
+                        uploadFileWithConflictCheck(filePath);
                     }
                     // 文件夹暂时不管
                 }
