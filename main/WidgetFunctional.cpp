@@ -12,6 +12,39 @@ DInfo* WidgetFunctional::getDInfo() {
     return dinfo;
 }
 
+DLogin* WidgetFunctional::ensureLoginDialog()
+{
+    if (!dlogin) {
+        dlogin = new DLogin(this);
+        connect(dlogin, &DLogin::loginSuccessful, this, &WidgetFunctional::handleLoginSuccess);
+    }
+    return dlogin;
+}
+
+SendEmail* WidgetFunctional::ensureSendEmailForm()
+{
+    if (!form) {
+        form = new SendEmail(this);
+    }
+    return form;
+}
+
+ClipboardView* WidgetFunctional::ensureClipboard()
+{
+    if (!clipboard) {
+        clipboard = ClipboardComponentFactory::createClipboardComponent(this);
+    }
+    return clipboard;
+}
+
+DriveView* WidgetFunctional::ensureDriveView()
+{
+    if (!drive) {
+        drive = new DriveView(this);
+    }
+    return drive;
+}
+
 void WidgetFunctional::tryRestoreLogin()
 {
     const QString token = SettingManager::Instance().getToken().trimmed();
@@ -25,6 +58,7 @@ void WidgetFunctional::tryRestoreLogin()
     connect(sessionInfo, &FlaskInfo::s_sessionValidated, this, &WidgetFunctional::handleSessionValidated);
     connect(sessionInfo, &FlaskInfo::s_sessionRefreshed, this, &WidgetFunctional::handleSessionRefreshed);
     connect(sessionInfo, &FlaskInfo::errorOccurred, this, &WidgetFunctional::handleSessionError);
+    connect(sessionInfo, &FlaskInfo::requestFinished, sessionInfo, &QObject::deleteLater);
     sessionInfo->route_validateSession();
 }
 
@@ -51,18 +85,18 @@ void WidgetFunctional::on_pushButton_4_clicked()
 
 void WidgetFunctional::on_pushButton_6_clicked()
 {
-    emit showDrive(drive);
+    emit showDrive(ensureDriveView());
 }
 
 
 void WidgetFunctional::on_pushButton_7_clicked()
 {
-    emit sendEmailForm(form);
+    emit sendEmailForm(ensureSendEmailForm());
 }
 
 void WidgetFunctional::on_pushButton_8_clicked()
 {
-    emit showClipboard(clipboard);
+    emit showClipboard(ensureClipboard());
 
 }
 
@@ -74,7 +108,7 @@ void WidgetFunctional::on_pushButton_9_clicked()
         return;
     }
 
-    dlogin->exec();
+    ensureLoginDialog()->exec();
 }
 
 void WidgetFunctional::on_pushButton_10_clicked()
@@ -161,6 +195,7 @@ void WidgetFunctional::handleSessionError(const QString &error)
         FlaskInfo *refreshInfo = new FlaskInfo(this);
         connect(refreshInfo, &FlaskInfo::s_sessionRefreshed, this, &WidgetFunctional::handleSessionRefreshed);
         connect(refreshInfo, &FlaskInfo::errorOccurred, this, &WidgetFunctional::handleSessionError);
+        connect(refreshInfo, &FlaskInfo::requestFinished, refreshInfo, &QObject::deleteLater);
         refreshInfo->route_refreshSession();
         return;
     }
@@ -172,7 +207,17 @@ void WidgetFunctional::handleSessionError(const QString &error)
 }
 
 WidgetFunctional::WidgetFunctional(QWidget *parent)
-    : QWidget(parent), ui(new Ui::WidgetFunctional), more_function(nullptr)
+    : QWidget(parent),
+      ui(new Ui::WidgetFunctional),
+      btnGroup(nullptr),
+      btnLayout(nullptr),
+      mainLayout(nullptr),
+      dlogin(nullptr),
+      dinfo(nullptr),
+      more_function(nullptr),
+      clipboard(nullptr),
+      form(nullptr),
+      drive(nullptr)
 {
     ui->setupUi(this);
     btnGroup=new QButtonGroup;
@@ -228,14 +273,6 @@ WidgetFunctional::WidgetFunctional(QWidget *parent)
     ui->pushButton_9->setText(QStringLiteral("用户\n登录"));
 
     // ui->pushButton_7->hide(); //暂时不隐藏
-    form = new SendEmail();
-    clipboard = ClipboardComponentFactory::createClipboardComponent();
-    dlogin = new DLogin();
-    dinfo = nullptr;
-    drive = new DriveView();
-
-    connect(dlogin, &DLogin::loginSuccessful, this, &WidgetFunctional::handleLoginSuccess);
-
 }
 
 

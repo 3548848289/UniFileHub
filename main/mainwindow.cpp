@@ -4,6 +4,8 @@
 #include "../Setting/include/ThemeManager.h"
 #include "../Setting/include/SettingManager.h"
 #include "../../PersonalDrive/include/DriveManager.h"
+#include <QGuiApplication>
+#include <QScreen>
 #include <QTimer>
 
 void MainWindow::initCoreWidgets() {
@@ -302,14 +304,36 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     initConnect();
     initMemubarLayout();
     
-    // 加载窗口大小和位置
+    // 加载窗口大小、位置和最大化状态。最大化状态下仍要先设置普通窗口尺寸，
+    // 这样点击还原时会回到用户最后的普通窗口大小。
     QSize size = SettingManager::Instance().getWindowSize();
     QPoint pos = SettingManager::Instance().getWindowPosition();
+    const bool maximized = SettingManager::Instance().getWindowMaximized();
+
+    if (maximized) {
+        QScreen *screen = QGuiApplication::screenAt(pos);
+        if (!screen) {
+            screen = QGuiApplication::primaryScreen();
+        }
+
+        if (screen) {
+            const QRect availableRect = screen->availableGeometry();
+            const bool savedAsMaximizedSize =
+                size.width() >= availableRect.width() - 20 ||
+                size.height() >= availableRect.height() - 20;
+
+            if (savedAsMaximizedSize) {
+                size = QSize(1000, 600);
+                pos = availableRect.center() - QPoint(size.width() / 2, size.height() / 2);
+            }
+        }
+    }
+
     this->resize(size);
     this->move(pos);
     
     // 恢复窗口最大化状态
-    if (SettingManager::Instance().getWindowMaximized()) {
+    if (maximized) {
         this->showMaximized();
     }
     
@@ -326,7 +350,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     
     tabManager->openFile(":/conf/help.txt");
     recentFilesManager->populateRecentFilesMenu(ui->recentFile);
-    widgetfunc->tryRestoreLogin();
+    QTimer::singleShot(500, widgetfunc, [this]() {
+        widgetfunc->tryRestoreLogin();
+    });
 
     // 默认关闭在线文档
     QAction *action = findChild<QAction*>("Function4");
@@ -337,10 +363,16 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    // 保存窗口大小、位置和状态
-    SettingManager::Instance().setWindowSize(this->size());
-    SettingManager::Instance().setWindowPosition(this->pos());
-    SettingManager::Instance().setWindowMaximized(this->isMaximized());
+    // 最大化时仍保存普通窗口几何，避免下次还原后仍是满屏大小。
+    const bool maximized = this->isMaximized();
+    const QRect normalRect = maximized ? this->normalGeometry() : this->geometry();
+
+    if (normalRect.isValid() && normalRect.width() > 0 && normalRect.height() > 0) {
+        SettingManager::Instance().setWindowSize(normalRect.size());
+        SettingManager::Instance().setWindowPosition(normalRect.topLeft());
+    }
+
+    SettingManager::Instance().setWindowMaximized(maximized);
     event->accept();
 }
 

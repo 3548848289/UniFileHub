@@ -381,7 +381,7 @@ DriveItem *DriveManager::jsonToDriveItem(const QJsonObject &json)
     QString name = json["name"].toString();
     int parentId = json["parent_id"].toInt();
     bool isDir = json["is_dir"].toBool();
-    QDateTime createdAt = QDateTime::fromString(json["created_at"].toString(), Qt::ISODate);
+    QDateTime createdAt = QDateTime::fromString(json["created_at"].toString(), Qt::ISODate).toLocalTime();
     
     if (isDir) {
         return new DriveFolder(id, name, parentId, createdAt);

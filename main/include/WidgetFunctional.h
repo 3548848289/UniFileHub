@@ -66,6 +66,11 @@ private slots:
 
 
 private:
+    DLogin* ensureLoginDialog();
+    SendEmail* ensureSendEmailForm();
+    ClipboardView* ensureClipboard();
+    DriveView* ensureDriveView();
+
     bool m_isRefreshingSession = false;
     QButtonGroup* btnGroup;
     QHBoxLayout* btnLayout;

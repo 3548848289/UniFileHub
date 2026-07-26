@@ -1329,54 +1329,54 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="167"/>
-        <location filename="../main/mainwindow.cpp" line="369"/>
-        <location filename="../main/mainwindow.cpp" line="485"/>
-        <location filename="../main/mainwindow.cpp" line="491"/>
-        <location filename="../main/mainwindow.cpp" line="497"/>
+        <location filename="../main/mainwindow.cpp" line="169"/>
+        <location filename="../main/mainwindow.cpp" line="401"/>
+        <location filename="../main/mainwindow.cpp" line="517"/>
+        <location filename="../main/mainwindow.cpp" line="523"/>
+        <location filename="../main/mainwindow.cpp" line="529"/>
         <source>提示</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="167"/>
+        <location filename="../main/mainwindow.cpp" line="169"/>
         <source>请选择一个本地文件上传到网盘。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="369"/>
+        <location filename="../main/mainwindow.cpp" line="401"/>
         <source>该文件夹不存在或不是有效文件夹。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="428"/>
+        <location filename="../main/mainwindow.cpp" line="460"/>
         <source>All Files (*);;CSV Files (*.csv);;Text Files (*.txt)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="103"/>
-        <location filename="../main/mainwindow.cpp" line="109"/>
+        <location filename="../main/mainwindow.cpp" line="105"/>
+        <location filename="../main/mainwindow.cpp" line="111"/>
         <source>打开文件夹</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="317"/>
-        <location filename="../main/mainwindow.cpp" line="318"/>
-        <location filename="../main/mainwindow.cpp" line="427"/>
+        <location filename="../main/mainwindow.cpp" line="341"/>
+        <location filename="../main/mainwindow.cpp" line="342"/>
+        <location filename="../main/mainwindow.cpp" line="459"/>
         <source>打开文件</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="485"/>
+        <location filename="../main/mainwindow.cpp" line="517"/>
         <source>当前页签不是本地文件，无法上传到网盘。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="491"/>
+        <location filename="../main/mainwindow.cpp" line="523"/>
         <source>当前页签还没有保存成文件，请先保存后再上传到网盘。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="497"/>
+        <location filename="../main/mainwindow.cpp" line="529"/>
         <source>当前页签对应的本地文件不存在，无法上传到网盘。</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1419,7 +1419,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <location filename="../MoreFunction/MoreFunction.ui" line="85"/>
-        <source>UniFileHub1.0.0721</source>
+        <source>UniFileHub1.0.0725</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
