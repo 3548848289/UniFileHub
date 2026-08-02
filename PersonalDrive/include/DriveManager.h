@@ -75,7 +75,7 @@ public:
     
     // ========== 下载历史管理 ==========
     // 添加下载记录
-    void addDownloadRecord(int fileId, const QString &fileName, qint64 fileSize, const QString &savePath);
+    void addDownloadRecord(int fileId, const QString &localFileName, const QString &cloudFileName, qint64 fileSize, const QString &savePath);
     
     // 获取下载历史
     QList<DriveDownloadRecord> getDownloadHistory();
@@ -91,7 +91,7 @@ public:
     
     // ========== 上传记录管理 ==========
     // 添加上传记录
-    void addUploadRecord(int fileId, const QString &fileName, qint64 fileSize, const QString &localPath, int parentId);
+    void addUploadRecord(int fileId, const QString &localFileName, const QString &cloudFileName, qint64 fileSize, const QString &localPath, int parentId);
     
     // 获取上传历史
     QList<DriveUploadRecord> getUploadHistory();
@@ -101,6 +101,9 @@ public:
     
     // 更新上传状态
     bool updateUploadStatus(int recordId, const QString &status);
+
+    // 更新上传成功后的云端记录信息
+    bool updateUploadResult(int recordId, int fileId, const QString &cloudFileName, const QString &status);
     
     // 通过本地路径获取记录ID
     int getRecordIdByLocalPath(const QString &localPath);

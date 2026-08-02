@@ -2,6 +2,25 @@
 #include "ui/ui_FileSystem.h"
 #include <QTimer>
 
+namespace {
+constexpr const char *kDriveDownloadMimeType = "application/x-unifilehub-drive-file-id";
+
+QString dropDirectoryForIndex(QFileSystemModel *model, const QModelIndex &index, const QString &fallbackDir)
+{
+    if (!model || !index.isValid()) {
+        return fallbackDir;
+    }
+
+    if (model->isDir(index)) {
+        const QString path = model->filePath(index);
+        return path.isEmpty() ? fallbackDir : path;
+    }
+
+    const QString parentPath = model->filePath(index.parent());
+    return parentPath.isEmpty() ? fallbackDir : parentPath;
+}
+}
+
 FileSystem::FileSystem(QWidget *parent)
     : QWidget(parent), ui(new Ui::FileSystem), serverManager(ServerManager::instance()),
     fileSystemModel(new QFileSystemModel(this))
@@ -55,6 +74,7 @@ FileSystem::FileSystem(QWidget *parent)
     
     // 安装事件过滤器
     ui->treeView->installEventFilter(this);
+    ui->treeView->viewport()->installEventFilter(this);
 
 
     connect(tagItemdelegate, &TagItemDelegate::TagUpdated, this, [=](){
@@ -100,8 +120,6 @@ FileSystem::FileSystem(QWidget *parent)
             changePath(path);
     });
 
-    // 安装事件过滤器来捕获鼠标和键盘事件
-    ui->treeView->installEventFilter(this);
     isMouseClick = false;
     isKeyboardSelection = false;
 
@@ -200,7 +218,7 @@ void FileSystem::changePath(const QString& path){
 }
 
 bool FileSystem::eventFilter(QObject *watched, QEvent *event) {
-    if (watched == ui->treeView) {
+    if (watched == ui->treeView || watched == ui->treeView->viewport()) {
         if (event->type() == QEvent::MouseButtonPress) {
             isMouseClick = true;
             isKeyboardSelection = false;
@@ -217,27 +235,36 @@ bool FileSystem::eventFilter(QObject *watched, QEvent *event) {
             }
         } else if (event->type() == QEvent::DragEnter) {
             QDragEnterEvent *dragEvent = static_cast<QDragEnterEvent*>(event);
-            if (dragEvent->mimeData()->hasUrls()) {
+            if (dragEvent->mimeData()->hasUrls() || dragEvent->mimeData()->hasFormat(kDriveDownloadMimeType)) {
                 dragEvent->acceptProposedAction();
+                return true;
+            }
+        } else if (event->type() == QEvent::DragMove) {
+            QDragMoveEvent *dragMoveEvent = static_cast<QDragMoveEvent*>(event);
+            if (dragMoveEvent->mimeData()->hasUrls() || dragMoveEvent->mimeData()->hasFormat(kDriveDownloadMimeType)) {
+                dragMoveEvent->acceptProposedAction();
                 return true;
             }
         } else if (event->type() == QEvent::Drop) {
             QDropEvent *dropEvent = static_cast<QDropEvent*>(event);
             const QMimeData *mimeData = dropEvent->mimeData();
+            if (mimeData->hasFormat(kDriveDownloadMimeType)) {
+                const QModelIndex dropIndex = ui->treeView->indexAt(dropEvent->pos());
+                const QString dropPath = dropDirectoryForIndex(fileSystemModel, dropIndex, currentDir);
+                const int fileId = QString::fromUtf8(mimeData->data(kDriveDownloadMimeType)).toInt();
+                const QString fileName = mimeData->text();
+
+                if (fileId > 0 && !fileName.isEmpty()) {
+                    emit driveFileDropped(fileId, fileName, dropPath);
+                    dropEvent->acceptProposedAction();
+                    return true;
+                }
+            }
+
             if (mimeData->hasUrls()) {
                 QList<QUrl> urlList = mimeData->urls();
                 QModelIndex dropIndex = ui->treeView->indexAt(dropEvent->pos());
-                QString dropPath;
-                
-                if (dropIndex.isValid()) {
-                    if (fileSystemModel->isDir(dropIndex)) {
-                        dropPath = fileSystemModel->filePath(dropIndex);
-                    } else {
-                        dropPath = fileSystemModel->filePath(dropIndex.parent());
-                    }
-                } else {
-                    dropPath = currentDir;
-                }
+                QString dropPath = dropDirectoryForIndex(fileSystemModel, dropIndex, currentDir);
                 
                 for (const QUrl &url : urlList) {
                     QString sourcePath = url.toLocalFile();
@@ -286,27 +313,36 @@ bool FileSystem::eventFilter(QObject *watched, QEvent *event) {
 }
 
 void FileSystem::dragEnterEvent(QDragEnterEvent *event) {
-    if (event->mimeData()->hasUrls()) {
+    if (event->mimeData()->hasUrls() || event->mimeData()->hasFormat(kDriveDownloadMimeType)) {
+        event->acceptProposedAction();
+    }
+}
+
+void FileSystem::dragMoveEvent(QDragMoveEvent *event) {
+    if (event->mimeData()->hasUrls() || event->mimeData()->hasFormat(kDriveDownloadMimeType)) {
         event->acceptProposedAction();
     }
 }
 
 void FileSystem::dropEvent(QDropEvent *event) {
     const QMimeData *mimeData = event->mimeData();
+    if (mimeData->hasFormat(kDriveDownloadMimeType)) {
+        const QModelIndex dropIndex = ui->treeView->indexAt(event->pos());
+        const QString dropPath = dropDirectoryForIndex(fileSystemModel, dropIndex, currentDir);
+        const int fileId = QString::fromUtf8(mimeData->data(kDriveDownloadMimeType)).toInt();
+        const QString fileName = mimeData->text();
+
+        if (fileId > 0 && !fileName.isEmpty()) {
+            emit driveFileDropped(fileId, fileName, dropPath);
+            event->acceptProposedAction();
+        }
+        return;
+    }
+
     if (mimeData->hasUrls()) {
         QList<QUrl> urlList = mimeData->urls();
         QModelIndex dropIndex = ui->treeView->indexAt(event->pos());
-        QString dropPath;
-        
-        if (dropIndex.isValid()) {
-            if (fileSystemModel->isDir(dropIndex)) {
-                dropPath = fileSystemModel->filePath(dropIndex);
-            } else {
-                dropPath = fileSystemModel->filePath(dropIndex.parent());
-            }
-        } else {
-            dropPath = currentDir;
-        }
+        QString dropPath = dropDirectoryForIndex(fileSystemModel, dropIndex, currentDir);
         
         for (const QUrl &url : urlList) {
             QString sourcePath = url.toLocalFile();

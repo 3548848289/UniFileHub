@@ -30,6 +30,7 @@ class DriveView : public QWidget
 public:
     explicit DriveView(QWidget *parent = nullptr);
     ~DriveView();
+    void downloadFileToDirectoryWithConflictCheck(int fileId, const QString &fileName, const QString &targetDirectory);
 
 private slots:
     void on_PushFileBtn_clicked();
@@ -107,6 +108,7 @@ private:
     void positionStatusPopup();
     void uploadFileWithConflictCheck(const QString &filePath);
     void downloadFileWithConflictCheck(int fileId, const QString &fileName);
+    void downloadFileWithConflictCheck(int fileId, const QString &fileName, const QString &targetDirectory);
     bool cloudNameExists(const QString &fileName) const;
     bool hasUploadableLocalFiles(const QMimeData *mimeData) const;
     void uploadLocalFilesFromMimeData(const QMimeData *mimeData);

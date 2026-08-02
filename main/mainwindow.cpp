@@ -173,6 +173,16 @@ void MainWindow::initConnect() {
         DriveManager::Instance().uploadFile(filePath, 0);
         // QMessageBox::information(this, tr("提示"), tr("已开始上传到网盘根目录。"));
     });
+    connect(file_system, &FileSystem::driveFileDropped, this,
+            [this](int fileId, const QString &fileName, const QString &targetDirectory) {
+        DriveView *driveView = widgetfunc ? widgetfunc->getDriveView() : nullptr;
+        if (!driveView) {
+            QMessageBox::warning(this, tr("提示"), tr("未找到个人网盘窗口，无法下载。"));
+            return;
+        }
+
+        driveView->downloadFileToDirectoryWithConflictCheck(fileId, fileName, targetDirectory);
+    });
     connect(file_system, &FileSystem::fileSelectedByKeyboard, this, [this](const QString &filePath) {
         // 创建预览标签页
         TabAbstract* previewTab = TabFactory::create(filePath);

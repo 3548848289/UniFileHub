@@ -10,6 +10,7 @@ struct DriveDownloadRecord {
     int id;
     int fileId;
     QString fileName;
+    QString cloudFileName;
     qint64 fileSize;
     QString savePath;
     QDateTime downloadTime;

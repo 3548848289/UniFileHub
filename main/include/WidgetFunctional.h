@@ -32,6 +32,7 @@ public:
     explicit WidgetFunctional(QWidget *parent = nullptr);
     ~WidgetFunctional();
     DInfo* getDInfo();
+    DriveView* getDriveView() const;
     void tryRestoreLogin();
 
     void hideButton1();

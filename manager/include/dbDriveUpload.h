@@ -10,6 +10,7 @@ struct DriveUploadRecord {
     int id;
     int fileId;
     QString fileName;
+    QString cloudFileName;
     qint64 fileSize;
     QString localPath;
     QDateTime uploadTime;
@@ -26,6 +27,7 @@ public:
     bool clearUploadHistory();
     bool deleteUploadRecord(int id);
     bool updateUploadStatus(int id, const QString &status);
+    bool updateUploadResult(int id, int fileId, const QString &cloudFileName, const QString &status);
     int getRecordIdByLocalPath(const QString &localPath);
 };
 

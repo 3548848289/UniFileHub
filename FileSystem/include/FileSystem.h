@@ -10,6 +10,7 @@
 #include <QDrag>
 #include <QMimeData>
 #include <QDragEnterEvent>
+#include <QDragMoveEvent>
 #include <QDirIterator>
 #include <QDropEvent>
 #include "TagItemDelegate.h"
@@ -44,6 +45,7 @@ signals:
     void tagopened();
     void fileSelectedByKeyboard(const QString &filePath);
     void uploadToDriveRequested(const QString &filePath);
+    void driveFileDropped(int fileId, const QString &fileName, const QString &targetDirectory);
 private:
     void loadFileMetadata(const QString &filePath);
     void saveExpirationDate(const QString &filePath, const QDate &expirationDate);
@@ -51,6 +53,7 @@ private:
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
+    void dragMoveEvent(QDragMoveEvent *event) override;
     void dropEvent(QDropEvent *event) override;
 
     ServerManager* serverManager;

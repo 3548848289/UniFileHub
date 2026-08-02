@@ -56,7 +56,6 @@ void DInfo::loadUserInfo(const QJsonObject &userInfo) {
         QImage image;
         if (image.loadFromData(avatarData)) {
             storedAvatar = QPixmap::fromImage(image);
-            qDebug() << "成功缓存图片";
             ui->avatarLabel->setPixmap(storedAvatar);
         } else {
             qWarning() << "Failed to load image from data.";

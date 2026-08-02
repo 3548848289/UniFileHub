@@ -12,6 +12,11 @@ DInfo* WidgetFunctional::getDInfo() {
     return dinfo;
 }
 
+DriveView* WidgetFunctional::getDriveView() const
+{
+    return drive;
+}
+
 DLogin* WidgetFunctional::ensureLoginDialog()
 {
     if (!dlogin) {
@@ -130,7 +135,6 @@ void WidgetFunctional::on_pushButton_10_clicked()
 
 
 void WidgetFunctional::handleLoginSuccess(const QString& username) {
-    qDebug() << "Username in handleLoginSuccess:" << username;
     if (dinfo) {
         dinfo->deleteLater();
         dinfo = nullptr;

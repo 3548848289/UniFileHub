@@ -7,6 +7,7 @@
 #include <QJsonObject>
 #include <QDebug>
 #include <QDateTime>
+#include <QFileInfo>
 
 DriveManager::DriveManager(QObject *parent): QObject(parent), m_apiClient(nullptr), m_currentDirectoryId(0), m_initialized(false), m_dbDriveDownload(nullptr), m_dbDriveUpload(nullptr)
 {
@@ -135,8 +136,9 @@ void DriveManager::uploadFile(const QString &filePath, int parentId, const QStri
     QFileInfo fileInfo(filePath);
     if (fileInfo.exists()) {
         // 添加上传记录
-        const QString uploadName = targetName.isEmpty() ? fileInfo.fileName() : targetName;
-        addUploadRecord(0, uploadName, fileInfo.size(), filePath, parentId);
+        const QString localFileName = fileInfo.fileName();
+        const QString cloudFileName = targetName.isEmpty() ? localFileName : targetName;
+        addUploadRecord(0, localFileName, cloudFileName, fileInfo.size(), filePath, parentId);
     }
     
     m_apiClient->uploadFile(filePath, parentId, targetName, overwrite);
@@ -218,8 +220,8 @@ void DriveManager::downloadFile(int fileId, const QString &savePath, bool overwr
                     counter++;
                 }
 
-                // 添加下载记录（使用处理后的实际保存路径）
-                addDownloadRecord(fileId, file->getName(), file->getSize(), finalPath);
+                // 添加下载记录：本地名使用最终保存路径，云端名使用网盘原文件名。
+                addDownloadRecord(fileId, QFileInfo(finalPath).fileName(), file->getName(), file->getSize(), finalPath);
                 const int recordId = m_downloadRecordMap.value(fileId, -1);
                 if (recordId > 0) {
                     emit downloadProgress(recordId, 0);
@@ -295,10 +297,9 @@ void DriveManager::onFileUploaded(const QJsonObject &fileInfo)
     // 查找对应的上传记录并更新状态
     for (auto it = m_uploadRecordMap.begin(); it != m_uploadRecordMap.end(); ++it) {
         int recordId = it.value();
-        DriveUploadRecord record;
         // 需要从数据库获取记录来匹配
         // 这里简化处理，更新所有uploading状态的记录为success
-        updateUploadStatus(recordId, "success");
+        updateUploadResult(recordId, fileId, fileName, "success");
     }
     
     // 文件上传成功，刷新当前目录
@@ -431,7 +432,7 @@ void DriveManager::onPathReceived(const QJsonArray &path)
 
 // ========== 下载历史管理 ==========
 
-void DriveManager::addDownloadRecord(int fileId, const QString &fileName, qint64 fileSize, const QString &savePath)
+void DriveManager::addDownloadRecord(int fileId, const QString &localFileName, const QString &cloudFileName, qint64 fileSize, const QString &savePath)
 {
     if (!m_dbDriveDownload) {
         return;
@@ -439,12 +440,13 @@ void DriveManager::addDownloadRecord(int fileId, const QString &fileName, qint64
     
     DriveDownloadRecord record;
     record.fileId = fileId;
-    record.fileName = fileName;
+    record.fileName = localFileName;
+    record.cloudFileName = cloudFileName;
     record.fileSize = fileSize;
     record.savePath = savePath;
     record.downloadTime = QDateTime::currentDateTime();
     record.downloadStatus = "downloading"; // 初始状态为下载中
-    record.fileType = fileName.section('.', -1);
+    record.fileType = localFileName.section('.', -1);
     
     if (m_dbDriveDownload->addDownloadRecord(record)) {
         // 获取刚插入的记录ID
@@ -497,7 +499,7 @@ int DriveManager::getRecordIdBySavePath(const QString &savePath)
 
 // ========== 上传记录管理 ==========
 
-void DriveManager::addUploadRecord(int fileId, const QString &fileName, qint64 fileSize, const QString &localPath, int parentId)
+void DriveManager::addUploadRecord(int fileId, const QString &localFileName, const QString &cloudFileName, qint64 fileSize, const QString &localPath, int parentId)
 {
     if (!m_dbDriveUpload) {
         return;
@@ -505,12 +507,13 @@ void DriveManager::addUploadRecord(int fileId, const QString &fileName, qint64 f
     
     DriveUploadRecord record;
     record.fileId = fileId;
-    record.fileName = fileName;
+    record.fileName = localFileName;
+    record.cloudFileName = cloudFileName;
     record.fileSize = fileSize;
     record.localPath = localPath;
     record.uploadTime = QDateTime::currentDateTime();
     record.uploadStatus = "uploading"; // 初始状态为上传中
-    record.fileType = fileName.section('.', -1);
+    record.fileType = localFileName.section('.', -1);
     record.parentId = parentId;
     
     if (m_dbDriveUpload->addUploadRecord(record)) {
@@ -551,6 +554,15 @@ bool DriveManager::updateUploadStatus(int recordId, const QString &status)
     }
     
     return m_dbDriveUpload->updateUploadStatus(recordId, status);
+}
+
+bool DriveManager::updateUploadResult(int recordId, int fileId, const QString &cloudFileName, const QString &status)
+{
+    if (!m_dbDriveUpload) {
+        return false;
+    }
+
+    return m_dbDriveUpload->updateUploadResult(recordId, fileId, cloudFileName, status);
 }
 
 int DriveManager::getRecordIdByLocalPath(const QString &localPath)

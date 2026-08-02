@@ -641,8 +641,8 @@ void ClipboardView::refreshAllItems()
     for (auto* item : pinnedItems) {
         addItemToListWidget(item);
     }
-    for (auto* item : cloudItems) {
-        addItemToListWidget(item);
+    for (auto it = cloudItems.rbegin(); it != cloudItems.rend(); ++it) {
+        addItemToListWidget(*it);
     }
     for (auto* item : normalItems) {
         addItemToListWidget(item);

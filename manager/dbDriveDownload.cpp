@@ -2,6 +2,7 @@
 
 #include <QSqlQuery>
 #include <QDebug>
+#include <QFileInfo>
 
 // 表名
 const QString TABLE_NAME = "drive_download_history";
@@ -14,6 +15,7 @@ dbDriveDownload::dbDriveDownload(const QString &dbName) : dbManager(dbName) {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             file_id INTEGER NOT NULL,
             file_name TEXT NOT NULL,
+            cloud_file_name TEXT,
             file_size INTEGER DEFAULT 0,
             save_path TEXT NOT NULL,
             download_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -25,18 +27,44 @@ dbDriveDownload::dbDriveDownload(const QString &dbName) : dbManager(dbName) {
     if (!query.exec(createTableSql)) {
         qDebug() << "创建下载历史表失败:" << query.lastError().text();
     }
+
+    QSqlQuery columnQuery(dbsqlite);
+    bool hasCloudFileName = false;
+    if (columnQuery.exec(QString("PRAGMA table_info(%1)").arg(TABLE_NAME))) {
+        while (columnQuery.next()) {
+            if (columnQuery.value(1).toString() == QStringLiteral("cloud_file_name")) {
+                hasCloudFileName = true;
+                break;
+            }
+        }
+    }
+
+    bool canMigrateCloudFileName = hasCloudFileName;
+    if (!hasCloudFileName) {
+        QSqlQuery alterQuery(dbsqlite);
+        if (!alterQuery.exec(QString("ALTER TABLE %1 ADD COLUMN cloud_file_name TEXT").arg(TABLE_NAME))) {
+            qDebug() << "新增云端文件名字段失败:" << alterQuery.lastError().text();
+        } else {
+            canMigrateCloudFileName = true;
+        }
+    }
+    if (canMigrateCloudFileName) {
+        QSqlQuery migrateQuery(dbsqlite);
+        migrateQuery.exec(QString("UPDATE %1 SET cloud_file_name = file_name WHERE cloud_file_name IS NULL OR cloud_file_name = ''").arg(TABLE_NAME));
+    }
 }
 
 bool dbDriveDownload::addDownloadRecord(const DriveDownloadRecord &record) {
     QSqlQuery query(dbsqlite);
     
     query.prepare(QString(R"(
-        INSERT INTO %1 (file_id, file_name, file_size, save_path, download_time, download_status, file_type)
-        VALUES (:file_id, :file_name, :file_size, :save_path, :download_time, :download_status, :file_type)
+        INSERT INTO %1 (file_id, file_name, cloud_file_name, file_size, save_path, download_time, download_status, file_type)
+        VALUES (:file_id, :file_name, :cloud_file_name, :file_size, :save_path, :download_time, :download_status, :file_type)
     )").arg(TABLE_NAME));
     
     query.bindValue(":file_id", record.fileId);
     query.bindValue(":file_name", record.fileName);
+    query.bindValue(":cloud_file_name", record.cloudFileName);
     query.bindValue(":file_size", record.fileSize);
     query.bindValue(":save_path", record.savePath);
     query.bindValue(":download_time", record.downloadTime.toString(Qt::ISODate));
@@ -56,7 +84,7 @@ QList<DriveDownloadRecord> dbDriveDownload::getDownloadHistory(int limit) {
     QSqlQuery query(dbsqlite);
     
     query.prepare(QString(R"(
-        SELECT id, file_id, file_name, file_size, save_path, download_time, download_status, file_type
+        SELECT id, file_id, file_name, cloud_file_name, file_size, save_path, download_time, download_status, file_type
         FROM %1
         ORDER BY download_time DESC, id DESC
         LIMIT :limit
@@ -74,11 +102,21 @@ QList<DriveDownloadRecord> dbDriveDownload::getDownloadHistory(int limit) {
         record.id = query.value(0).toInt();
         record.fileId = query.value(1).toInt();
         record.fileName = query.value(2).toString();
-        record.fileSize = query.value(3).toLongLong();
-        record.savePath = query.value(4).toString();
-        record.downloadTime = QDateTime::fromString(query.value(5).toString(), Qt::ISODate);
-        record.downloadStatus = query.value(6).toString();
-        record.fileType = query.value(7).toString();
+        record.cloudFileName = query.value(3).toString();
+        const QString storedFileName = record.fileName;
+        record.fileSize = query.value(4).toLongLong();
+        record.savePath = query.value(5).toString();
+        record.downloadTime = QDateTime::fromString(query.value(6).toString(), Qt::ISODate);
+        record.downloadStatus = query.value(7).toString();
+        record.fileType = query.value(8).toString();
+
+        if (record.cloudFileName.isEmpty()) {
+            record.cloudFileName = storedFileName;
+        }
+        const QString localFileName = QFileInfo(record.savePath).fileName();
+        if (!localFileName.isEmpty()) {
+            record.fileName = localFileName;
+        }
         records.append(record);
     }
     
