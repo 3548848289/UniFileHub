@@ -50,6 +50,7 @@ constexpr int kDownloadRecordIdRole = Qt::UserRole + 1;
 constexpr int kDownloadProgressRole = Qt::UserRole + 2;
 constexpr int kHistoryKindRole = Qt::UserRole + 3;
 constexpr const char *kDriveDownloadMimeType = "application/x-unifilehub-drive-file-id";
+constexpr const char *kDriveDownloadFileNameMimeType = "application/x-unifilehub-drive-file-name";
 
 enum HistoryFilter {
     HistoryAll = 0,
@@ -712,15 +713,18 @@ bool DriveView::startDownloadDrag(const QModelIndex &index)
 
     QDrag drag(ui->tableView);
     auto *mimeData = new QMimeData;
-    mimeData->setText(fileName);
-    mimeData->setData(kDriveDownloadMimeType, QByteArray::number(id));
     const QUrl dragFileUrl = QUrl::fromLocalFile(dragFilePath);
     mimeData->setUrls({dragFileUrl});
 #ifdef Q_OS_LINUX
     const QByteArray encodedDragFileUrl = dragFileUrl.toEncoded();
     mimeData->setData("text/uri-list", encodedDragFileUrl + "\r\n");
-    mimeData->setData("x-special/gnome-copied-files", QByteArray("copy\n") + encodedDragFileUrl);
+    mimeData->setData("application/x-kde4-urilist", encodedDragFileUrl + "\r\n");
+    mimeData->setData("application/x-url", encodedDragFileUrl);
+    mimeData->setData("x-special/gnome-copied-files", QByteArray("copy\n") + encodedDragFileUrl + "\n");
+    qDebug() << "External drive drag URI:" << encodedDragFileUrl;
 #endif
+    mimeData->setData(kDriveDownloadMimeType, QByteArray::number(id));
+    mimeData->setData(kDriveDownloadFileNameMimeType, fileName.toUtf8());
     qDebug() << "Starting external/internal drive drag:" << dragFilePath
              << "formats:" << mimeData->formats();
 
@@ -746,13 +750,31 @@ bool DriveView::startDownloadDrag(const QModelIndex &index)
              << "currentInternalAppTarget:" << currentInternalAppTarget
              << "tempFile:" << dragFilePath;
     if (!currentInternalAppTarget && action == Qt::CopyAction) {
-        const QFileInfo dragFileInfo(dragFilePath);
+        QString historyPath = dragFilePath;
+#ifdef Q_OS_LINUX
+        QString targetDirectory = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
+
+        if (targetDirectory.isEmpty()) {
+            showInlineMessage(tr("已取消拖拽下载保存"));
+            return true;
+        }
+
+        const QString targetPath = uniqueLocalPath(QDir(targetDirectory).absoluteFilePath(fileName));
+        if (!QFile::copy(dragFilePath, targetPath)) {
+            showInlineMessage(tr("保存拖拽下载文件失败"), true);
+            return true;
+        }
+
+        historyPath = targetPath;
+        showInlineMessage(tr("已保存拖拽下载：%1").arg(QFileInfo(targetPath).fileName()));
+#endif
+        const QFileInfo dragFileInfo(historyPath);
         m_driveManager->addDownloadRecord(id,
                                           dragFileInfo.fileName(),
                                           fileName,
                                           dragFileInfo.size(),
-                                          dragFilePath);
-        const int recordId = m_driveManager->getRecordIdBySavePath(dragFilePath);
+                                          historyPath);
+        const int recordId = m_driveManager->getRecordIdBySavePath(historyPath);
         if (recordId > 0) {
             m_driveManager->updateDownloadStatus(recordId, "success");
         }

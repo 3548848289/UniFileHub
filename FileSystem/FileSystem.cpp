@@ -4,6 +4,17 @@
 
 namespace {
 constexpr const char *kDriveDownloadMimeType = "application/x-unifilehub-drive-file-id";
+constexpr const char *kDriveDownloadFileNameMimeType = "application/x-unifilehub-drive-file-name";
+
+QString driveDownloadFileName(const QMimeData *mimeData)
+{
+    if (!mimeData) {
+        return QString();
+    }
+
+    const QString fileName = QString::fromUtf8(mimeData->data(kDriveDownloadFileNameMimeType));
+    return fileName.isEmpty() ? mimeData->text() : fileName;
+}
 
 QString dropDirectoryForIndex(QFileSystemModel *model, const QModelIndex &index, const QString &fallbackDir)
 {
@@ -252,7 +263,7 @@ bool FileSystem::eventFilter(QObject *watched, QEvent *event) {
                 const QModelIndex dropIndex = ui->treeView->indexAt(dropEvent->pos());
                 const QString dropPath = dropDirectoryForIndex(fileSystemModel, dropIndex, currentDir);
                 const int fileId = QString::fromUtf8(mimeData->data(kDriveDownloadMimeType)).toInt();
-                const QString fileName = mimeData->text();
+                const QString fileName = driveDownloadFileName(mimeData);
 
                 if (fileId > 0 && !fileName.isEmpty()) {
                     emit driveFileDropped(fileId, fileName, dropPath);
@@ -330,7 +341,7 @@ void FileSystem::dropEvent(QDropEvent *event) {
         const QModelIndex dropIndex = ui->treeView->indexAt(event->pos());
         const QString dropPath = dropDirectoryForIndex(fileSystemModel, dropIndex, currentDir);
         const int fileId = QString::fromUtf8(mimeData->data(kDriveDownloadMimeType)).toInt();
-        const QString fileName = mimeData->text();
+        const QString fileName = driveDownloadFileName(mimeData);
 
         if (fileId > 0 && !fileName.isEmpty()) {
             emit driveFileDropped(fileId, fileName, dropPath);
