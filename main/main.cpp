@@ -18,6 +18,7 @@
 #include "mainwindow.h"
 #include "../Setting/include/SettingManager.h"
 #include "../Setting/include/IconManager.h"
+#include "../../PersonalDrive/include/DriveView.h"
 
 #define SERVER_NAME "SmartDesk_Server"
 
@@ -216,6 +217,7 @@ int main(int argc, char *argv[]) {
 
     QApplication app(argc, argv);
     installTranslators(app);
+    DriveView::clearExternalDragTempFiles();
 
     // if (connectToRunningInstance()) {
     //     return 0;

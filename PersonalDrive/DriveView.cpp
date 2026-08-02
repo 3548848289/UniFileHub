@@ -131,18 +131,23 @@ bool downloadDriveFileToLocalPath(int fileId, const QString &targetPath, QString
     return true;
 }
 
-QString externalDragTempPath(int fileId, const QString &fileName)
+QString externalDragTempRoot()
 {
     QString tempRoot = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
     if (tempRoot.isEmpty()) {
         tempRoot = QDir::tempPath();
     }
 
+    return QDir(tempRoot).absoluteFilePath(QStringLiteral("UniFileHubDrag"));
+}
+
+QString externalDragTempPath(int fileId, const QString &fileName)
+{
     const QString safeFileName = QFileInfo(fileName).fileName().isEmpty()
         ? QStringLiteral("download")
         : QFileInfo(fileName).fileName();
-    const QString sessionDir = QDir(tempRoot).absoluteFilePath(
-        QStringLiteral("UniFileHubDrag/%1_%2")
+    const QString sessionDir = QDir(externalDragTempRoot()).absoluteFilePath(
+        QStringLiteral("%1_%2")
             .arg(QDateTime::currentMSecsSinceEpoch())
             .arg(fileId));
 
@@ -155,8 +160,26 @@ bool isExternalDragDownloadPath(const QString &path)
 }
 }
 
+void DriveView::clearExternalDragTempFiles()
+{
+    QDir tempDir(externalDragTempRoot());
+    const QString tempPath = tempDir.absolutePath();
+    if (!tempDir.exists()) {
+        qDebug() << "External drag temp directory does not exist:" << tempPath;
+        return;
+    }
+
+    if (tempDir.removeRecursively()) {
+        qDebug() << "Cleared external drag temp directory:" << tempPath;
+    } else {
+        qDebug() << "Failed to clear external drag temp directory:" << tempPath;
+    }
+}
+
 DriveView::DriveView(QWidget *parent): QWidget(parent), ui(new Ui::DriveView), m_statusPopup(nullptr), m_statusLabel(nullptr), m_currentDirId(0)
 {
+    DriveView::clearExternalDragTempFiles();
+
     ui->setupUi(this);
     this->setWindowTitle(tr("Personal Drive"));
 
@@ -691,7 +714,15 @@ bool DriveView::startDownloadDrag(const QModelIndex &index)
     auto *mimeData = new QMimeData;
     mimeData->setText(fileName);
     mimeData->setData(kDriveDownloadMimeType, QByteArray::number(id));
-    mimeData->setUrls({QUrl::fromLocalFile(dragFilePath)});
+    const QUrl dragFileUrl = QUrl::fromLocalFile(dragFilePath);
+    mimeData->setUrls({dragFileUrl});
+#ifdef Q_OS_LINUX
+    const QByteArray encodedDragFileUrl = dragFileUrl.toEncoded();
+    mimeData->setData("text/uri-list", encodedDragFileUrl + "\r\n");
+    mimeData->setData("x-special/gnome-copied-files", QByteArray("copy\n") + encodedDragFileUrl);
+#endif
+    qDebug() << "Starting external/internal drive drag:" << dragFilePath
+             << "formats:" << mimeData->formats();
 
     drag.setMimeData(mimeData);
 
@@ -711,6 +742,9 @@ bool DriveView::startDownloadDrag(const QModelIndex &index)
     }
 
     const Qt::DropAction action = drag.exec(Qt::CopyAction, Qt::CopyAction);
+    qDebug() << "Drive drag finished. action:" << action
+             << "currentInternalAppTarget:" << currentInternalAppTarget
+             << "tempFile:" << dragFilePath;
     if (!currentInternalAppTarget && action == Qt::CopyAction) {
         const QFileInfo dragFileInfo(dragFilePath);
         m_driveManager->addDownloadRecord(id,

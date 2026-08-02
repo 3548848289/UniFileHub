@@ -30,6 +30,7 @@ class DriveView : public QWidget
 public:
     explicit DriveView(QWidget *parent = nullptr);
     ~DriveView();
+    static void clearExternalDragTempFiles();
     void downloadFileToDirectoryWithConflictCheck(int fileId, const QString &fileName, const QString &targetDirectory);
 
 private slots:
