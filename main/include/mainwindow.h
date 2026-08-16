@@ -93,6 +93,7 @@ private:
     void onTabContextMenuRequested(const QPoint &pos);
     void togglePanel(QWidget *target);
     void openFolderInFileSystem(const QString &folderPath, bool addToHistory = true);
+    void openTerminal(const QString &workingDirectory = QString());
 };
 
 #endif // MAINWINDOW_H

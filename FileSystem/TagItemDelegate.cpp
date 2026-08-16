@@ -94,6 +94,7 @@ void TagItemDelegate::showContextMenu(const QPoint &pos,
     auto *uploadToDriveAction = new QAction(QStringLiteral("上传到网盘"), &contextMenu);
     auto *copyPathAction = new QAction(QStringLiteral("复制路径"), &contextMenu);
     auto *openInExplorerAction = new QAction(QStringLiteral("在文件夹中打开"), &contextMenu);
+    auto *openInTerminalAction = new QAction(QStringLiteral("在终端打开"), &contextMenu);
 
     connect(openAction, &QAction::triggered, [this, model, index]() { onOpenFileTriggered(model, index); });
     connect(renameAction, &QAction::triggered, [this, model, index]() { onRenameTriggered(model, index); });
@@ -103,15 +104,17 @@ void TagItemDelegate::showContextMenu(const QPoint &pos,
     connect(uploadToDriveAction, &QAction::triggered, [this, model, index]() { onUploadToDriveTriggered(model, index); });
     connect(copyPathAction, &QAction::triggered, [this, model, index]() { onCopyPathTriggered(model, index); });
     connect(openInExplorerAction, &QAction::triggered, [this, model, index]() { onOpenInExplorer(model, index); });
+    connect(openInTerminalAction, &QAction::triggered, [this, model, index]() { onOpenInTerminal(model, index); });
 
     contextMenu.addAction(openAction);
     contextMenu.addAction(renameAction);
     contextMenu.addAction(deleteAction);
+    contextMenu.addAction(copyPathAction);
+    contextMenu.addAction(openInExplorerAction);
     contextMenu.addAction(newTagAction);
     contextMenu.addAction(commitAction);
     contextMenu.addAction(uploadToDriveAction);
-    contextMenu.addAction(copyPathAction);
-    contextMenu.addAction(openInExplorerAction);
+    contextMenu.addAction(openInTerminalAction);
     contextMenu.exec(pos);
 }
 
@@ -303,6 +306,26 @@ void TagItemDelegate::onOpenInExplorer(QAbstractItemModel *model, const QModelIn
 
     const QString filePath = fileSystemModel->filePath(index);
     FileLocationHelper::openFileLocationWithSelection(filePath);
+}
+
+void TagItemDelegate::onOpenInTerminal(QAbstractItemModel *model, const QModelIndex &index)
+{
+    if (!index.isValid()) {
+        return;
+    }
+
+    auto *fileSystemModel = qobject_cast<QFileSystemModel *>(model);
+    if (!fileSystemModel) {
+        return;
+    }
+
+    const QString filePath = fileSystemModel->filePath(index);
+    const QString directoryPath = fileSystemModel->isDir(index)
+                                      ? filePath
+                                      : QFileInfo(filePath).absolutePath();
+    if (!directoryPath.isEmpty()) {
+        emit openTerminalRequested(directoryPath);
+    }
 }
 
 void TagItemDelegate::onTagDeleted(const QString &filePath)

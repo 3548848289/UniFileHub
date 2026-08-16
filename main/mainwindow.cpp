@@ -173,6 +173,9 @@ void MainWindow::initConnect() {
         DriveManager::Instance().uploadFile(filePath, 0);
         // QMessageBox::information(this, tr("提示"), tr("已开始上传到网盘根目录。"));
     });
+    connect(file_system, &FileSystem::openTerminalRequested, this, [this](const QString &directoryPath) {
+        openTerminal(directoryPath);
+    });
     connect(file_system, &FileSystem::driveFileDropped, this,
             [this](int fileId, const QString &fileName, const QString &targetDirectory) {
         DriveView *driveView = widgetfunc ? widgetfunc->getDriveView() : nullptr;
@@ -562,6 +565,11 @@ void MainWindow::openFileFromCommandLine(const QString& filePath)
 
 void MainWindow::on_actionTerminal_triggered()
 {
+    openTerminal();
+}
+
+void MainWindow::openTerminal(const QString &workingDirectory)
+{
     Q_INIT_RESOURCE(KodoTermThemes);
     
     auto *terminal = new KodoTerm(this);
@@ -572,6 +580,11 @@ void MainWindow::on_actionTerminal_triggered()
 #else
     terminal->setProgram("/bin/bash");
 #endif
+
+    const QFileInfo workingDirectoryInfo(workingDirectory);
+    if (!workingDirectory.isEmpty() && workingDirectoryInfo.exists() && workingDirectoryInfo.isDir()) {
+        terminal->setWorkingDirectory(workingDirectoryInfo.absoluteFilePath());
+    }
     
     // 从 SettingManager 获取配置
     QString fontFamily = SettingManager::Instance().terminal_font_family();

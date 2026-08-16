@@ -2,3 +2,4 @@
 /build/
 CMakeLists.txt.user
 CMakeLists.txt.*
+/Resources/ThirdParty/KodoTerm/

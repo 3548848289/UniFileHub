@@ -111,6 +111,10 @@ FileSystem::FileSystem(QWidget *parent)
         emit uploadToDriveRequested(filePath);
     });
 
+    connect(tagItemdelegate, &TagItemDelegate::openTerminalRequested, this, [this](const QString &directoryPath) {
+        emit openTerminalRequested(directoryPath);
+    });
+
     // 创建面包屑控件
     breadcrumb = new QFileSystemBreadcrumbBar();
     breadcrumb->setPath(currentDir);

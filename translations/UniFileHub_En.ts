@@ -1465,11 +1465,11 @@ Refresh file list to get the latest status?</translation>
     </message>
     <message>
         <location filename="../main/mainwindow.cpp" line="169"/>
-        <location filename="../main/mainwindow.cpp" line="180"/>
-        <location filename="../main/mainwindow.cpp" line="411"/>
-        <location filename="../main/mainwindow.cpp" line="527"/>
-        <location filename="../main/mainwindow.cpp" line="533"/>
-        <location filename="../main/mainwindow.cpp" line="539"/>
+        <location filename="../main/mainwindow.cpp" line="183"/>
+        <location filename="../main/mainwindow.cpp" line="414"/>
+        <location filename="../main/mainwindow.cpp" line="530"/>
+        <location filename="../main/mainwindow.cpp" line="536"/>
+        <location filename="../main/mainwindow.cpp" line="542"/>
         <source>提示</source>
         <translation type="unfinished">Info</translation>
     </message>
@@ -1479,7 +1479,7 @@ Refresh file list to get the latest status?</translation>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="411"/>
+        <location filename="../main/mainwindow.cpp" line="414"/>
         <source>该文件夹不存在或不是有效文件夹。</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1488,7 +1488,7 @@ Refresh file list to get the latest status?</translation>
         <translation type="vanished">Open File</translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="470"/>
+        <location filename="../main/mainwindow.cpp" line="473"/>
         <source>All Files (*);;CSV Files (*.csv);;Text Files (*.txt)</source>
         <translation>All Files (*);;CSV Files (*.csv);;Text Files (*.txt)</translation>
     </message>
@@ -1499,29 +1499,29 @@ Refresh file list to get the latest status?</translation>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="180"/>
+        <location filename="../main/mainwindow.cpp" line="183"/>
         <source>未找到个人网盘窗口，无法下载。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="351"/>
-        <location filename="../main/mainwindow.cpp" line="352"/>
-        <location filename="../main/mainwindow.cpp" line="469"/>
+        <location filename="../main/mainwindow.cpp" line="354"/>
+        <location filename="../main/mainwindow.cpp" line="355"/>
+        <location filename="../main/mainwindow.cpp" line="472"/>
         <source>打开文件</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="527"/>
+        <location filename="../main/mainwindow.cpp" line="530"/>
         <source>当前页签不是本地文件，无法上传到网盘。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="533"/>
+        <location filename="../main/mainwindow.cpp" line="536"/>
         <source>当前页签还没有保存成文件，请先保存后再上传到网盘。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="539"/>
+        <location filename="../main/mainwindow.cpp" line="542"/>
         <source>当前页签对应的本地文件不存在，无法上传到网盘。</source>
         <translation type="unfinished"></translation>
     </message>

@@ -45,6 +45,7 @@ signals:
     void tagopened();
     void fileSelectedByKeyboard(const QString &filePath);
     void uploadToDriveRequested(const QString &filePath);
+    void openTerminalRequested(const QString &directoryPath);
     void driveFileDropped(int fileId, const QString &fileName, const QString &targetDirectory);
 private:
     void loadFileMetadata(const QString &filePath);

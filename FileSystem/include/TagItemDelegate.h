@@ -32,6 +32,7 @@ signals:
     void openFileRequested(const QString &filePath);
     void deleteFileRequested(const QString &filePath);
     void uploadToDriveRequested(const QString &filePath);
+    void openTerminalRequested(const QString &directoryPath);
     void onFilesListUpdated(const QStringList& files);
     void TagUpdated();
 
@@ -52,6 +53,7 @@ private slots:
     void onUploadToDriveTriggered(QAbstractItemModel *model, const QModelIndex &index);
     void onCopyPathTriggered(QAbstractItemModel *model, const QModelIndex &index);
     void onOpenInExplorer(QAbstractItemModel *model, const QModelIndex &index);
+    void onOpenInTerminal(QAbstractItemModel *model, const QModelIndex &index);
     void onTagDeleted(const QString &filePath); // 新增槽函数，处理标签删除事件
 private:
     QStringList fileList;
