@@ -11,6 +11,8 @@ class ClipboardComponentFactory
 public:
     // 创建剪切板MVC组件
     static ClipboardView* createClipboardComponent(QWidget* parent = nullptr);
+    static ClipboardView* createClipboardComponent(ClipboardController* controller, QWidget* parent = nullptr);
+    static ClipboardController* createClipboardController(QWidget* parent = nullptr);
     
     // 获取与View关联的Controller
     static ClipboardController* getController(ClipboardView* view);

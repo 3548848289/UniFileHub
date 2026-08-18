@@ -32,6 +32,16 @@ ClipboardController::ClipboardController(QObject *parent)
     });
     connect(m_cloudClient, &ClipboardCloudClient::deleteFailed,
             this, &ClipboardController::errorMessageRequested);
+    connect(m_cloudClient, &ClipboardCloudClient::clearSucceeded, this, [this]() {
+        m_historyManager.removeCloudItems();
+        emit modelCleared();
+        const auto& items = m_historyManager.items();
+        for (auto it = items.begin(); it != items.end(); ++it) {
+            emit itemAddedToModel(it->get());
+        }
+    });
+    connect(m_cloudClient, &ClipboardCloudClient::clearFailed,
+            this, &ClipboardController::errorMessageRequested);
     connect(m_cloudClient, &ClipboardCloudClient::itemsFetched,
             this, &ClipboardController::handleCloudItemsFetched);
     connect(m_cloudClient, &ClipboardCloudClient::fetchFailed,
@@ -226,6 +236,16 @@ void ClipboardController::unsyncItemFromCloud(ClipboardItem *item)
     }
 
     m_cloudClient->deleteItem(item->cloudItemId());
+}
+
+void ClipboardController::clearCloudItems()
+{
+    if (SettingManager::Instance().getToken().trimmed().isEmpty()) {
+        emit errorMessageRequested(QStringLiteral("请先登录账号"));
+        return;
+    }
+
+    m_cloudClient->clearItems();
 }
 
 void ClipboardController::refreshCloudItems()

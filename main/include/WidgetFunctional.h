@@ -69,6 +69,7 @@ private slots:
 private:
     DLogin* ensureLoginDialog();
     SendEmail* ensureSendEmailForm();
+    ClipboardController* ensureClipboardController();
     ClipboardView* ensureClipboard();
     DriveView* ensureDriveView();
 
@@ -79,6 +80,7 @@ private:
     DLogin * dlogin;
     DInfo *dinfo;
     MoreFunction * more_function;
+    ClipboardController* clipboardController;
     ClipboardView* clipboard;
     SendEmail * form;
     DriveView * drive;

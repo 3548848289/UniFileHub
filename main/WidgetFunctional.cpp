@@ -37,9 +37,23 @@ SendEmail* WidgetFunctional::ensureSendEmailForm()
 ClipboardView* WidgetFunctional::ensureClipboard()
 {
     if (!clipboard) {
-        clipboard = ClipboardComponentFactory::createClipboardComponent(this);
+        if (!clipboardController) {
+            clipboardController = ClipboardComponentFactory::createClipboardController(this);
+        }
+        clipboard = ClipboardComponentFactory::createClipboardComponent(clipboardController, this);
+        connect(clipboard, &QObject::destroyed, this, [this]() {
+            clipboard = nullptr;
+        });
     }
     return clipboard;
+}
+
+ClipboardController* WidgetFunctional::ensureClipboardController()
+{
+    if (!clipboardController) {
+        clipboardController = ClipboardComponentFactory::createClipboardController(this);
+    }
+    return clipboardController;
 }
 
 DriveView* WidgetFunctional::ensureDriveView()
@@ -219,6 +233,7 @@ WidgetFunctional::WidgetFunctional(QWidget *parent)
       dlogin(nullptr),
       dinfo(nullptr),
       more_function(nullptr),
+      clipboardController(nullptr),
       clipboard(nullptr),
       form(nullptr),
       drive(nullptr)
@@ -275,6 +290,8 @@ WidgetFunctional::WidgetFunctional(QWidget *parent)
     ui->pushButton_9->setIcon(IconManager::icon(IconManager::Icon::Login, QSize(24,24)));
     ui->pushButton_10->setIcon(IconManager::icon(IconManager::Icon::More, QSize(24,24)));
     ui->pushButton_9->setText(QStringLiteral("用户\n登录"));
+
+    ensureClipboardController();
 
     // ui->pushButton_7->hide(); //暂时不隐藏
 }

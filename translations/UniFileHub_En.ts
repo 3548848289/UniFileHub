@@ -101,16 +101,21 @@
     </message>
     <message>
         <location filename="../ClipBoard/ui/ClipboardView.ui" line="90"/>
+        <source>清空云端</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ClipBoard/ui/ClipboardView.ui" line="103"/>
         <source>刷新</source>
         <translation type="unfinished">Refresh</translation>
     </message>
     <message>
-        <location filename="../ClipBoard/ui/ClipboardView.ui" line="103"/>
+        <location filename="../ClipBoard/ui/ClipboardView.ui" line="116"/>
         <source>保存</source>
         <translation>Save</translation>
     </message>
     <message>
-        <location filename="../ClipBoard/ui/ClipboardView.ui" line="116"/>
+        <location filename="../ClipBoard/ui/ClipboardView.ui" line="129"/>
         <source>清空</source>
         <translation>Clear</translation>
     </message>

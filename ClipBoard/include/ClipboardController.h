@@ -34,6 +34,7 @@ public slots:
     void searchItems(const QString& searchText);
     void syncItemToCloud(ClipboardItem* item);
     void unsyncItemFromCloud(ClipboardItem* item);
+    void clearCloudItems();
     void refreshCloudItems();
 
 private slots:

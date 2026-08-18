@@ -21,6 +21,7 @@ public:
     void uploadTextItem(const QString &content);
     void fetchItems();
     void deleteItem(int cloudItemId);
+    void clearItems();
     void startEventStream();
     void stopEventStream();
 
@@ -29,6 +30,8 @@ signals:
     void uploadFailed(const QString &message);
     void deleteSucceeded();
     void deleteFailed(const QString &message);
+    void clearSucceeded();
+    void clearFailed(const QString &message);
     void itemsFetched(const QJsonArray &items);
     void fetchFailed(const QString &message);
     void cloudItemsChanged();

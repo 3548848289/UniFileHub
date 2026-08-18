@@ -5,22 +5,30 @@ QHash<ClipboardView*, ClipboardController*> ClipboardComponentFactory::m_viewCon
 
 ClipboardView *ClipboardComponentFactory::createClipboardComponent(QWidget *parent)
 {
-    // 1. 创建Controller
-    ClipboardController* controller = new ClipboardController(parent);
+    ClipboardController* controller = createClipboardController(parent);
+    return createClipboardComponent(controller, parent);
+}
 
-    // 2. 创建View并连接到Controller
-    ClipboardView* view = new ClipboardView(controller, parent);
-
-    // 存储View和Controller的映射关系，便于后续获取Controller
-    m_viewControllerMap[view] = controller;
-
-    // 将Controller的父对象设为View，这样当View被销毁时，Controller也会被销毁
-    // 避免内存泄漏
-    if (parent == nullptr && view != nullptr) {
-        controller->setParent(view);
+ClipboardView *ClipboardComponentFactory::createClipboardComponent(ClipboardController *controller, QWidget *parent)
+{
+    if (!controller) {
+        controller = createClipboardController(parent);
+    } else if (parent && !controller->parent()) {
+        controller->setParent(parent);
     }
 
+    ClipboardView* view = new ClipboardView(controller, parent);
+
+    m_viewControllerMap[view] = controller;
+    QObject::connect(view, &QObject::destroyed, [view]() {
+        ClipboardComponentFactory::cleanup(view);
+    });
     return view;
+}
+
+ClipboardController *ClipboardComponentFactory::createClipboardController(QWidget *parent)
+{
+    return new ClipboardController(parent);
 }
 
 ClipboardController *ClipboardComponentFactory::getController(ClipboardView *view)

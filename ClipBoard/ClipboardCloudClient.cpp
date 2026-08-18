@@ -113,6 +113,25 @@ void ClipboardCloudClient::deleteItem(int cloudItemId)
     });
 }
 
+void ClipboardCloudClient::clearItems()
+{
+    if (serviceAddress().isEmpty() || token().isEmpty()) {
+        emit clearFailed(QStringLiteral("未登录或剪切板服务地址未配置"));
+        return;
+    }
+
+    QNetworkRequest request(QUrl(serviceAddress() + "/clipboard/items"));
+    request.setRawHeader("Authorization", "Bearer " + token().toUtf8());
+    request.setTransferTimeout(15000);
+
+    QNetworkReply *reply = m_networkManager->deleteResource(request);
+    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+        handleJsonReply(reply,
+                        [this](const QJsonDocument &) { emit clearSucceeded(); },
+                        [this](const QString &message) { emit clearFailed(message); });
+    });
+}
+
 void ClipboardCloudClient::startEventStream()
 {
     m_eventStreamEnabled = true;

@@ -34,6 +34,7 @@ public slots:
 
 private slots:
     void on_clearButton_clicked();
+    void on_clearCloudButton_clicked();
     void on_saveButton_clicked();
     void on_refreshButton_clicked();
     void on_listWidget_itemDoubleClicked(QListWidgetItem *item);

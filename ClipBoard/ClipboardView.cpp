@@ -499,6 +499,21 @@ void ClipboardView::on_clearButton_clicked()
     m_controller->clearAllItems();
 }
 
+void ClipboardView::on_clearCloudButton_clicked()
+{
+    const QMessageBox::StandardButton reply =
+        QMessageBox::question(this,
+                              QStringLiteral("清空云端记录"),
+                              QStringLiteral("确定要清空当前账号的云端剪切板记录吗？"),
+                              QMessageBox::Yes | QMessageBox::No,
+                              QMessageBox::No);
+    if (reply != QMessageBox::Yes) {
+        return;
+    }
+
+    m_controller->clearCloudItems();
+}
+
 void ClipboardView::on_saveButton_clicked()
 {
     m_controller->saveHistory();
