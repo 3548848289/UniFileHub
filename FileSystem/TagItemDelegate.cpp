@@ -4,6 +4,7 @@
 
 #include <QDir>
 #include <QMessageBox>
+#include <QtGlobal>
 
 TagItemDelegate::TagItemDelegate(QObject *parent, ServerManager *serverManager)
     : QStyledItemDelegate(parent),
@@ -22,13 +23,23 @@ void TagItemDelegate::paint(QPainter *painter,
 
     if (hasTags(filePath)) {
         const QRect iconRect(option.rect.right() - 30, option.rect.top() + 5, 20, 20);
-        const QIcon tagIcon = QIcon::fromTheme(QIcon::ThemeIcon::MailMessageNew);
+        const QIcon tagIcon =
+#if QT_VERSION_MAJOR >= 6
+            QIcon::fromTheme(QIcon::ThemeIcon::MailMessageNew);
+#else
+            QIcon::fromTheme(QStringLiteral("mail-message-new"));
+#endif
         tagIcon.paint(painter, iconRect, Qt::AlignCenter);
     }
 
     if (dbservice.dbBackup().hasSubmissions(filePath)) {
         const QRect submissionIconRect(option.rect.right() - 60, option.rect.top() + 5, 20, 20);
-        const QIcon submissionIcon = QIcon::fromTheme(QIcon::ThemeIcon::EditCopy);
+        const QIcon submissionIcon =
+#if QT_VERSION_MAJOR >= 6
+            QIcon::fromTheme(QIcon::ThemeIcon::EditCopy);
+#else
+            QIcon::fromTheme(QStringLiteral("edit-copy"));
+#endif
         submissionIcon.paint(painter, submissionIconRect, Qt::AlignCenter);
     }
 }
@@ -61,7 +72,11 @@ bool TagItemDelegate::editorEvent(QEvent *event,
         }
 
         if (mouseEvent->button() == Qt::RightButton && option.rect.contains(mouseEvent->pos())) {
+#if QT_VERSION_MAJOR >= 6
             showContextMenu(mouseEvent->globalPosition().toPoint(), index, model);
+#else
+            showContextMenu(mouseEvent->globalPos(), index, model);
+#endif
             return true;
         }
     }
@@ -94,7 +109,9 @@ void TagItemDelegate::showContextMenu(const QPoint &pos,
     auto *uploadToDriveAction = new QAction(QStringLiteral("上传到网盘"), &contextMenu);
     auto *copyPathAction = new QAction(QStringLiteral("复制路径"), &contextMenu);
     auto *openInExplorerAction = new QAction(QStringLiteral("在文件夹中打开"), &contextMenu);
+#if UNIFILEHUB_ENABLE_TERMINAL
     auto *openInTerminalAction = new QAction(QStringLiteral("在终端打开"), &contextMenu);
+#endif
 
     connect(openAction, &QAction::triggered, [this, model, index]() { onOpenFileTriggered(model, index); });
     connect(renameAction, &QAction::triggered, [this, model, index]() { onRenameTriggered(model, index); });
@@ -104,7 +121,9 @@ void TagItemDelegate::showContextMenu(const QPoint &pos,
     connect(uploadToDriveAction, &QAction::triggered, [this, model, index]() { onUploadToDriveTriggered(model, index); });
     connect(copyPathAction, &QAction::triggered, [this, model, index]() { onCopyPathTriggered(model, index); });
     connect(openInExplorerAction, &QAction::triggered, [this, model, index]() { onOpenInExplorer(model, index); });
+#if UNIFILEHUB_ENABLE_TERMINAL
     connect(openInTerminalAction, &QAction::triggered, [this, model, index]() { onOpenInTerminal(model, index); });
+#endif
 
     contextMenu.addAction(openAction);
     contextMenu.addAction(renameAction);
@@ -114,7 +133,9 @@ void TagItemDelegate::showContextMenu(const QPoint &pos,
     contextMenu.addAction(newTagAction);
     contextMenu.addAction(commitAction);
     contextMenu.addAction(uploadToDriveAction);
+#if UNIFILEHUB_ENABLE_TERMINAL
     contextMenu.addAction(openInTerminalAction);
+#endif
     contextMenu.exec(pos);
 }
 

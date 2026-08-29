@@ -131,9 +131,14 @@ void MainWindow::initConnect() {
         tabManager->createNewTab([]() { return new TabHandleCSV(""); }, "New CSV Tab");
     });
 
+#if QT_VERSION_MAJOR >= 6
     connect(ui->actionxlsx_file, &QAction::triggered, this, [this]() {
         tabManager->createNewTab([]() { return new TabHandleXLSX(""); }, "New XLSX Tab");
     });
+#else
+    ui->actionxlsx_file->setEnabled(false);
+    ui->actionxlsx_file->setVisible(false);
+#endif
 
     connect(ui->actionshe, &QAction::triggered, this, &MainWindow::showSetting);
 
@@ -360,6 +365,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->actionshe->setIcon(IconManager::icon(IconManager::Icon::MenuSettings, QSize(16, 16)));
     ui->actionhelp->setIcon(IconManager::icon(IconManager::Icon::MenuHelp, QSize(16, 16)));
     ui->actionfind->setIcon(IconManager::icon(IconManager::Icon::MenuSearch, QSize(16, 16)));
+#if !UNIFILEHUB_ENABLE_TERMINAL
+    ui->actionTerminal->setVisible(false);
+#endif
+
     
     tabManager->openFile(":/conf/help.txt");
     recentFilesManager->populateRecentFilesMenu(ui->recentFile);
@@ -570,6 +579,7 @@ void MainWindow::on_actionTerminal_triggered()
 
 void MainWindow::openTerminal(const QString &workingDirectory)
 {
+#if UNIFILEHUB_ENABLE_TERMINAL
     Q_INIT_RESOURCE(KodoTermThemes);
     
     auto *terminal = new KodoTerm(this);
@@ -618,5 +628,9 @@ void MainWindow::openTerminal(const QString &workingDirectory)
     tabManager->addWidgetTab(terminal, "终端");
     terminal->show();
     terminal->start();
+#else
+    Q_UNUSED(workingDirectory);
+    QMessageBox::information(this, tr("提示"), tr("当前构建未启用内置终端。"));
+#endif
 }
 

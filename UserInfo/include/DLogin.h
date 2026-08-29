@@ -16,6 +16,7 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QBuffer>
+#include <QtGlobal>
 #include "FlaskInfo.h"
 
 namespace Ui {
@@ -76,13 +77,21 @@ protected:
     void mousePressEvent(QMouseEvent *event) override {
         if (event->button() == Qt::LeftButton) {
             mousePressed = true;
+#if QT_VERSION_MAJOR >= 6
             startPos = event->globalPosition().toPoint() - this->frameGeometry().topLeft();
+#else
+            startPos = event->globalPos() - this->frameGeometry().topLeft();
+#endif
         }
     }
 
     void mouseMoveEvent(QMouseEvent *event) override {
         if (mousePressed) {
+#if QT_VERSION_MAJOR >= 6
             move(event->globalPosition().toPoint() - startPos);
+#else
+            move(event->globalPos() - startPos);
+#endif
         }
     }
 

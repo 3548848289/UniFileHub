@@ -1,5 +1,8 @@
 #include "dbManager.h"
 
+#include <QDebug>
+#include <QPair>
+
 dbManager::dbManager(const QString &dbName)
 {
     QString connectionName = "sqlite_" + QUuid::createUuid().toString();

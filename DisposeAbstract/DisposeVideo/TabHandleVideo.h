@@ -9,14 +9,18 @@
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QGraphicsVideoItem>
-#include <QVideoSink>
 #include <QSlider>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QMediaPlayer>
 #include <QVideoWidget>
+#include <QtGlobal>
+#if QT_VERSION_MAJOR >= 6
 #include <QAudioOutput>
+#else
+#include <QMediaContent>
+#endif
 #include "ControlWidVideo.h"
 
 class TabHandleVideo : public TabAbstract
@@ -44,7 +48,9 @@ private:
     ControlWidVideo * controlwidVideo;
     QMediaPlayer *player;
     QVideoWidget *videoWidget;
+#if QT_VERSION_MAJOR >= 6
     QAudioOutput *audioOutput;
+#endif
     QLabel *loadingLabel;
     bool isPlaying;
 

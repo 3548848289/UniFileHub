@@ -31,9 +31,11 @@ const QMap<QString, std::function<TabAbstract*(const QString&)>> TabFactory::fac
     // --- 表格/数据类 ---
     { "csv",   [](const QString& f){ return new TabHandleCSV(f); } },
     { "tsv",   [](const QString& f){ return new TabHandleCSV(f); } },
+#if QT_VERSION_MAJOR >= 6
     { "xlsx",  [](const QString& f){ return new TabHandleXLSX(f); } },
     { "xls",   [](const QString& f){ return new TabHandleXLSX(f); } },
     { "ods",   [](const QString& f){ return new TabHandleXLSX(f); } },
+#endif
 
     // --- 图片类 ---
     { "png",   [](const QString& f){ return new TabHandleIMG(f); } },
@@ -63,8 +65,10 @@ const QMap<QString, std::function<TabAbstract*(const QString&)>> TabFactory::fac
     { "h264",   [](const QString& f){ return new TabHandleVideo(f); } },
 
     // --- PDF类 ---
+#if QT_VERSION_MAJOR >= 6
     { "pdf",  [](const QString& f){ return new TabHandlePDF(f); } },
     { "ai",  [](const QString& f){ return new TabHandlePDF(f); } },
+#endif
     
     // --- 数据库类 ---
     { "db",   [](const QString& f){ return new TabHandleDB(f); } },

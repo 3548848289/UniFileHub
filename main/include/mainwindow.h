@@ -18,11 +18,13 @@
 #include "WidgetFunctional.h"
 #include "FindDialog.h"
 #include "TabAbstract.h"
-#include "TabManager.h" // 包含LayoutType
+#include "TabManager.h" // 鍖呭惈LayoutType
 #include "../../DisposeAbstract/DisposeTXT/TabHandleTXT.h"
 #include "../../DisposeAbstract/DisposeCSV/TabHandleCSV.h"
 #include "../../DisposeAbstract/DisposeIMG/include/TabHandleIMG.h"
+#if QT_VERSION_MAJOR >= 6
 #include "../../DisposeAbstract/DisposeXLSX/TabHandleXLSX.h"
+#endif
 #include "../../DisposeAbstract/DisposeVideo/TabHandleVideo.h"
 #include "../../DisposeAbstract/DisposeCSV/ControlWidCSV.h"
 #include "../../DisposeAbstract/DisposeIMG/include/ControlFrame.h"
@@ -32,7 +34,9 @@
 #include "../../FileSystem/include/FileSystem.h"
 #include "../../FileBackup/include/FileBackupView.h"
 #include "../../manager/include/dbService.h"
+#if UNIFILEHUB_ENABLE_TERMINAL
 #include "../../Resources/ThirdParty/KodoTerm/include/KodoTerm/KodoTerm.hpp"
+#endif
 
 #include "TabManager.h"
 

@@ -1423,7 +1423,11 @@ bool DriveView::eventFilter(QObject *obj, QEvent *event)
         if (event->type() == QEvent::MouseButtonPress) {
             QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
             if (mouseEvent->button() == Qt::LeftButton) {
+#if QT_VERSION_MAJOR >= 6
                 QPoint position = mouseEvent->position().toPoint();
+#else
+                QPoint position = mouseEvent->pos();
+#endif
                 if (obj == ui->tableView) {
                     position = ui->tableView->viewport()->mapFrom(ui->tableView, position);
                 }
@@ -1434,7 +1438,11 @@ bool DriveView::eventFilter(QObject *obj, QEvent *event)
         } else if (event->type() == QEvent::MouseMove) {
             QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
             if ((mouseEvent->buttons() & Qt::LeftButton) && m_dragStartIndex.isValid()) {
+#if QT_VERSION_MAJOR >= 6
                 QPoint position = mouseEvent->position().toPoint();
+#else
+                QPoint position = mouseEvent->pos();
+#endif
                 if (obj == ui->tableView) {
                     position = ui->tableView->viewport()->mapFrom(ui->tableView, position);
                 }

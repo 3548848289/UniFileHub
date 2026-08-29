@@ -963,23 +963,23 @@ Path</translation>
 Refresh file list to get the latest status?</translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1489"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1514"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1560"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1585"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1497"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1522"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1568"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1593"/>
         <source>文件路径为空</source>
         <translation>File path is empty</translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1495"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1520"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1566"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1591"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1503"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1528"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1574"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1599"/>
         <source>文件不存在: %1</source>
         <translation>File does not exist: %1</translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1609"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1617"/>
         <source> (预览)</source>
         <translation> (Preview)</translation>
     </message>
@@ -1469,23 +1469,62 @@ Refresh file list to get the latest status?</translation>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="169"/>
-        <location filename="../main/mainwindow.cpp" line="183"/>
-        <location filename="../main/mainwindow.cpp" line="414"/>
-        <location filename="../main/mainwindow.cpp" line="530"/>
-        <location filename="../main/mainwindow.cpp" line="536"/>
-        <location filename="../main/mainwindow.cpp" line="542"/>
+        <location filename="../main/mainwindow.cpp" line="105"/>
+        <location filename="../main/mainwindow.cpp" line="111"/>
+        <source>打开文件夹</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/mainwindow.cpp" line="174"/>
+        <location filename="../main/mainwindow.cpp" line="188"/>
+        <location filename="../main/mainwindow.cpp" line="423"/>
+        <location filename="../main/mainwindow.cpp" line="539"/>
+        <location filename="../main/mainwindow.cpp" line="545"/>
+        <location filename="../main/mainwindow.cpp" line="551"/>
+        <location filename="../main/mainwindow.cpp" line="633"/>
         <source>提示</source>
         <translation type="unfinished">Info</translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="169"/>
+        <location filename="../main/mainwindow.cpp" line="174"/>
         <source>请选择一个本地文件上传到网盘。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="414"/>
+        <location filename="../main/mainwindow.cpp" line="188"/>
+        <source>未找到个人网盘窗口，无法下载。</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/mainwindow.cpp" line="359"/>
+        <location filename="../main/mainwindow.cpp" line="360"/>
+        <location filename="../main/mainwindow.cpp" line="481"/>
+        <source>打开文件</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/mainwindow.cpp" line="423"/>
         <source>该文件夹不存在或不是有效文件夹。</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/mainwindow.cpp" line="539"/>
+        <source>当前页签不是本地文件，无法上传到网盘。</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/mainwindow.cpp" line="545"/>
+        <source>当前页签还没有保存成文件，请先保存后再上传到网盘。</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/mainwindow.cpp" line="551"/>
+        <source>当前页签对应的本地文件不存在，无法上传到网盘。</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/mainwindow.cpp" line="633"/>
+        <source>当前构建未启用内置终端。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1493,42 +1532,9 @@ Refresh file list to get the latest status?</translation>
         <translation type="vanished">Open File</translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="473"/>
+        <location filename="../main/mainwindow.cpp" line="482"/>
         <source>All Files (*);;CSV Files (*.csv);;Text Files (*.txt)</source>
         <translation>All Files (*);;CSV Files (*.csv);;Text Files (*.txt)</translation>
-    </message>
-    <message>
-        <location filename="../main/mainwindow.cpp" line="105"/>
-        <location filename="../main/mainwindow.cpp" line="111"/>
-        <source>打开文件夹</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/mainwindow.cpp" line="183"/>
-        <source>未找到个人网盘窗口，无法下载。</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/mainwindow.cpp" line="354"/>
-        <location filename="../main/mainwindow.cpp" line="355"/>
-        <location filename="../main/mainwindow.cpp" line="472"/>
-        <source>打开文件</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/mainwindow.cpp" line="530"/>
-        <source>当前页签不是本地文件，无法上传到网盘。</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/mainwindow.cpp" line="536"/>
-        <source>当前页签还没有保存成文件，请先保存后再上传到网盘。</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/mainwindow.cpp" line="542"/>
-        <source>当前页签对应的本地文件不存在，无法上传到网盘。</source>
-        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1629,12 +1635,12 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation>The current tab is invalid</translation>
     </message>
     <message>
-        <location filename="../main/TabFactory.cpp" line="92"/>
+        <location filename="../main/TabFactory.cpp" line="96"/>
         <source>不受支持的文件类型</source>
         <translation>Unsupported File Type</translation>
     </message>
     <message>
-        <location filename="../main/TabFactory.cpp" line="93"/>
+        <location filename="../main/TabFactory.cpp" line="97"/>
         <source>该文件类型不受支持。是否以文本方式打开？</source>
         <translation>This file type is not supported. Open as text?</translation>
     </message>
@@ -1685,12 +1691,12 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation>Sort by Expiration (Descending)</translation>
     </message>
     <message>
-        <location filename="../TagSchedule/ScheduleWid.cpp" line="61"/>
+        <location filename="../TagSchedule/ScheduleWid.cpp" line="62"/>
         <source>文件不存在</source>
         <translation>File does not exist</translation>
     </message>
     <message>
-        <location filename="../TagSchedule/ScheduleWid.cpp" line="62"/>
+        <location filename="../TagSchedule/ScheduleWid.cpp" line="63"/>
         <source>文件已被移动或删除：
 %1</source>
         <translation>File has been moved or deleted:
@@ -2179,27 +2185,27 @@ Directory</translation>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/Setting.cpp" line="28"/>
+        <location filename="../Setting/Setting.cpp" line="30"/>
         <source>默认覆盖</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/Setting.cpp" line="31"/>
+        <location filename="../Setting/Setting.cpp" line="33"/>
         <source>默认自动重命名</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/Setting.cpp" line="34"/>
+        <location filename="../Setting/Setting.cpp" line="36"/>
         <source>默认弹出提示框</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/Setting.cpp" line="77"/>
+        <location filename="../Setting/Setting.cpp" line="83"/>
         <source>配置已保存</source>
         <translation>Configuration Saved</translation>
     </message>
     <message>
-        <location filename="../Setting/Setting.cpp" line="78"/>
+        <location filename="../Setting/Setting.cpp" line="84"/>
         <source>是否需要重启程序以应用配置？</source>
         <translation>Restart the application to apply changes?</translation>
     </message>
@@ -2573,53 +2579,63 @@ Message</translation>
 <context>
     <name>TabHandleIMG</name>
     <message>
-        <location filename="../DisposeAbstract/DisposeIMG/TabHandleIMG.cpp" line="39"/>
+        <location filename="../DisposeAbstract/DisposeIMG/TabHandleIMG.cpp" line="44"/>
         <source>Graphics Item Transformation</source>
         <translation>Graphics Item Transformation</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeIMG/TabHandleIMG.cpp" line="156"/>
+        <location filename="../DisposeAbstract/DisposeIMG/TabHandleIMG.cpp" line="161"/>
         <source>Save Image</source>
         <translation>Save Image</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeIMG/TabHandleIMG.cpp" line="158"/>
+        <location filename="../DisposeAbstract/DisposeIMG/TabHandleIMG.cpp" line="163"/>
         <source>Images (*.png *.jpg *.bmp)</source>
         <translation>Images (*.png *.jpg *.bmp)</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeIMG/TabHandleIMG.cpp" line="293"/>
-        <location filename="../DisposeAbstract/DisposeIMG/TabHandleIMG.cpp" line="306"/>
+        <location filename="../DisposeAbstract/DisposeIMG/TabHandleIMG.cpp" line="297"/>
+        <source>提示</source>
+        <translation type="unfinished">Info</translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeIMG/TabHandleIMG.cpp" line="297"/>
+        <source>Qt 5 版本不预览 XMind 文件。</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeIMG/TabHandleIMG.cpp" line="305"/>
+        <location filename="../DisposeAbstract/DisposeIMG/TabHandleIMG.cpp" line="318"/>
         <source>加载错误</source>
         <translation>Load Error</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeIMG/TabHandleIMG.cpp" line="293"/>
+        <location filename="../DisposeAbstract/DisposeIMG/TabHandleIMG.cpp" line="305"/>
         <source>SVG 文件无法打开: %1</source>
         <translation>Unable to open SVG file: %1</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeIMG/TabHandleIMG.cpp" line="306"/>
+        <location filename="../DisposeAbstract/DisposeIMG/TabHandleIMG.cpp" line="318"/>
         <source>%1 文件无法打开</source>
         <translation>Unable to open %1 file</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeIMG/TabHandleIMG.cpp" line="464"/>
+        <location filename="../DisposeAbstract/DisposeIMG/TabHandleIMG.cpp" line="487"/>
         <source>输入水印</source>
         <translation>Enter Watermark</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeIMG/TabHandleIMG.cpp" line="465"/>
+        <location filename="../DisposeAbstract/DisposeIMG/TabHandleIMG.cpp" line="488"/>
         <source>请输入水印内容</source>
         <translation>Please enter watermark text</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeIMG/TabHandleIMG.cpp" line="533"/>
+        <location filename="../DisposeAbstract/DisposeIMG/TabHandleIMG.cpp" line="556"/>
         <source>保存失败</source>
         <translation>Save Failed</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeIMG/TabHandleIMG.cpp" line="533"/>
+        <location filename="../DisposeAbstract/DisposeIMG/TabHandleIMG.cpp" line="556"/>
         <source>无法保存图像到 %1</source>
         <translation>Unable to save image to %1</translation>
     </message>
@@ -2627,30 +2643,35 @@ Message</translation>
 <context>
     <name>TabHandlePDF</name>
     <message>
-        <location filename="../DisposeAbstract/DisposePDF/TabHandlePDF.cpp" line="72"/>
+        <location filename="../DisposeAbstract/DisposePDF/TabHandlePDF.cpp" line="77"/>
         <source>打开失败</source>
         <translation>Open Failed</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposePDF/TabHandlePDF.cpp" line="73"/>
+        <location filename="../DisposeAbstract/DisposePDF/TabHandlePDF.cpp" line="78"/>
         <source>无法加载 PDF 文件：%1</source>
         <translation>Unable to load PDF file: %1</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposePDF/TabHandlePDF.cpp" line="101"/>
-        <location filename="../DisposeAbstract/DisposePDF/TabHandlePDF.cpp" line="108"/>
+        <location filename="../DisposeAbstract/DisposePDF/TabHandlePDF.cpp" line="106"/>
+        <location filename="../DisposeAbstract/DisposePDF/TabHandlePDF.cpp" line="113"/>
         <source>加载失败</source>
         <translation>Load Failed</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposePDF/TabHandlePDF.cpp" line="101"/>
+        <location filename="../DisposeAbstract/DisposePDF/TabHandlePDF.cpp" line="106"/>
         <source>无法打开内存缓冲区</source>
         <translation>Unable to open memory buffer</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposePDF/TabHandlePDF.cpp" line="108"/>
+        <location filename="../DisposeAbstract/DisposePDF/TabHandlePDF.cpp" line="113"/>
         <source>无法加载 PDF 内容</source>
         <translation>Unable to load PDF content</translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposePDF/TabHandlePDF.cpp" line="303"/>
+        <source>PDF preview is available in the Qt 6 build.</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2739,36 +2760,38 @@ Message</translation>
 <context>
     <name>TabHandleVideo</name>
     <message>
-        <location filename="../DisposeAbstract/DisposeVideo/TabHandleVideo.cpp" line="19"/>
-        <location filename="../DisposeAbstract/DisposeVideo/TabHandleVideo.cpp" line="96"/>
+        <location filename="../DisposeAbstract/DisposeVideo/TabHandleVideo.cpp" line="25"/>
+        <location filename="../DisposeAbstract/DisposeVideo/TabHandleVideo.cpp" line="106"/>
         <source>加载中...</source>
         <translation>Loading...</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeVideo/TabHandleVideo.cpp" line="45"/>
-        <location filename="../DisposeAbstract/DisposeVideo/TabHandleVideo.cpp" line="55"/>
-        <location filename="../DisposeAbstract/DisposeVideo/TabHandleVideo.cpp" line="155"/>
+        <location filename="../DisposeAbstract/DisposeVideo/TabHandleVideo.cpp" line="47"/>
+        <location filename="../DisposeAbstract/DisposeVideo/TabHandleVideo.cpp" line="57"/>
+        <location filename="../DisposeAbstract/DisposeVideo/TabHandleVideo.cpp" line="67"/>
+        <location filename="../DisposeAbstract/DisposeVideo/TabHandleVideo.cpp" line="165"/>
         <source>暂停</source>
         <translation>Pause</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeVideo/TabHandleVideo.cpp" line="47"/>
+        <location filename="../DisposeAbstract/DisposeVideo/TabHandleVideo.cpp" line="49"/>
         <source>加载失败</source>
         <translation>Load Failed</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeVideo/TabHandleVideo.cpp" line="58"/>
-        <location filename="../DisposeAbstract/DisposeVideo/TabHandleVideo.cpp" line="151"/>
+        <location filename="../DisposeAbstract/DisposeVideo/TabHandleVideo.cpp" line="60"/>
+        <location filename="../DisposeAbstract/DisposeVideo/TabHandleVideo.cpp" line="70"/>
+        <location filename="../DisposeAbstract/DisposeVideo/TabHandleVideo.cpp" line="161"/>
         <source>播放</source>
         <translation>Play</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeVideo/TabHandleVideo.cpp" line="117"/>
+        <location filename="../DisposeAbstract/DisposeVideo/TabHandleVideo.cpp" line="125"/>
         <source>错误</source>
         <translation>Error</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeVideo/TabHandleVideo.cpp" line="117"/>
+        <location filename="../DisposeAbstract/DisposeVideo/TabHandleVideo.cpp" line="125"/>
         <source>无法保存文件</source>
         <translation>Unable to save file</translation>
     </message>
@@ -2968,32 +2991,32 @@ Message</translation>
 <context>
     <name>TextTab</name>
     <message>
-        <location filename="../DisposeAbstract/DisposeTXT/TabHandleTXT.cpp" line="202"/>
+        <location filename="../DisposeAbstract/DisposeTXT/TabHandleTXT.cpp" line="207"/>
         <source>错误</source>
         <translation>Error</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeTXT/TabHandleTXT.cpp" line="202"/>
+        <location filename="../DisposeAbstract/DisposeTXT/TabHandleTXT.cpp" line="207"/>
         <source>无法打开文件</source>
         <translation>Unable to open file</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeTXT/TabHandleTXT.cpp" line="304"/>
+        <location filename="../DisposeAbstract/DisposeTXT/TabHandleTXT.cpp" line="309"/>
         <source>查找</source>
         <translation>Find</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeTXT/TabHandleTXT.cpp" line="304"/>
+        <location filename="../DisposeAbstract/DisposeTXT/TabHandleTXT.cpp" line="309"/>
         <source>找不到此单词</source>
         <translation>Word not found</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeTXT/TabHandleTXT.cpp" line="509"/>
+        <location filename="../DisposeAbstract/DisposeTXT/TabHandleTXT.cpp" line="514"/>
         <source>刷新文本</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeTXT/TabHandleTXT.cpp" line="510"/>
+        <location filename="../DisposeAbstract/DisposeTXT/TabHandleTXT.cpp" line="515"/>
         <source>当前有未保存修改，刷新会用磁盘内容覆盖当前文本。是否继续？</source>
         <translation type="unfinished"></translation>
     </message>

@@ -1,5 +1,8 @@
-cmake_minimum_required(VERSION 3.16)  # 确保 CMake 版本支持此策略
-cmake_policy(SET CMP0079 NEW)  # 设置 CMP0079 策略为 NEW
+cmake_minimum_required(VERSION 3.10)
+if(POLICY CMP0079)
+    cmake_policy(SET CMP0079 NEW)
+endif()
+
 
 
 set(MAIN_SOURCES
@@ -27,8 +30,13 @@ set(MAIN_SOURCES
 )
 
 # 查找 Qt 库
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Network Pdf PdfWidgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network Pdf PdfWidgets)
+if(QT_VERSION_MAJOR EQUAL 6)
+    find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets Network Pdf PdfWidgets)
+    find_package(Qt6 REQUIRED COMPONENTS Widgets Network Pdf PdfWidgets)
+else()
+    find_package(QT NAMES Qt5 REQUIRED COMPONENTS Widgets Network)
+    find_package(Qt5 REQUIRED COMPONENTS Widgets Network)
+endif()
 
 # 创建静态库
 qt_add_library(mytxt_main STATIC
@@ -37,9 +45,6 @@ qt_add_library(mytxt_main STATIC
 )
 
 # 添加资源文件
-qt_add_resources(TARGET mytxt_main
-    RESOURCE ${CMAKE_CURRENT_SOURCE_DIR}/../Resources/res.qrc
-)
 
 # 包含头文件目录
 target_include_directories(mytxt_main PRIVATE
@@ -52,10 +57,18 @@ target_link_libraries(mytxt_main PRIVATE
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::Network
-    Qt${QT_VERSION_MAJOR}::Pdf
-    Qt${QT_VERSION_MAJOR}::PdfWidgets
     Qt${QT_VERSION_MAJOR}::Svg
     Qt${QT_VERSION_MAJOR}::Multimedia
     Qt${QT_VERSION_MAJOR}::MultimediaWidgets
-    KodoTerm::KodoTerm
 )
+
+if(QT_VERSION_MAJOR EQUAL 6)
+    target_link_libraries(mytxt_main PRIVATE
+        Qt6::Pdf
+        Qt6::PdfWidgets
+    )
+endif()
+
+if(UNIFILEHUB_ENABLE_TERMINAL)
+    target_link_libraries(mytxt_main PRIVATE KodoTerm::KodoTerm)
+endif()

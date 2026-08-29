@@ -28,8 +28,13 @@ qt_add_library(mytxt_img STATIC
 target_link_libraries(mytxt_img PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::Svg
-    Qt${QT_VERSION_MAJOR}::SvgWidgets
-    Qt${QT_VERSION_MAJOR}::GuiPrivate
 )
+
+if(QT_VERSION_MAJOR EQUAL 6)
+    target_link_libraries(mytxt_img PRIVATE
+        Qt6::GuiPrivate
+        Qt6::SvgWidgets
+    )
+endif()
 
 target_include_directories(mytxt_img PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

@@ -35,10 +35,15 @@ target_link_libraries(mytxt_drive PRIVATE
     Qt${QT_VERSION_MAJOR}::Network
     Qt${QT_VERSION_MAJOR}::Multimedia
     Qt${QT_VERSION_MAJOR}::MultimediaWidgets
-    Qt${QT_VERSION_MAJOR}::Pdf
-    Qt${QT_VERSION_MAJOR}::PdfWidgets
     mytxt_setting
 )
+
+if(QT_VERSION_MAJOR EQUAL 6)
+    target_link_libraries(mytxt_drive PRIVATE
+        Qt6::Pdf
+        Qt6::PdfWidgets
+    )
+endif()
 
 target_include_directories(mytxt_drive PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}

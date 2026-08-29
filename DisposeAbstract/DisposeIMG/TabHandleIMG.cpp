@@ -13,9 +13,14 @@
 #include <QPainter>
 #include <QClipboard>
 #include <QWheelEvent>
+#include <QtGlobal>
+#if QT_VERSION_MAJOR >= 6
 #include <QtCore/private/qzipreader_p.h>
-#include <QtSvg/QSvgRenderer>
 #include <QtSvgWidgets/QGraphicsSvgItem>
+#else
+#include <QtSvg/QGraphicsSvgItem>
+#endif
+#include <QtSvg/QSvgRenderer>
 
 TabHandleIMG::TabHandleIMG(const QString &filePath, QWidget *parent)
     : TabAbstract(filePath, parent)
@@ -282,9 +287,16 @@ void TabHandleIMG::loadFromFile(const QString &fileName)
         });
     };
 
-    if (suffix == QStringLiteral("xmind") && loadXmindThumbnail(fileName)) {
-        setSceneItemsInteractive(currentToolMode == ToolMode::Select);
+    if (suffix == QStringLiteral("xmind")) {
+#if QT_VERSION_MAJOR >= 6
+        if (loadXmindThumbnail(fileName)) {
+            setSceneItemsInteractive(currentToolMode == ToolMode::Select);
+            return;
+        }
+#else
+        QMessageBox::information(this, tr("提示"), tr("Qt 5 版本不预览 XMind 文件。"));
         return;
+#endif
     }
 
     if (suffix == QStringLiteral("svg")) {
@@ -316,6 +328,10 @@ void TabHandleIMG::loadFromFile(const QString &fileName)
 
 bool TabHandleIMG::loadXmindThumbnail(const QString &fileName)
 {
+#if QT_VERSION_MAJOR < 6
+    Q_UNUSED(fileName);
+    return false;
+#else
     const QStringList possiblePaths = {
         QStringLiteral("Thumbnails/thumbnail.png"),
         QStringLiteral("Thumbnails/thumbnail.jpg"),
@@ -359,10 +375,16 @@ bool TabHandleIMG::loadXmindThumbnail(const QString &fileName)
     }
 
     return false;
+#endif
 }
 
 QByteArray TabHandleIMG::extractFileFromZip(const QString &zipPath, const QString &fileNameInZip)
 {
+#if QT_VERSION_MAJOR < 6
+    Q_UNUSED(zipPath);
+    Q_UNUSED(fileNameInZip);
+    return QByteArray();
+#else
     QZipReader zipReader(zipPath);
     if (!zipReader.exists()) {
         return QByteArray();
@@ -371,6 +393,7 @@ QByteArray TabHandleIMG::extractFileFromZip(const QString &zipPath, const QStrin
     const QByteArray fileData = zipReader.fileData(fileNameInZip);
     zipReader.close();
     return fileData;
+#endif
 }
 
 void TabHandleIMG::saveToFile(const QString &fileName)

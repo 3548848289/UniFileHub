@@ -11,7 +11,12 @@
 #include <QLineEdit>
 #include <QTimer>
 #include <QInputDialog>
+#include <QtGlobal>
+#if QT_VERSION_MAJOR >= 6
 #include <QtSvgWidgets/QGraphicsSvgItem>
+#else
+#include <QtSvg/QGraphicsSvgItem>
+#endif
 #include "../../main/include/TabAbstract.h"
 #include "ControlWidPSD.h"
 

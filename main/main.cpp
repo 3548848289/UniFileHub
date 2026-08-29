@@ -15,6 +15,7 @@
 #include <QLibraryInfo>
 #include <QDir>
 #include <QFileInfo>
+#include <QPalette>
 #include "mainwindow.h"
 #include "../Setting/include/SettingManager.h"
 #include "../Setting/include/IconManager.h"
@@ -63,7 +64,11 @@ void installTranslators(QApplication &app)
     }
 
     if (QLocale::system().language() == QLocale::Chinese) {
+#if QT_VERSION_MAJOR >= 6
         const QString qtTranslationsPath = QLibraryInfo::path(QLibraryInfo::TranslationsPath);
+#else
+        const QString qtTranslationsPath = QLibraryInfo::location(QLibraryInfo::TranslationsPath);
+#endif
         if (qtTranslator.load(QLocale("zh_CN"), "qtbase", "_", qtTranslationsPath)) {
             app.installTranslator(&qtTranslator);
         }
@@ -225,9 +230,13 @@ int main(int argc, char *argv[]) {
 
     int font_size = SettingManager::Instance().all_setting_font_size();
     int themeIndex = SettingManager::Instance().all_setting_theme();
+#if QT_VERSION_MAJOR >= 6
     Qt::ColorScheme scheme = static_cast<Qt::ColorScheme>(themeIndex);
 
     qApp->styleHints()->setColorScheme(scheme);
+#else
+    Q_UNUSED(themeIndex);
+#endif
     if (SettingManager::Instance().all_setting_fenable_tray()) {
         QApplication::setQuitOnLastWindowClosed(false);
     } else {

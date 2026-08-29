@@ -1,4 +1,6 @@
 #include "dbFilepath.h"
+#include <QPair>
+#include <QVariant>
 dbFilepath::dbFilepath(const QString &dbName) : dbManager(dbName)  {}
 dbFilepath::~dbFilepath(){}
 

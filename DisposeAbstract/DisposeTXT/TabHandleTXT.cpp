@@ -7,7 +7,12 @@
 
 #include <QAction>
 #include <QMimeData>
+#include <QtGlobal>
+#if QT_VERSION_MAJOR >= 6
+#include <QtCore5Compat/QTextCodec>
+#else
 #include <QTextCodec>
+#endif
 #include <QFileDialog>
 #include <QSignalBlocker>
 #include <QTimer>

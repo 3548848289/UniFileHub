@@ -1,5 +1,6 @@
 #include "include/ThemeManager.h"
 #include "include/SettingManager.h"
+#include <QPalette>
 
 ThemeManager::ThemeManager()
 {
@@ -22,7 +23,7 @@ bool ThemeManager::isDarkMode() const
         return true; // 深色模式
     }
     // 跟随系统
-    return qApp->styleHints()->colorScheme() == Qt::ColorScheme::Dark;
+    return qApp->palette().color(QPalette::Window).value() < 128;
 }
 
 QColor ThemeManager::primaryColor() const

@@ -9,15 +9,12 @@
 #include <QVBoxLayout>
 #include <QSettings>
 #include <QSplitter>
-#include <QtCore5Compat/QTextCodec>
 #include "ControlWidTXT.h"
 #include "PlainTextEdit.h"
 #include "LineNumberWidget.h"
 #include "SyntaxHighlighter.h"
 #include <QString>
 #include <QByteArray>
-#include <QStringDecoder>
-#include <QStringEncoder>
 
 class TextTab : public TabAbstract
 {

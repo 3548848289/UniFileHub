@@ -29,10 +29,16 @@ qt_add_library(mytxt_setting STATIC
 target_link_libraries(mytxt_setting PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::Svg
-    KodoTerm::KodoTerm
 )
 
-target_include_directories(mytxt_setting PRIVATE 
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}/Resources/ThirdParty/KodoTerm/include
-)
+if(UNIFILEHUB_ENABLE_TERMINAL)
+    target_link_libraries(mytxt_setting PRIVATE KodoTerm::KodoTerm)
+    target_include_directories(mytxt_setting PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_SOURCE_DIR}/Resources/ThirdParty/KodoTerm/include
+    )
+else()
+    target_include_directories(mytxt_setting PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}
+    )
+endif()

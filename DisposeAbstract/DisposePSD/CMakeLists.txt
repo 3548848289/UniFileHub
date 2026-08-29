@@ -17,9 +17,12 @@ qt_add_library(mytxt_psd STATIC
 target_link_libraries(mytxt_psd PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::Svg
-    Qt${QT_VERSION_MAJOR}::SvgWidgets
     libqpsd
 )
+
+if(QT_VERSION_MAJOR EQUAL 6)
+    target_link_libraries(mytxt_psd PRIVATE Qt6::SvgWidgets)
+endif()
 
 target_include_directories(mytxt_psd PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}

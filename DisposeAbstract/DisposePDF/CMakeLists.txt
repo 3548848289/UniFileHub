@@ -16,8 +16,13 @@ qt_add_library(mytxt_pdf STATIC
 
 target_link_libraries(mytxt_pdf PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
-    Qt${QT_VERSION_MAJOR}::Pdf
-    Qt${QT_VERSION_MAJOR}::PdfWidgets
 )
+
+if(QT_VERSION_MAJOR EQUAL 6)
+    target_link_libraries(mytxt_pdf PRIVATE
+        Qt6::Pdf
+        Qt6::PdfWidgets
+    )
+endif()
 
 target_include_directories(mytxt_pdf PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

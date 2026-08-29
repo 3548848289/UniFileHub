@@ -3,9 +3,12 @@
 
 #include "../../main/include/TabAbstract.h"
 #include <QMessageBox>
+#include <QtGlobal>
+#if QT_VERSION_MAJOR >= 6
 #include <QPdfDocument>
 #include <QPdfSearchModel>
 #include <QPdfView>
+#endif
 #include <QSplitter>
 #include <QVBoxLayout>
 
@@ -41,9 +44,11 @@ private:
     void resetSearch();
     void goToSearchResult(int resultIndex);
 
+#if QT_VERSION_MAJOR >= 6
     QPdfDocument *pdfDoc;
     QPdfSearchModel *searchModel;
     QPdfView *pdfView;
+#endif
     QVBoxLayout *mainLayout;
     bool isShowControl;
     int m_zoomPercentage;

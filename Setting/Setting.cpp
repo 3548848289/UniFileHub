@@ -13,7 +13,9 @@
 #include <QTimeEdit>
 #include "include/IconManager.h"
 #include "include/SettingManager.h"
+#if UNIFILEHUB_ENABLE_TERMINAL
 #include "../Resources/ThirdParty/KodoTerm/include/KodoTerm/KodoTermConfig.hpp"
+#endif
 
 Setting::Setting(QWidget *parent) : QWidget(parent), ui(new Ui::Setting)
     , settings(SettingManager::getSettingsFilePath(), QSettings::IniFormat)
@@ -35,7 +37,9 @@ Setting::Setting(QWidget *parent) : QWidget(parent), ui(new Ui::Setting)
         int(SettingManager::PersonalDriveNameConflictPolicy::Ask));
 
     // 初始化终端主题列表
+#if UNIFILEHUB_ENABLE_TERMINAL
     initTerminalThemes();
+#endif
 
     if (settings.status() == QSettings::NoError) {
         loadSettings();
@@ -47,6 +51,7 @@ Setting::Setting(QWidget *parent) : QWidget(parent), ui(new Ui::Setting)
     setupRealtimeBindings();
 }
 
+#if UNIFILEHUB_ENABLE_TERMINAL
 void Setting::initTerminalThemes() {
     // 添加默认主题
     ui->terminal_theme_combo->addItem("Default");
@@ -60,6 +65,7 @@ void Setting::initTerminalThemes() {
         }
     }
 }
+#endif
 
 
 Setting::~Setting() {
@@ -97,6 +103,7 @@ void Setting::loadSettings() {
 
     ui->all_setting_checkBox->setChecked(settings.value("all_setting/fenableray", true).toBool());
     
+#if UNIFILEHUB_ENABLE_TERMINAL
     // 加载终端设置
     ui->terminal_font_combo->setCurrentFont(QFont(settings.value("terminal/font_family", "Consolas").toString()));
     ui->terminal_font_size_spin->setValue(settings.value("terminal/font_size", 14).toInt());
@@ -110,6 +117,7 @@ void Setting::loadSettings() {
     QString terminalType = settings.value("terminal/type", "powershell").toString();
     ui->terminal_checkbox_powershell->setChecked(terminalType == "powershell");
     ui->terminal_checkbox_cmd->setChecked(terminalType == "cmd");
+#endif
     
     // 加载图标颜色设置
     QString iconColor = settings.value("all_setting/icon_color", "#7598db").toString();
@@ -188,6 +196,7 @@ void Setting::saveSettings() {
 
     setRestartValue("all_setting/fenableray", ui->all_setting_checkBox->isChecked());
     
+#if UNIFILEHUB_ENABLE_TERMINAL
     // 保存终端设置
     setRealtimeValue("terminal/font_family", ui->terminal_font_combo->currentFont().family());
     setRealtimeValue("terminal/font_size", ui->terminal_font_size_spin->value());
@@ -196,6 +205,7 @@ void Setting::saveSettings() {
     // 保存终端类型设置
     QString terminalType = ui->terminal_checkbox_powershell->isChecked() ? "powershell" : "cmd";
     setRealtimeValue("terminal/type", terminalType);
+#endif
     
     // 保存图标颜色设置
     setRestartValue("all_setting/icon_color", ui->all_setting_iconColorBtn->styleSheet().section("background-color: ", 1, 1).section("; color", 0, 0));
@@ -326,6 +336,7 @@ void Setting::setupRealtimeBindings()
         setRealtimeValue("clip_board/context_menu_copy_minimize", checked);
     });
 
+#if UNIFILEHUB_ENABLE_TERMINAL
     connect(ui->terminal_font_combo, &QFontComboBox::currentFontChanged, this, [this](const QFont &font) {
         setRealtimeValue("terminal/font_family", font.family());
     });
@@ -336,6 +347,7 @@ void Setting::setupRealtimeBindings()
         setRealtimeValue("terminal/theme", theme);
     });
 
+#endif
     connect(ui->all_setting_spinBox, qOverload<int>(&QSpinBox::valueChanged), this, [this](int) {
         is_modified = true;
     });
@@ -388,7 +400,7 @@ void Setting::on_all_setting_comboBox_currentIndexChanged(int index)
 }
 
 void Setting::on_all_setting_iconColorBtn_clicked() {
-    QColor color = QColorDialog::getColor(Qt::blue, this, "选择图标颜色");
+    QColor color = QColorDialog::getColor(Qt::blue, this, "閫夋嫨鍥炬爣棰滆壊");
     if (color.isValid()) {
         QString colorStr = color.name();
         ui->all_setting_iconColorBtn->setStyleSheet(QString("background-color: %1; color: %2;").arg(colorStr).arg(color.lightness() < 128 ? "white" : "black"));
@@ -398,7 +410,7 @@ void Setting::on_all_setting_iconColorBtn_clicked() {
 }
 
 void Setting::on_all_setting_secondaryIconColorBtn_clicked() {
-    QColor color = QColorDialog::getColor(Qt::blue, this, "选择辅助图标颜色");
+    QColor color = QColorDialog::getColor(Qt::blue, this, "閫夋嫨杈呭姪鍥炬爣棰滆壊");
     if (color.isValid()) {
         QString colorStr = color.name();
         ui->all_setting_secondaryIconColorBtn->setStyleSheet(QString("background-color: %1; color: %2;").arg(colorStr).arg(color.lightness() < 128 ? "white" : "black"));

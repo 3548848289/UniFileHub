@@ -13,7 +13,9 @@
 #include <QProcess>
 #include <QStyleHints>
 #include <QVariant>
+#if UNIFILEHUB_ENABLE_TERMINAL
 #include "../../Resources/ThirdParty/KodoTerm/include/KodoTerm/KodoTermConfig.hpp"
+#endif
 namespace Ui {
 class Setting;
 }

@@ -2,9 +2,14 @@
 #include "ControlWidPDF.h"
 
 #include <QBuffer>
+#include <QLabel>
+#include <QtGlobal>
+#if QT_VERSION_MAJOR >= 6
 #include <QPdfPageNavigator>
+#endif
 #include <QTimer>
 
+#if QT_VERSION_MAJOR >= 6
 TabHandlePDF::TabHandlePDF(const QString &filePath, QWidget *parent)
     : TabAbstract(filePath, parent)
     , pdfDoc(new QPdfDocument(this))
@@ -284,3 +289,60 @@ void TabHandlePDF::goToSearchResult(int resultIndex)
     m_currentSearchResultIndex = resultIndex;
     controlWidPDF->setSearchResultInfo(m_currentSearchResultIndex, totalResults);
 }
+#else
+TabHandlePDF::TabHandlePDF(const QString &filePath, QWidget *parent)
+    : TabAbstract(filePath, parent)
+    , mainLayout(new QVBoxLayout(this))
+    , isShowControl(false)
+    , m_zoomPercentage(100)
+    , m_currentSearchResultIndex(-1)
+    , controlWidPDF(new ControlWidPDF(this))
+    , splitter(new QSplitter(Qt::Vertical, this))
+{
+    Q_UNUSED(filePath);
+    auto *message = new QLabel(tr("PDF preview is available in the Qt 6 build."), this);
+    message->setAlignment(Qt::AlignCenter);
+
+    mainLayout->setContentsMargins(0, 0, 0, 0);
+    splitter->addWidget(message);
+    splitter->addWidget(controlWidPDF);
+    splitter->setSizes({800, 92});
+    mainLayout->addWidget(splitter);
+
+    ControlWidget(false);
+    setContentModified(false);
+}
+
+void TabHandlePDF::setContent(const QString &text) { Q_UNUSED(text); }
+QString TabHandlePDF::getContent() const { return QString(); }
+
+void TabHandlePDF::loadFromFile(const QString &fileName)
+{
+    setCurrentFilePath(fileName);
+    setContentModified(false);
+}
+
+void TabHandlePDF::loadFromInternet(const QByteArray &content) { Q_UNUSED(content); }
+void TabHandlePDF::saveToFile(const QString &fileName) { Q_UNUSED(fileName); }
+
+void TabHandlePDF::ControlWidget(bool judge)
+{
+    isShowControl = judge;
+    if (controlWidPDF) {
+        controlWidPDF->setVisible(judge);
+    }
+}
+
+void TabHandlePDF::goToPage(int pageNumber) { Q_UNUSED(pageNumber); }
+void TabHandlePDF::goToPrevPage() {}
+void TabHandlePDF::goToNextPage() {}
+void TabHandlePDF::changeFitToWidth(bool enabled) { Q_UNUSED(enabled); }
+void TabHandlePDF::changeZoomValue(int zoomPercentage) { m_zoomPercentage = zoomPercentage; }
+void TabHandlePDF::changeScrollMode(bool enabled) { Q_UNUSED(enabled); }
+void TabHandlePDF::updateSearchText(const QString &text) { Q_UNUSED(text); }
+void TabHandlePDF::findPreviousSearchResult() {}
+void TabHandlePDF::findNextSearchResult() {}
+void TabHandlePDF::updateSearchResultInfo() {}
+void TabHandlePDF::resetSearch() {}
+void TabHandlePDF::goToSearchResult(int resultIndex) { Q_UNUSED(resultIndex); }
+#endif

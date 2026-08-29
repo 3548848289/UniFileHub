@@ -1,5 +1,6 @@
 #include "include/IconManager.h"
 #include <QApplication>
+#include <QPalette>
 #include <QStyleHints>
 #include <QSvgRenderer>
 #include <QPainter>
@@ -10,9 +11,13 @@ static QColor g_defaultIconColor = QColor("#7598db");
 
 static QColor currentIconColor()
 {
+#if QT_VERSION_MAJOR >= 6
     return qApp->styleHints()->colorScheme() == Qt::ColorScheme::Dark
                ? Qt::white
                : Qt::black;
+#else
+    return qApp->palette().color(QPalette::Window).value() < 128 ? Qt::white : Qt::black;
+#endif
 }
 
 static QString iconPath(IconManager::Icon icon)

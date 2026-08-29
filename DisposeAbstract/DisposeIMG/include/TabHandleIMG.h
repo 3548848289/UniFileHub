@@ -19,7 +19,6 @@
 #include "PixItem.h"
 
 class QGraphicsItem;
-class QZipReader;
 
 class TabHandleIMG : public TabAbstract
 {

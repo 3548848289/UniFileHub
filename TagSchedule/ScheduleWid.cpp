@@ -1,6 +1,7 @@
 #include "./include/ScheduleWid.h"
 #include "ui/ui_ScheduleWid.h"
 #include "notifymanager.h"
+#include <QDialogButtonBox>
 
 ScheduleWid::ScheduleWid(QWidget *parent) : QWidget(parent), ui(new Ui::ScheduleWid),
     dbservice(dbService::instance("./SmartDesk.db"))
