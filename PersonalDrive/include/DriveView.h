@@ -1,4 +1,4 @@
-﻿#ifndef DRIVEVIEW_H
+#ifndef DRIVEVIEW_H
 #define DRIVEVIEW_H
 
 #include <QWidget>
@@ -13,6 +13,7 @@
 #include <QPoint>
 #include <QTableView>
 #include "../../Resources/ThirdParty/QFileSystemBreadcrumbBar/QFileSystemBreadcrumbBar.h"
+#include "../../manager/include/InlineMessagePopup.h"
 
 namespace Ui {
 class DriveView;
@@ -65,6 +66,7 @@ private slots:
     void onDownloadProgress(int recordId, int progress);
     void onUploadSuccess(const QString &message);
     void onUploadFailed(const QString &errorMessage);
+    void onUploadProgress(int recordId, int progress);
     
     // 下载历史 Delegate 按钮点击
     void onDownloadHistoryOpenLocationClicked(int row);
@@ -82,14 +84,12 @@ private:
     QStandardItemModel * m_model;
     QStandardItemModel * m_downloadHistoryModel;
     QStandardItemModel * m_uploadHistoryModel;
-    QWidget *m_statusPopup;
-    QLabel *m_statusLabel;
+    InlineMessagePopup *m_statusPopup = nullptr;
     QComboBox *m_historyFilterCombo = nullptr;
     DriveManager *m_driveManager;
     int m_currentDirId;
     bool m_isClearDriveRequesting = false;
     bool m_layoutUpdatePending = false;
-    int m_statusMessageSerial = 0;
     QPoint m_dragStartPosition;
     QPersistentModelIndex m_dragStartIndex;
 
@@ -101,12 +101,12 @@ private:
     void loadUploadHistory();
     void showInlineMessage(const QString &message, bool isError = false);
     void updateDownloadHistoryProgress(int recordId, int progress);
+    void updateUploadHistoryProgress(int recordId, int progress);
     QString ensureDownloadDirectory();
     void polishTableView(QTableView *tableView);
     void scheduleTableLayoutUpdate();
     void applyDriveTableLayout();
     void applyHistoryTableLayout(QTableView *tableView);
-    void positionStatusPopup();
     void uploadFileWithConflictCheck(const QString &filePath);
     void downloadFileWithConflictCheck(int fileId, const QString &fileName);
     void downloadFileWithConflictCheck(int fileId, const QString &fileName, const QString &targetDirectory);

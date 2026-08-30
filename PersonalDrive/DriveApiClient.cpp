@@ -114,6 +114,17 @@ void DriveApiClient::uploadFile(const QString &filePath, int parentId, const QSt
     QNetworkReply *reply = m_networkManager->post(request, multiPart);
     multiPart->setParent(reply);
 
+    // 上传进度
+    connect(reply, &QNetworkReply::uploadProgress, this, [=](qint64 bytesSent, qint64 bytesTotal) {
+        if (bytesTotal <= 0) {
+            emit uploadProgress(filePath, 0);
+            return;
+        }
+
+        const int progress = static_cast<int>(qMin<qint64>(100, bytesSent * 100 / bytesTotal));
+        emit uploadProgress(filePath, progress);
+    });
+
     connect(reply, &QNetworkReply::finished, this, [=]() {
         reply->deleteLater();
 

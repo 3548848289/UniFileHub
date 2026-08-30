@@ -18,7 +18,7 @@
     <number>0</number>
    </property>
    <item row="2" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout" stretch="2,4,0,1,1,1,1">
+    <layout class="QHBoxLayout" name="horizontalLayout" stretch="2,4,0,0,1,1,1,1">
      <item>
       <widget class="QComboBox" name="typeComboBox">
        <property name="sizePolicy">
@@ -75,6 +75,22 @@
        </property>
        <property name="checked">
         <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="autoSyncCheckBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="toolTip">
+        <string>勾选后，新复制的内容自动同步到云端（当前仅支持文本）</string>
+       </property>
+       <property name="text">
+        <string>复制即同步</string>
        </property>
       </widget>
      </item>

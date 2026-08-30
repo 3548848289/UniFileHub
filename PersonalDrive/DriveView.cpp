@@ -177,7 +177,7 @@ void DriveView::clearExternalDragTempFiles()
     }
 }
 
-DriveView::DriveView(QWidget *parent): QWidget(parent), ui(new Ui::DriveView), m_statusPopup(nullptr), m_statusLabel(nullptr), m_currentDirId(0)
+DriveView::DriveView(QWidget *parent): QWidget(parent), ui(new Ui::DriveView), m_statusPopup(nullptr), m_currentDirId(0)
 {
     DriveView::clearExternalDragTempFiles();
 
@@ -191,19 +191,7 @@ DriveView::DriveView(QWidget *parent): QWidget(parent), ui(new Ui::DriveView), m
 
     ui->verticalLayout->insertWidget(0, breadcrumb);
 
-    m_statusPopup = new QWidget(this);
-    m_statusPopup->setAttribute(Qt::WA_TransparentForMouseEvents);
-    m_statusPopup->setVisible(false);
-
-    auto statusLayout = new QVBoxLayout(m_statusPopup);
-    statusLayout->setContentsMargins(16, 10, 16, 10);
-    statusLayout->setSpacing(8);
-
-    m_statusLabel = new QLabel(m_statusPopup);
-    m_statusLabel->setWordWrap(true);
-    m_statusLabel->setAlignment(Qt::AlignCenter);
-
-    statusLayout->addWidget(m_statusLabel);
+    m_statusPopup = new InlineMessagePopup(this);
 
     connect(breadcrumb, &QFileSystemBreadcrumbBar::pathClicked,
             this, [this](int clickedIndex, const QString&) {
@@ -286,6 +274,8 @@ DriveView::DriveView(QWidget *parent): QWidget(parent), ui(new Ui::DriveView), m
             this, &DriveView::onUploadSuccess);
     connect(m_driveManager, &DriveManager::uploadFailed,
             this, &DriveView::onUploadFailed);
+    connect(m_driveManager, &DriveManager::uploadProgress,
+            this, &DriveView::onUploadProgress);
     
     // ===== 7. Download History =====
     m_downloadHistoryModel = new QStandardItemModel(this);
@@ -394,39 +384,9 @@ DriveView::~DriveView()
 
 void DriveView::showInlineMessage(const QString &message, bool isError)
 {
-    if (!m_statusPopup || !m_statusLabel) {
-        return;
+    if (m_statusPopup) {
+        m_statusPopup->showMessage(isError ? tr("错误：%1").arg(message) : message, isError);
     }
-
-    const QString backgroundColor = isError ? "#fff1f0" : "#f6ffed";
-    const QString borderColor = isError ? "#ff4d4f" : "#52c41a";
-    const QString textColor = isError ? "#a8071a" : "#135200";
-
-    m_statusPopup->setStyleSheet(QString(
-        "QWidget {"
-        "background-color: %1;"
-        "border: 1px solid %2;"
-        "border-radius: 6px;"
-        "}"
-        "QLabel {"
-        "background: transparent;"
-        "border: none;"
-        "color: %3;"
-        "font-size: 13px;"
-        "}"
-    ).arg(backgroundColor, borderColor, textColor));
-
-    m_statusLabel->setText(isError ? tr("错误：%1").arg(message) : message);
-    positionStatusPopup();
-    m_statusPopup->raise();
-    m_statusPopup->setVisible(true);
-
-    const int serial = ++m_statusMessageSerial;
-    QTimer::singleShot(3000, this, [this, serial]() {
-        if (m_statusPopup && serial == m_statusMessageSerial) {
-            m_statusPopup->setVisible(false);
-        }
-    });
 }
 
 void DriveView::updateDownloadHistoryProgress(int recordId, int progress)
@@ -480,22 +440,57 @@ void DriveView::updateDownloadHistoryProgress(int recordId, int progress)
     ui->downloadHistoryTableView->viewport()->update(ui->downloadHistoryTableView->visualRect(statusIndex));
 }
 
-void DriveView::positionStatusPopup()
+void DriveView::updateUploadHistoryProgress(int recordId, int progress)
 {
-    if (!m_statusPopup) {
+    if (!m_downloadHistoryModel || recordId <= 0) {
         return;
     }
 
-    const int availableWidth = qMax(120, width() - 40);
-    const int popupMaxWidth = qMin(520, availableWidth);
-    const int popupMinWidth = qMin(220, popupMaxWidth);
+    const int boundedProgress = qBound(0, progress, 100);
+    int statusColumn = 4;
+    if (m_downloadHistoryModel->columnCount() >= 8) {
+        statusColumn = 6;
+    } else if (m_downloadHistoryModel->columnCount() >= 7) {
+        statusColumn = 5;
+    }
+    int targetRow = -1;
+    for (int row = 0; row < m_downloadHistoryModel->rowCount(); ++row) {
+        QStandardItem *statusItem = m_downloadHistoryModel->item(row, statusColumn);
+        if (statusItem && statusItem->data(kDownloadRecordIdRole).toInt() == recordId
+            && statusItem->data(kHistoryKindRole).toInt() == HistoryUpload) {
+            targetRow = row;
+            break;
+        }
+    }
 
-    m_statusPopup->setMinimumWidth(popupMinWidth);
-    m_statusPopup->setMaximumWidth(popupMaxWidth);
-    m_statusPopup->adjustSize();
+    // 上传/下载共用同一张历史表，找不到该上传记录时先刷新历史再查找
+    if (targetRow < 0 && boundedProgress == 0) {
+        loadUploadHistory();
+        for (int row = 0; row < m_downloadHistoryModel->rowCount(); ++row) {
+            QStandardItem *statusItem = m_downloadHistoryModel->item(row, statusColumn);
+            if (statusItem && statusItem->data(kDownloadRecordIdRole).toInt() == recordId
+                && statusItem->data(kHistoryKindRole).toInt() == HistoryUpload) {
+                targetRow = row;
+                break;
+            }
+        }
+    }
 
-    const int x = qMax(12, (width() - m_statusPopup->width()) / 2);
-    m_statusPopup->move(x, 50);
+    if (targetRow < 0) {
+        return;
+    }
+
+    QStandardItem *statusItem = m_downloadHistoryModel->item(targetRow, statusColumn);
+    if (!statusItem) {
+        return;
+    }
+
+    statusItem->setText(tr("上传中 %1%").arg(boundedProgress));
+    statusItem->setData(boundedProgress, kDownloadProgressRole);
+    statusItem->setData(recordId, kDownloadRecordIdRole);
+    statusItem->setForeground(QBrush(Qt::blue));
+
+    const QModelIndex statusIndex = m_downloadHistoryModel->index(targetRow, statusColumn);ui->downloadHistoryTableView->viewport()->update(ui->downloadHistoryTableView->visualRect(statusIndex));
 }
 
 QString DriveView::ensureDownloadDirectory()
@@ -1071,6 +1066,7 @@ void DriveView::loadHistory()
         for (const DriveUploadRecord &record : uploadRecords) {
             HistoryEntry entry;
             entry.kind = HistoryUpload;
+            entry.recordId = record.id;
             entry.fileName = QFileInfo(record.localPath).fileName();
             if (entry.fileName.isEmpty()) {
                 entry.fileName = record.fileName;
@@ -1160,7 +1156,14 @@ void DriveView::loadHistory()
         if (entry.kind == HistoryDownload) {
             statusItem->setData(entry.recordId, kDownloadRecordIdRole);
         }
+        if (entry.kind == HistoryUpload) {
+            statusItem->setData(entry.recordId, kDownloadRecordIdRole);
+            statusItem->setData(static_cast<int>(entry.kind), kHistoryKindRole);
+        }
         if (entry.kind == HistoryDownload && entry.rawStatus == "downloading") {
+            statusItem->setData(0, kDownloadProgressRole);
+        }
+        if (entry.kind == HistoryUpload && entry.rawStatus == "uploading") {
             statusItem->setData(0, kDownloadProgressRole);
         }
 
@@ -1379,17 +1382,27 @@ void DriveView::onUploadFailed(const QString &errorMessage) {
     loadUploadHistory();
 }
 
+// 上传进度处理
+void DriveView::onUploadProgress(int recordId, int progress)
+{
+    updateUploadHistoryProgress(recordId, progress);
+}
+
 void DriveView::showEvent(QShowEvent *event)
 {
     QWidget::showEvent(event);
-    positionStatusPopup();
+    if (m_statusPopup) {
+        m_statusPopup->reposition();
+    }
     scheduleTableLayoutUpdate();
 }
 
 void DriveView::resizeEvent(QResizeEvent *event)
 {
     QWidget::resizeEvent(event);
-    positionStatusPopup();
+    if (m_statusPopup) {
+        m_statusPopup->reposition();
+    }
     scheduleTableLayoutUpdate();
 }
 

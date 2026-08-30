@@ -5,6 +5,8 @@ FileRestoreWid::FileRestoreWid(QString fileName, bool isMissing, QWidget *parent
     ui(new Ui::FileRestoreWid), file_name(fileName), isMissing(isMissing),
     dbservice(dbService::instance("./SmartDesk.db")) {
     ui->setupUi(this);
+    m_messagePopup = new InlineMessagePopup(this);
+    m_messagePopup->setPanelWidget(this); // 弹窗显示在面板内部顶部居中
     QFileInfo tmp(fileName);
     backup_filepath = tmp.path();
 
@@ -75,11 +77,11 @@ void FileRestoreWid::on_saveasBtn_clicked()
 
     QString error;
     if (!copyFileSafely(file_name, savePath, &error)) {
-        QMessageBox::warning(this, "", error);
+        m_messagePopup->showMessage(error, true);
         return;
     }
 
-    QMessageBox::information(this, "", "文件另存成功!");
+    m_messagePopup->showMessage("文件另存成功!");
 }
 
 void FileRestoreWid::on_restoreBtn_clicked()
@@ -88,9 +90,9 @@ void FileRestoreWid::on_restoreBtn_clicked()
     QString targetFilePath = ui->initpathEdit->text();
 
     if (!copyFileSafely(file_name, targetFilePath, &error)) {
-        QMessageBox::warning(this, "", error);
+        m_messagePopup->showMessage(error, true);
         return;
     }
 
-    QMessageBox::information(this, "", "文件恢复成功!");
+    m_messagePopup->showMessage("文件恢复成功!");
 }

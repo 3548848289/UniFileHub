@@ -12,6 +12,7 @@
 #include "TagDetail.h"
 
 #include "../../manager/include/dbService.h"
+#include "../../manager/include/InlineMessagePopup.h"
 
 namespace Ui {
 class TagList;
@@ -49,6 +50,7 @@ private:
     FilePathInfo fileInfo;
     TagDetail *tagdetail = nullptr; // 标签详情窗口实例
     dbService& dbservice;    // dbService 单例引用
+    InlineMessagePopup *m_messagePopup = nullptr;
 };
 
 #endif // TAGLIST_H

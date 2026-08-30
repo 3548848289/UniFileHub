@@ -16,6 +16,8 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QPalette>
+#include <QSettings>
+#include <QDebug>
 #include "mainwindow.h"
 #include "../Setting/include/SettingManager.h"
 #include "../Setting/include/IconManager.h"
@@ -76,6 +78,30 @@ void installTranslators(QApplication &app)
 }
 
 }
+
+#ifdef Q_OS_WIN
+void registerWindowsContextMenu()
+{
+    const QString appPath = QDir::toNativeSeparators(QCoreApplication::applicationFilePath());
+
+    qDebug() << "========== Register Windows Context Menu ==========";
+    qDebug() << "Application path:" << appPath;
+
+    QSettings reg(
+        "HKEY_CURRENT_USER\\Software\\Classes\\*\\shell\\UniFileHub",
+        QSettings::NativeFormat
+        );
+
+    reg.setValue(".", "用 UniFileHub 打开");
+    reg.setValue("Icon", "\"" + appPath + "\",0");
+    reg.setValue("command/.", "\"" + appPath + "\" \"%1\"");
+    reg.sync();
+
+    qDebug() << "Registry status:" << reg.status();
+    qDebug() << "Context menu command:" << "\"" + appPath + "\" \"%1\"";
+    qDebug() << "===================================================";
+}
+#endif
 
 bool connectToRunningInstance() {
     QLocalSocket socket;
@@ -221,12 +247,17 @@ QSystemTrayIcon* createTray(MainWindow *w, QApplication &app) {
 int main(int argc, char *argv[]) {
 
     QApplication app(argc, argv);
+
+#ifdef Q_OS_WIN
+    registerWindowsContextMenu();
+#endif
+
     installTranslators(app);
     DriveView::clearExternalDragTempFiles();
 
-    // if (connectToRunningInstance()) {
-    //     return 0;
-    // }
+    if (connectToRunningInstance()) {
+        return 0;
+    }
 
     int font_size = SettingManager::Instance().all_setting_font_size();
     int themeIndex = SettingManager::Instance().all_setting_theme();
@@ -263,8 +294,12 @@ int main(int argc, char *argv[]) {
             filePath = fileInfo.absoluteFilePath();
         }
 
+        qDebug() << "Command line file path:" << filePath;
+        qDebug() << "File exists:" << QFile::exists(filePath);
+
         if (QFile::exists(filePath)) {
             QTimer::singleShot(100, [&w, filePath]() {
+                qDebug() << "Opening file:" << filePath;
                 w.openFileFromCommandLine(filePath);
             });
         }
@@ -273,7 +308,9 @@ int main(int argc, char *argv[]) {
 
     w.show();
 
-    // QLocalServer *server = createLocalServer(&w);
+    QLocalServer *server = createLocalServer(&w);
+
+    Q_UNUSED(server);
 
     if (SettingManager::Instance().all_setting_fenable_tray()) {
         createTray(&w, app);

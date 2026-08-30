@@ -249,6 +249,11 @@ bool SettingManager::clip_board_context_menu_copy_minimize()
     return settings.value("clip_board/context_menu_copy_minimize", true).toBool();
 }
 
+bool SettingManager::clip_board_copy_auto_sync()
+{
+    return settings.value("clip_board/copy_auto_sync", false).toBool();
+}
+
 QString SettingManager::serverconfig_ip1()
 {
     return settings.value("ServerConfig/IP1", "http://127.0.0.1:5002/").toString();

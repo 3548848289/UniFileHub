@@ -7,6 +7,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include "../../manager/include/dbService.h"
+#include "../../manager/include/InlineMessagePopup.h"
 
 namespace Ui {
 class FileRestoreWid;
@@ -32,6 +33,7 @@ private:
     QString initial_file_name;  //原文件全文件路径
     bool isMissing;
     dbService& dbservice;
+    InlineMessagePopup *m_messagePopup = nullptr;
 
     bool copyFileSafely(const QString &source, const QString &destination, QString *errorMsg);
 };

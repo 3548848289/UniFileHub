@@ -1,10 +1,13 @@
 #include "include/FileBackupWid.h"
 #include "ui/ui_FileBackupWid.h"
+#include <QTimer>
 #include "../Setting/include/SettingManager.h"
 
 FileBackupWid::FileBackupWid(const QString &filePath, QWidget *parent) :QDialog(parent),ui(new Ui::FileBackupWid), m_filePath(filePath)
 {
     ui->setupUi(this);
+    m_messagePopup = new InlineMessagePopup(this);
+    m_messagePopup->setPanelWidget(this); // 弹窗显示在面板内部顶部居中
 
     QString timeStamp = QDateTime::currentDateTime().toString("yyyyMMddHHmmss");
     QString backupFileName = QFileInfo(filePath).baseName() + timeStamp + "." + QFileInfo(filePath).suffix();
@@ -30,7 +33,7 @@ bool FileBackupWid::backupFile(const QString &filePath, const QString &fileName)
     QDir dir(backupDir);
     if (!dir.exists())
         if (!dir.mkpath(".")) {
-            QMessageBox::critical(this, "目录创建失败", "无法创建 resources 目录！");
+            m_messagePopup->showMessage("无法创建备份目录！", true);
             return false;
         }
 
@@ -48,10 +51,11 @@ void FileBackupWid::on_save_clicked()
 {
     QString fileName = ui->edit_name->text();
     if (backupFile(m_filePath, fileName)) {
-        QMessageBox::information(this, "", "文件已成功备份！");
-        accept();
+        m_messagePopup->showMessage("文件已成功备份！");
+        // 延迟关闭，让用户看到成功提示
+        QTimer::singleShot(1200, this, &QDialog::accept);
     } else {
-        QMessageBox::critical(this, "", "备份文件失败！");
+        m_messagePopup->showMessage("备份文件失败！", true);
     }
 }
 

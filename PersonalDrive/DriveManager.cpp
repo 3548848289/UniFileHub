@@ -1,4 +1,4 @@
-﻿#include "include/DriveManager.h"
+#include "include/DriveManager.h"
 #include "include/DriveApiClient.h"
 #include "include/DriveItem.h"
 #include "include/DriveFile.h"
@@ -62,6 +62,14 @@ void DriveManager::initialize()
 
     connect(m_apiClient, &DriveApiClient::fileUploaded,
             this, &DriveManager::onFileUploaded);
+
+    connect(m_apiClient, &DriveApiClient::uploadProgress,
+            this, [this](const QString &filePath, int progress) {
+                const int recordId = m_uploadRecordMap.value(filePath, -1);
+                if (recordId > 0) {
+                    emit uploadProgress(recordId, progress);
+                }
+            });
     
     connect(m_apiClient, &DriveApiClient::folderCreated,
             this, &DriveManager::onFolderCreated);
@@ -139,6 +147,12 @@ void DriveManager::uploadFile(const QString &filePath, int parentId, const QStri
         const QString localFileName = fileInfo.fileName();
         const QString cloudFileName = targetName.isEmpty() ? localFileName : targetName;
         addUploadRecord(0, localFileName, cloudFileName, fileInfo.size(), filePath, parentId);
+
+        // 立即通知进度0，让界面显示"上传中"进度条
+        const int recordId = m_uploadRecordMap.value(filePath, -1);
+        if (recordId > 0) {
+            emit uploadProgress(recordId, 0);
+        }
     }
     
     m_apiClient->uploadFile(filePath, parentId, targetName, overwrite);

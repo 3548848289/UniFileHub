@@ -2,6 +2,7 @@
 #include "ui/ui_DLogin.h"
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QTimer>
 #include "../Setting/include/SettingManager.h"
 #include "../Setting/include/ThemeManager.h"
 #include "../Setting/include/IconManager.h"
@@ -11,6 +12,11 @@ DLogin::DLogin(QWidget *parent): QDialog(parent), ui(new Ui::DLogin)
     ui->setupUi(this);
     this->setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint);
     mousePressed = false;
+
+    // 悬浮提示（自动消失，无需手动点击），锚定在密码框正下方
+    m_messagePopup = new InlineMessagePopup(this);
+    m_messagePopup->setAnchorWidget(ui->password);
+
     ui->loginBtn->setEnabled(false);
     ui->registerBtn->setEnabled(false);
     
@@ -105,7 +111,7 @@ void DLogin::onAvatarDownloaded(const QByteArray &data, const QString &action)
             qDebug() << "User avatar loaded for action:" << action;
         }
     } else {
-        QMessageBox::warning(this, "提示", "头像加载失败，请重试");
+        m_messagePopup->showMessage(QStringLiteral("头像加载失败，请重试"), true);
     }
 }
 
@@ -162,7 +168,7 @@ void DLogin::on_loginBtn_clicked()
     QString passwordText = ui->password->text();
 
     if (usernameText.isEmpty() || passwordText.isEmpty()) {
-        QMessageBox::warning(this, "提示", "请输入用户名和密码");
+        m_messagePopup->showMessage(QStringLiteral("请输入用户名和密码"), true);
         return;
     }
 
@@ -179,7 +185,7 @@ void DLogin::on_registerBtn_clicked()
     QString passwordText = ui->password->text();
 
     if (avatarImage.isNull()) {
-        QMessageBox::warning(this, "提示", "请先上传头像");
+        m_messagePopup->showMessage(QStringLiteral("请先上传头像"), true);
         return;
     }
 
@@ -213,18 +219,22 @@ void DLogin::onLoginResponse(const QJsonObject &response)
         SettingManager::Instance().setLoginUsername(response["username"].toString());
 
         emit loginSuccessful(response["username"].toString());
-        QMessageBox::information(this, "登录成功", "登录成功！欢迎回来");
-        this->close();
+        m_messagePopup->showMessage(QStringLiteral("登录成功！欢迎回来"));
+        QTimer::singleShot(1200, this, &QWidget::close);
     }
     else {
-        // 优化登录失败提示语
+        // 优化登录失败提示语（服务器消息为英文，匹配不区分大小写）
         QString errorMsg = message;
-        if (message.contains("password")) {
+        if (message.contains("password", Qt::CaseInsensitive)) {
             errorMsg = "账户或密码错误，请重新输入";
-        } else if (message.contains("user")) {
+        } else if (message.contains("user", Qt::CaseInsensitive)) {
             errorMsg = "用户不存在，请先注册";
+        } else if (message.contains("token", Qt::CaseInsensitive)) {
+            errorMsg = "身份验证失败，请稍后重试";
+        } else if (message.contains("server", Qt::CaseInsensitive)) {
+            errorMsg = "服务器开小差了，请稍后重试";
         }
-        QMessageBox::warning(this, "登录失败", errorMsg);
+        m_messagePopup->showMessage(errorMsg, true);
     }
 }
 
@@ -250,8 +260,7 @@ void DLogin::onRegisterResponse(const QJsonObject &response)
     QString error   = response.value("error").toString();
 
     if (message == "User registered successfully!") {
-        QMessageBox::information(this, "注册成功", "注册成功！您现在可以登录了");
-        this->close();
+        m_messagePopup->showMessage(QStringLiteral("注册成功！您现在可以登录了"));
         return;
     }
 
@@ -264,7 +273,7 @@ void DLogin::onRegisterResponse(const QJsonObject &response)
         errorMsg = "密码格式不正确，请检查密码设置";
     }
 
-    QMessageBox::critical(this, "注册失败", errorMsg);
+    m_messagePopup->showMessage(errorMsg, true);
 }
 
 void DLogin::onNetworkError(const QString &error)
@@ -277,7 +286,7 @@ void DLogin::onNetworkError(const QString &error)
     } else if (error.contains("host not found")) {
         errorMsg = "无法连接到服务器，请稍后重试";
     }
-    QMessageBox::critical(this, "网络错误", errorMsg);
+    m_messagePopup->showMessage(errorMsg, true);
 }
 
 void DLogin::onPrivacyPolicyClicked()

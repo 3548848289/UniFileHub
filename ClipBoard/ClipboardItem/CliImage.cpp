@@ -29,7 +29,8 @@ QListWidgetItem* CliImage::createListWidgetItem() const {
     item->setText(QString("[图片] %1x%2").arg(m_pixmap.width()).arg(m_pixmap.height()));
     item->setData(Qt::UserRole, QVariant::fromValue<quintptr>(reinterpret_cast<quintptr>(this)));
     item->setData(Qt::UserRole + 1, "image");
-    item->setToolTip(QString("<img src='%1' width='%2'/>")
+    item->setToolTip(QString("复制时间：%1<br><img src='%2' width='%3'/>")
+                         .arg(copyTime().toString(QStringLiteral("yyyy-MM-dd HH:mm:ss")))
                          .arg(savePixmapToTempFile(m_pixmap))
                          .arg(400));
 

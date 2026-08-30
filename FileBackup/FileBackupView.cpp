@@ -4,6 +4,8 @@
 FileBackupView::FileBackupView(QWidget *parent) : QWidget(parent), ui(new Ui::FileBackupView)
     , serverManager(ServerManager::instance()) , dbservice(dbService::instance("./SmartDesk.db")) {
     ui->setupUi(this);
+    m_messagePopup = new InlineMessagePopup(this);
+    m_messagePopup->setPanelWidget(this); // 弹窗显示在面板内部顶部居中
     ui->backupList->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->fileListComboBox->setMinimumContentsLength(20);
     ui->fileListComboBox->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -29,7 +31,7 @@ FileBackupView::FileBackupView(QWidget *parent) : QWidget(parent), ui(new Ui::Fi
                         ui->fileListComboBox->setItemData(index, newFilePath);
                         ui->fileListComboBox->setItemText(index, QFileInfo(newFilePath).fileName());
                     } else
-                        QMessageBox::warning(this, "", tr("更新文件路径失败。"));
+                        m_messagePopup->showMessage(tr("更新文件路径失败。"), true);
                 }
             }
         });
@@ -48,7 +50,7 @@ FileBackupView::FileBackupView(QWidget *parent) : QWidget(parent), ui(new Ui::Fi
 
                         ui->fileListComboBox->removeItem(index);
                     } else {
-                        QMessageBox::warning(this, "", tr("从数据库中删除文件记录失败。"));
+                        m_messagePopup->showMessage(tr("从数据库中删除文件记录失败。"), true);
                     }
 
                     if (ui->fileListComboBox->count() == 0)
@@ -127,7 +129,7 @@ void FileBackupView::updateFileList(const QString filepath)
 void FileBackupView::on_fileListComboBox_currentIndexChanged(int index) {
     if (index != -1) {
         if (ui->fileListComboBox->itemData(index) == "missing") {
-            QMessageBox::warning(this, "文件缺失", "您选择的文件已经缺失，请更改源文件路径或选择其他文件。");
+            m_messagePopup->showMessage("您选择的文件已经缺失，请更改源文件路径或选择其他文件。", true);
         }
         choosed_file = ui->fileListComboBox->currentText();
         ui->fileListComboBox->setToolTip(choosed_file);

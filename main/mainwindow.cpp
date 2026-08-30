@@ -167,6 +167,7 @@ void MainWindow::initConnect() {
 
 
     connect(file_system, &FileSystem::fileOpened, tabManager, &TabManager::openFile);
+    connect(file_system, &FileSystem::folderNavigated, recentFilesManager, &RecentFilesManager::addFolder);
     connect(file_system, &FileSystem::deleteFileRequested, tabManager, &TabManager::deleteFile);
     connect(file_system, &FileSystem::uploadToDriveRequested, this, [this](const QString &filePath) {
         const QFileInfo fileInfo(filePath);

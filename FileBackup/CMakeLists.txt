@@ -25,6 +25,7 @@ qt_add_library(mytxt_filehis STATIC
 target_link_libraries(mytxt_filehis PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::Network
+    mytxt_manager
 )
 
 target_include_directories(mytxt_filehis PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

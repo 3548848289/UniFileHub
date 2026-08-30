@@ -27,6 +27,7 @@ qt_add_library(mytxt_schedule STATIC
 
 target_link_libraries(mytxt_schedule PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
+    mytxt_manager
 )
 target_link_libraries(mytxt_schedule PRIVATE
     LmsgNotify::LmsgNotify

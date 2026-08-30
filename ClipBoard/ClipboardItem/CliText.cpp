@@ -22,7 +22,7 @@ QListWidgetItem* CliText::createListWidgetItem() const {
 
     item->setText(displayText);
     item->setData(Qt::UserRole, QVariant::fromValue<quintptr>(reinterpret_cast<quintptr>(this)));
-    item->setToolTip(m_text);
+    item->setToolTip(toolTipWithCopyTime(m_text));
     item->setTextAlignment(Qt::AlignTop);
     if (isCloudItem()) {
         item->setIcon(IconManager::icon(IconManager::Icon::Cloud, QSize(16, 16)));

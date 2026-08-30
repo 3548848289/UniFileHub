@@ -14,6 +14,7 @@ struct DbClipRecord {
     int id;
     QString content;
     bool isPinned;
+    QDateTime timestamp; // 复制时间（DB 中 CURRENT_TIMESTAMP 为 UTC，需转本地时间）
 };
 
 class dbClipboard : public dbManager

@@ -123,7 +123,7 @@ signals:
     void operationFailed(const QString &errorMessage);
     
     // 文件上传进度信号
-    void uploadProgress(int progress);
+    void uploadProgress(int recordId, int progress);
     
     // 文件上传失败信号
     void uploadFailed(const QString &errorMessage);

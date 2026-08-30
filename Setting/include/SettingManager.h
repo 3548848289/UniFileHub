@@ -57,6 +57,7 @@ public:
     bool clip_board_double_click_copy_minimize();
     bool clip_board_ctrl_c_copy_minimize();
     bool clip_board_context_menu_copy_minimize();
+    bool clip_board_copy_auto_sync();
 
     QString serverconfig_ip1();
     QString serverconfig_ip2();

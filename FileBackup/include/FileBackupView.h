@@ -11,6 +11,7 @@
 #include "FileRestoreWid.h"
 #include "../../manager/include/dbService.h"
 #include "../../manager/include/ServerManager.h"
+#include "../../manager/include/InlineMessagePopup.h"
 
 namespace Ui {
 class FileBackupView;
@@ -48,6 +49,7 @@ private:
     QList<QString> missingFiles;
     bool exists = false;
     QString choosed_file;
+    InlineMessagePopup *m_messagePopup = nullptr;
 
     void loadFileNames();
 };

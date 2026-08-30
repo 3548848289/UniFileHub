@@ -10,6 +10,7 @@
 #include <QMessageBox>
 #include <QDebug>
 #include <QSettings>
+#include "../../manager/include/InlineMessagePopup.h"
 
 namespace Ui {
 class FileBackupWid;
@@ -35,6 +36,7 @@ private:
     bool backupFile(const QString &filePath, const QString &fileName);
     QString m_backupFilePath; // 存储备份路径
     QString m_filePath;  // 用于保存传入的 filePath
+    InlineMessagePopup *m_messagePopup = nullptr;
 };
 
 #endif // FILEBACKUPWID_H

@@ -5,6 +5,8 @@
 TagDetail::TagDetail(QWidget *parent, FilePathInfo fileInfo) : QWidget(parent), fileInfo(fileInfo),
     ui(new Ui::TagDetail), dbservice(dbService::instance("./SmartDesk.db")) {
     ui->setupUi(this);
+    m_messagePopup = new InlineMessagePopup(this);
+    m_messagePopup->setPanelWidget(this); // 弹窗显示在面板内部顶部居中
     init(fileInfo);
     qDebug() << "TagDetail" << fileInfo.filePath;
 
@@ -61,6 +63,8 @@ void TagDetail::init(FilePathInfo fileInfo) {
 TagDetail::TagDetail(QWidget *parent, QString filePath) :
     QWidget(parent), ui(new Ui::TagDetail), dbservice(dbService::instance("./SmartDesk.db")) {
     ui->setupUi(this);
+    m_messagePopup = new InlineMessagePopup(this);
+    m_messagePopup->setPanelWidget(this); // 弹窗显示在面板内部顶部居中
     this->fileInfo.filePath = filePath; // 正确初始化filePath
     if (dbservice.dbTags().getFileInfoByFilePath(filePath, fileInfo)) {
         init(fileInfo);
@@ -90,14 +94,14 @@ void TagDetail::on_YesBtn_clicked() {
     // 获取修改后的文件路径
     QString newFilePath = ui->tableWidget->item(0, 1)->text();
     if (newFilePath.isEmpty()) {
-        QMessageBox::warning(this, tr("警告"), tr("文件路径不能为空！"));
+        m_messagePopup->showMessage(tr("文件路径不能为空！"), true);
         return;
     }
 
     // 检查文件是否存在
     QFileInfo fileInfoCheck(newFilePath);
     if (!fileInfoCheck.exists()) {
-        QMessageBox::warning(this, tr("警告"), tr("文件不存在！"));
+        m_messagePopup->showMessage(tr("文件不存在！"), true);
         return;
     }
 
@@ -107,7 +111,7 @@ void TagDetail::on_YesBtn_clicked() {
         fileInfo.reminderType = newReminderType;
         // 更新数据库中的提醒方式
         if (!dbservice.dbTags().updateFileInfo(fileInfo)) {
-            QMessageBox::warning(this, tr("警告"), tr("提醒方式更新失败！"));
+            m_messagePopup->showMessage(tr("提醒方式更新失败！"), true);
             return;
         }
     }
@@ -115,13 +119,13 @@ void TagDetail::on_YesBtn_clicked() {
     // 更新数据库
     if (dbservice.dbTags().updateFilePath(oldFilePath, newFilePath)) {
         // 更新成功
-        QMessageBox::information(this, tr("提示"), tr("文件路径已成功更新！"));
+        m_messagePopup->showMessage(tr("文件路径已成功更新！"));
         // 更新UI中的文件状态
         ui->tableWidget->setItem(4, 1, new QTableWidgetItem("文件存在"));
         // 更新oldFilePath
         oldFilePath = newFilePath;
     } else {
-        QMessageBox::warning(this, tr("警告"), tr("文件路径更新失败！"));
+        m_messagePopup->showMessage(tr("文件路径更新失败！"), true);
         // 恢复原来的路径
         ui->tableWidget->setItem(0, 1, new QTableWidgetItem(oldFilePath));
         fileInfo.filePath = oldFilePath;

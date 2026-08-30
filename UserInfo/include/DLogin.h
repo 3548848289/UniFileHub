@@ -18,6 +18,7 @@
 #include <QBuffer>
 #include <QtGlobal>
 #include "FlaskInfo.h"
+#include "../../manager/include/InlineMessagePopup.h"
 
 namespace Ui {
 class DLogin;
@@ -56,6 +57,7 @@ private:
 
     Ui::DLogin *ui;                           // UI pointer
     FlaskInfo *flaskinfo;            // NetworkManager for handling requests
+    InlineMessagePopup *m_messagePopup = nullptr; // 自动消失的悬浮提示（替代 QMessageBox）
 
     QPixmap avatarImage;                      // Store avatar image
     QImage m_avatarImage;  // 用于保存头像图片

@@ -39,6 +39,7 @@ qt_add_library(mytxt_userinfo STATIC
 target_link_libraries(mytxt_userinfo PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::Network
+    mytxt_manager
 )
 
 # 添加头文件路径

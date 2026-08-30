@@ -47,6 +47,8 @@ signals:
     void uploadToDriveRequested(const QString &filePath);
     void openTerminalRequested(const QString &directoryPath);
     void driveFileDropped(int fileId, const QString &fileName, const QString &targetDirectory);
+    // 通过面包屑输入路径导航到某个文件夹时发出
+    void folderNavigated(const QString &folderPath);
 private:
     void loadFileMetadata(const QString &filePath);
     void saveExpirationDate(const QString &filePath, const QDate &expirationDate);

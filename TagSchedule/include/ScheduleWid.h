@@ -18,6 +18,7 @@
 #include "TagList.h"
 #include "../../Setting/include/SettingManager.h"
 #include "../../EmailService/SendEmail.h"
+#include "../../manager/include/InlineMessagePopup.h"
 
 class NotifyManager;
 class DatabaseManager;
@@ -53,6 +54,7 @@ private:
     NotifyManager *manager;
     SendEmail * sendemail;
     dbService& dbservice;
+    InlineMessagePopup *m_messagePopup = nullptr;
 
 };
 

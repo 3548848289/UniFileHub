@@ -75,6 +75,24 @@ void ClipboardController::handleNewClipboardItem(ClipboardItem* rawItem)
         ClipboardItem* addedItem = m_historyManager.items().back().get();
         emit itemAddedToModel(addedItem);
         m_historyManager.saveIncremental();
+
+        // "复制即同步"开启时，自动上传到云端（仅文本）
+        if (SettingManager::Instance().clip_board_copy_auto_sync()
+            && addedItem->type() == ClipboardItemType::Text
+            && !SettingManager::Instance().getToken().trimmed().isEmpty()) {
+            // 避免重复同步：内容已存在于云端项（如复制云端项）时跳过
+            const QString serialized = addedItem->serialize();
+            bool alreadyInCloud = false;
+            for (const auto& existing : m_historyManager.items()) {
+                if (existing && existing->isCloudItem() && existing->serialize() == serialized) {
+                    alreadyInCloud = true;
+                    break;
+                }
+            }
+            if (!alreadyInCloud) {
+                m_cloudClient->uploadTextItem(serialized);
+            }
+        }
     }
 }
 

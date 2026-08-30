@@ -70,6 +70,12 @@ ClipboardView::ClipboardView(ClipboardController* controller, QWidget *parent)
     const int hours = SettingManager::Instance().clip_board_hours();
     m_controller->loadHistory(hours);
 
+    // 初始化"复制即同步"勾选框状态
+    ui->autoSyncCheckBox->setChecked(SettingManager::Instance().clip_board_copy_auto_sync());
+    connect(ui->autoSyncCheckBox, &QCheckBox::toggled, this, [](bool checked) {
+        SettingManager::Instance().setValue(QStringLiteral("clip_board/copy_auto_sync"), checked);
+    });
+
     connect(&SettingManager::Instance(), &SettingManager::settingChanged,
             this, [this](const QString &key, const QVariant &value) {
                 if (key == QStringLiteral("clip_board/hours") && m_controller) {

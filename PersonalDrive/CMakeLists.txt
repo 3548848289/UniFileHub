@@ -36,6 +36,7 @@ target_link_libraries(mytxt_drive PRIVATE
     Qt${QT_VERSION_MAJOR}::Multimedia
     Qt${QT_VERSION_MAJOR}::MultimediaWidgets
     mytxt_setting
+    mytxt_manager
 )
 
 if(QT_VERSION_MAJOR EQUAL 6)

@@ -12,6 +12,9 @@ TagList::TagList(const FilePathInfo &fileInfo, QWidget *parent)
     : QWidget(parent), ui(new Ui::TagList), fileInfo(fileInfo), dbservice(dbService::instance("./SmartDesk.db"))
 {
     ui->setupUi(this);
+    // 列表项自身会被 QListWidget 裁剪，弹窗统一挂到父面板（ScheduleWid）上
+    m_messagePopup = new InlineMessagePopup(parent ? parent : this);
+    m_messagePopup->setPanelWidget(parent ? parent : this); // 弹窗显示在面板内部顶部居中
 
     QFileInfo fileInfoObj(fileInfo.filePath);
     ui->fileLabel->setText(fileInfoObj.fileName());
@@ -28,6 +31,8 @@ TagList::TagList(const FilePathInfo &fileInfo, QWidget *parent)
 
 TagList::~TagList()
 {
+    // popup 挂在父面板（ScheduleWid）上，不会随 TagList 自动析构，需手动释放
+    delete m_messagePopup;
     delete ui;
 }
 
@@ -131,7 +136,7 @@ void TagList::onModifyPathAction()
         // 验证文件是否存在
         QFileInfo fileInfoCheck(newPath);
         if (!fileInfoCheck.exists()) {
-            QMessageBox::warning(this, "警告", "新文件不存在");
+            m_messagePopup->showMessage("新文件不存在", true);
             return;
         }
 
@@ -147,9 +152,9 @@ void TagList::onModifyPathAction()
             ui->lineEdit->setText(newFileInfoObj.path());
             ui->lineEdit->setToolTip(newFileInfoObj.path());
 
-            QMessageBox::information(this, "成功", "文件路径已更新");
+            m_messagePopup->showMessage("文件路径已更新");
         } else {
-            QMessageBox::warning(this, "失败", "更新文件路径失败");
+            m_messagePopup->showMessage("更新文件路径失败", true);
         }
     }
 }
@@ -164,17 +169,17 @@ void TagList::onDeleteTagAction()
         int fileId;
         // 获取文件ID
         if (!dbservice.dbTags().getFileId(fileInfo.filePath, fileId)) {
-            QMessageBox::warning(this, "错误", "无法找到文件ID！");
+            m_messagePopup->showMessage("无法找到文件ID！", true);
             return;
         }
 
         // 删除标签
         bool result = dbservice.dbTags().deleteTag(fileId);
         if (result) {
-            QMessageBox::information(this, "成功", "标签已删除");
+            m_messagePopup->showMessage("标签已删除");
             // 可以考虑发出信号通知父组件删除此TagList
         } else {
-            QMessageBox::warning(this, "删除失败", "删除过程中出现错误");
+            m_messagePopup->showMessage("删除过程中出现错误", true);
         }
     }
 }

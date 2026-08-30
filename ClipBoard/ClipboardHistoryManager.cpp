@@ -16,6 +16,9 @@ void ClipboardHistoryManager::loadHistory(int hours) {
         if (item) {
             item->setId(rec.id);
             item->setPinned(rec.isPinned);
+            if (rec.timestamp.isValid()) {
+                item->setCopyTime(rec.timestamp);
+            }
             m_items.push_back(std::move(item));
         }
     }
@@ -26,6 +29,9 @@ void ClipboardHistoryManager::loadHistory(int hours) {
         if (item) {
             item->setId(rec.id);
             item->setPinned(rec.isPinned);
+            if (rec.timestamp.isValid()) {
+                item->setCopyTime(rec.timestamp);
+            }
             m_items.push_back(std::move(item));
         }
     }

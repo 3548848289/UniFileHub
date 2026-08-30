@@ -131,8 +131,14 @@ FileSystem::FileSystem(QWidget *parent)
                 qDebug() << "File clicked:" << path;
     });
     connect(breadcrumb, &QFileSystemBreadcrumbBar::pathEdited, [this](const QString& path){
-        if(path != "")
+        if(path != "") {
+            const QString previousDir = currentDir;
             changePath(path);
+            // 路径有效并成功切换后，记录到菜单的文件夹历史
+            if (currentDir != previousDir) {
+                emit folderNavigated(currentDir);
+            }
+        }
     });
 
     isMouseClick = false;

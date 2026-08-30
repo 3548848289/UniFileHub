@@ -11,6 +11,7 @@
 #include <QString>
 #include <QScrollBar>
 #include "../../manager/include/dbService.h"
+#include "../../manager/include/InlineMessagePopup.h"
 
 namespace Ui {
 class TagDetail;
@@ -37,6 +38,7 @@ private:
     dbService& dbservice;    // dbService 单例引用
     FilePathInfo fileInfo;  // 引用传递的文件路径信息
     QString oldFilePath;    // 原文件路径，用于比较是否修改
+    InlineMessagePopup *m_messagePopup = nullptr;
 
 private slots:
     void on_choosePathBtn_clicked();

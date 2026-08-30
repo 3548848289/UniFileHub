@@ -58,7 +58,7 @@ QListWidgetItem* CliFile::createListWidgetItem() const {
         for (const auto& path : m_filePaths) {
             toolTip += path + "\n";
         }
-        item->setToolTip(toolTip.trimmed());
+        item->setToolTip(toolTipWithCopyTime(toolTip.trimmed()));
     } else {
         QString path = m_filePaths.first();
         QFileInfo fileInfo(path);
@@ -70,10 +70,10 @@ QListWidgetItem* CliFile::createListWidgetItem() const {
             for (const auto& file : files) {
                 toolTip += file + "\n";
             }
-            item->setToolTip(toolTip.trimmed());
+            item->setToolTip(toolTipWithCopyTime(toolTip.trimmed()));
         } else {
             // 单个文件：显示完整路径
-            item->setToolTip(path);
+            item->setToolTip(toolTipWithCopyTime(path));
         }
     }
 

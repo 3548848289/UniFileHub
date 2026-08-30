@@ -7,6 +7,8 @@ ScheduleWid::ScheduleWid(QWidget *parent) : QWidget(parent), ui(new Ui::Schedule
     dbservice(dbService::instance("./SmartDesk.db"))
 {
     ui->setupUi(this);
+    m_messagePopup = new InlineMessagePopup(this);
+    m_messagePopup->setPanelWidget(this); // 弹窗显示在面板内部顶部居中
 
     on_refreshBtn_clicked("全部");
     loadTags();
@@ -59,8 +61,7 @@ void ScheduleWid::onItemClicked(QListWidgetItem *item) {
         if (QFile::exists(path)) {
             emit fileClicked(path);
         } else {
-            QMessageBox::warning(this, tr("文件不存在"),
-                                 tr("文件已被移动或删除：\n%1").arg(path));
+            m_messagePopup->showMessage(tr("文件已被移动或删除：\n%1").arg(path), true);
         }
     }
 }
@@ -80,7 +81,7 @@ void ScheduleWid::onSearch(const QString &keyword) {
     ui->listWidget->clear();
     QList<FilePathInfo> files = dbservice.dbTags().searchFiles(keyword);
     for (const FilePathInfo &fileInfo : files) {
-        TagList *widget = new TagList(fileInfo);
+        TagList *widget = new TagList(fileInfo, this);
 
         QListWidgetItem *listItem = new QListWidgetItem(ui->listWidget);
         listItem->setSizeHint(widget->sizeHint());
@@ -174,7 +175,7 @@ void ScheduleWid::on_sortComboBox_currentIndexChanged(int index)
         });
 
         for (const FilePathInfo &file : files) {
-            TagList *widget = new TagList(file);
+            TagList *widget = new TagList(file, this);
             // 连接信号
             connect(widget, &TagList::openInFileSystemRequested, this, &ScheduleWid::openInFileSystemRequested);
 
@@ -195,7 +196,7 @@ void ScheduleWid::on_refreshBtn_clicked(const QString &tag = "全部")
     QList<FilePathInfo> files = dbservice.dbTags().getFilePathsByTag(tag);
 
     for (const auto &info : files) {
-        TagList *taglist = new TagList(info);
+        TagList *taglist = new TagList(info, this);
         // 连接信号
         connect(taglist, &TagList::openInFileSystemRequested, this, &ScheduleWid::openInFileSystemRequested);
 

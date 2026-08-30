@@ -28,7 +28,7 @@ QList<DbClipRecord> dbClipboard::loadRecentNormalHistory(int hours) {
     QList<DbClipRecord> list;
     QSqlQuery query(dbsqlite);
     query.prepare(R"(
-        SELECT id, content, is_pinned FROM clipboard_history
+        SELECT id, content, is_pinned, timestamp FROM clipboard_history
         WHERE is_pinned = 0 AND datetime(timestamp) >= datetime('now', ?)
         ORDER BY timestamp ASC, id ASC
     )");
@@ -37,7 +37,8 @@ QList<DbClipRecord> dbClipboard::loadRecentNormalHistory(int hours) {
     query.exec();
 
     while (query.next()) {
-        list.append({query.value(0).toInt(), query.value(1).toString(), query.value(2).toBool()});
+        list.append({query.value(0).toInt(), query.value(1).toString(), query.value(2).toBool(),
+                     QDateTime::fromString(query.value(3).toString(), Qt::ISODate).toLocalTime()});
     }
     return list;
 }
@@ -47,14 +48,15 @@ QList<DbClipRecord> dbClipboard::loadPinnedHistory() {
     QList<DbClipRecord> list;
     QSqlQuery query(dbsqlite);
     query.prepare(R"(
-        SELECT id, content, is_pinned FROM clipboard_history
+        SELECT id, content, is_pinned, timestamp FROM clipboard_history
         WHERE is_pinned = 1
         ORDER BY timestamp DESC
     )");
     query.exec();
 
     while (query.next()) {
-        list.append({query.value(0).toInt(), query.value(1).toString(), query.value(2).toBool()});
+        list.append({query.value(0).toInt(), query.value(1).toString(), query.value(2).toBool(),
+                     QDateTime::fromString(query.value(3).toString(), Qt::ISODate).toLocalTime()});
     }
     return list;
 }
