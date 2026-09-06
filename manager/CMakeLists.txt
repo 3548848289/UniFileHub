@@ -5,6 +5,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(MANAGER_SOURCES
     myJson.cpp
     ServerManager.cpp
+    ServerDiscovery.cpp
     dbManager.cpp
     dbFilepath.cpp
     dbBackupRecord.cpp
@@ -19,6 +20,7 @@ set(MANAGER_SOURCES
     include/dbBackupRecord.h
     include/myJson.h
     include/ServerManager.h
+    include/ServerDiscovery.h
     include/dbManager.h
     include/dbFilepath.h
     include/dbService.h

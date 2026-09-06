@@ -21,6 +21,7 @@
 #include "mainwindow.h"
 #include "../Setting/include/SettingManager.h"
 #include "../Setting/include/IconManager.h"
+#include "../manager/include/ServerDiscovery.h"
 #include "../../PersonalDrive/include/DriveView.h"
 
 #define SERVER_NAME "SmartDesk_Server"
@@ -311,6 +312,15 @@ int main(int argc, char *argv[]) {
     QLocalServer *server = createLocalServer(&w);
 
     Q_UNUSED(server);
+
+    // 启动时局域网广播寻找服务端，找到后自动更新各服务地址；
+    // 找不到则保持 settings.ini 里手动配置的地址不变
+    ServerDiscovery* discovery = new ServerDiscovery(2000, &app);
+    QObject::connect(discovery, &ServerDiscovery::discovered, &w,
+                     [](const QString& ip) {
+                         qDebug() << "Server discovered at" << ip;
+                     });
+    discovery->start();
 
     if (SettingManager::Instance().all_setting_fenable_tray()) {
         createTray(&w, app);
