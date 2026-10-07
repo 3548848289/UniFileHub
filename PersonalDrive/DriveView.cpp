@@ -1,6 +1,7 @@
 #include "include/DriveView.h"
 #include "ui_DriveView.h"
 #include "include/DriveManager.h"
+#include "include/DriveUploadHelper.h"
 #include "include/DriveItem.h"
 #include "include/DriveFile.h"
 #include "include/DriveFolder.h"
@@ -625,17 +626,6 @@ void DriveView::applyHistoryTableLayout(QTableView *tableView)
     }
 }
 
-bool DriveView::cloudNameExists(const QString &fileName) const
-{
-    const QList<DriveItem *> currentFiles = m_driveManager ? m_driveManager->getCurrentFileList() : QList<DriveItem *>();
-    for (DriveItem *item : currentFiles) {
-        if (item && item->getName().compare(fileName, Qt::CaseInsensitive) == 0) {
-            return true;
-        }
-    }
-    return false;
-}
-
 bool DriveView::hasUploadableLocalFiles(const QMimeData *mimeData) const
 {
     if (!mimeData || !mimeData->hasUrls()) {
@@ -781,53 +771,9 @@ bool DriveView::startDownloadDrag(const QModelIndex &index)
 
 void DriveView::uploadFileWithConflictCheck(const QString &filePath)
 {
-    QFileInfo fileInfo(filePath);
-    if (!fileInfo.isFile()) {
-        return;
-    }
-
-    const QString fileName = fileInfo.fileName();
-    if (!cloudNameExists(fileName)) {
-        m_driveManager->uploadFile(filePath, m_currentDirId);
-        return;
-    }
-
-    switch (SettingManager::Instance().personal_drive_name_conflict_policy()) {
-    case SettingManager::PersonalDriveNameConflictPolicy::Overwrite:
-        m_driveManager->uploadFile(filePath, m_currentDirId, fileName, true);
-        return;
-    case SettingManager::PersonalDriveNameConflictPolicy::AutoRename:
-        m_driveManager->uploadFile(filePath, m_currentDirId);
-        return;
-    case SettingManager::PersonalDriveNameConflictPolicy::Ask:
-        break;
-    }
-
-    const NameConflictChoice choice = NameConflictDialog::getChoice(
-        this,
-        fileName,
-        QStringLiteral("当前云盘目录中已存在同名文件，请选择处理方式。"),
-        QStringLiteral("覆盖云盘文件"),
-        QStringLiteral("自动重命名上传"),
-        QStringLiteral("以该命名上传")
-    );
-
-    switch (choice.action) {
-    case NameConflictAction::Overwrite:
-        m_driveManager->uploadFile(filePath, m_currentDirId, fileName, true);
-        break;
-    case NameConflictAction::AutoRename:
-        m_driveManager->uploadFile(filePath, m_currentDirId);
-        break;
-    case NameConflictAction::CustomName:
-        if (cloudNameExists(choice.customName)) {
-            showInlineMessage(QStringLiteral("自定义名称仍与云盘文件重复，请换一个名称"), true);
-            return;
-        }
-        m_driveManager->uploadFile(filePath, m_currentDirId, choice.customName, false);
-        break;
-    case NameConflictAction::Cancel:
-        break;
+    QString uploadError;
+    if (!DriveUploadHelper::uploadToCurrentDirectory(this, filePath, &uploadError) && !uploadError.isEmpty()) {
+        showInlineMessage(uploadError, true);
     }
 }
 

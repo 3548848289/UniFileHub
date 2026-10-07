@@ -1,5 +1,7 @@
 #include "include/FileBackupView.h"
 #include "ui/ui_FileBackupView.h"
+#include "../PersonalDrive/include/DriveUploadHelper.h"
+#include "../manager/include/DataChangeNotifier.h"
 
 FileBackupView::FileBackupView(QWidget *parent) : QWidget(parent), ui(new Ui::FileBackupView)
     , serverManager(ServerManager::instance()) , dbservice(dbService::instance("./SmartDesk.db")) {
@@ -19,6 +21,7 @@ FileBackupView::FileBackupView(QWidget *parent) : QWidget(parent), ui(new Ui::Fi
         QAction *deleteRecordAction = contextMenu.addAction("删除文件记录");
         QAction *openInFileSystemAction = contextMenu.addAction("在文件系统打开");
         QAction *openFileLocationAction = contextMenu.addAction("打开文件所在位置");
+        QAction *uploadToDriveAction = contextMenu.addAction("上传到网盘");
 
         // 处理菜单项点击
         connect(changePathAction, &QAction::triggered, this, [=]() {
@@ -82,11 +85,22 @@ FileBackupView::FileBackupView(QWidget *parent) : QWidget(parent), ui(new Ui::Fi
             }
         });
 
+        connect(uploadToDriveAction, &QAction::triggered, this, [=]() {
+            int index = ui->fileListComboBox->currentIndex();
+            if (index != -1) {
+                uploadFileToDrive(ui->fileListComboBox->currentData().toString());
+            }
+        });
+
         // 显示菜单
         contextMenu.exec(ui->fileListComboBox->mapToGlobal(pos));
     });
 
     connect(serverManager, &ServerManager::onFilesListUpdated, this, &FileBackupView::updateFileList);
+
+    // 文件系统里新增备份记录后自动刷新，不用手动点刷新按钮
+    connect(&DataChangeNotifier::Instance(), &DataChangeNotifier::backupRecordAdded,
+            this, &FileBackupView::onBackupRecordAdded);
 
     connect(serverManager, &ServerManager::returnStatus, this, [this](bool exists) {
         this->exists = exists;
@@ -127,37 +141,73 @@ void FileBackupView::updateFileList(const QString filepath)
 }
 
 void FileBackupView::on_fileListComboBox_currentIndexChanged(int index) {
-    if (index != -1) {
-        if (ui->fileListComboBox->itemData(index) == "missing") {
-            m_messagePopup->showMessage("您选择的文件已经缺失，请更改源文件路径或选择其他文件。", true);
-        }
-        choosed_file = ui->fileListComboBox->currentText();
-        ui->fileListComboBox->setToolTip(choosed_file);
-        QList<QString> backupFileNames = dbservice.dbBackup().getBackupFileNames(choosed_file);
-        ui->backupList->clear();
+    if (index == -1)
+        return;
 
-        QIcon missingIcon = QIcon::fromTheme("dialog-warning", QIcon(":/usedimage/tips.png"));
-
-        for (QString &backupFileName : backupFileNames) {
-
-            QFileInfo fileInfo(backupFileName);
-            QString fileNameOnly = fileInfo.fileName();
-            serverManager->checkFileExists(fileNameOnly);
-            QListWidgetItem *item = new QListWidgetItem(fileNameOnly);
-
-            bool fileMissing = false;
-
-            if (!fileInfo.exists()) {
-                item->setIcon(missingIcon);
-                fileMissing = true;
-            }
-            item->setData(Qt::UserRole, backupFileName);
-            item->setData(Qt::UserRole + 1, fileMissing);
-            item->setToolTip(fileMissing ? "文件已缺失" : backupFileName);
-            ui->backupList->addItem(item);
-        }
-
+    if (ui->fileListComboBox->itemData(index) == "missing") {
+        m_messagePopup->showMessage("您选择的文件已经缺失，请更改源文件路径或选择其他文件。", true);
     }
+    choosed_file = ui->fileListComboBox->currentText();
+    ui->fileListComboBox->setToolTip(choosed_file);
+    fillBackupList(choosed_file);
+}
+
+void FileBackupView::fillBackupList(const QString &filePath) {
+    QList<QString> backupFileNames = dbservice.dbBackup().getBackupFileNames(filePath);
+    ui->backupList->clear();
+
+    QIcon missingIcon = QIcon::fromTheme("dialog-warning", QIcon(":/usedimage/tips.png"));
+
+    for (QString &backupFileName : backupFileNames) {
+
+        QFileInfo fileInfo(backupFileName);
+        QString fileNameOnly = fileInfo.fileName();
+        serverManager->checkFileExists(fileNameOnly);
+        QListWidgetItem *item = new QListWidgetItem(fileNameOnly);
+
+        bool fileMissing = false;
+
+        if (!fileInfo.exists()) {
+            item->setIcon(missingIcon);
+            fileMissing = true;
+        }
+        item->setData(Qt::UserRole, backupFileName);
+        item->setData(Qt::UserRole + 1, fileMissing);
+        item->setToolTip(fileMissing ? "文件已缺失" : backupFileName);
+        ui->backupList->addItem(item);
+    }
+}
+
+// 文件系统新增备份记录后自动刷新：重填文件下拉框并保持当前选中，
+// 若新增记录正好属于当前选中文件，其备份列表会同步显示新备份。
+void FileBackupView::onBackupRecordAdded(const QString &filePath)
+{
+    const QString previousFile = ui->fileListComboBox->currentText();
+    const bool hadSelection = ui->fileListComboBox->currentIndex() != -1;
+
+    {
+        // 阻塞信号，避免重填过程中触发 currentIndexChanged 把备份列表换成别的文件
+        const QSignalBlocker blocker(ui->fileListComboBox);
+        loadFileNames();
+
+        int index = -1;
+        if (hadSelection) {
+            index = ui->fileListComboBox->findText(previousFile);
+        }
+        if (index < 0) {
+            index = ui->fileListComboBox->findText(filePath);
+        }
+        if (index < 0 && ui->fileListComboBox->count() > 0) {
+            index = 0;
+        }
+        if (index >= 0) {
+            ui->fileListComboBox->setCurrentIndex(index);
+        }
+    }
+
+    choosed_file = ui->fileListComboBox->currentText();
+    ui->fileListComboBox->setToolTip(choosed_file);
+    fillBackupList(choosed_file);
 }
 
 
@@ -185,6 +235,7 @@ void FileBackupView::on_backupList_customContextMenuRequested(const QPoint &pos)
         QAction *actionRestore = contextMenu.addAction("详情");
         QAction *actionReplace = contextMenu.addAction("更换路径");
         QAction *actionCommit = contextMenu.addAction("上传云端");
+        QAction *actionUploadDrive = contextMenu.addAction("上传到网盘");
         QAction *actionRecover = contextMenu.addAction("从云端恢复");
         QAction *actionDelete = contextMenu.addAction("删除记录");
 
@@ -197,6 +248,7 @@ void FileBackupView::on_backupList_customContextMenuRequested(const QPoint &pos)
             actionEdit->setEnabled(false);
             // actionRestore->setEnabled(false);
             actionCommit->setEnabled(false);
+            actionUploadDrive->setEnabled(false);
         } else {
             connect(actionEdit, &QAction::triggered, this, [this, item, file]() {
                 emit s_fileopen(file);
@@ -220,6 +272,10 @@ void FileBackupView::on_backupList_customContextMenuRequested(const QPoint &pos)
             serverManager->commitFile(file);
         });
 
+        connect(actionUploadDrive, &QAction::triggered, this, [this, file]() {
+            uploadFileToDrive(file);
+        });
+
         connect(actionRecover, &QAction::triggered, this, [this, item, file]() {
             serverManager->downloadFile(file);
 
@@ -234,6 +290,22 @@ void FileBackupView::on_backupList_customContextMenuRequested(const QPoint &pos)
             }
         });
         contextMenu.exec(ui->backupList->mapToGlobal(pos));
+    }
+}
+
+
+void FileBackupView::uploadFileToDrive(const QString &filePath)
+{
+    if (!QFileInfo(filePath).isFile()) {
+        m_messagePopup->showMessage("文件不存在或已缺失，无法上传到网盘。", true);
+        return;
+    }
+
+    QString uploadError;
+    if (DriveUploadHelper::uploadToCurrentDirectory(this, filePath, &uploadError)) {
+        m_messagePopup->showMessage(QString("已开始上传到网盘（网盘当前位置）：%1").arg(QFileInfo(filePath).fileName()));
+    } else if (!uploadError.isEmpty()) {
+        m_messagePopup->showMessage(uploadError, true);
     }
 }
 

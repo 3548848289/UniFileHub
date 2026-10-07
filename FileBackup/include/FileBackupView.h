@@ -52,6 +52,9 @@ private:
     InlineMessagePopup *m_messagePopup = nullptr;
 
     void loadFileNames();
+    void fillBackupList(const QString &filePath);
+    void onBackupRecordAdded(const QString &filePath);
+    void uploadFileToDrive(const QString &filePath);
 };
 
 #endif // FILEBACKUPVIEW_H

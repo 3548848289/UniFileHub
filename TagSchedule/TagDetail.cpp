@@ -1,5 +1,6 @@
 #include "include/TagDetail.h"
 #include "ui/ui_TagDetail.h"
+#include "../manager/include/DataChangeNotifier.h"
 
 
 TagDetail::TagDetail(QWidget *parent, FilePathInfo fileInfo) : QWidget(parent), fileInfo(fileInfo),
@@ -124,6 +125,8 @@ void TagDetail::on_YesBtn_clicked() {
         ui->tableWidget->setItem(4, 1, new QTableWidgetItem("文件存在"));
         // 更新oldFilePath
         oldFilePath = newFilePath;
+        // 通知备忘标签页自动刷新
+        DataChangeNotifier::Instance().notifyTagChanged(newFilePath);
     } else {
         m_messagePopup->showMessage(tr("文件路径更新失败！"), true);
         // 恢复原来的路径

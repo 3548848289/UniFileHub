@@ -7,6 +7,8 @@
 #include <QMessageBox>
 #include "../manager/include/dbService.h"
 #include "../manager/include/FileLocationHelper.h"
+#include "../manager/include/DataChangeNotifier.h"
+#include "../PersonalDrive/include/DriveUploadHelper.h"
 
 TagList::TagList(const FilePathInfo &fileInfo, QWidget *parent)
     : QWidget(parent), ui(new Ui::TagList), fileInfo(fileInfo), dbservice(dbService::instance("./SmartDesk.db"))
@@ -77,6 +79,7 @@ void TagList::contextMenuEvent(QContextMenuEvent *event)
     QAction *deleteTagAction = menu.addAction("删除标签");
     QAction *openLocationAction = menu.addAction("打开文件位置");
     QAction *openInFileSystemAction = menu.addAction("在文件系统打开");
+    QAction *uploadDriveAction = menu.addAction("上传到网盘");
 
     // 连接槽函数
     connect(previewAction, &QAction::triggered, this, &TagList::onPreviewAction);
@@ -85,6 +88,7 @@ void TagList::contextMenuEvent(QContextMenuEvent *event)
     connect(detailAction, &QAction::triggered, this, &TagList::onDetailAction);
     connect(modifyPathAction, &QAction::triggered, this, &TagList::onModifyPathAction);
     connect(deleteTagAction, &QAction::triggered, this, &TagList::onDeleteTagAction);
+    connect(uploadDriveAction, &QAction::triggered, this, &TagList::onUploadToDriveAction);
 
     // 显示右键菜单
     menu.exec(event->globalPos());
@@ -126,6 +130,21 @@ void TagList::onDetailAction()
     }
 }
 
+void TagList::onUploadToDriveAction()
+{
+    if (!QFileInfo(fileInfo.filePath).isFile()) {
+        m_messagePopup->showMessage("文件不存在或已缺失，无法上传到网盘", true);
+        return;
+    }
+
+    QString uploadError;
+    if (DriveUploadHelper::uploadToCurrentDirectory(this, fileInfo.filePath, &uploadError)) {
+        m_messagePopup->showMessage(QString("已开始上传到网盘（网盘当前位置）：%1").arg(QFileInfo(fileInfo.filePath).fileName()));
+    } else if (!uploadError.isEmpty()) {
+        m_messagePopup->showMessage(uploadError, true);
+    }
+}
+
 void TagList::onModifyPathAction()
 {
     // 选择新文件路径
@@ -153,6 +172,8 @@ void TagList::onModifyPathAction()
             ui->lineEdit->setToolTip(newFileInfoObj.path());
 
             m_messagePopup->showMessage("文件路径已更新");
+            // 通知备忘标签页自动刷新（本条目会按新路径重建）
+            DataChangeNotifier::Instance().notifyTagChanged(newPath);
         } else {
             m_messagePopup->showMessage("更新文件路径失败", true);
         }
@@ -177,7 +198,8 @@ void TagList::onDeleteTagAction()
         bool result = dbservice.dbTags().deleteTag(fileId);
         if (result) {
             m_messagePopup->showMessage("标签已删除");
-            // 可以考虑发出信号通知父组件删除此TagList
+            // 通知备忘标签页自动刷新，从列表中移除该条目
+            DataChangeNotifier::Instance().notifyTagChanged(fileInfo.filePath);
         } else {
             m_messagePopup->showMessage("删除过程中出现错误", true);
         }

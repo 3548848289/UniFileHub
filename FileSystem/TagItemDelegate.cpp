@@ -1,6 +1,7 @@
 #include "./include/TagItemDelegate.h"
 
 #include "../manager/include/FileLocationHelper.h"
+#include "../manager/include/DataChangeNotifier.h"
 
 #include <QDir>
 #include <QMessageBox>
@@ -245,6 +246,7 @@ void TagItemDelegate::onCommitTriggered(QAbstractItemModel *model, const QModelI
     if (commitDialog->exec() == QDialog::Accepted) {
         const QString backupFilePath = commitDialog->getBackupFilePath();
         dbservice.dbBackup().recordSubmission(filePath, backupFilePath);
+        DataChangeNotifier::Instance().notifyBackupRecordAdded(filePath);
     }
     commitDialog->deleteLater();
 }
@@ -292,6 +294,7 @@ void TagItemDelegate::addTag(const QAbstractItemModel *model, const QModelIndex 
 
     emit TagUpdated();
     m_tagsCache[filePath] = true;
+    DataChangeNotifier::Instance().notifyTagChanged(filePath);
 }
 
 void TagItemDelegate::onCopyPathTriggered(QAbstractItemModel *model, const QModelIndex &index)

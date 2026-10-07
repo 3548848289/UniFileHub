@@ -5,6 +5,7 @@ set(SCHEDULE_SOURCES
    DriveFile.cpp
    DriveFolder.cpp
    DriveManager.cpp
+   DriveUploadHelper.cpp
    DriveViewDelegate.cpp
    HistoryDelegate.cpp
    NameConflictDialog.cpp
@@ -16,8 +17,9 @@ set(SCHEDULE_HEADERS
     include/DriveItem.h
     include/DriveFile.h
     include/DriveFolder.h
-    include/DriveManager.h
-    include/DriveViewDelegate.h
+   include/DriveManager.h
+   include/DriveUploadHelper.h
+   include/DriveViewDelegate.h
     include/DriveRoles.h
     include/HistoryDelegate.h
     include/NameConflictDialog.h

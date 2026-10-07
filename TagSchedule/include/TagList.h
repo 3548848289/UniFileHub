@@ -41,6 +41,7 @@ private slots:
     void onDetailAction();
     void onModifyPathAction();
     void onDeleteTagAction();
+    void onUploadToDriveAction();
 
 signals:
     void openInFileSystemRequested(const QString &filePath);

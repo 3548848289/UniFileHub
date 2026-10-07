@@ -110,7 +110,6 @@ private:
     void uploadFileWithConflictCheck(const QString &filePath);
     void downloadFileWithConflictCheck(int fileId, const QString &fileName);
     void downloadFileWithConflictCheck(int fileId, const QString &fileName, const QString &targetDirectory);
-    bool cloudNameExists(const QString &fileName) const;
     bool hasUploadableLocalFiles(const QMimeData *mimeData) const;
     void uploadLocalFilesFromMimeData(const QMimeData *mimeData);
     bool startDownloadDrag(const QModelIndex &index);

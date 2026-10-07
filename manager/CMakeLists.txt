@@ -15,6 +15,7 @@ set(MANAGER_SOURCES
     dbDriveUpload.cpp
     FileLocationHelper.cpp
     InlineMessagePopup.cpp
+    DataChangeNotifier.cpp
 
     include/dbOnlineDoc.h
     include/dbBackupRecord.h
@@ -29,6 +30,7 @@ set(MANAGER_SOURCES
     include/dbDriveUpload.h
     include/FileLocationHelper.h
     include/InlineMessagePopup.h
+    include/DataChangeNotifier.h
 
 )
 

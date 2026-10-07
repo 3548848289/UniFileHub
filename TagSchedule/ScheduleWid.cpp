@@ -1,6 +1,7 @@
 #include "./include/ScheduleWid.h"
 #include "ui/ui_ScheduleWid.h"
 #include "notifymanager.h"
+#include "../manager/include/DataChangeNotifier.h"
 #include <QDialogButtonBox>
 
 ScheduleWid::ScheduleWid(QWidget *parent) : QWidget(parent), ui(new Ui::ScheduleWid),
@@ -15,6 +16,10 @@ ScheduleWid::ScheduleWid(QWidget *parent) : QWidget(parent), ui(new Ui::Schedule
 
     connect(ui->listWidget, &QListWidget::itemClicked, this, &ScheduleWid::onItemClicked);
     connect(ui->searchLineEdit, &QLineEdit::textChanged, this, &ScheduleWid::onSearch);
+
+    // 标签数据变化（文件系统里新增/修改、标签菜单里删除等）后自动刷新，不用手动点刷新按钮
+    connect(&DataChangeNotifier::Instance(), &DataChangeNotifier::tagChanged,
+            this, &ScheduleWid::onTagChanged);
     connect(ui->refreshBtn, &QPushButton::clicked, this, [this]() {
         on_refreshBtn_clicked("全部");
     });
@@ -154,6 +159,22 @@ void ScheduleWid::checkExpiration()
             dbservice.dbTags().updateLastReminderIndex(file.filePath, currentIndex);
         }
     }
+}
+
+// 标签数据变化后自动刷新列表：有搜索词按搜索词刷，否则沿用当前标签筛选，不重置回“全部”。
+// 延迟到事件循环再重建：发出通知的一方可能正处于某个列表项（TagList）的槽函数里
+//（如右键删除标签），立即 clear() 会把调用方自己销毁掉。
+void ScheduleWid::onTagChanged(const QString &filePath)
+{
+    Q_UNUSED(filePath);
+    QTimer::singleShot(0, this, [this]() {
+        const QString keyword = ui->searchLineEdit->text().trimmed();
+        if (!keyword.isEmpty()) {
+            onSearch(keyword);
+        } else {
+            on_refreshBtn_clicked(ui->comboBox->currentText());
+        }
+    });
 }
 
 void ScheduleWid::on_comboBox_currentIndexChanged(int index) {

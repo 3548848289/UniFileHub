@@ -42,6 +42,7 @@ private slots:
     void on_sortComboBox_currentIndexChanged(int index);
 
     void on_refreshBtn_clicked(const QString &tag);
+    void onTagChanged(const QString &filePath);
 
 private:
     void loadFiles();
