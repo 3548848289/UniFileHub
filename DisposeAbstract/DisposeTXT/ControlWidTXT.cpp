@@ -31,6 +31,8 @@ ControlWidTXT::ControlWidTXT(QWidget *parent) :
     connect(ui->fontSizeDisplayLabel, &ClickableLabel::clicked, this, &ControlWidTXT::onFontSizeLabelClicked);
     connect(ui->mdPreviewCheckBox, &QCheckBox::toggled, this, &ControlWidTXT::mdPreviewToggled);
     connect(ui->htmlPreviewCheckBox, &QCheckBox::toggled, this, &ControlWidTXT::htmlPreviewToggled);
+    ui->syntaxHighlightCheckBox->setToolTip("对代码/标记文本进行语法着色(大文件开启会明显变慢)");
+    connect(ui->syntaxHighlightCheckBox, &QCheckBox::toggled, this, &ControlWidTXT::syntaxHighlightToggled);
     connect(ui->RefreshBtn, &QPushButton::clicked, this, &ControlWidTXT::refreshRequested);
 }
 

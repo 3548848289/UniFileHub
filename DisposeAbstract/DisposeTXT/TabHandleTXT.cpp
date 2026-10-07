@@ -17,9 +17,13 @@
 #include <QSignalBlocker>
 #include <QTimer>
 #include <QTextCursor>
+#include <QTextBlock>
+#include <QTextBrowser>
+#include <QTextEdit>
+#include <QStackedWidget>
 
 // TextTab 实现
-TextTab::TextTab(const QString &filePath, QWidget *parent)  : TabAbstract(filePath, parent), m_currentCodecName("UTF-8"), m_isSwitchingPreviewMode(false)
+TextTab::TextTab(const QString &filePath, QWidget *parent)  : TabAbstract(filePath, parent), m_currentCodecName("UTF-8")
 {
     textEdit = new PlainTextEdit(this);
     lineNumberWidget = new LineNumberWidget(textEdit, this);
@@ -29,8 +33,9 @@ TextTab::TextTab(const QString &filePath, QWidget *parent)  : TabAbstract(filePa
     int tabWidth = fm.horizontalAdvance("中文");
     textEdit->setTabStopDistance(tabWidth);
 
-    // 创建语法高亮器
-    m_syntaxHighlighter = new SyntaxHighlighter(textEdit->document());
+    // 创建语法高亮器(默认不挂载到文档,由控制栏的"语法高亮"复选框控制,
+    // 避免大文件在打开时同步高亮整个文档造成卡顿)
+    m_syntaxHighlighter = new SyntaxHighlighter(nullptr);
 
     // 根据文件扩展名设置语言
     QString ext = QFileInfo(filePath).suffix().toLower();
@@ -73,10 +78,15 @@ TextTab::TextTab(const QString &filePath, QWidget *parent)  : TabAbstract(filePa
     textLayout->addWidget(lineNumberWidget);
     textLayout->addWidget(textEdit);
 
+    // 文本区用堆叠容器承载(普通模式/预览模式共用一个槽位):
+    // splitter 的子项保持不变,切换预览不会触发它重新分配空间而挤压控制栏
+    textStack = new QStackedWidget(this);
+    textStack->addWidget(textContainer);
+
     controlWidtxt = new ControlWidTXT(this);
 
     splitter = new QSplitter(Qt::Vertical, this);
-    splitter->addWidget(textContainer);
+    splitter->addWidget(textStack);
     splitter->addWidget(controlWidtxt);
     splitter->setSizes({700, 100});
 
@@ -98,27 +108,20 @@ TextTab::TextTab(const QString &filePath, QWidget *parent)  : TabAbstract(filePa
                     QFont font = textEdit->font();
                     font.setPointSize(value.toInt());
                     textEdit->setFont(font);
+                    if (m_previewEdit) {
+                        m_previewEdit->setFont(font);
+                    }
                     controlWidtxt->setFontSize(value.toInt());
                 } else if (key == QStringLiteral("file_see/txt")) {
                     controlWidtxt->setVisible(value.toBool());
                 }
             });
 
-    connect(textEdit, &QTextEdit::textChanged, this, [this]() {
-        // 如果正在切换预览模式，不更新m_originalPlainText
-        if (m_isSwitchingPreviewMode) {
-            return;
-        }
-        
+    connect(textEdit, &QPlainTextEdit::textChanged, this, [this]() {
         setContentModified(true);
 
         // 更新文本统计信息
-        int lineCount = textEdit->document()->blockCount();
-        int charCount = textEdit->toPlainText().length();
-        controlWidtxt->updateTextStatistics(lineCount, charCount);
-
-        // 更新原始纯文本内容
-        m_originalPlainText = textEdit->toPlainText();
+        updateTextStatistics();
     });
 
     // 连接编码变化信号
@@ -130,6 +133,9 @@ TextTab::TextTab(const QString &filePath, QWidget *parent)  : TabAbstract(filePa
     // 连接HTML预览模式切换信号
     connect(controlWidtxt, &ControlWidTXT::htmlPreviewToggled, this, &TextTab::onHtmlPreviewToggled);
     connect(controlWidtxt, &ControlWidTXT::refreshRequested, this, &TextTab::onRefreshRequested);
+
+    // 连接语法高亮开关信号
+    connect(controlWidtxt, &ControlWidTXT::syntaxHighlightToggled, this, &TextTab::onHighlightToggled);
 
     // 连接Tab缩进字符数变化信号
     connect(controlWidtxt, &ControlWidTXT::tabIndentChanged, this, [this](int indent) {
@@ -143,6 +149,9 @@ TextTab::TextTab(const QString &filePath, QWidget *parent)  : TabAbstract(filePa
         QFont font = textEdit->font();
         font.setPointSize(fontSize);
         textEdit->setFont(font);
+        if (m_previewEdit) {
+            m_previewEdit->setFont(font);
+        }
     });
 
     // 初始化文本统计信息
@@ -155,9 +164,6 @@ TextTab::TextTab(const QString &filePath, QWidget *parent)  : TabAbstract(filePa
     if (!filePath.isEmpty()) {
         loadFromFile(filePath);
     }
-    
-    // 初始化原始纯文本内容
-    m_originalPlainText = textEdit->toPlainText();
 }
 
 void TextTab::onTextScrolled(int value)
@@ -214,7 +220,6 @@ void TextTab::loadFromFile(const QString &fileName)
     QString text = decodeContent(content);
 
     setContent(text);
-    m_originalPlainText = text;
     updateTextStatistics();
     setContentModified(false);
 }
@@ -241,9 +246,7 @@ void TextTab::loadFromInternet(const QByteArray &content)
 {
     // 使用辅助函数根据当前编码解码内容
     QString text = decodeContent(content);
-    qDebug() << "Converted text:" << text;
     setContent(text);
-    m_originalPlainText = text;
     updateTextStatistics();
 }
 
@@ -431,73 +434,67 @@ void TextTab::onEncodingChanged(const QString& codecName)
 
     // 切换编码只应刷新显示，不应把当前编辑状态误判成“未保存”
     const bool wasModified = isModified;
-    m_isSwitchingPreviewMode = true;
 
     loadFromFile(filePath);
 
-    // textChanged 在切换标志位下会被忽略，所以这里手动补一次统计信息
-    updateTextStatistics();
-
     QTimer::singleShot(0, this, [this, wasModified]() {
-        m_isSwitchingPreviewMode = false;
         setContentModified(wasModified);
     });
+}
+
+void TextTab::ensurePreviewWidget()
+{
+    if (m_previewEdit) {
+        return;
+    }
+    m_previewEdit = new QTextBrowser(this);
+    m_previewEdit->setFont(textEdit->font());
+    // 加入堆叠容器(作为隐藏页),不动 splitter
+    textStack->addWidget(m_previewEdit);
+}
+
+void TextTab::showPreview(bool enabled)
+{
+    if (!m_previewEdit) {
+        return;
+    }
+    // 只切换堆叠页,splitter 子项不变,控制栏尺寸不受影响
+    textStack->setCurrentWidget(enabled ? static_cast<QWidget *>(m_previewEdit)
+                                        : static_cast<QWidget *>(textContainer));
 }
 
 void TextTab::onMdPreviewToggled(bool enabled)
 {
-    bool wasModified = isModified; // 保存修改状态，切换视图不应改变该状态
-    m_isSwitchingPreviewMode = true; // 设置标志位，防止textChanged信号更新m_originalPlainText
-    QSignalBlocker blockerEdit(textEdit);
-    QSignalBlocker blockerDoc(textEdit->document()); // 同时阻塞 document，防止 contentsChanged 等信号
+    // 源文本保留在编辑器里不动，预览渲染到独立控件，因此无需屏蔽信号或恢复状态
     if (enabled) {
-        // 保存原始纯文本内容
-        m_originalPlainText = textEdit->toPlainText();
-        // 切换到md预览模式
-        textEdit->setMarkdown(m_originalPlainText);
-        // 禁用语法高亮
-        if (m_syntaxHighlighter) {
-            m_syntaxHighlighter->setDocument(nullptr);
-        }
-    } else {
-        // 切换回普通文本模式
-        textEdit->setPlainText(m_originalPlainText);
-        // 重新启用语法高亮
-        if (m_syntaxHighlighter) {
-            m_syntaxHighlighter->setDocument(textEdit->document());
-        }
+        ensurePreviewWidget();
+        m_previewEdit->setMarkdown(textEdit->toPlainText());
     }
-    // 延迟到下一事件循环再恢复，确保任何延迟触发的 textChanged 仍能看到 m_isSwitchingPreviewMode=true
-    QTimer::singleShot(0, this, [this, wasModified]() {
-        m_isSwitchingPreviewMode = false;
-        setContentModified(wasModified);
-    });
+    showPreview(enabled);
 }
 
 void TextTab::onHtmlPreviewToggled(bool enabled)
 {
-    Q_ASSERT(textEdit != nullptr);
-    Q_ASSERT(m_syntaxHighlighter != nullptr);
-    
-    bool wasModified = isModified; // 保存修改状态，切换视图不应改变该状态
-    m_isSwitchingPreviewMode = true;
-    QSignalBlocker blockerEdit(textEdit);
-    QSignalBlocker blockerDoc(textEdit->document());
     if (enabled) {
-        textEdit->setText(m_originalPlainText);
-    } else {
-        textEdit->setPlainText(m_originalPlainText);
+        ensurePreviewWidget();
+        // setText 按 Qt::AutoText 自动识别纯文本/HTML，与旧的 QTextEdit::setText 行为一致
+        m_previewEdit->setText(textEdit->toPlainText());
     }
-    QTimer::singleShot(0, this, [this, wasModified]() {
-        m_isSwitchingPreviewMode = false;
-        setContentModified(wasModified);
-    });
+    showPreview(enabled);
+}
+
+void TextTab::onHighlightToggled(bool enabled)
+{
+    // Qt 的实现:setDocument(文档) 挂载并在下一事件循环整篇重新高亮;
+    // setDocument(nullptr) 断开连接并清除所有已着色块的格式
+    m_syntaxHighlighter->setDocument(enabled ? textEdit->document() : nullptr);
 }
 
 void TextTab::updateTextStatistics()
 {
     const int lineCount = textEdit->document()->blockCount();
-    const int charCount = textEdit->toPlainText().length();
+    // characterCount 含每个块末尾的分隔符;toPlainText().length() 与之相差 1,保持旧口径
+    const int charCount = textEdit->document()->characterCount() - 1;
     controlWidtxt->updateTextStatistics(lineCount, charCount);
 }
 
@@ -526,7 +523,6 @@ void TextTab::onRefreshRequested()
     const int previousHorizontalScrollValue = textEdit->horizontalScrollBar()->value();
     const bool wasModified = isModified;
 
-    m_isSwitchingPreviewMode = true;
     loadFromFile(filePath);
 
     QTextCursor restoredCursor = textEdit->textCursor();
@@ -546,7 +542,6 @@ void TextTab::onRefreshRequested()
     textEdit->horizontalScrollBar()->setValue(qMin(previousHorizontalScrollValue, textEdit->horizontalScrollBar()->maximum()));
 
     QTimer::singleShot(0, this, [this, wasModified]() {
-        m_isSwitchingPreviewMode = false;
         setContentModified(wasModified && isModified);
     });
 }

@@ -1,6 +1,6 @@
 #include "PlainTextEdit.h"
 
-PlainTextEdit::PlainTextEdit(QWidget *parent) : QTextEdit(parent)
+PlainTextEdit::PlainTextEdit(QWidget *parent) : QPlainTextEdit(parent)
 {
 }
 

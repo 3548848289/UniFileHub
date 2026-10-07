@@ -16,6 +16,9 @@
 #include <QString>
 #include <QByteArray>
 
+class QTextBrowser;
+class QStackedWidget;
+
 class TextTab : public TabAbstract
 {
     Q_OBJECT
@@ -50,6 +53,8 @@ private:
     // 辅助函数：将字符串根据当前编码转换为字节数组
     QByteArray encodeContent(const QString &text) const;
     void updateTextStatistics();
+    void ensurePreviewWidget();
+    void showPreview(bool enabled);
 
 public:
     bool eventFilter(QObject *obj, QEvent *event) override;
@@ -69,9 +74,12 @@ public slots:
     
     // 处理md预览模式切换
     void onMdPreviewToggled(bool enabled);
-    
+
     // 处理HTML预览模式切换
     void onHtmlPreviewToggled(bool enabled);
+
+    // 处理语法高亮开关
+    void onHighlightToggled(bool enabled);
     void onRefreshRequested();
     
     // 右键菜单槽函数
@@ -84,10 +92,10 @@ private:
     LineNumberWidget *lineNumberWidget;
     QWidget *textContainer;
     QHBoxLayout *textLayout;
+    QStackedWidget *textStack; // 文本区/预览区的堆叠容器,占 splitter 的一个槽位
     SyntaxHighlighter *m_syntaxHighlighter;
+    QTextBrowser *m_previewEdit = nullptr; // MD/HTML 预览,懒创建;源文本始终留在编辑器中
     QString m_currentCodecName;
-    QString m_originalPlainText; // 保存原始纯文本内容
-    bool m_isSwitchingPreviewMode; // 标志位：是否正在切换预览模式
 };
 
 #endif // TABHANDLETXT_H

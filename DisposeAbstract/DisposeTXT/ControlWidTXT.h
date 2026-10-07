@@ -56,6 +56,7 @@ signals:
     void fontSizeChanged(int size);
     void mdPreviewToggled(bool enabled);
     void htmlPreviewToggled(bool enabled);
+    void syntaxHighlightToggled(bool enabled);
     void refreshRequested();
 
 private slots:

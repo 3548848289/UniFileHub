@@ -24,6 +24,26 @@
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="backBtn">
+       <property name="toolTip">
+        <string>后退5秒</string>
+       </property>
+       <property name="text">
+        <string>后退5s</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="forwardBtn">
+       <property name="toolTip">
+        <string>前进5秒</string>
+       </property>
+       <property name="text">
+        <string>前进5s</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QSlider" name="horizontalSlider">
        <property name="orientation">
         <enum>Qt::Orientation::Horizontal</enum>
@@ -38,6 +58,46 @@
        <property name="alignment">
         <set>Qt::AlignCenter</set>
        </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="speedComboBox">
+       <property name="toolTip">
+        <string>播放倍速</string>
+       </property>
+       <property name="currentIndex">
+        <number>2</number>
+       </property>
+       <item>
+        <property name="text">
+         <string>0.5x</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>0.75x</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>1.0x</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>1.25x</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>1.5x</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>2.0x</string>
+        </property>
+       </item>
       </widget>
      </item>
     </layout>

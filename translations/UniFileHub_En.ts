@@ -348,17 +348,22 @@
         <translation type="unfinished">Refresh</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeTXT/ControlWidTXT.ui" line="118"/>
+        <location filename="../DisposeAbstract/DisposeTXT/ControlWidTXT.ui" line="112"/>
         <source>HTML预览模式</source>
         <translation>HTML Preview Mode</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeTXT/ControlWidTXT.ui" line="125"/>
+        <location filename="../DisposeAbstract/DisposeTXT/ControlWidTXT.ui" line="119"/>
         <source>md文件预览模式</source>
         <translation>Markdown Preview Mode</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeTXT/ControlWidTXT.ui" line="140"/>
+        <location filename="../DisposeAbstract/DisposeTXT/ControlWidTXT.ui" line="105"/>
+        <source>语法高亮</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeTXT/ControlWidTXT.ui" line="134"/>
         <source>文本摘录</source>
         <translation>Text Excerpt</translation>
     </message>
@@ -1045,7 +1050,7 @@ Refresh file list to get the latest status?</translation>
         <translation>Refresh</translation>
     </message>
     <message>
-        <location filename="../FileBackup/FileBackupView.cpp" line="30"/>
+        <location filename="../FileBackup/FileBackupView.cpp" line="31"/>
         <source>选择新的文件路径</source>
         <translation>Select new file path</translation>
     </message>
@@ -1054,23 +1059,23 @@ Refresh file list to get the latest status?</translation>
         <translation type="vanished">All Files (*.*)</translation>
     </message>
     <message>
-        <location filename="../FileBackup/FileBackupView.cpp" line="30"/>
-        <location filename="../FileBackup/FileBackupView.cpp" line="222"/>
+        <location filename="../FileBackup/FileBackupView.cpp" line="31"/>
+        <location filename="../FileBackup/FileBackupView.cpp" line="263"/>
         <source>所有文件 (*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../FileBackup/FileBackupView.cpp" line="36"/>
+        <location filename="../FileBackup/FileBackupView.cpp" line="37"/>
         <source>更新文件路径失败。</source>
         <translation>Failed to update file path.</translation>
     </message>
     <message>
-        <location filename="../FileBackup/FileBackupView.cpp" line="55"/>
+        <location filename="../FileBackup/FileBackupView.cpp" line="56"/>
         <source>从数据库中删除文件记录失败。</source>
         <translation>Failed to delete file record from database.</translation>
     </message>
     <message>
-        <location filename="../FileBackup/FileBackupView.cpp" line="222"/>
+        <location filename="../FileBackup/FileBackupView.cpp" line="263"/>
         <source>选择文件</source>
         <translation>Select File</translation>
     </message>
@@ -1710,7 +1715,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation type="vanished">File does not exist</translation>
     </message>
     <message>
-        <location filename="../TagSchedule/ScheduleWid.cpp" line="64"/>
+        <location filename="../TagSchedule/ScheduleWid.cpp" line="69"/>
         <source>文件已被移动或删除：
 %1</source>
         <translation>File has been moved or deleted:
@@ -2941,7 +2946,7 @@ Message</translation>
         <translation>Confirm Change</translation>
     </message>
     <message>
-        <location filename="../TagSchedule/TagDetail.cpp" line="84"/>
+        <location filename="../TagSchedule/TagDetail.cpp" line="85"/>
         <source>选择文件</source>
         <translation>Select File</translation>
     </message>
@@ -2950,7 +2955,7 @@ Message</translation>
         <translation type="vanished">All Files (*.*)</translation>
     </message>
     <message>
-        <location filename="../TagSchedule/TagDetail.cpp" line="84"/>
+        <location filename="../TagSchedule/TagDetail.cpp" line="85"/>
         <source>所有文件 (*)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2959,17 +2964,17 @@ Message</translation>
         <translation type="vanished">Warning</translation>
     </message>
     <message>
-        <location filename="../TagSchedule/TagDetail.cpp" line="97"/>
+        <location filename="../TagSchedule/TagDetail.cpp" line="98"/>
         <source>文件路径不能为空！</source>
         <translation>File path cannot be empty!</translation>
     </message>
     <message>
-        <location filename="../TagSchedule/TagDetail.cpp" line="104"/>
+        <location filename="../TagSchedule/TagDetail.cpp" line="105"/>
         <source>文件不存在！</source>
         <translation>File does not exist!</translation>
     </message>
     <message>
-        <location filename="../TagSchedule/TagDetail.cpp" line="114"/>
+        <location filename="../TagSchedule/TagDetail.cpp" line="115"/>
         <source>提醒方式更新失败！</source>
         <translation>Failed to update reminder method!</translation>
     </message>
@@ -2978,12 +2983,12 @@ Message</translation>
         <translation type="vanished">Info</translation>
     </message>
     <message>
-        <location filename="../TagSchedule/TagDetail.cpp" line="122"/>
+        <location filename="../TagSchedule/TagDetail.cpp" line="123"/>
         <source>文件路径已成功更新！</source>
         <translation>File path updated successfully!</translation>
     </message>
     <message>
-        <location filename="../TagSchedule/TagDetail.cpp" line="128"/>
+        <location filename="../TagSchedule/TagDetail.cpp" line="131"/>
         <source>文件路径更新失败！</source>
         <translation>Failed to update file path!</translation>
     </message>
@@ -3000,32 +3005,32 @@ Message</translation>
 <context>
     <name>TextTab</name>
     <message>
-        <location filename="../DisposeAbstract/DisposeTXT/TabHandleTXT.cpp" line="207"/>
+        <location filename="../DisposeAbstract/DisposeTXT/TabHandleTXT.cpp" line="213"/>
         <source>错误</source>
         <translation>Error</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeTXT/TabHandleTXT.cpp" line="207"/>
+        <location filename="../DisposeAbstract/DisposeTXT/TabHandleTXT.cpp" line="213"/>
         <source>无法打开文件</source>
         <translation>Unable to open file</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeTXT/TabHandleTXT.cpp" line="309"/>
+        <location filename="../DisposeAbstract/DisposeTXT/TabHandleTXT.cpp" line="312"/>
         <source>查找</source>
         <translation>Find</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeTXT/TabHandleTXT.cpp" line="309"/>
+        <location filename="../DisposeAbstract/DisposeTXT/TabHandleTXT.cpp" line="312"/>
         <source>找不到此单词</source>
         <translation>Word not found</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeTXT/TabHandleTXT.cpp" line="514"/>
+        <location filename="../DisposeAbstract/DisposeTXT/TabHandleTXT.cpp" line="511"/>
         <source>刷新文本</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeTXT/TabHandleTXT.cpp" line="515"/>
+        <location filename="../DisposeAbstract/DisposeTXT/TabHandleTXT.cpp" line="512"/>
         <source>当前有未保存修改，刷新会用磁盘内容覆盖当前文本。是否继续？</source>
         <translation type="unfinished"></translation>
     </message>
