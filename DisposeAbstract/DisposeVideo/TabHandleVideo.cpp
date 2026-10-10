@@ -73,6 +73,9 @@ TabHandleVideo::TabHandleVideo(const QString &filePath, QWidget *parent)
 #endif
 
     connect(controlwidVideo, &ControlWidVideo::playPauseRequested, this, &TabHandleVideo::onPlayPauseButtonClicked);
+    connect(controlwidVideo, &ControlWidVideo::forwardRequested, this, &TabHandleVideo::onForwardRequested);
+    connect(controlwidVideo, &ControlWidVideo::backwardRequested, this, &TabHandleVideo::onBackwardRequested);
+    connect(controlwidVideo, &ControlWidVideo::speedChanged, this, &TabHandleVideo::onSpeedChanged);
     connect(controlwidVideo, &ControlWidVideo::sliderMoved, this, &TabHandleVideo::onSliderMoved);
     connect(player, &QMediaPlayer::positionChanged, this, &TabHandleVideo::updateSlider);
     connect(player, &QMediaPlayer::durationChanged, this, &TabHandleVideo::updateDuration);
@@ -163,6 +166,27 @@ void TabHandleVideo::onPlayPauseButtonClicked()
         player->play();
         isPlaying = true;
         controlwidVideo->setPlayButtonText(tr("暂停"));
+    }
+}
+
+void TabHandleVideo::onForwardRequested()
+{
+    // 前进5秒,不超过片尾
+    const qint64 target = qMin(player->position() + 5000, player->duration());
+    player->setPosition(target);
+}
+
+void TabHandleVideo::onBackwardRequested()
+{
+    // 后退5秒,不低于开头
+    const qint64 target = qMax(player->position() - 5000, 0LL);
+    player->setPosition(target);
+}
+
+void TabHandleVideo::onSpeedChanged(double rate)
+{
+    if (rate > 0.0) {
+        player->setPlaybackRate(rate);
     }
 }
 

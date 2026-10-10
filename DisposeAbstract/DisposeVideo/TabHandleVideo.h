@@ -39,6 +39,9 @@ public:
 
 private slots:
     void onPlayPauseButtonClicked();
+    void onForwardRequested();
+    void onBackwardRequested();
+    void onSpeedChanged(double rate);
     void onSliderMoved(int position);
     void updateSlider(qint64 position);
     void updateDuration(qint64 duration);

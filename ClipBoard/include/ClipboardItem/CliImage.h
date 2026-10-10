@@ -26,6 +26,10 @@ public:
     const QPixmap& pixmap() const { return m_pixmap; }
     const QByteArray& data() const { return m_data; }
 
+    // 将全分辨率图片写入临时 PNG 文件(供图片编辑器打开),失败返回空串;
+    // 路径记入 m_tempImageFiles,随对象析构清理
+    QString saveFullImageToTempFile();
+
 private:
     // ClipboardView.cpp
     QString savePixmapToTempFile(const QPixmap& pixmap) const;

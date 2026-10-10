@@ -443,6 +443,48 @@ void ClipboardView::previewImage()
     }
 }
 
+void ClipboardView::openItem()
+{
+    if (!m_currentRightClickedItem) {
+        return;
+    }
+    ClipboardItem* item = findItemForListWidgetItem(m_currentRightClickedItem);
+    if (!item) {
+        return;
+    }
+
+    switch (item->type()) {
+    case ClipboardItemType::Image: {
+        // 纯位图记录:落盘全分辨率 PNG 临时文件再交给编辑器
+        auto* imageItem = static_cast<CliImage*>(item);
+        const QString path = imageItem->saveFullImageToTempFile();
+        if (path.isEmpty()) {
+            QMessageBox::warning(this, QStringLiteral("打开失败"), QStringLiteral("无法导出图片数据"));
+            return;
+        }
+        emit openImageRequested(path, QStringLiteral("[剪贴板] 图片"));
+        break;
+    }
+    case ClipboardItemType::File: {
+        auto* fileItem = static_cast<CliFile*>(item);
+        if (!fileItem->isImageFile() || fileItem->filePaths().isEmpty()) {
+            return;
+        }
+        emit openImageRequested(fileItem->filePaths().first(),
+                                QStringLiteral("[剪贴板] ") + QFileInfo(fileItem->filePaths().first()).fileName());
+        break;
+    }
+    case ClipboardItemType::Text: {
+        // 文本记录:内容直接交给文本编辑器
+        auto* textItem = static_cast<CliText*>(item);
+        emit openTextRequested(textItem->text());
+        break;
+    }
+    default:
+        break;
+    }
+}
+
 void ClipboardView::openFileLocation()
 {
     if (!m_currentRightClickedItem) {
@@ -557,6 +599,7 @@ void ClipboardView::on_listWidget_customContextMenuRequested(const QPoint &pos)
                                         copyItemAndMaybeCollapse(
                                             SettingManager::Instance().clip_board_context_menu_copy_minimize());
                                     },
+                                    [this]{ openItem(); },
                                     [this]{ previewImage(); },
                                     [this]{ openFileLocation(); },
                                     [this]{ deleteItem(); },

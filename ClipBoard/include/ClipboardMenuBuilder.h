@@ -16,6 +16,7 @@ public:
     QMenu* buildMenu(
         ClipboardItem* item,
         std::function<void()> copyCallback,
+        std::function<void()> openCallback,
         std::function<void()> previewCallback,
         std::function<void()> openLocationCallback,
         std::function<void()> deleteCallback,

@@ -83,6 +83,29 @@ void MainWindow::initConnect() {
         tabManager->addWidgetTab(clipboard, "剪贴板");
         clipboard->show();
         ui->stackedWidget->setCurrentWidget(file_system);
+
+        // 剪贴板图片记录:用图片编辑器打开,tab 名带"[剪贴板]"标注
+        disconnect(clipboard, &ClipboardView::openImageRequested, this, nullptr);
+        connect(clipboard, &ClipboardView::openImageRequested, this,
+                [this](const QString &imagePath, const QString &tabName) {
+                    TabAbstract* tab = TabFactory::create(imagePath);
+                    if (!tab) {
+                        return;
+                    }
+                    tab->loadFromFile(imagePath);
+                    tabManager->addTab(tab, tabName, QString());
+                });
+
+        // 剪贴板文本记录:内容交给文本编辑器,tab 名带"[剪贴板]"标注
+        disconnect(clipboard, &ClipboardView::openTextRequested, this, nullptr);
+        connect(clipboard, &ClipboardView::openTextRequested, this, [this](const QString &textContent) {
+            tabManager->createNewTab([textContent]() {
+                auto* tab = new TextTab(QString());
+                tab->setContent(textContent);
+                tab->clearModified();
+                return tab;
+            }, QStringLiteral("[剪贴板] 文本.txt"));
+        });
     });
 
     connect(widgetfunc, &WidgetFunctional::showDrive, this, [this](DriveView* drive) {

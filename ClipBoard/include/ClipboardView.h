@@ -45,6 +45,7 @@ private slots:
     void on_showPinnedCheckBox_toggled(bool checked);
     void copyItem();
     void previewImage();
+    void openItem();
     void deleteItem();
     void openFileLocation();
     void pinItem();
@@ -74,6 +75,12 @@ private:
     void collapseWindow();
     void copyItemAndMaybeCollapse(bool shouldCollapse);
     void updateSequenceNumbers();
+
+signals:
+    // 图片记录请求打开:图片路径(纯位图记录为临时 PNG)+ tab 显示名
+    void openImageRequested(const QString &imagePath, const QString &tabName);
+    // 文本记录请求打开:文本内容(主窗口用文本编辑器打开)
+    void openTextRequested(const QString &textContent);
 };
 
 #endif // CLIPBOARDVIEW_H

@@ -5,6 +5,8 @@
 #include <QBuffer>
 #include <QMimeData>
 #include <QClipboard>
+#include <QDateTime>
+#include <QFile>
 
 // 传入QPixmap：自动转换为PNG二进制数据
 CliImage::CliImage(const QPixmap& pixmap)
@@ -59,6 +61,24 @@ QString CliImage::savePixmapToTempFile(const QPixmap& pixmap) const {
         scaled.save(&tempFile, "PNG");
         m_tempImageFiles.append(tempFile.fileName());
         return tempFile.fileName();
+    }
+    return QString();
+}
+
+// 与 savePixmapToTempFile 不同:这里不做缩放,写入全分辨率 PNG(m_data),供编辑器打开
+QString CliImage::saveFullImageToTempFile() {
+    const QString path = QDir::tempPath() + QStringLiteral("/UniFileHub_clip_%1.png")
+                             .arg(QDateTime::currentMSecsSinceEpoch());
+    QFile file(path);
+    if (!file.open(QIODevice::WriteOnly)) {
+        return QString();
+    }
+    const bool ok = (!m_data.isEmpty() && file.write(m_data) == m_data.size()) ||
+                    (m_data.isEmpty() && m_pixmap.save(&file, "PNG"));
+    file.close();
+    if (ok) {
+        m_tempImageFiles.append(path);
+        return path;
     }
     return QString();
 }

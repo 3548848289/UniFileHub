@@ -26,12 +26,18 @@ public slots:
 
 private slots:
     void on_pushButton_clicked();
+    void on_backBtn_clicked();
+    void on_forwardBtn_clicked();
+    void on_speedComboBox_currentTextChanged(const QString &text);
     void on_horizontalSlider_sliderMoved(int position);
     void on_horizontalSlider_sliderPressed();
     void on_horizontalSlider_sliderReleased();
 
 signals:
     void playPauseRequested();
+    void backwardRequested();
+    void forwardRequested();
+    void speedChanged(double rate);
     void sliderMoved(int position);
     void sliderPressed();
     void sliderReleased();

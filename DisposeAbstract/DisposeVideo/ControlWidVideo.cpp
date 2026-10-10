@@ -56,6 +56,22 @@ void ControlWidVideo::on_pushButton_clicked()
     emit playPauseRequested();
 }
 
+void ControlWidVideo::on_backBtn_clicked()
+{
+    emit backwardRequested();
+}
+
+void ControlWidVideo::on_forwardBtn_clicked()
+{
+    emit forwardRequested();
+}
+
+void ControlWidVideo::on_speedComboBox_currentTextChanged(const QString &text)
+{
+    // 选项形如 "1.5x",去掉尾部 'x' 解析为倍率
+    emit speedChanged(text.chopped(1).toDouble());
+}
+
 void ControlWidVideo::on_horizontalSlider_sliderMoved(int position)
 {
     emit sliderMoved(position);

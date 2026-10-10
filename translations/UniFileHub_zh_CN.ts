@@ -354,8 +354,63 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeVideo/ControlWidVideo.ui" line="36"/>
+        <location filename="../DisposeAbstract/DisposeVideo/ControlWidVideo.ui" line="29"/>
+        <source>后退5秒</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeVideo/ControlWidVideo.ui" line="32"/>
+        <source>后退5s</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeVideo/ControlWidVideo.ui" line="39"/>
+        <source>前进5秒</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeVideo/ControlWidVideo.ui" line="42"/>
+        <source>前进5s</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeVideo/ControlWidVideo.ui" line="56"/>
         <source>0:00/0:00</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeVideo/ControlWidVideo.ui" line="66"/>
+        <source>播放倍速</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeVideo/ControlWidVideo.ui" line="73"/>
+        <source>0.5x</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeVideo/ControlWidVideo.ui" line="78"/>
+        <source>0.75x</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeVideo/ControlWidVideo.ui" line="83"/>
+        <source>1.0x</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeVideo/ControlWidVideo.ui" line="88"/>
+        <source>1.25x</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeVideo/ControlWidVideo.ui" line="93"/>
+        <source>1.5x</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeVideo/ControlWidVideo.ui" line="98"/>
+        <source>2.0x</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1394,66 +1449,66 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="105"/>
-        <location filename="../main/mainwindow.cpp" line="111"/>
+        <location filename="../main/mainwindow.cpp" line="128"/>
+        <location filename="../main/mainwindow.cpp" line="134"/>
         <source>打开文件夹</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="175"/>
-        <location filename="../main/mainwindow.cpp" line="189"/>
-        <location filename="../main/mainwindow.cpp" line="424"/>
-        <location filename="../main/mainwindow.cpp" line="540"/>
-        <location filename="../main/mainwindow.cpp" line="546"/>
-        <location filename="../main/mainwindow.cpp" line="552"/>
-        <location filename="../main/mainwindow.cpp" line="634"/>
+        <location filename="../main/mainwindow.cpp" line="198"/>
+        <location filename="../main/mainwindow.cpp" line="212"/>
+        <location filename="../main/mainwindow.cpp" line="447"/>
+        <location filename="../main/mainwindow.cpp" line="563"/>
+        <location filename="../main/mainwindow.cpp" line="569"/>
+        <location filename="../main/mainwindow.cpp" line="575"/>
+        <location filename="../main/mainwindow.cpp" line="657"/>
         <source>提示</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="175"/>
+        <location filename="../main/mainwindow.cpp" line="198"/>
         <source>请选择一个本地文件上传到网盘。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="189"/>
+        <location filename="../main/mainwindow.cpp" line="212"/>
         <source>未找到个人网盘窗口，无法下载。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="360"/>
-        <location filename="../main/mainwindow.cpp" line="361"/>
-        <location filename="../main/mainwindow.cpp" line="482"/>
+        <location filename="../main/mainwindow.cpp" line="383"/>
+        <location filename="../main/mainwindow.cpp" line="384"/>
+        <location filename="../main/mainwindow.cpp" line="505"/>
         <source>打开文件</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="424"/>
+        <location filename="../main/mainwindow.cpp" line="447"/>
         <source>该文件夹不存在或不是有效文件夹。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="540"/>
+        <location filename="../main/mainwindow.cpp" line="563"/>
         <source>当前页签不是本地文件，无法上传到网盘。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="546"/>
+        <location filename="../main/mainwindow.cpp" line="569"/>
         <source>当前页签还没有保存成文件，请先保存后再上传到网盘。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="552"/>
+        <location filename="../main/mainwindow.cpp" line="575"/>
         <source>当前页签对应的本地文件不存在，无法上传到网盘。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="634"/>
+        <location filename="../main/mainwindow.cpp" line="657"/>
         <source>当前构建未启用内置终端。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="483"/>
+        <location filename="../main/mainwindow.cpp" line="506"/>
         <source>All Files (*);;CSV Files (*.csv);;Text Files (*.txt)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2609,7 +2664,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <name>TabHandleVideo</name>
     <message>
         <location filename="../DisposeAbstract/DisposeVideo/TabHandleVideo.cpp" line="25"/>
-        <location filename="../DisposeAbstract/DisposeVideo/TabHandleVideo.cpp" line="106"/>
+        <location filename="../DisposeAbstract/DisposeVideo/TabHandleVideo.cpp" line="109"/>
         <source>加载中...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2617,7 +2672,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <location filename="../DisposeAbstract/DisposeVideo/TabHandleVideo.cpp" line="47"/>
         <location filename="../DisposeAbstract/DisposeVideo/TabHandleVideo.cpp" line="57"/>
         <location filename="../DisposeAbstract/DisposeVideo/TabHandleVideo.cpp" line="67"/>
-        <location filename="../DisposeAbstract/DisposeVideo/TabHandleVideo.cpp" line="165"/>
+        <location filename="../DisposeAbstract/DisposeVideo/TabHandleVideo.cpp" line="168"/>
         <source>暂停</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2629,17 +2684,17 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <message>
         <location filename="../DisposeAbstract/DisposeVideo/TabHandleVideo.cpp" line="60"/>
         <location filename="../DisposeAbstract/DisposeVideo/TabHandleVideo.cpp" line="70"/>
-        <location filename="../DisposeAbstract/DisposeVideo/TabHandleVideo.cpp" line="161"/>
+        <location filename="../DisposeAbstract/DisposeVideo/TabHandleVideo.cpp" line="164"/>
         <source>播放</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeVideo/TabHandleVideo.cpp" line="125"/>
+        <location filename="../DisposeAbstract/DisposeVideo/TabHandleVideo.cpp" line="128"/>
         <source>错误</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeVideo/TabHandleVideo.cpp" line="125"/>
+        <location filename="../DisposeAbstract/DisposeVideo/TabHandleVideo.cpp" line="128"/>
         <source>无法保存文件</source>
         <translation type="unfinished"></translation>
     </message>
