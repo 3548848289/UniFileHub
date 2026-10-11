@@ -59,7 +59,9 @@ QMenu* ClipboardMenuBuilder::buildMenu(
         QObject::connect(openLocationAction, &QAction::triggered, [openLocationCallback]{ openLocationCallback(); });
     }
 
-    if (item->type() == ClipboardItemType::Text && !item->isCloudItem() && cloudSyncCallback) {
+    const bool canCloudSync = (item->type() == ClipboardItemType::Text
+                               || item->type() == ClipboardItemType::Image);
+    if (canCloudSync && !item->isCloudItem() && cloudSyncCallback) {
         QAction* cloudAction = menu->addAction(QStringLiteral("云端同步"));
         QObject::connect(cloudAction, &QAction::triggered, [cloudSyncCallback]{ cloudSyncCallback(); });
     }

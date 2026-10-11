@@ -101,7 +101,7 @@
     </message>
     <message>
         <location filename="../ClipBoard/ui/ClipboardView.ui" line="90"/>
-        <source>勾选后，新复制的内容自动同步到云端（当前仅支持文本）</source>
+        <source>勾选后，新复制的文本和图片自动同步到云端</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -111,21 +111,41 @@
     </message>
     <message>
         <location filename="../ClipBoard/ui/ClipboardView.ui" line="106"/>
+        <source>把当前剪贴板内容立即同步到云端</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ClipBoard/ui/ClipboardView.ui" line="109"/>
+        <source>快速同步</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ClipBoard/ui/ClipboardView.ui" line="122"/>
+        <source>把云端最新记录复制到本机剪贴板</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ClipBoard/ui/ClipboardView.ui" line="125"/>
+        <source>快速复制</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ClipBoard/ui/ClipboardView.ui" line="138"/>
         <source>清空云端</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ClipBoard/ui/ClipboardView.ui" line="119"/>
+        <location filename="../ClipBoard/ui/ClipboardView.ui" line="151"/>
         <source>刷新</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ClipBoard/ui/ClipboardView.ui" line="132"/>
+        <location filename="../ClipBoard/ui/ClipboardView.ui" line="164"/>
         <source>保存</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ClipBoard/ui/ClipboardView.ui" line="145"/>
+        <location filename="../ClipBoard/ui/ClipboardView.ui" line="177"/>
         <source>清空</source>
         <translation type="unfinished"></translation>
     </message>

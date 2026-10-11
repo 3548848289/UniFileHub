@@ -1,5 +1,6 @@
 #include "include/ClipboardCloudClient.h"
 #include "../Setting/include/SettingManager.h"
+#include <QHttpMultiPart>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QNetworkAccessManager>
@@ -42,6 +43,15 @@ QString ClipboardCloudClient::token() const
     return SettingManager::Instance().getToken().trimmed();
 }
 
+bool ClipboardCloudClient::ensureConfigured()
+{
+    if (serviceAddress().isEmpty() || token().isEmpty()) {
+        emit fetchFailed(QStringLiteral("未登录或剪切板服务地址未配置"));
+        return false;
+    }
+    return true;
+}
+
 void ClipboardCloudClient::uploadTextItem(const QString &content)
 {
     if (serviceAddress().isEmpty() || token().isEmpty()) {
@@ -58,6 +68,40 @@ void ClipboardCloudClient::uploadTextItem(const QString &content)
     payload["content"] = content;
 
     QNetworkReply *reply = m_networkManager->post(request, QJsonDocument(payload).toJson(QJsonDocument::Compact));
+    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+        handleJsonReply(reply,
+                        [this](const QJsonDocument &) { emit uploadSucceeded(); },
+                        [this](const QString &message) { emit uploadFailed(message); });
+    });
+}
+
+void ClipboardCloudClient::uploadImageItem(const QByteArray &pngData)
+{
+    if (serviceAddress().isEmpty() || token().isEmpty()) {
+        emit uploadFailed(QStringLiteral("未登录或剪切板服务地址未配置"));
+        return;
+    }
+    if (pngData.isEmpty()) {
+        emit uploadFailed(QStringLiteral("图片数据为空，无法同步"));
+        return;
+    }
+
+    QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
+
+    QHttpPart filePart;
+    filePart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("image/png"));
+    filePart.setHeader(QNetworkRequest::ContentDispositionHeader,
+                       QVariant(QStringLiteral("form-data; name=\"file\"; filename=\"clipboard.png\"")));
+    filePart.setBody(pngData);
+    multiPart->append(filePart);
+
+    QNetworkRequest request(QUrl(serviceAddress() + "/clipboard/images"));
+    request.setRawHeader("Authorization", "Bearer " + token().toUtf8());
+    // 图片体积可能远大于文本，放宽超时
+    request.setTransferTimeout(60000);
+
+    QNetworkReply *reply = m_networkManager->post(request, multiPart);
+    multiPart->setParent(reply);
     connect(reply, &QNetworkReply::finished, this, [this, reply]() {
         handleJsonReply(reply,
                         [this](const QJsonDocument &) { emit uploadSucceeded(); },
@@ -90,6 +134,58 @@ void ClipboardCloudClient::fetchItems()
     });
 }
 
+void ClipboardCloudClient::fetchImages()
+{
+    if (!ensureConfigured()) {
+        return;
+    }
+
+    QNetworkRequest request(QUrl(serviceAddress() + "/clipboard/images"));
+    request.setRawHeader("Authorization", "Bearer " + token().toUtf8());
+    request.setTransferTimeout(15000);
+
+    QNetworkReply *reply = m_networkManager->get(request);
+    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+        handleJsonReply(reply,
+                        [this](const QJsonDocument &doc) {
+                            if (!doc.isObject()) {
+                                emit fetchFailed(QStringLiteral("服务端返回格式不正确"));
+                                return;
+                            }
+                            emit imagesFetched(doc.object().value("images").toArray());
+                        },
+                        [this](const QString &message) { emit fetchFailed(message); });
+    });
+}
+
+void ClipboardCloudClient::downloadImageData(int cloudImageId)
+{
+    if (!ensureConfigured()) {
+        return;
+    }
+    if (cloudImageId <= 0) {
+        return;
+    }
+
+    QNetworkRequest request(QUrl(serviceAddress() + QString("/clipboard/images/%1/data").arg(cloudImageId)));
+    request.setRawHeader("Authorization", "Bearer " + token().toUtf8());
+    request.setTransferTimeout(60000);
+
+    QNetworkReply *reply = m_networkManager->get(request);
+    connect(reply, &QNetworkReply::finished, this, [this, reply, cloudImageId]() {
+        const QByteArray data = reply->readAll();
+        const int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        if (reply->error() != QNetworkReply::NoError && statusCode == 0) {
+            emit fetchFailed(reply->errorString());
+        } else if (statusCode >= 400 || data.isEmpty()) {
+            emit fetchFailed(QStringLiteral("下载云端图片失败"));
+        } else {
+            emit imageDataReceived(cloudImageId, data);
+        }
+        reply->deleteLater();
+    });
+}
+
 void ClipboardCloudClient::deleteItem(int cloudItemId)
 {
     if (serviceAddress().isEmpty() || token().isEmpty()) {
@@ -102,6 +198,29 @@ void ClipboardCloudClient::deleteItem(int cloudItemId)
     }
 
     QNetworkRequest request(QUrl(serviceAddress() + QString("/clipboard/items/%1").arg(cloudItemId)));
+    request.setRawHeader("Authorization", "Bearer " + token().toUtf8());
+    request.setTransferTimeout(15000);
+
+    QNetworkReply *reply = m_networkManager->deleteResource(request);
+    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+        handleJsonReply(reply,
+                        [this](const QJsonDocument &) { emit deleteSucceeded(); },
+                        [this](const QString &message) { emit deleteFailed(message); });
+    });
+}
+
+void ClipboardCloudClient::deleteImage(int cloudImageId)
+{
+    if (serviceAddress().isEmpty() || token().isEmpty()) {
+        emit deleteFailed(QStringLiteral("未登录或剪切板服务地址未配置"));
+        return;
+    }
+    if (cloudImageId <= 0) {
+        emit deleteFailed(QStringLiteral("未找到云端记录"));
+        return;
+    }
+
+    QNetworkRequest request(QUrl(serviceAddress() + QString("/clipboard/images/%1").arg(cloudImageId)));
     request.setRawHeader("Authorization", "Bearer " + token().toUtf8());
     request.setTransferTimeout(15000);
 

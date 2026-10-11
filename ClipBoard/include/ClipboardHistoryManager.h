@@ -17,7 +17,10 @@ public:
     void clear();
     int saveIncremental();
     void removeCloudItems();
-    bool addCloudTextItem(const QString &content, int cloudItemId);
+    bool addCloudTextItem(const QString &content, int cloudItemId,
+                          const QDateTime &createdAt = QDateTime());
+    bool addCloudImageItem(int cloudItemId, const QByteArray &pngData,
+                           const QDateTime &createdAt = QDateTime());
 
     const std::vector<std::unique_ptr<ClipboardItem>>& items() const { return m_items; }
 

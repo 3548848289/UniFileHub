@@ -19,8 +19,12 @@ public:
     explicit ClipboardCloudClient(QObject *parent = nullptr);
 
     void uploadTextItem(const QString &content);
+    void uploadImageItem(const QByteArray &pngData);
     void fetchItems();
+    void fetchImages();
+    void downloadImageData(int cloudImageId);
     void deleteItem(int cloudItemId);
+    void deleteImage(int cloudImageId);
     void clearItems();
     void startEventStream();
     void stopEventStream();
@@ -33,12 +37,15 @@ signals:
     void clearSucceeded();
     void clearFailed(const QString &message);
     void itemsFetched(const QJsonArray &items);
+    void imagesFetched(const QJsonArray &images);
+    void imageDataReceived(int cloudImageId, const QByteArray &data);
     void fetchFailed(const QString &message);
     void cloudItemsChanged();
 
 private:
     QString serviceAddress() const;
     QString token() const;
+    bool ensureConfigured();
     void handleJsonReply(QNetworkReply *reply,
                          const std::function<void (const QJsonDocument &doc)> &onSuccess,
                          const std::function<void (const QString &message)> &onFailure);

@@ -28,7 +28,8 @@ QListWidgetItem* CliImage::createListWidgetItem() const {
     // 缩放到80x60（保持宽高比）
     item->setIcon(QIcon(m_pixmap.scaled(80, 60, Qt::KeepAspectRatio, Qt::SmoothTransformation)));
     // 直接设置显示文本，不添加序号
-    item->setText(QString("[图片] %1x%2").arg(m_pixmap.width()).arg(m_pixmap.height()));
+    const QString prefix = isCloudItem() ? QStringLiteral("[云图片]") : QStringLiteral("[图片]");
+    item->setText(QString("%1 %2x%3").arg(prefix).arg(m_pixmap.width()).arg(m_pixmap.height()));
     item->setData(Qt::UserRole, QVariant::fromValue<quintptr>(reinterpret_cast<quintptr>(this)));
     item->setData(Qt::UserRole + 1, "image");
     item->setToolTip(QString("复制时间：%1<br><img src='%2' width='%3'/>")

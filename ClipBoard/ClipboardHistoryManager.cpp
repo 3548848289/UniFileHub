@@ -1,5 +1,6 @@
 #include "include/ClipboardHistoryManager.h"
 #include "include/ClipboardItem/CliText.h"
+#include "include/ClipboardItem/CliImage.h"
 #include "include/ClipboardItemFactory.h"
 #include <algorithm>
 
@@ -107,7 +108,8 @@ void ClipboardHistoryManager::removeCloudItems()
     m_initialItemCount = m_items.size();
 }
 
-bool ClipboardHistoryManager::addCloudTextItem(const QString &content, int cloudItemId)
+bool ClipboardHistoryManager::addCloudTextItem(const QString &content, int cloudItemId,
+                                               const QDateTime &createdAt)
 {
     for (const auto &existingItem : m_items) {
         if (!existingItem) {
@@ -121,6 +123,38 @@ bool ClipboardHistoryManager::addCloudTextItem(const QString &content, int cloud
     auto item = std::make_unique<CliText>(content);
     item->setCloudItem(true);
     item->setCloudItemId(cloudItemId);
+    if (createdAt.isValid()) {
+        item->setCopyTime(createdAt);
+    }
+    m_items.push_back(std::move(item));
+    return true;
+}
+
+bool ClipboardHistoryManager::addCloudImageItem(int cloudItemId, const QByteArray &pngData,
+                                                const QDateTime &createdAt)
+{
+    if (pngData.isEmpty()) {
+        return false;
+    }
+
+    for (const auto &existingItem : m_items) {
+        if (!existingItem) {
+            continue;
+        }
+        if (existingItem->isCloudItem() && existingItem->cloudItemId() == cloudItemId) {
+            return false;
+        }
+    }
+
+    auto item = std::make_unique<CliImage>(pngData);
+    if (item->pixmap().isNull()) {
+        return false;
+    }
+    item->setCloudItem(true);
+    item->setCloudItemId(cloudItemId);
+    if (createdAt.isValid()) {
+        item->setCopyTime(createdAt);
+    }
     m_items.push_back(std::move(item));
     return true;
 }

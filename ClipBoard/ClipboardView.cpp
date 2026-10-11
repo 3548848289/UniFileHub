@@ -11,6 +11,7 @@
 #include "../Setting/include/IconManager.h"
 #include "../Setting/include/SettingManager.h"
 #include "../Setting/include/ThemeManager.h"
+#include "../manager/include/InlineMessagePopup.h"
 #include <QAbstractAnimation>
 #include <QApplication>
 #include <QEasingCurve>
@@ -52,6 +53,14 @@ ClipboardView::ClipboardView(ClipboardController* controller, QWidget *parent)
     connect(m_controller, &ClipboardController::errorMessageRequested, this, [this](const QString &message) {
         QMessageBox::warning(this, QStringLiteral("提示"), message);
     });
+    connect(m_controller, &ClipboardController::quickActionMessage, this, [this](const QString &message, bool isError) {
+        if (m_quickToast) {
+            m_quickToast->showMessage(message, isError);
+        }
+    });
+
+    m_quickToast = new InlineMessagePopup(this);
+    m_quickToast->setPanelWidget(this);
 
     QShortcut* ctrlCShortcut = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_C), ui->listWidget);
     ctrlCShortcut->setContext(Qt::WidgetWithChildrenShortcut);
@@ -245,8 +254,11 @@ void ClipboardView::insertNewItem(ClipboardItem* newItem)
             }
         }
         ui->listWidget->insertItem(insertRow, listItem);
-        QIcon cloudIcon = IconManager::icon(IconManager::Icon::Cloud, QSize(16, 16));
-        listItem->setIcon(cloudIcon);
+        // 云端图片保留自身缩略图，其余类型才替换为云图标
+        if (newItem->type() != ClipboardItemType::Image) {
+            QIcon cloudIcon = IconManager::icon(IconManager::Icon::Cloud, QSize(16, 16));
+            listItem->setIcon(cloudIcon);
+        }
     } else {
         int insertRow = 0;
         for (; insertRow < ui->listWidget->count(); ++insertRow) {
@@ -273,7 +285,7 @@ void ClipboardView::addItemToListWidget(ClipboardItem* item)
     if (item->isPinned()) {
         QIcon pinIcon = IconManager::icon(IconManager::Icon::Pin, QSize(24, 24));
         listItem->setIcon(pinIcon);
-    } else if (item->isCloudItem()) {
+    } else if (item->isCloudItem() && item->type() != ClipboardItemType::Image) {
         QIcon cloudIcon = IconManager::icon(IconManager::Icon::Cloud, QSize(24, 24));
         listItem->setIcon(cloudIcon);
     }
@@ -552,7 +564,7 @@ void ClipboardView::on_clearCloudButton_clicked()
     const QMessageBox::StandardButton reply =
         QMessageBox::question(this,
                               QStringLiteral("清空云端记录"),
-                              QStringLiteral("确定要清空当前账号的云端剪切板记录吗？"),
+                              QStringLiteral("确定要清空当前账号的云端剪切板记录吗？（含文本与图片）"),
                               QMessageBox::Yes | QMessageBox::No,
                               QMessageBox::No);
     if (reply != QMessageBox::Yes) {
@@ -570,6 +582,16 @@ void ClipboardView::on_saveButton_clicked()
 void ClipboardView::on_refreshButton_clicked()
 {
     refreshCloudItems();
+}
+
+void ClipboardView::on_quickSyncButton_clicked()
+{
+    m_controller->quickSyncCurrentClipboard();
+}
+
+void ClipboardView::on_quickCopyButton_clicked()
+{
+    m_controller->quickCopyLatestCloudItem();
 }
 
 void ClipboardView::on_listWidget_itemDoubleClicked(QListWidgetItem *item)

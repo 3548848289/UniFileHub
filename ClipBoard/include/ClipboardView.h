@@ -8,6 +8,7 @@
 #include "ClipboardItemDelegate.h"
 
 class ClipboardController;
+class InlineMessagePopup;
 class QPropertyAnimation;
 
 QT_BEGIN_NAMESPACE
@@ -37,6 +38,8 @@ private slots:
     void on_clearCloudButton_clicked();
     void on_saveButton_clicked();
     void on_refreshButton_clicked();
+    void on_quickSyncButton_clicked();
+    void on_quickCopyButton_clicked();
     void on_listWidget_itemDoubleClicked(QListWidgetItem *item);
     void on_listWidget_customContextMenuRequested(const QPoint &pos);
     void on_lineEdit_editingFinished();
@@ -61,6 +64,8 @@ private:
     QLabel *m_imagePreviewLabel;
     QPropertyAnimation* m_smoothScrollAnimation;
     int m_smoothScrollTarget;
+    // 快速同步/快速复制的悬浮提示条
+    InlineMessagePopup *m_quickToast;
 
     void initializeListWidget();
     void initializeSmoothScrolling();
