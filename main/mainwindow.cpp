@@ -4,6 +4,7 @@
 #include "../Setting/include/ThemeManager.h"
 #include "../Setting/include/SettingManager.h"
 #include "../../PersonalDrive/include/DriveManager.h"
+#include "../../PersonalDrive/include/DriveUploadHelper.h"
 #include <QGuiApplication>
 #include <QScreen>
 #include <QTimer>
@@ -199,8 +200,10 @@ void MainWindow::initConnect() {
             return;
         }
 
-        DriveManager::Instance().uploadFile(filePath, 0);
-        // QMessageBox::information(this, tr("提示"), tr("已开始上传到网盘根目录。"));
+        QString uploadError;
+        if (!DriveUploadHelper::uploadToCurrentDirectory(this, filePath, &uploadError) && !uploadError.isEmpty()) {
+            QMessageBox::information(this, tr("提示"), uploadError);
+        }
     });
     connect(file_system, &FileSystem::openTerminalRequested, this, [this](const QString &directoryPath) {
         openTerminal(directoryPath);
@@ -576,8 +579,10 @@ void MainWindow::onTabContextMenuRequested(const QPoint &pos) {
             return;
         }
 
-        DriveManager::Instance().uploadFile(filePath, 0);
-        // QMessageBox::information(this, tr("提示"), tr("已开始上传到网盘根目录。"));
+        QString uploadError;
+        if (!DriveUploadHelper::uploadToCurrentDirectory(this, filePath, &uploadError) && !uploadError.isEmpty()) {
+            QMessageBox::information(this, tr("提示"), uploadError);
+        }
     }
 
 }

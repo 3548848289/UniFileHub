@@ -7,6 +7,7 @@
 #include <QDropEvent>
 #include "../manager/include/FileLocationHelper.h"
 #include "../../PersonalDrive/include/DriveManager.h"
+#include "../../PersonalDrive/include/DriveUploadHelper.h"
 #include "../Setting/include/Setting.h"
 
 TabManager::TabManager(QTabWidget* parentTabWidget, QObject* parent) : QObject(parent), tabWidget(parentTabWidget)
@@ -656,8 +657,10 @@ void TabManager::updateLayout() {
                             return;
                         }
 
-                        DriveManager::Instance().uploadFile(filePath, 0);
-                        // QMessageBox::information(currentTabWidget, tr("提示"), tr("已开始上传到网盘根目录。"));
+                        QString uploadError;
+                        if (!DriveUploadHelper::uploadToCurrentDirectory(currentTabWidget, filePath, &uploadError) && !uploadError.isEmpty()) {
+                            QMessageBox::information(currentTabWidget, tr("提示"), uploadError);
+                        }
                     }
                 });
             }

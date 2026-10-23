@@ -8,6 +8,7 @@
 #include "include/DriveViewDelegate.h"
 #include "include/HistoryDelegate.h"
 #include "include/NameConflictDialog.h"
+#include "include/FolderPickerDialog.h"
 #include "../Setting/include/SettingManager.h"
 #include "../../main/include/TabFactory.h"
 #include "../../main/include/TabManager.h"
@@ -950,6 +951,21 @@ void DriveView::onActionClicked(int row, int action)
         }
         break;
     case 3: // 移动
+        {
+            if (SettingManager::Instance().personal_drive_server_ip().trimmed().isEmpty()) {
+                showInlineMessage(tr("网盘服务器地址为空，请先在设置中配置"), true);
+                break;
+            }
+
+            // 文件夹不能移到自身（子树），在选择框中一并隐藏；文件没有该限制
+            FolderPickerDialog picker(isDir ? id : -1, this);
+            if (picker.exec() == QDialog::Accepted) {
+                const int targetFolderId = picker.selectedFolderId();
+                if (targetFolderId >= 0) {
+                    m_driveManager->moveItem(id, targetFolderId);
+                }
+            }
+        }
         break;
 
     default:

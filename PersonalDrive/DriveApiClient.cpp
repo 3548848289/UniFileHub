@@ -358,12 +358,15 @@ void DriveApiClient::moveItem(int itemId, int newParentId)
     QByteArray data = QJsonDocument(json).toJson();
     
     QNetworkReply *reply = m_networkManager->post(request, data);
-    
+
     connect(reply, &QNetworkReply::finished, this, [=]() {
         reply->deleteLater();
-        
+
         if (reply->error() != QNetworkReply::NoError) {
-            emit itemMoveError(reply->errorString());
+            // 优先透传服务端的具体原因（如"目标目录已存在同名文件或文件夹"）
+            const QJsonDocument errDoc = QJsonDocument::fromJson(reply->readAll());
+            const QString serverMsg = errDoc.object().value(QStringLiteral("msg")).toString();
+            emit itemMoveError(serverMsg.isEmpty() ? reply->errorString() : serverMsg);
             return;
         }
         

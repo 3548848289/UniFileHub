@@ -82,7 +82,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
       </font>
      </property>
      <property name="text">
-      <string>UniFileHub for Windows 1.0.0909</string>
+      <string>UniFileHub for Windows 1.0.1011</string>
      </property>
     </widget>
    </item>

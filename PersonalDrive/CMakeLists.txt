@@ -9,6 +9,7 @@ set(SCHEDULE_SOURCES
    DriveViewDelegate.cpp
    HistoryDelegate.cpp
    NameConflictDialog.cpp
+   FolderPickerDialog.cpp
 )
 
 set(SCHEDULE_HEADERS
@@ -23,6 +24,7 @@ set(SCHEDULE_HEADERS
     include/DriveRoles.h
     include/HistoryDelegate.h
     include/NameConflictDialog.h
+    include/FolderPickerDialog.h
 
 )
 
