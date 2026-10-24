@@ -71,6 +71,7 @@ private slots:
 
 protected:
     void closeEvent(QCloseEvent *event) override;
+    void resizeEvent(QResizeEvent *event) override;
 
 private:
     Ui::MainWindow *ui;
@@ -94,10 +95,14 @@ private:
     void initCoreWidgets();
     void initConnect();
     void initMemubarLayout();
+    void applyPanelWidthRatio();
     void onTabContextMenuRequested(const QPoint &pos);
     void togglePanel(QWidget *target);
     void openFolderInFileSystem(const QString &folderPath, bool addToHistory = true);
     void openTerminal(const QString &workingDirectory = QString());
+
+    QSplitter *m_mainSplitter = nullptr;  // 主窗口三栏分隔器
+    double m_panelWidthRatio = 0.30;      // 左侧面板宽度占比，窗口缩放时按此维持
 };
 
 #endif // MAINWINDOW_H

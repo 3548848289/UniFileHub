@@ -21,6 +21,9 @@ public:
     explicit FileRestoreWid(QString fileName, bool isMissing, QWidget *parent = nullptr);
     ~FileRestoreWid();
 
+    // 安全复制：覆盖前先处理目标冲突，失败时给出可提示的错误信息
+    static bool copyFileSafely(const QString &source, const QString &destination, QString *errorMsg);
+
 private slots:
     void on_saveasBtn_clicked();
     void on_restoreBtn_clicked();
@@ -34,8 +37,6 @@ private:
     bool isMissing;
     dbService& dbservice;
     InlineMessagePopup *m_messagePopup = nullptr;
-
-    bool copyFileSafely(const QString &source, const QString &destination, QString *errorMsg);
 };
 
 #endif // FILERESTOREWID_H

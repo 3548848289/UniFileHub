@@ -6,161 +6,208 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>393</width>
-    <height>327</height>
+    <width>420</width>
+    <height>340</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>新增标签</string>
   </property>
-  <property name="windowIcon">
-   <iconset theme="QIcon::ThemeIcon::MailMessageNew"/>
-  </property>
-  <layout class="QGridLayout" name="gridLayout_2">
-   <item row="0" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0">
-     <item>
-      <layout class="QGridLayout" name="gridLayout">
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_1">
-         <property name="text">
-          <string>标签</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignmentFlag::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="label_3">
-         <property name="text">
-          <string>详情</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignmentFlag::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QDateTimeEdit" name="dateTimeEdit"/>
-       </item>
-       <item row="2" column="1">
-        <widget class="QTextEdit" name="annotationTextEdit">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="reminderLabel">
-         <property name="text">
-          <string>提前多久提醒(小时)</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignmentFlag::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="1">
-        <widget class="QSpinBox" name="reminderTimeEdit">
-         <property name="maximum">
-          <number>8760</number>
-         </property>
-         <property name="singleStep">
-          <number>1</number>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="0">
-        <widget class="QLabel" name="intervalLabel">
-         <property name="text">
-          <string>每次提醒间隔时间(分钟)</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignmentFlag::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="1">
-        <widget class="QSpinBox" name="intervalTimeEdit">
-         <property name="maximum">
-          <number>43200</number>
-         </property>
-         <property name="singleStep">
-          <number>1</number>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="label_2">
-         <property name="text">
-          <string>日期</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignmentFlag::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="QLineEdit" name="tagsLineEdit"/>
-       </item>
-       <item row="5" column="0">
-        <widget class="QLabel" name="reminderTypeLabel">
-         <property name="text">
-          <string>提醒方式</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignmentFlag::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="1">
-        <widget class="QComboBox" name="reminderTypeComboBox">
-         <item>
-          <property name="text">
-           <string>不提醒</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>弹窗提醒</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>邮件提醒</string>
-          </property>
-         </item>
-        </widget>
-       </item>
-      </layout>
+  <layout class="QVBoxLayout" name="verticalLayout_2">
+   <item>
+    <widget class="QLabel" name="targetFileLabel">
+     <property name="text">
+      <string>未指定文件</string>
+     </property>
+     <property name="textInteractionFlags">
+      <set>Qt::TextSelectableByMouse</set>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="0">
+      <widget class="QLabel" name="label_1">
+       <property name="text">
+        <string>标签</string>
+       </property>
+      </widget>
      </item>
-     <item>
-      <widget class="QPushButton" name="saveButton">
+     <item row="0" column="1">
+      <widget class="QComboBox" name="tagsComboBox">
+       <property name="editable">
+        <bool>true</bool>
+       </property>
+       <property name="insertPolicy">
+        <enum>QComboBox::InsertPolicy::NoInsert</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>到期时间</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QDateTimeEdit" name="dateTimeEdit">
+       <property name="displayFormat">
+        <string>yyyy-MM-dd HH:mm</string>
+       </property>
+       <property name="calendarPopup">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>详情</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QTextEdit" name="annotationTextEdit">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <property name="styleSheet">
-        <string notr="true"> /*
-
-QPushButton {
-    color: #7598db;  
-    background-color: #e0e0e0;  
-    border: 1px solid #ccc; 
-    border-radius: 5px;
-    padding: 5px 10px;
-}
-*/
-</string>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>64</height>
+        </size>
        </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="reminderTypeLabel">
+       <property name="text">
+        <string>提醒方式</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QComboBox" name="reminderTypeComboBox">
+       <item>
+        <property name="text">
+         <string>不提醒</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>弹窗提醒</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>邮件提醒</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="4" column="0" colspan="2">
+      <widget class="QWidget" name="reminderWidget" native="true">
+       <layout class="QGridLayout" name="gridLayout_3">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item row="0" column="0">
+         <widget class="QLabel" name="reminderLabel">
+          <property name="text">
+           <string>提前多久提醒(小时)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QSpinBox" name="reminderTimeEdit">
+          <property name="maximum">
+           <number>8760</number>
+          </property>
+          <property name="singleStep">
+           <number>1</number>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="intervalLabel">
+          <property name="text">
+           <string>每次提醒间隔时间(分钟)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QSpinBox" name="intervalTimeEdit">
+          <property name="maximum">
+           <number>43200</number>
+          </property>
+          <property name="singleStep">
+           <number>1</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Orientation::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>8</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Orientation::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="cancelButton">
+       <property name="text">
+        <string>取消</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="saveButton">
        <property name="text">
         <string>保存</string>
+       </property>
+       <property name="default">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -169,10 +216,14 @@ QPushButton {
   </layout>
  </widget>
  <tabstops>
-  <tabstop>tagsLineEdit</tabstop>
+  <tabstop>tagsComboBox</tabstop>
   <tabstop>dateTimeEdit</tabstop>
   <tabstop>annotationTextEdit</tabstop>
+  <tabstop>reminderTypeComboBox</tabstop>
+  <tabstop>reminderTimeEdit</tabstop>
+  <tabstop>intervalTimeEdit</tabstop>
   <tabstop>saveButton</tabstop>
+  <tabstop>cancelButton</tabstop>
  </tabstops>
  <resources/>
  <connections/>

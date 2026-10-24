@@ -32,6 +32,9 @@ public:
 
     ~FileSystem();
 
+public slots:
+    void refreshTagCache(); // 标签数据变化后清空 delegate 缓存并刷新列表
+
 private slots:
     void onItemClicked(const QModelIndex &index);
     void onItemDoubleClicked(const QModelIndex &index);

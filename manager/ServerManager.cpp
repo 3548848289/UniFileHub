@@ -149,7 +149,7 @@ void ServerManager::checkFileExists(const QString& filepath) {
     QNetworkRequest request{QUrl(url)};
     QNetworkReply* reply = networkManager.get(request);
 
-    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+    connect(reply, &QNetworkReply::finished, this, [this, reply, filename]() {
         bool exists = false;
         if (reply->error() == QNetworkReply::NoError) {
             QByteArray response = reply->readAll();
@@ -159,6 +159,7 @@ void ServerManager::checkFileExists(const QString& filepath) {
             // qDebug() << "Error checking file existence:" << reply->errorString();
         }
         emit returnStatus(exists);
+        emit fileExistsChecked(filename, exists);
         reply->deleteLater();
     });
 }

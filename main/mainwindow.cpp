@@ -260,28 +260,41 @@ void MainWindow::initConnect() {
 }
 
 void MainWindow::initMemubarLayout() {
-    QSplitter *horizontalSplitter = new QSplitter(Qt::Horizontal);    
-    horizontalSplitter->addWidget(widgetfunc);
+    m_mainSplitter = new QSplitter(Qt::Horizontal);
+    m_mainSplitter->addWidget(widgetfunc);
     widgetfunc->setFixedWidth(60);
 
-    horizontalSplitter->addWidget(ui->combinedWidget);
-    ui->combinedWidget->setMaximumWidth(450);
+    m_mainSplitter->addWidget(ui->combinedWidget);
+    // 面板宽度由 resizeEvent 按比例维持（默认 30%），不再设最大宽度上限
 
     // 添加tabManager的容器部件，并隐藏原始tabWidget
     QWidget* containerWidget = tabManager->getContainerWidget();
-    horizontalSplitter->addWidget(containerWidget);
-    
+    m_mainSplitter->addWidget(containerWidget);
+
     // 隐藏原始的tabWidget，避免重叠显示
     if (tabWidget) {
         tabWidget->setVisible(false);
     }
-    
-    horizontalSplitter->setStretchFactor(0, 0);
-    horizontalSplitter->setStretchFactor(1, 1);
-    horizontalSplitter->setStretchFactor(2, 20);
-    setCentralWidget(horizontalSplitter);
+
+    m_mainSplitter->setStretchFactor(0, 0);
+    m_mainSplitter->setStretchFactor(1, 1);
+    m_mainSplitter->setStretchFactor(2, 20);
+    setCentralWidget(m_mainSplitter);
     QList<int> sizes = {60, 340, 600};
-    horizontalSplitter->setSizes(sizes);
+    m_mainSplitter->setSizes(sizes);
+
+    // 用户拖动分隔条时把面板宽度记为比例，之后的窗口缩放按该比例维持
+    connect(m_mainSplitter, &QSplitter::splitterMoved, this, [this](int /*pos*/, int index) {
+        if (index != 1)
+            return;
+        const QList<int> currentSizes = m_mainSplitter->sizes();
+        if (currentSizes.size() < 3)
+            return;
+        const int available = currentSizes[1] + currentSizes[2];
+        if (available > 0)
+            m_panelWidthRatio = qBound(0.10, double(currentSizes[1]) / available, 0.60);
+    });
+    applyPanelWidthRatio();
     
     // 添加布局菜单选项
     QMenu* layoutMenu = new QMenu("布局", this);
@@ -337,6 +350,30 @@ void MainWindow::initMemubarLayout() {
         }
     }
 
+}
+
+
+// 窗口尺寸变化（含最大化/还原）时，按记录的比例维持左侧面板宽度，
+// 避免 QSplitter 把新增空间均分给面板导致它占掉一半窗口
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+    QMainWindow::resizeEvent(event);
+    applyPanelWidthRatio();
+}
+
+void MainWindow::applyPanelWidthRatio()
+{
+    if (!m_mainSplitter)
+        return;
+    const QList<int> currentSizes = m_mainSplitter->sizes();
+    if (currentSizes.size() < 3)
+        return;
+    const int railWidth = currentSizes[0];
+    const int available = m_mainSplitter->width() - railWidth;
+    if (available <= 0)
+        return;
+    const int panelWidth = qBound(0, int(available * m_panelWidthRatio + 0.5), available);
+    m_mainSplitter->setSizes({railWidth, panelWidth, available - panelWidth});
 }
 
 

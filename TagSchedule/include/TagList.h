@@ -49,7 +49,6 @@ signals:
 private:
     Ui::TagList *ui;
     FilePathInfo fileInfo;
-    TagDetail *tagdetail = nullptr; // 标签详情窗口实例
     dbService& dbservice;    // dbService 单例引用
     InlineMessagePopup *m_messagePopup = nullptr;
 };

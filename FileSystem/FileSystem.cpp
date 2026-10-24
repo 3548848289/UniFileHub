@@ -1,5 +1,6 @@
 #include "include/FileSystem.h"
 #include "ui/ui_FileSystem.h"
+#include "../manager/include/DataChangeNotifier.h"
 #include <QTimer>
 
 namespace {
@@ -74,6 +75,10 @@ FileSystem::FileSystem(QWidget *parent)
 
     tagItemdelegate = new TagItemDelegate(this, serverManager);
     ui->treeView->setItemDelegate(tagItemdelegate);
+
+    // 标签详情窗口保存后同步刷新文件列表的标签 chip
+    connect(&DataChangeNotifier::Instance(), &DataChangeNotifier::tagChanged,
+            this, &FileSystem::refreshTagCache);
 
     connect(ui->treeView, &QTreeView::clicked, this, &FileSystem::onItemClicked);
     connect(ui->treeView, &QTreeView::doubleClicked, this, &FileSystem::onItemDoubleClicked);
@@ -156,6 +161,13 @@ FileSystem::FileSystem(QWidget *parent)
 }
 
 
+
+void FileSystem::refreshTagCache()
+{
+    if (tagItemdelegate) {
+        tagItemdelegate->onTagDeleted(QString());
+    }
+}
 
 void FileSystem::onItemClicked(const QModelIndex &index) {
     if (fileSystemModel->isDir(index) || tagItemdelegate->isButtonClicked) {

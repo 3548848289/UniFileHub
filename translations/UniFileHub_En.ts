@@ -9,52 +9,71 @@
         <translation>Add Tag</translation>
     </message>
     <message>
-        <location filename="../TagSchedule/ui/AddTag.ui" line="27"/>
+        <location filename="../TagSchedule/ui/AddTag.ui" line="20"/>
+        <source>未指定文件</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../TagSchedule/ui/AddTag.ui" line="32"/>
         <source>标签</source>
         <translation>Tag</translation>
     </message>
     <message>
-        <location filename="../TagSchedule/ui/AddTag.ui" line="37"/>
+        <location filename="../TagSchedule/ui/AddTag.ui" line="49"/>
+        <source>到期时间</source>
+        <translation type="unfinished">Expiration Date</translation>
+    </message>
+    <message>
+        <location filename="../TagSchedule/ui/AddTag.ui" line="56"/>
+        <source>yyyy-MM-dd HH:mm</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../TagSchedule/ui/AddTag.ui" line="66"/>
         <source>详情</source>
         <translation>Details</translation>
     </message>
     <message>
-        <location filename="../TagSchedule/ui/AddTag.ui" line="60"/>
+        <location filename="../TagSchedule/ui/AddTag.ui" line="133"/>
         <source>提前多久提醒(小时)</source>
         <translation>Remind in advance (hours)</translation>
     </message>
     <message>
-        <location filename="../TagSchedule/ui/AddTag.ui" line="80"/>
+        <location filename="../TagSchedule/ui/AddTag.ui" line="150"/>
         <source>每次提醒间隔时间(分钟)</source>
         <translation>Reminder interval (minutes)</translation>
     </message>
     <message>
-        <location filename="../TagSchedule/ui/AddTag.ui" line="100"/>
         <source>日期</source>
-        <translation>Date</translation>
+        <translation type="vanished">Date</translation>
     </message>
     <message>
-        <location filename="../TagSchedule/ui/AddTag.ui" line="113"/>
+        <location filename="../TagSchedule/ui/AddTag.ui" line="92"/>
         <source>提醒方式</source>
         <translation>Reminder Method</translation>
     </message>
     <message>
-        <location filename="../TagSchedule/ui/AddTag.ui" line="124"/>
+        <location filename="../TagSchedule/ui/AddTag.ui" line="100"/>
         <source>不提醒</source>
         <translation>No Reminder</translation>
     </message>
     <message>
-        <location filename="../TagSchedule/ui/AddTag.ui" line="129"/>
+        <location filename="../TagSchedule/ui/AddTag.ui" line="105"/>
         <source>弹窗提醒</source>
         <translation>Popup Reminder</translation>
     </message>
     <message>
-        <location filename="../TagSchedule/ui/AddTag.ui" line="134"/>
+        <location filename="../TagSchedule/ui/AddTag.ui" line="110"/>
         <source>邮件提醒</source>
         <translation>Email Reminder</translation>
     </message>
     <message>
-        <location filename="../TagSchedule/ui/AddTag.ui" line="163"/>
+        <location filename="../TagSchedule/ui/AddTag.ui" line="200"/>
+        <source>取消</source>
+        <translation type="unfinished">Cancel</translation>
+    </message>
+    <message>
+        <location filename="../TagSchedule/ui/AddTag.ui" line="207"/>
         <source>保存</source>
         <translation>Save</translation>
     </message>
@@ -1115,22 +1134,78 @@ Refresh file list to get the latest status?</translation>
         <translation>Form</translation>
     </message>
     <message>
-        <location filename="../FileBackup/ui/FileBackupView.ui" line="55"/>
+        <location filename="../FileBackup/ui/FileBackupView.ui" line="69"/>
+        <source>搜索文件…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../FileBackup/ui/FileBackupView.ui" line="117"/>
+        <source>在编辑器中打开该版本</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../FileBackup/ui/FileBackupView.ui" line="120"/>
+        <source>打开</source>
+        <translation type="unfinished">Open</translation>
+    </message>
+    <message>
+        <location filename="../FileBackup/ui/FileBackupView.ui" line="127"/>
+        <source>查看详情、还原到原路径或另存为</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../FileBackup/ui/FileBackupView.ui" line="130"/>
+        <source>还原…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../FileBackup/ui/FileBackupView.ui" line="137"/>
+        <source>将该版本另存到指定位置</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../FileBackup/ui/FileBackupView.ui" line="140"/>
+        <location filename="../FileBackup/FileBackupView.cpp" line="295"/>
+        <source>另存为</source>
+        <translation type="unfinished">Save As</translation>
+    </message>
+    <message>
+        <location filename="../FileBackup/ui/FileBackupView.ui" line="147"/>
+        <source>上传该版本到云端服务器</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../FileBackup/ui/FileBackupView.ui" line="150"/>
+        <source>上传云端</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../FileBackup/ui/FileBackupView.ui" line="157"/>
+        <source>删除该备份记录及对应的备份文件</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../FileBackup/ui/FileBackupView.ui" line="160"/>
+        <source>删除</source>
+        <translation type="unfinished">Delete</translation>
+    </message>
+    <message>
+        <location filename="../FileBackup/ui/FileBackupView.ui" line="92"/>
         <source>提交历史</source>
         <translation>Submission History</translation>
     </message>
     <message>
-        <location filename="../FileBackup/ui/FileBackupView.ui" line="64"/>
+        <location filename="../FileBackup/ui/FileBackupView.ui" line="28"/>
         <source>提交过的文件</source>
         <translation>Submitted Files</translation>
     </message>
     <message>
-        <location filename="../FileBackup/ui/FileBackupView.ui" line="96"/>
+        <location filename="../FileBackup/ui/FileBackupView.ui" line="60"/>
         <source>刷新</source>
         <translation>Refresh</translation>
     </message>
     <message>
-        <location filename="../FileBackup/FileBackupView.cpp" line="31"/>
+        <location filename="../FileBackup/FileBackupView.cpp" line="211"/>
         <source>选择新的文件路径</source>
         <translation>Select new file path</translation>
     </message>
@@ -1139,23 +1214,24 @@ Refresh file list to get the latest status?</translation>
         <translation type="vanished">All Files (*.*)</translation>
     </message>
     <message>
-        <location filename="../FileBackup/FileBackupView.cpp" line="31"/>
-        <location filename="../FileBackup/FileBackupView.cpp" line="263"/>
+        <location filename="../FileBackup/FileBackupView.cpp" line="211"/>
+        <location filename="../FileBackup/FileBackupView.cpp" line="296"/>
+        <location filename="../FileBackup/FileBackupView.cpp" line="563"/>
         <source>所有文件 (*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../FileBackup/FileBackupView.cpp" line="37"/>
+        <location filename="../FileBackup/FileBackupView.cpp" line="215"/>
         <source>更新文件路径失败。</source>
         <translation>Failed to update file path.</translation>
     </message>
     <message>
-        <location filename="../FileBackup/FileBackupView.cpp" line="56"/>
+        <location filename="../FileBackup/FileBackupView.cpp" line="238"/>
         <source>从数据库中删除文件记录失败。</source>
         <translation>Failed to delete file record from database.</translation>
     </message>
     <message>
-        <location filename="../FileBackup/FileBackupView.cpp" line="263"/>
+        <location filename="../FileBackup/FileBackupView.cpp" line="563"/>
         <source>选择文件</source>
         <translation>Select File</translation>
     </message>
@@ -1578,12 +1654,12 @@ Refresh file list to get the latest status?</translation>
         <location filename="../main/mainwindow.cpp" line="199"/>
         <location filename="../main/mainwindow.cpp" line="205"/>
         <location filename="../main/mainwindow.cpp" line="215"/>
-        <location filename="../main/mainwindow.cpp" line="450"/>
-        <location filename="../main/mainwindow.cpp" line="566"/>
-        <location filename="../main/mainwindow.cpp" line="572"/>
-        <location filename="../main/mainwindow.cpp" line="578"/>
-        <location filename="../main/mainwindow.cpp" line="584"/>
-        <location filename="../main/mainwindow.cpp" line="662"/>
+        <location filename="../main/mainwindow.cpp" line="487"/>
+        <location filename="../main/mainwindow.cpp" line="603"/>
+        <location filename="../main/mainwindow.cpp" line="609"/>
+        <location filename="../main/mainwindow.cpp" line="615"/>
+        <location filename="../main/mainwindow.cpp" line="621"/>
+        <location filename="../main/mainwindow.cpp" line="699"/>
         <source>提示</source>
         <translation type="unfinished">Info</translation>
     </message>
@@ -1598,34 +1674,34 @@ Refresh file list to get the latest status?</translation>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="386"/>
-        <location filename="../main/mainwindow.cpp" line="387"/>
-        <location filename="../main/mainwindow.cpp" line="508"/>
+        <location filename="../main/mainwindow.cpp" line="423"/>
+        <location filename="../main/mainwindow.cpp" line="424"/>
+        <location filename="../main/mainwindow.cpp" line="545"/>
         <source>打开文件</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="450"/>
+        <location filename="../main/mainwindow.cpp" line="487"/>
         <source>该文件夹不存在或不是有效文件夹。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="566"/>
+        <location filename="../main/mainwindow.cpp" line="603"/>
         <source>当前页签不是本地文件，无法上传到网盘。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="572"/>
+        <location filename="../main/mainwindow.cpp" line="609"/>
         <source>当前页签还没有保存成文件，请先保存后再上传到网盘。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="578"/>
+        <location filename="../main/mainwindow.cpp" line="615"/>
         <source>当前页签对应的本地文件不存在，无法上传到网盘。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="662"/>
+        <location filename="../main/mainwindow.cpp" line="699"/>
         <source>当前构建未启用内置终端。</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1634,7 +1710,7 @@ Refresh file list to get the latest status?</translation>
         <translation type="vanished">Open File</translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="509"/>
+        <location filename="../main/mainwindow.cpp" line="546"/>
         <source>All Files (*);;CSV Files (*.csv);;Text Files (*.txt)</source>
         <translation>All Files (*);;CSV Files (*.csv);;Text Files (*.txt)</translation>
     </message>
@@ -1797,7 +1873,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation type="vanished">File does not exist</translation>
     </message>
     <message>
-        <location filename="../TagSchedule/ScheduleWid.cpp" line="69"/>
+        <location filename="../TagSchedule/ScheduleWid.cpp" line="75"/>
         <source>文件已被移动或删除：
 %1</source>
         <translation>File has been moved or deleted:
@@ -3029,7 +3105,7 @@ Message</translation>
         <translation>Confirm Change</translation>
     </message>
     <message>
-        <location filename="../TagSchedule/TagDetail.cpp" line="85"/>
+        <location filename="../TagSchedule/TagDetail.cpp" line="168"/>
         <source>选择文件</source>
         <translation>Select File</translation>
     </message>
@@ -3038,7 +3114,7 @@ Message</translation>
         <translation type="vanished">All Files (*.*)</translation>
     </message>
     <message>
-        <location filename="../TagSchedule/TagDetail.cpp" line="85"/>
+        <location filename="../TagSchedule/TagDetail.cpp" line="168"/>
         <source>所有文件 (*)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3047,31 +3123,44 @@ Message</translation>
         <translation type="vanished">Warning</translation>
     </message>
     <message>
-        <location filename="../TagSchedule/TagDetail.cpp" line="98"/>
+        <location filename="../TagSchedule/TagDetail.cpp" line="181"/>
         <source>文件路径不能为空！</source>
         <translation>File path cannot be empty!</translation>
     </message>
     <message>
-        <location filename="../TagSchedule/TagDetail.cpp" line="105"/>
+        <location filename="../TagSchedule/TagDetail.cpp" line="187"/>
         <source>文件不存在！</source>
         <translation>File does not exist!</translation>
     </message>
     <message>
-        <location filename="../TagSchedule/TagDetail.cpp" line="115"/>
+        <location filename="../TagSchedule/TagDetail.cpp" line="193"/>
+        <source>标签名称不能为空！</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../TagSchedule/TagDetail.cpp" line="217"/>
+        <source>标签信息保存失败！</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../TagSchedule/TagDetail.cpp" line="236"/>
+        <source>标签已保存</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>提醒方式更新失败！</source>
-        <translation>Failed to update reminder method!</translation>
+        <translation type="vanished">Failed to update reminder method!</translation>
     </message>
     <message>
         <source>提示</source>
         <translation type="vanished">Info</translation>
     </message>
     <message>
-        <location filename="../TagSchedule/TagDetail.cpp" line="123"/>
         <source>文件路径已成功更新！</source>
-        <translation>File path updated successfully!</translation>
+        <translation type="vanished">File path updated successfully!</translation>
     </message>
     <message>
-        <location filename="../TagSchedule/TagDetail.cpp" line="131"/>
+        <location filename="../TagSchedule/TagDetail.cpp" line="203"/>
         <source>文件路径更新失败！</source>
         <translation>Failed to update file path!</translation>
     </message>

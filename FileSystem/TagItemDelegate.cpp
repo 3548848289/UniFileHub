@@ -4,14 +4,39 @@
 #include "../manager/include/DataChangeNotifier.h"
 
 #include <QDir>
+#include <QHelpEvent>
 #include <QMessageBox>
+#include <QToolTip>
 #include <QtGlobal>
+
+namespace {
+constexpr int kChipHeight = 22;          // 标签 chip 高度(行高 30px)
+constexpr int kChipHPadding = 8;         // chip 内左右留白
+constexpr int kChipGap = 4;              // 相邻 chip 间距
+constexpr int kMaxChipTextWidth = 120;   // 标签文字超宽时省略
+constexpr int kSubmissionIconRight = 60; // 备份角标占据 [right-60, right-40],位置与旧版一致
+constexpr int kSubmissionReserve = 64;   // 有角标时 chip 至少让出 64px
+constexpr int kEdgeMargin = 10;          // 无角标时 chip 距行右缘 10px
+}
 
 TagItemDelegate::TagItemDelegate(QObject *parent, ServerManager *serverManager)
     : QStyledItemDelegate(parent),
       serverManager(serverManager),
       dbservice(dbService::instance("./SmartDesk.db"))
 {
+    // 标签数据在任何地方发生变化(详情窗口保存、标签菜单删除等)后,
+    // 清空缓存让文件列表的 chip 立即刷新
+    connect(&DataChangeNotifier::Instance(), &DataChangeNotifier::tagChanged, this,
+            [this](const QString &) {
+                m_infoCache.clear();
+                emit TagUpdated();
+            });
+    // 备份记录变化后同步刷新角标
+    connect(&DataChangeNotifier::Instance(), &DataChangeNotifier::backupRecordAdded, this,
+            [this](const QString &) {
+                m_submissionsCache.clear();
+                emit TagUpdated();
+            });
 }
 
 void TagItemDelegate::paint(QPainter *painter,
@@ -22,19 +47,10 @@ void TagItemDelegate::paint(QPainter *painter,
 
     const QString filePath = index.data(QFileSystemModel::FilePathRole).toString();
 
-    if (hasTags(filePath)) {
-        const QRect iconRect(option.rect.right() - 30, option.rect.top() + 5, 20, 20);
-        const QIcon tagIcon =
-#if QT_VERSION_MAJOR >= 6
-            QIcon::fromTheme(QIcon::ThemeIcon::MailMessageNew);
-#else
-            QIcon::fromTheme(QStringLiteral("mail-message-new"));
-#endif
-        tagIcon.paint(painter, iconRect, Qt::AlignCenter);
-    }
-
-    if (dbservice.dbBackup().hasSubmissions(filePath)) {
-        const QRect submissionIconRect(option.rect.right() - 60, option.rect.top() + 5, 20, 20);
+    const bool hasSubmissionIcon = hasSubmissions(filePath);
+    if (hasSubmissionIcon) {
+        const QRect submissionIconRect(option.rect.right() - kSubmissionIconRight,
+                                       option.rect.top() + 5, 20, 20);
         const QIcon submissionIcon =
 #if QT_VERSION_MAJOR >= 6
             QIcon::fromTheme(QIcon::ThemeIcon::EditCopy);
@@ -43,6 +59,27 @@ void TagItemDelegate::paint(QPainter *painter,
 #endif
         submissionIcon.paint(painter, submissionIconRect, Qt::AlignCenter);
     }
+
+    const FilePathInfo &info = tagInfoFor(filePath);
+    const QVector<TagChip> chips = layoutChips(option, info, hasSubmissionIcon);
+    if (chips.isEmpty()) {
+        return;
+    }
+
+    painter->save();
+    painter->setRenderHint(QPainter::Antialiasing, true);
+    for (const TagChip &chip : chips) {
+        QColor background = chip.color;
+        background.setAlpha(36);
+        QColor border = chip.color;
+        border.setAlpha(110);
+        painter->setPen(QPen(border, 1));
+        painter->setBrush(background);
+        painter->drawRoundedRect(chip.rect, 9, 9);
+        painter->setPen(chip.color);
+        painter->drawText(chip.rect, Qt::AlignCenter, chip.text);
+    }
+    painter->restore();
 }
 
 bool TagItemDelegate::editorEvent(QEvent *event,
@@ -52,23 +89,26 @@ bool TagItemDelegate::editorEvent(QEvent *event,
 {
     if (event->type() == QEvent::MouseButtonRelease) {
         auto *mouseEvent = static_cast<QMouseEvent *>(event);
+        const QString filePath = model->data(index, QFileSystemModel::FilePathRole).toString();
 
-        const QRect tagIconRect(option.rect.right() - 30, option.rect.top() + 5, 20, 20);
-        if (tagIconRect.contains(mouseEvent->pos())) {
+        const QRect submissionButtonRect(option.rect.right() - kSubmissionIconRight,
+                                         option.rect.top() + 5, 20, 20);
+        if (hasSubmissions(filePath) && submissionButtonRect.contains(mouseEvent->pos())) {
             isButtonClicked = true;
-            emit tagbutClicked(index);
-
-            const QString filePath = model->data(index, QFileSystemModel::FilePathRole).toString();
-            auto *tagDetail = new TagDetail(nullptr, filePath);
-            connect(tagDetail, &QObject::destroyed, tagDetail, &QObject::deleteLater);
-            tagDetail->show();
+            emit subbutClicked(index);
             return true;
         }
 
-        const QRect submissionButtonRect(option.rect.right() - 60, option.rect.top() + 5, 20, 20);
-        if (submissionButtonRect.contains(mouseEvent->pos())) {
+        const FilePathInfo &info = tagInfoFor(filePath);
+        const QVector<TagChip> chips = layoutChips(option, info, hasSubmissions(filePath));
+        for (const TagChip &chip : chips) {
+            if (!chip.rect.contains(mouseEvent->pos())) {
+                continue;
+            }
+
             isButtonClicked = true;
-            emit subbutClicked(index);
+            emit tagbutClicked(index);
+            TagDetail::showForPath(filePath); // 单例:同一文件复用已有详情窗口
             return true;
         }
 
@@ -85,16 +125,95 @@ bool TagItemDelegate::editorEvent(QEvent *event,
     return QStyledItemDelegate::editorEvent(event, model, option, index);
 }
 
-bool TagItemDelegate::hasTags(const QString &filePath) const
+bool TagItemDelegate::helpEvent(QHelpEvent *event, QAbstractItemView *view,
+                                const QStyleOptionViewItem &option, const QModelIndex &index)
 {
-    auto it = m_tagsCache.find(filePath);
-    if (it != m_tagsCache.end()) {
+    if (event->type() == QEvent::ToolTip && index.isValid()) {
+        const QString filePath = index.data(QFileSystemModel::FilePathRole).toString();
+        const FilePathInfo &info = tagInfoFor(filePath);
+        if (!info.tagName.trimmed().isEmpty()) {
+            QStringList lines;
+            lines << QStringLiteral("标签:%1").arg(info.tagName);
+            if (!info.annotation.trimmed().isEmpty()) {
+                lines << QStringLiteral("备注:%1").arg(info.annotation);
+            }
+            if (info.expirationDate.isValid()) {
+                lines << QStringLiteral("到期:%1").arg(
+                    info.expirationDate.toString(QStringLiteral("yyyy-MM-dd HH:mm")));
+            }
+            QToolTip::showText(event->globalPos(), lines.join(QLatin1Char('\n')), view);
+            return true;
+        }
+    }
+
+    return QStyledItemDelegate::helpEvent(event, view, option, index);
+}
+
+const FilePathInfo &TagItemDelegate::tagInfoFor(const QString &filePath) const
+{
+    auto it = m_infoCache.find(filePath);
+    if (it != m_infoCache.end()) {
         return it.value();
     }
 
-    const bool hasTagsValue = dbservice.dbTags().hasTagsForFile(filePath);
-    const_cast<TagItemDelegate *>(this)->m_tagsCache[filePath] = hasTagsValue;
-    return hasTagsValue;
+    FilePathInfo info{};
+    // 查询失败也可能是旧库缺备注行导致的"部分成功",保留已取到的标签字段
+    dbservice.dbTags().getFileInfoByFilePath(filePath, info);
+    info.filePath = filePath;
+
+    return const_cast<TagItemDelegate *>(this)->m_infoCache.insert(filePath, info).value();
+}
+
+bool TagItemDelegate::hasSubmissions(const QString &filePath) const
+{
+    auto it = m_submissionsCache.find(filePath);
+    if (it != m_submissionsCache.end()) {
+        return it.value();
+    }
+
+    const bool has = dbservice.dbBackup().hasSubmissions(filePath);
+    return const_cast<TagItemDelegate *>(this)->m_submissionsCache.insert(filePath, has).value();
+}
+
+QColor TagItemDelegate::tagColor(const QString &tagName)
+{
+    static const QColor palette[] = {
+        QColor(37, 99, 235),   QColor(5, 150, 105),  QColor(217, 119, 6),
+        QColor(220, 38, 38),   QColor(124, 58, 237), QColor(8, 145, 178),
+        QColor(219, 39, 119),  QColor(101, 163, 13),
+    };
+    constexpr int paletteSize = sizeof(palette) / sizeof(palette[0]);
+    if (tagName.isEmpty()) {
+        return palette[0];
+    }
+
+    return palette[qHash(tagName) % paletteSize];
+}
+
+QVector<TagItemDelegate::TagChip> TagItemDelegate::layoutChips(const QStyleOptionViewItem &option,
+                                                               const FilePathInfo &info,
+                                                               bool hasSubmissionIcon) const
+{
+    QVector<TagChip> chips;
+
+    const QString tagName = info.tagName.trimmed();
+    if (tagName.isEmpty()) {
+        return chips; // 没标签的文件不显示任何内容,打标走右键菜单"新建标签"
+    }
+
+    // 当前数据模型下一个文件对应一条标签;按列表渲染,后续支持多标签时无需改动绘制
+    int right = option.rect.right() - (hasSubmissionIcon ? kSubmissionReserve : kEdgeMargin);
+    const int top = option.rect.top() + (option.rect.height() - kChipHeight) / 2;
+    const QFontMetrics fm(option.font);
+    const QStringList tagNames = { tagName };
+    for (const QString &raw : tagNames) {
+        const QString text = fm.elidedText(raw, Qt::ElideRight, kMaxChipTextWidth);
+        const int width = fm.horizontalAdvance(text) + kChipHPadding * 2;
+        chips.append(TagChip{ text, tagColor(raw), QRect(right - width, top, width, kChipHeight) });
+        right -= width + kChipGap;
+    }
+
+    return chips;
 }
 
 void TagItemDelegate::showContextMenu(const QPoint &pos,
@@ -142,7 +261,9 @@ void TagItemDelegate::showContextMenu(const QPoint &pos,
 
 void TagItemDelegate::onNewTagTriggered(QAbstractItemModel *model, const QModelIndex &index)
 {
+    const QString filePath = model->data(index, QFileSystemModel::FilePathRole).toString();
     AddTag tagDialog;
+    tagDialog.setTargetFile(filePath);
     addTag(model, index, tagDialog);
 }
 
@@ -181,6 +302,9 @@ void TagItemDelegate::onDeleteFileTriggered(QAbstractItemModel *model, const QMo
 
     if (success) {
         model->removeRow(index.row());
+        // 磁盘文件已删除,同步清理标签/备注记录,避免管理页残留死卡片
+        cleanupTagRecordsForRemovedPath(filePath);
+        DataChangeNotifier::Instance().notifyTagChanged(filePath);
     } else {
         QMessageBox::warning(nullptr,
                              QStringLiteral("删除失败"),
@@ -188,6 +312,29 @@ void TagItemDelegate::onDeleteFileTriggered(QAbstractItemModel *model, const QMo
     }
 
     emit deleteFileRequested(filePath);
+}
+
+void TagItemDelegate::cleanupTagRecordsForRemovedPath(const QString &removedPath)
+{
+    const QString normalized = QDir::fromNativeSeparators(removedPath);
+    const QString childPrefix = normalized + QLatin1Char('/');
+
+    // 删除的可能是目录:其下所有带标签的子文件记录一并清理
+    const QStringList allPaths = dbservice.dbTags().getAllFilePaths();
+    for (const QString &path : allPaths) {
+        const QString candidate = QDir::fromNativeSeparators(path);
+        if (candidate.compare(normalized, Qt::CaseInsensitive) != 0
+            && !candidate.startsWith(childPrefix, Qt::CaseInsensitive)) {
+            continue;
+        }
+
+        int fileId = -1;
+        if (dbservice.dbTags().getFileId(path, fileId)) {
+            dbservice.dbTags().deleteTag(fileId);
+        }
+        m_infoCache.remove(path);
+        m_submissionsCache.remove(path);
+    }
 }
 
 void TagItemDelegate::onRenameTriggered(QAbstractItemModel *model, const QModelIndex &index)
@@ -264,6 +411,9 @@ void TagItemDelegate::addTag(const QAbstractItemModel *model, const QModelIndex 
     }
 
     const QString tagName = tagDialog.getTagName();
+    if (tagName.isEmpty()) {
+        return;
+    }
     const QString annotation = tagDialog.getAnnotation();
     const QDateTime expirationDate = tagDialog.getExpirationDate();
     const int reminderHours = tagDialog.getReminderTime();
@@ -292,8 +442,8 @@ void TagItemDelegate::addTag(const QAbstractItemModel *model, const QModelIndex 
         dbservice.dbTags().updateFileInfo(fileInfo);
     }
 
+    m_infoCache.remove(filePath);
     emit TagUpdated();
-    m_tagsCache[filePath] = true;
     DataChangeNotifier::Instance().notifyTagChanged(filePath);
 }
 
@@ -355,6 +505,7 @@ void TagItemDelegate::onOpenInTerminal(QAbstractItemModel *model, const QModelIn
 void TagItemDelegate::onTagDeleted(const QString &filePath)
 {
     Q_UNUSED(filePath);
-    m_tagsCache.clear();
+    m_infoCache.clear();
+    m_submissionsCache.clear();
     emit TagUpdated();
 }

@@ -24,6 +24,12 @@ ScheduleWid::ScheduleWid(QWidget *parent) : QWidget(parent), ui(new Ui::Schedule
         on_refreshBtn_clicked("全部");
     });
 
+    // 到期提醒的邮件发送器(此前从未初始化,有文件选"邮件提醒"时到期检查会空指针崩溃)。
+    // SendEmail 本身是带完整界面的窗体(邮件服务页用的就是它):必须显式 hide,
+    // 否则备忘标签页显示时它会跟着显示,把整个页面盖住
+    sendemail = new SendEmail(this);
+    sendemail->hide();
+
     startExpirationCheck();    // 启动定时器检查到期文件
 
     int showTime = SettingManager::Instance().tag_schedule_show_time();
@@ -152,7 +158,9 @@ void ScheduleWid::checkExpiration()
                                                .arg(file.tagName)
                                                .arg(file.annotation)
                                                .arg(file.expirationDate.toString());
-                sendemail->sendEmailWithData(file.filePath, allDetails, QStringList());
+                if (sendemail) {
+                    sendemail->sendEmailWithData(file.filePath, allDetails, QStringList());
+                }
             }
 
             // 更新数据库中的lastReminderIndex

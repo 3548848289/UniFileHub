@@ -45,27 +45,37 @@ QString TagList::getFilePath() const
 
 QString TagList::getExpInfo(const QDateTime expDate)
 {
-    QDateTime now = QDateTime::currentDateTime();
-    QString expInfo;
-
-    if (expDate.isValid()) {
-        qint64 mnow = now.secsTo(expDate);
-        if (mnow >= 0) {
-            int s = mnow / 3600;        // 计算小时数
-            int m = (mnow % 3600) / 60; // 计算分钟数
-            expInfo = QString("%1:%2").arg(s, 2, 10, QChar('0')).arg(m, 2, 10, QChar('0'));
-        } else {
-            // int oh = -mnow / 3600;         // 计算小时数（过期时是负值）
-            // int om = (-mnow % 3600) / 60;  // 计算分钟数（过期时是负值）
-            // expInfo = QString("%1:%2").arg(oh, 2, 10, QChar('0')).arg(om, 2, 10, QChar('0'));
-            expInfo = "已过期";
-        }
-    } else {
-        expInfo = "No expiration date";
+    if (!expDate.isValid()) {
+        return QStringLiteral("无到期日");
     }
 
-    return expDate.isValid()
-               ? expDate.toString("MM-dd hh:mm\n") + " (" + expInfo + ")" : expInfo;
+    const qint64 secondsLeft = QDateTime::currentDateTime().secsTo(expDate);
+    QString relative;
+    if (secondsLeft < 0) {
+        const qint64 overdue = -secondsLeft;
+        const qint64 days = overdue / 86400;
+        const qint64 hours = (overdue % 86400) / 3600;
+        if (days > 0) {
+            relative = QStringLiteral("已过期 %1 天").arg(days);
+        } else if (hours > 0) {
+            relative = QStringLiteral("已过期 %1 小时").arg(hours);
+        } else {
+            relative = QStringLiteral("已过期不到 1 小时");
+        }
+    } else {
+        const qint64 days = secondsLeft / 86400;
+        const qint64 hours = (secondsLeft % 86400) / 3600;
+        const qint64 minutes = (secondsLeft % 3600) / 60;
+        if (days > 0) {
+            relative = QStringLiteral("%1 天后到期").arg(days);
+        } else if (hours > 0) {
+            relative = QStringLiteral("%1 小时后到期").arg(hours);
+        } else {
+            relative = QStringLiteral("%1 分钟后到期").arg(minutes);
+        }
+    }
+
+    return expDate.toString("MM-dd hh:mm") + "\n" + relative;
 }
 
 void TagList::contextMenuEvent(QContextMenuEvent *event)
@@ -114,20 +124,8 @@ void TagList::onOpenLocationAction()
 
 void TagList::onDetailAction()
 {
-    // 实现单例模式，确保只有一个标签详情窗口实例
-    if (!tagdetail) {
-        tagdetail = new TagDetail(nullptr, fileInfo);
-        // 连接destroyed信号，当窗口关闭时重置指针
-        connect(tagdetail, &QObject::destroyed, this, [=]() {
-            tagdetail = nullptr;
-        });
-        tagdetail->show();
-    } else {
-        // 如果窗口已存在，将其显示在前台
-        tagdetail->show();
-        tagdetail->raise();
-        tagdetail->activateWindow();
-    }
+    // 单例入口:同一文件复用同一个详情窗口,保存后的刷新由 DataChangeNotifier 统一触发
+    TagDetail::showForFile(fileInfo);
 }
 
 void TagList::onUploadToDriveAction()

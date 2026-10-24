@@ -25,14 +25,19 @@ public:
     explicit FileBackupView(QWidget *parent = nullptr);
     ~FileBackupView();
 
+    // backupList 条目的自定义数据角色，供 BackupItemDelegate 绘制时读取
+    enum BackupItemRole {
+        CloudStatusRole = Qt::UserRole + 2,  // int，取值见 CloudStatus
+        SubmitTimeRole = Qt::UserRole + 3,   // QDateTime，备份提交时间
+        FileSizeRole = Qt::UserRole + 4      // qint64，备份文件大小
+    };
+    enum CloudStatus { CloudUnknown = 0, CloudExists = 1, CloudMissing = 2 };
+
     bool deleteBackupFile(const QString &backupFilePath);
 public slots:
     void updateFileList(const QString filePath);
 
 private slots:
-    void on_backupList_itemClicked(QListWidgetItem *item);
-    void on_fileListComboBox_currentIndexChanged(int index);
-
     void on_backupList_customContextMenuRequested(const QPoint &pos);
 
     void on_refreshBtn_clicked();
@@ -47,14 +52,17 @@ private:
     FileRestoreWid * file_restore_wid;
     Ui::FileBackupView *ui;
     QList<QString> missingFiles;
-    bool exists = false;
-    QString choosed_file;
     InlineMessagePopup *m_messagePopup = nullptr;
 
     void loadFileNames();
     void fillBackupList(const QString &filePath);
     void onBackupRecordAdded(const QString &filePath);
     void uploadFileToDrive(const QString &filePath);
+    void openBackupItem(QListWidgetItem *item);
+    void updateActionStates();
+    void onFileCurrentChanged();
+    void applyFileFilter(const QString &text);
+    QListWidgetItem *findFileItem(const QString &filePath) const;
 };
 
 #endif // FILEBACKUPVIEW_H

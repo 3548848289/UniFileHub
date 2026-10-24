@@ -89,6 +89,15 @@ void FileRestoreWid::on_restoreBtn_clicked()
     QString error;
     QString targetFilePath = ui->initpathEdit->text();
 
+    // 还原会覆盖原位置的现文件，覆盖前必须确认
+    if (QFile::exists(targetFilePath)) {
+        const QMessageBox::StandardButton answer = QMessageBox::question(
+            this, "还原文件",
+            QString("原位置已存在同名文件，还原将覆盖它，且无法恢复。确定继续吗？\n%1").arg(targetFilePath));
+        if (answer != QMessageBox::Yes)
+            return;
+    }
+
     if (!copyFileSafely(file_name, targetFilePath, &error)) {
         m_messagePopup->showMessage(error, true);
         return;

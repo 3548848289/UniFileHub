@@ -82,6 +82,7 @@ signals:
     void onFilesListUpdated(const QString& files);
     void fileListReady(const QStringList &fileNames);
     void returnStatus(bool exists);
+    void fileExistsChecked(const QString &filename, bool exists);
 
 private slots:
     void oncommitFin(QPointer<QNetworkReply> reply);
