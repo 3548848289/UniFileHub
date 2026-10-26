@@ -29,6 +29,7 @@ class FileSystem : public QWidget
 public:
     explicit FileSystem(QWidget *parent = nullptr);
     void changePath(const QString& path);
+    QString currentDirectory() const { return currentDir; }  // 供退出时记录上次目录
 
     ~FileSystem();
 

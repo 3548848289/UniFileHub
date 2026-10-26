@@ -224,6 +224,22 @@ QString SettingManager::file_system_file_system_dir()
     return settings.value("file_system/file_system_dir").toString();
 }
 
+bool SettingManager::file_system_use_default_start_dir()
+{
+    return settings.value("file_system/use_default_start_dir", true).toBool();
+}
+
+QString SettingManager::file_system_last_dir()
+{
+    return settings.value("file_system/last_dir").toString();
+}
+
+void SettingManager::set_file_system_last_dir(const QString &dir)
+{
+    settings.setValue("file_system/last_dir", dir);
+    settings.sync();
+}
+
 int SettingManager::tag_schedule_show_time() {
     int timeInSeconds = settings.value("tag_schedule/show_time", 60).toInt();
     return timeInSeconds;

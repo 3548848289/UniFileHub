@@ -66,24 +66,6 @@ bool FileRestoreWid::copyFileSafely(const QString &source, const QString &destin
     return true;
 }
 
-void FileRestoreWid::on_saveasBtn_clicked()
-{
-    QString suggestedName = QFileInfo(file_name).fileName();
-    QString savePath = QFileDialog::getSaveFileName(
-        this, tr("另存为"), QDir::homePath() + "/" + suggestedName, tr("所有文件 (*)"));
-
-    if (savePath.isEmpty())
-        return;
-
-    QString error;
-    if (!copyFileSafely(file_name, savePath, &error)) {
-        m_messagePopup->showMessage(error, true);
-        return;
-    }
-
-    m_messagePopup->showMessage("文件另存成功!");
-}
-
 void FileRestoreWid::on_restoreBtn_clicked()
 {
     QString error;

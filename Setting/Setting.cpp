@@ -129,6 +129,8 @@ void Setting::loadSettings() {
     ui->all_setting_iconColorBtn->setStyleSheet(QString("background-color: %1; color: %2;").arg(iconColor).arg(color1.lightness() < 128 ? "white" : "black"));
     ui->all_setting_secondaryIconColorBtn->setStyleSheet(QString("background-color: %1; color: %2;").arg(secondaryIconColor).arg(color2.lightness() < 128 ? "white" : "black"));
     ui->file_system_lineEdit->setText(settings.value("file_system/file_system_dir").toString());
+    ui->file_system_useDefaultDirCheckBox->setChecked(
+        settings.value("file_system/use_default_start_dir", true).toBool());
     ui->file_see_spinBox->setValue(settings.value("file_see/font_size", 12).toInt());
     ui->file_see_checkBox1->setChecked(settings.value("file_see/txt", true).toBool());
     ui->file_see_checkBox2->setChecked(settings.value("file_see/csv", true).toBool());
@@ -215,6 +217,8 @@ void Setting::saveSettings() {
     if (filesystemDir.isEmpty())
         filesystemDir = settings.value("file_system/file_system_dir", QStandardPaths::writableLocation(QStandardPaths::HomeLocation)).toString();
     setRealtimeValue("file_system/file_system_dir", filesystemDir);
+    setRealtimeValue("file_system/use_default_start_dir",
+                     ui->file_system_useDefaultDirCheckBox->isChecked());
 
     setRealtimeValue("file_see/font_size", ui->file_see_spinBox->value());
     setRealtimeValue("file_see/txt", ui->file_see_checkBox1->isChecked());

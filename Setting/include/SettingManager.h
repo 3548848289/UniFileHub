@@ -46,6 +46,9 @@ public:
 
 
     QString file_system_file_system_dir();
+    bool file_system_use_default_start_dir();
+    QString file_system_last_dir();
+    void set_file_system_last_dir(const QString &dir);
 
     int tag_schedule_show_time();
 

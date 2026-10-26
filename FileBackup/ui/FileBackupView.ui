@@ -122,22 +122,22 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="restoreBtn">
+      <widget class="QPushButton" name="quickRestoreBtn">
        <property name="toolTip">
-        <string>查看详情、还原到原路径或另存为</string>
+        <string>直接还原到原路径（覆盖原位置文件，不弹确认）</string>
        </property>
        <property name="text">
-        <string>还原…</string>
+        <string>快速还原</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="saveAsBtn">
+      <widget class="QPushButton" name="restoreBtn">
        <property name="toolTip">
-        <string>将该版本另存到指定位置</string>
+        <string>查看还原详情（上传时间、原路径等）</string>
        </property>
        <property name="text">
-        <string>另存为</string>
+        <string>还原</string>
        </property>
       </widget>
      </item>

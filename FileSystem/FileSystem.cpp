@@ -39,8 +39,17 @@ FileSystem::FileSystem(QWidget *parent)
 {
     ui->setupUi(this);
 
-    QString userDir = SettingManager::Instance().file_system_file_system_dir();
-    if (userDir.isEmpty())
+    // 启动目录：勾选"使用默认启动目录"时用默认目录，否则用上次退出时的目录；
+    // 所选目录无效时逐级回退到默认目录、主目录
+    QString userDir;
+    if (SettingManager::Instance().file_system_use_default_start_dir())
+        userDir = SettingManager::Instance().file_system_file_system_dir();
+    else
+        userDir = SettingManager::Instance().file_system_last_dir();
+
+    if (userDir.isEmpty() || !QDir(userDir).exists())
+        userDir = SettingManager::Instance().file_system_file_system_dir();
+    if (userDir.isEmpty() || !QDir(userDir).exists())
         userDir = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
 
     QDir dir(userDir);
@@ -154,6 +163,14 @@ FileSystem::FileSystem(QWidget *parent)
                 if (key == QStringLiteral("file_system/file_system_dir")) {
                     const QString path = value.toString().trimmed();
                     if (!path.isEmpty()) {
+                        changePath(path);
+                    }
+                } else if (key == QStringLiteral("file_system/use_default_start_dir")) {
+                    // 勾选时立即跳到默认启动目录，取消勾选时回到上次退出目录
+                    const QString path = value.toBool()
+                        ? SettingManager::Instance().file_system_file_system_dir()
+                        : SettingManager::Instance().file_system_last_dir();
+                    if (!path.isEmpty() && QDir(path).exists()) {
                         changePath(path);
                     }
                 }

@@ -278,6 +278,25 @@ FileBackupView::FileBackupView(QWidget *parent) : QWidget(parent), ui(new Ui::Fi
     // 底部操作栏
     connect(ui->openBtn, &QPushButton::clicked, this,
             [this] { openBackupItem(ui->backupList->currentItem()); });
+    connect(ui->quickRestoreBtn, &QPushButton::clicked, this, [this] {
+        QListWidgetItem *item = ui->backupList->currentItem();
+        if (!item)
+            return;
+        const QString file = item->data(Qt::UserRole).toString();
+        if (file.isEmpty() || !QFile::exists(file)) {
+            m_messagePopup->showMessage("文件已缺失，无法还原。", true);
+            return;
+        }
+        const QString initPath = dbservice.dbBackup().getInitPath(file);
+        if (initPath.isEmpty()) {
+            m_messagePopup->showMessage("找不到该备份对应的原始路径，无法快速还原。", true);
+            return;
+        }
+        // 快速还原：直接覆盖回原位置，成功时不弹任何提示；失败用浮提示报告
+        QString error;
+        if (!FileRestoreWid::copyFileSafely(file, initPath, &error))
+            m_messagePopup->showMessage(error, true);
+    });
     connect(ui->restoreBtn, &QPushButton::clicked, this, [this] {
         QListWidgetItem *item = ui->backupList->currentItem();
         if (!item)
@@ -285,23 +304,6 @@ FileBackupView::FileBackupView(QWidget *parent) : QWidget(parent), ui(new Ui::Fi
         const QString file = item->data(Qt::UserRole).toString();
         file_restore_wid = new FileRestoreWid(file, item->data(Qt::UserRole + 1).toBool(), this);
         file_restore_wid->exec();
-    });
-    connect(ui->saveAsBtn, &QPushButton::clicked, this, [this] {
-        QListWidgetItem *item = ui->backupList->currentItem();
-        if (!item)
-            return;
-        const QString file = item->data(Qt::UserRole).toString();
-        QString savePath = QFileDialog::getSaveFileName(
-            this, tr("另存为"), QDir::homePath() + "/" + QFileInfo(file).fileName(),
-            tr("所有文件 (*)"));
-        if (savePath.isEmpty())
-            return;
-        QString error;
-        if (!FileRestoreWid::copyFileSafely(file, savePath, &error)) {
-            m_messagePopup->showMessage(error, true);
-            return;
-        }
-        m_messagePopup->showMessage("文件另存成功!");
     });
     connect(ui->commitBtn, &QPushButton::clicked, this, [this] {
         QListWidgetItem *item = ui->backupList->currentItem();
@@ -341,6 +343,14 @@ FileBackupView::FileBackupView(QWidget *parent) : QWidget(parent), ui(new Ui::Fi
                 break;
             }
         }
+    });
+
+    // 上传云端结果用自动消失的浮提示反馈（ServerManager 不再弹模态窗）
+    connect(serverManager, &ServerManager::commitSuccess, this, [this] {
+        m_messagePopup->showMessage("文件已上传至云端");
+    });
+    connect(serverManager, &ServerManager::commitFailed, this, [this] {
+        m_messagePopup->showMessage("上传云端失败，请检查服务器连接。", true);
     });
 
     connect(serverManager, &ServerManager::onFilesListUpdated, this, &FileBackupView::updateFileList);
@@ -532,8 +542,8 @@ void FileBackupView::updateActionStates()
     const bool hasLocalFile = !filePath.isEmpty() && QFile::exists(filePath);
 
     ui->openBtn->setEnabled(hasLocalFile);
+    ui->quickRestoreBtn->setEnabled(hasLocalFile);
     ui->restoreBtn->setEnabled(item != nullptr);
-    ui->saveAsBtn->setEnabled(hasLocalFile);
     ui->commitBtn->setEnabled(hasLocalFile);
     ui->deleteBtn->setEnabled(item != nullptr);
 }

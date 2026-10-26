@@ -25,7 +25,6 @@ public:
     static bool copyFileSafely(const QString &source, const QString &destination, QString *errorMsg);
 
 private slots:
-    void on_saveasBtn_clicked();
     void on_restoreBtn_clicked();
 
 private:

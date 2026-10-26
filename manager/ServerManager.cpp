@@ -30,15 +30,15 @@ void ServerManager::commitFile(const QString& filepath) {
 
 void ServerManager::oncommitFin(QPointer<QNetworkReply> reply)
 {
+    // 结果通过信号通知调用方展示（自动消失的浮提示），不再弹模态窗
     if (!reply) {
-        QMessageBox::critical(nullptr, "上传失败", "网络响应无效！");
+        emit commitFailed();
         return;
     }
     if (reply->error() == QNetworkReply::NoError) {
-        QMessageBox::information(nullptr, "成功", "文件已经上传至云端");
+        emit commitSuccess();
     } else {
-        QString friendlyMessage = friendlyErrorMessage(reply->error());
-        QMessageBox::critical(nullptr, "上传失败", friendlyMessage);
+        qDebug() << "Upload failed:" << friendlyErrorMessage(reply->error());
         emit commitFailed();
     }
 

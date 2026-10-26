@@ -368,11 +368,17 @@ void MainWindow::applyPanelWidthRatio()
     const QList<int> currentSizes = m_mainSplitter->sizes();
     if (currentSizes.size() < 3)
         return;
+    if (currentSizes[1] == 0)
+        return;  // 面板被 togglePanel 隐藏时保持原状，不要强行撑开
     const int railWidth = currentSizes[0];
     const int available = m_mainSplitter->width() - railWidth;
     if (available <= 0)
         return;
-    const int panelWidth = qBound(0, int(available * m_panelWidthRatio + 0.5), available);
+    int panelWidth = int(available * m_panelWidthRatio + 0.5);
+    // 面板过窄会挤压操作栏按钮，窗口放得下时保底 340
+    if (available >= 340)
+        panelWidth = qMax(panelWidth, 340);
+    panelWidth = qBound(0, panelWidth, available);
     m_mainSplitter->setSizes({railWidth, panelWidth, available - panelWidth});
 }
 
@@ -457,6 +463,9 @@ void MainWindow::closeEvent(QCloseEvent *event)
         SettingManager::Instance().setWindowSize(normalRect.size());
         SettingManager::Instance().setWindowPosition(normalRect.topLeft());
     }
+
+    // 记录退出时的文件目录，供"使用上次退出目录"的启动方式使用
+    SettingManager::Instance().set_file_system_last_dir(file_system->currentDirectory());
 
     SettingManager::Instance().setWindowMaximized(maximized);
     event->accept();
