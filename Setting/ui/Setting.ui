@@ -236,6 +236,48 @@
          </property>
         </widget>
        </item>
+       <item row="5" column="0">
+        <widget class="QLabel" name="all_setting_label6">
+         <property name="text">
+          <string>右键菜单</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <widget class="QCheckBox" name="all_setting_contextMenuCheckBox">
+         <property name="text">
+          <string>显示“用 UniFileHub 打开”</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="1">
+        <widget class="QCheckBox" name="all_setting_contextMenuBackupCheckBox">
+         <property name="text">
+          <string>显示“UniFileHub 文件备份”</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="1">
+        <widget class="QCheckBox" name="all_setting_contextMenuTagCheckBox">
+         <property name="text">
+          <string>显示“UniFileHub 备忘标签”</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="1">
+        <widget class="QCheckBox" name="all_setting_contextMenuUploadCheckBox">
+         <property name="text">
+          <string>显示“UniFileHub 上传网盘”</string>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="1">
+        <widget class="QCheckBox" name="all_setting_contextMenuFolderCheckBox">
+         <property name="text">
+          <string>显示“UniFileHub 打开文件夹”</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="file_system">
@@ -817,6 +859,11 @@
   <tabstop>treeWidget</tabstop>
   <tabstop>all_setting_spinBox</tabstop>
   <tabstop>all_setting_checkBox</tabstop>
+  <tabstop>all_setting_contextMenuCheckBox</tabstop>
+  <tabstop>all_setting_contextMenuBackupCheckBox</tabstop>
+  <tabstop>all_setting_contextMenuTagCheckBox</tabstop>
+  <tabstop>all_setting_contextMenuUploadCheckBox</tabstop>
+  <tabstop>all_setting_contextMenuFolderCheckBox</tabstop>
   <tabstop>file_system_lineEdit</tabstop>
   <tabstop>file_system_Btn</tabstop>
   <tabstop>email_service_lineEdit_1</tabstop>

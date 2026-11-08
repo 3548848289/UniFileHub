@@ -44,6 +44,7 @@
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
+class ExternalActionDispatcher;
 class MainWindow : public QMainWindow {
     Q_OBJECT
 
@@ -57,6 +58,10 @@ signals:
 public slots:
     void showSetting();
     void openFileFromCommandLine(const QString& filePath);
+    // 处理外部动作请求（资源管理器右键菜单/命令行），action ∈ open/backup/tag/upload/openfolder
+    void handleExternalAction(const QString &action, const QString &filePath);
+    // 打开文件夹：切到文件系统视图并把面包屑路径定位到 folderPath
+    void openFolderInFileSystem(const QString &folderPath, bool addToHistory = true);
 
 private slots:
     void on_actionopen_triggered();
@@ -98,11 +103,11 @@ private:
     void applyPanelWidthRatio();
     void onTabContextMenuRequested(const QPoint &pos);
     void togglePanel(QWidget *target);
-    void openFolderInFileSystem(const QString &folderPath, bool addToHistory = true);
     void openTerminal(const QString &workingDirectory = QString());
 
     QSplitter *m_mainSplitter = nullptr;  // 主窗口三栏分隔器
     double m_panelWidthRatio = 0.30;      // 左侧面板宽度占比，窗口缩放时按此维持
+    ExternalActionDispatcher *externalActionDispatcher = nullptr;
 };
 
 #endif // MAINWINDOW_H

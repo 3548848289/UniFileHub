@@ -13,6 +13,7 @@ set(MAIN_SOURCES
     FindDialog.cpp
     TabManager.cpp
     TabFactory.cpp
+    ExternalActionDispatcher.cpp
 
 
     include/mainwindow.h
@@ -22,6 +23,7 @@ set(MAIN_SOURCES
     include/FindDialog.h
     include/TabFactory.h
     include/TabManager.h
+    include/ExternalActionDispatcher.h
 
     ui/WidgetFunctional.ui
     ui/mainwindow.ui

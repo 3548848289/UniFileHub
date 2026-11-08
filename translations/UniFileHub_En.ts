@@ -1127,6 +1127,32 @@ Refresh file list to get the latest status?</translation>
     </message>
 </context>
 <context>
+    <name>ExternalActionDispatcher</name>
+    <message>
+        <location filename="../main/ExternalActionDispatcher.cpp" line="44"/>
+        <location filename="../main/ExternalActionDispatcher.cpp" line="62"/>
+        <location filename="../main/ExternalActionDispatcher.cpp" line="112"/>
+        <location filename="../main/ExternalActionDispatcher.cpp" line="119"/>
+        <source>提示</source>
+        <translation type="unfinished">Info</translation>
+    </message>
+    <message>
+        <location filename="../main/ExternalActionDispatcher.cpp" line="44"/>
+        <source>文件不存在，无法备份。</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/ExternalActionDispatcher.cpp" line="62"/>
+        <source>文件不存在，无法添加标签。</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main/ExternalActionDispatcher.cpp" line="112"/>
+        <source>请选择一个本地文件上传到网盘。</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>FileBackupView</name>
     <message>
         <location filename="../FileBackup/ui/FileBackupView.ui" line="20"/>
@@ -1640,63 +1666,56 @@ Refresh file list to get the latest status?</translation>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="129"/>
-        <location filename="../main/mainwindow.cpp" line="135"/>
+        <location filename="../main/mainwindow.cpp" line="133"/>
+        <location filename="../main/mainwindow.cpp" line="139"/>
         <source>打开文件夹</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="199"/>
-        <location filename="../main/mainwindow.cpp" line="205"/>
-        <location filename="../main/mainwindow.cpp" line="215"/>
-        <location filename="../main/mainwindow.cpp" line="496"/>
-        <location filename="../main/mainwindow.cpp" line="612"/>
-        <location filename="../main/mainwindow.cpp" line="618"/>
-        <location filename="../main/mainwindow.cpp" line="624"/>
-        <location filename="../main/mainwindow.cpp" line="630"/>
-        <location filename="../main/mainwindow.cpp" line="708"/>
+        <location filename="../main/mainwindow.cpp" line="211"/>
+        <location filename="../main/mainwindow.cpp" line="510"/>
+        <location filename="../main/mainwindow.cpp" line="628"/>
+        <location filename="../main/mainwindow.cpp" line="634"/>
+        <location filename="../main/mainwindow.cpp" line="640"/>
+        <location filename="../main/mainwindow.cpp" line="646"/>
+        <location filename="../main/mainwindow.cpp" line="731"/>
         <source>提示</source>
         <translation type="unfinished">Info</translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="199"/>
-        <source>请选择一个本地文件上传到网盘。</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../main/mainwindow.cpp" line="215"/>
+        <location filename="../main/mainwindow.cpp" line="211"/>
         <source>未找到个人网盘窗口，无法下载。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="429"/>
-        <location filename="../main/mainwindow.cpp" line="430"/>
-        <location filename="../main/mainwindow.cpp" line="554"/>
+        <location filename="../main/mainwindow.cpp" line="441"/>
+        <location filename="../main/mainwindow.cpp" line="442"/>
+        <location filename="../main/mainwindow.cpp" line="570"/>
         <source>打开文件</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="496"/>
+        <location filename="../main/mainwindow.cpp" line="510"/>
         <source>该文件夹不存在或不是有效文件夹。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="612"/>
+        <location filename="../main/mainwindow.cpp" line="628"/>
         <source>当前页签不是本地文件，无法上传到网盘。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="618"/>
+        <location filename="../main/mainwindow.cpp" line="634"/>
         <source>当前页签还没有保存成文件，请先保存后再上传到网盘。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="624"/>
+        <location filename="../main/mainwindow.cpp" line="640"/>
         <source>当前页签对应的本地文件不存在，无法上传到网盘。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="708"/>
+        <location filename="../main/mainwindow.cpp" line="731"/>
         <source>当前构建未启用内置终端。</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1705,7 +1724,7 @@ Refresh file list to get the latest status?</translation>
         <translation type="vanished">Open File</translation>
     </message>
     <message>
-        <location filename="../main/mainwindow.cpp" line="555"/>
+        <location filename="../main/mainwindow.cpp" line="571"/>
         <source>All Files (*);;CSV Files (*.csv);;Text Files (*.txt)</source>
         <translation>All Files (*);;CSV Files (*.csv);;Text Files (*.txt)</translation>
     </message>
@@ -2017,7 +2036,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <location filename="../Setting/ui/Setting.ui" line="57"/>
-        <location filename="../Setting/ui/Setting.ui" line="292"/>
+        <location filename="../Setting/ui/Setting.ui" line="334"/>
         <source>字体大小</source>
         <translation>Font Size</translation>
     </message>
@@ -2058,7 +2077,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <location filename="../Setting/ui/Setting.ui" line="103"/>
-        <location filename="../Setting/ui/Setting.ui" line="793"/>
+        <location filename="../Setting/ui/Setting.ui" line="835"/>
         <source>个人网盘</source>
         <translation>Personal Drive</translation>
     </message>
@@ -2100,7 +2119,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <message>
         <location filename="../Setting/ui/Setting.ui" line="132"/>
         <location filename="../Setting/ui/Setting.ui" line="188"/>
-        <location filename="../Setting/ui/Setting.ui" line="677"/>
+        <location filename="../Setting/ui/Setting.ui" line="719"/>
         <source>主题</source>
         <translation>Theme</translation>
     </message>
@@ -2111,7 +2130,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <location filename="../Setting/ui/Setting.ui" line="127"/>
-        <location filename="../Setting/ui/Setting.ui" line="654"/>
+        <location filename="../Setting/ui/Setting.ui" line="696"/>
         <source>字体</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2147,7 +2166,37 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation>Secondary Icon Color</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="246"/>
+        <location filename="../Setting/ui/Setting.ui" line="242"/>
+        <source>右键菜单</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Setting/ui/Setting.ui" line="249"/>
+        <source>显示“用 UniFileHub 打开”</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Setting/ui/Setting.ui" line="256"/>
+        <source>显示“UniFileHub 文件备份”</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Setting/ui/Setting.ui" line="263"/>
+        <source>显示“UniFileHub 备忘标签”</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Setting/ui/Setting.ui" line="270"/>
+        <source>显示“UniFileHub 上传网盘”</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Setting/ui/Setting.ui" line="277"/>
+        <source>显示“UniFileHub 打开文件夹”</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Setting/ui/Setting.ui" line="288"/>
         <source>默认
 启用
 目录</source>
@@ -2156,81 +2205,81 @@ Working
 Directory</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="261"/>
-        <location filename="../Setting/ui/Setting.ui" line="464"/>
-        <location filename="../Setting/ui/Setting.ui" line="528"/>
+        <location filename="../Setting/ui/Setting.ui" line="303"/>
+        <location filename="../Setting/ui/Setting.ui" line="506"/>
+        <location filename="../Setting/ui/Setting.ui" line="570"/>
         <source>选取
 路径</source>
         <translation>Select
 Path</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="269"/>
+        <location filename="../Setting/ui/Setting.ui" line="311"/>
         <source>勾选：启动时进入默认启用目录；不勾选：进入上次退出时的目录</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="272"/>
+        <location filename="../Setting/ui/Setting.ui" line="314"/>
         <source>使用默认启动目录</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="302"/>
+        <location filename="../Setting/ui/Setting.ui" line="344"/>
         <source>csv文件</source>
         <translation>CSV Files</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="331"/>
+        <location filename="../Setting/ui/Setting.ui" line="373"/>
         <source>image文件</source>
         <translation>Image Files</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="338"/>
+        <location filename="../Setting/ui/Setting.ui" line="380"/>
         <source>xlsx文件</source>
         <translation>XLSX Files</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="345"/>
+        <location filename="../Setting/ui/Setting.ui" line="387"/>
         <source>txt文件</source>
         <translation>TXT Files</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="358"/>
+        <location filename="../Setting/ui/Setting.ui" line="400"/>
         <source>文件操作窗口可见性</source>
         <translation>File Control Panel Visibility</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="385"/>
+        <location filename="../Setting/ui/Setting.ui" line="427"/>
         <source>服务器</source>
         <translation>Server</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="395"/>
+        <location filename="../Setting/ui/Setting.ui" line="437"/>
         <source>用户名</source>
         <translation>Username</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="405"/>
+        <location filename="../Setting/ui/Setting.ui" line="447"/>
         <source>密码</source>
         <translation>Password</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="415"/>
+        <location filename="../Setting/ui/Setting.ui" line="457"/>
         <source>端口</source>
         <translation>Port</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="425"/>
+        <location filename="../Setting/ui/Setting.ui" line="467"/>
         <source>发件人</source>
         <translation>Sender</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="435"/>
+        <location filename="../Setting/ui/Setting.ui" line="477"/>
         <source>收件人</source>
         <translation>Recipient</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="452"/>
+        <location filename="../Setting/ui/Setting.ui" line="494"/>
         <source>程序
 备份
 目录</source>
@@ -2239,22 +2288,22 @@ Backup
 Directory</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="472"/>
+        <location filename="../Setting/ui/Setting.ui" line="514"/>
         <source>云端IP地址</source>
         <translation>Cloud IP Address</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="495"/>
+        <location filename="../Setting/ui/Setting.ui" line="537"/>
         <source>单位均为（时:分）</source>
         <translation>Unit: (hours:minutes)</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="502"/>
+        <location filename="../Setting/ui/Setting.ui" line="544"/>
         <source>通知消息显示时间</source>
         <translation>Notification Display Time</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="513"/>
+        <location filename="../Setting/ui/Setting.ui" line="555"/>
         <source>文件
 下载
 目录</source>
@@ -2263,23 +2312,23 @@ Download
 Directory</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="536"/>
+        <location filename="../Setting/ui/Setting.ui" line="578"/>
         <source>上传/下载
 同名处理</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="565"/>
+        <location filename="../Setting/ui/Setting.ui" line="607"/>
         <source>初始加载记录</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="582"/>
+        <location filename="../Setting/ui/Setting.ui" line="624"/>
         <source>小时</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="604"/>
+        <location filename="../Setting/ui/Setting.ui" line="646"/>
         <source>复制后窗口行为</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2292,102 +2341,102 @@ Directory</translation>
         <translation type="vanished">Unit: Hours</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="613"/>
+        <location filename="../Setting/ui/Setting.ui" line="655"/>
         <source>双击复制时是否最小化。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="620"/>
+        <location filename="../Setting/ui/Setting.ui" line="662"/>
         <source>CTRL+C 复制时是否最小化。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="627"/>
+        <location filename="../Setting/ui/Setting.ui" line="669"/>
         <source>右键复制时是否最小化。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="687"/>
+        <location filename="../Setting/ui/Setting.ui" line="729"/>
         <source>终端类型</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="694"/>
+        <location filename="../Setting/ui/Setting.ui" line="736"/>
         <source>PowerShell</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="701"/>
+        <location filename="../Setting/ui/Setting.ui" line="743"/>
         <source>CMD</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="712"/>
+        <location filename="../Setting/ui/Setting.ui" line="754"/>
         <source>共享文档</source>
         <translation>Shared Documents</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="719"/>
+        <location filename="../Setting/ui/Setting.ui" line="761"/>
         <source>IP端口</source>
         <translation>IP Port</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="726"/>
+        <location filename="../Setting/ui/Setting.ui" line="768"/>
         <source>用户信息</source>
         <translation>User Info</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="736"/>
+        <location filename="../Setting/ui/Setting.ui" line="778"/>
         <source>提交文件</source>
         <translation>Submit File</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="746"/>
+        <location filename="../Setting/ui/Setting.ui" line="788"/>
         <source>云端备份</source>
         <translation>Cloud Backup</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="759"/>
+        <location filename="../Setting/ui/Setting.ui" line="801"/>
         <source>例如：127.0.0.1:5000</source>
         <translation>e.g.: 127.0.0.1:5000</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="766"/>
+        <location filename="../Setting/ui/Setting.ui" line="808"/>
         <source>一键改IP</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="778"/>
+        <location filename="../Setting/ui/Setting.ui" line="820"/>
         <source>确定</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="803"/>
+        <location filename="../Setting/ui/Setting.ui" line="845"/>
         <source>云端剪切板</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/Setting.cpp" line="30"/>
+        <location filename="../Setting/Setting.cpp" line="41"/>
         <source>默认覆盖</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/Setting.cpp" line="33"/>
+        <location filename="../Setting/Setting.cpp" line="44"/>
         <source>默认自动重命名</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/Setting.cpp" line="36"/>
+        <location filename="../Setting/Setting.cpp" line="47"/>
         <source>默认弹出提示框</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/Setting.cpp" line="83"/>
+        <location filename="../Setting/Setting.cpp" line="94"/>
         <source>配置已保存</source>
         <translation>Configuration Saved</translation>
     </message>
     <message>
-        <location filename="../Setting/Setting.cpp" line="84"/>
+        <location filename="../Setting/Setting.cpp" line="95"/>
         <source>是否需要重启程序以应用配置？</source>
         <translation>Restart the application to apply changes?</translation>
     </message>

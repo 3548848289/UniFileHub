@@ -13,6 +13,7 @@
 #include <QTimeEdit>
 #include "include/IconManager.h"
 #include "include/SettingManager.h"
+#include "include/ShellContextMenu.h"
 #if UNIFILEHUB_ENABLE_TERMINAL
 #include "../Resources/ThirdParty/KodoTerm/include/KodoTerm/KodoTermConfig.hpp"
 #endif
@@ -24,6 +25,16 @@ Setting::Setting(QWidget *parent) : QWidget(parent), ui(new Ui::Setting)
     is_modified = false;
     ui->stackedWidget->setCurrentIndex(0);
     ui->treeWidget->setHeaderHidden(true);
+
+#ifndef Q_OS_WIN
+    // 右键菜单只在 Windows 上有意义
+    ui->all_setting_label6->hide();
+    ui->all_setting_contextMenuCheckBox->hide();
+    ui->all_setting_contextMenuBackupCheckBox->hide();
+    ui->all_setting_contextMenuTagCheckBox->hide();
+    ui->all_setting_contextMenuUploadCheckBox->hide();
+    ui->all_setting_contextMenuFolderCheckBox->hide();
+#endif
 
     ui->tag_schedule_timeEdit3->setDisplayFormat("HH:mm");
     ui->personal_drive_nameConflictComboBox->addItem(
@@ -102,7 +113,17 @@ void Setting::loadSettings() {
     ui->all_setting_comboBox->setCurrentIndex(settings.value("all_setting/theme", 0).toInt());
 
     ui->all_setting_checkBox->setChecked(settings.value("all_setting/fenableray", true).toBool());
-    
+    ui->all_setting_contextMenuCheckBox->setChecked(
+        settings.value("all_setting/context_menu", true).toBool());
+    ui->all_setting_contextMenuBackupCheckBox->setChecked(
+        settings.value("all_setting/context_menu_backup", true).toBool());
+    ui->all_setting_contextMenuTagCheckBox->setChecked(
+        settings.value("all_setting/context_menu_tag", true).toBool());
+    ui->all_setting_contextMenuUploadCheckBox->setChecked(
+        settings.value("all_setting/context_menu_upload", true).toBool());
+    ui->all_setting_contextMenuFolderCheckBox->setChecked(
+        settings.value("all_setting/context_menu_folder", true).toBool());
+
 #if UNIFILEHUB_ENABLE_TERMINAL
     // 加载终端设置
     ui->terminal_font_combo->setCurrentFont(QFont(settings.value("terminal/font_family", "Consolas").toString()));
@@ -197,7 +218,18 @@ void Setting::saveSettings() {
     setRestartValue("all_setting/theme", ui->all_setting_comboBox->currentIndex());
 
     setRestartValue("all_setting/fenableray", ui->all_setting_checkBox->isChecked());
-    
+
+    // 右键菜单在勾选时即时生效，无需重启
+    setRealtimeValue("all_setting/context_menu", ui->all_setting_contextMenuCheckBox->isChecked());
+    setRealtimeValue("all_setting/context_menu_backup",
+                     ui->all_setting_contextMenuBackupCheckBox->isChecked());
+    setRealtimeValue("all_setting/context_menu_tag",
+                     ui->all_setting_contextMenuTagCheckBox->isChecked());
+    setRealtimeValue("all_setting/context_menu_upload",
+                     ui->all_setting_contextMenuUploadCheckBox->isChecked());
+    setRealtimeValue("all_setting/context_menu_folder",
+                     ui->all_setting_contextMenuFolderCheckBox->isChecked());
+
 #if UNIFILEHUB_ENABLE_TERMINAL
     // 保存终端设置
     setRealtimeValue("terminal/font_family", ui->terminal_font_combo->currentFont().family());
@@ -357,6 +389,26 @@ void Setting::setupRealtimeBindings()
     });
     connect(ui->all_setting_checkBox, &QCheckBox::toggled, this, [this](bool) {
         is_modified = true;
+    });
+    connect(ui->all_setting_contextMenuCheckBox, &QCheckBox::toggled, this, [this](bool checked) {
+        setRealtimeValue("all_setting/context_menu", checked);
+        ShellContextMenu::setVerbEnabled(ShellContextMenu::Verb::Open, checked);
+    });
+    connect(ui->all_setting_contextMenuBackupCheckBox, &QCheckBox::toggled, this, [this](bool checked) {
+        setRealtimeValue("all_setting/context_menu_backup", checked);
+        ShellContextMenu::setVerbEnabled(ShellContextMenu::Verb::Backup, checked);
+    });
+    connect(ui->all_setting_contextMenuTagCheckBox, &QCheckBox::toggled, this, [this](bool checked) {
+        setRealtimeValue("all_setting/context_menu_tag", checked);
+        ShellContextMenu::setVerbEnabled(ShellContextMenu::Verb::Tag, checked);
+    });
+    connect(ui->all_setting_contextMenuUploadCheckBox, &QCheckBox::toggled, this, [this](bool checked) {
+        setRealtimeValue("all_setting/context_menu_upload", checked);
+        ShellContextMenu::setVerbEnabled(ShellContextMenu::Verb::Upload, checked);
+    });
+    connect(ui->all_setting_contextMenuFolderCheckBox, &QCheckBox::toggled, this, [this](bool checked) {
+        setRealtimeValue("all_setting/context_menu_folder", checked);
+        ShellContextMenu::setVerbEnabled(ShellContextMenu::Verb::Folder, checked);
     });
 }
 

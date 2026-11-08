@@ -1,4 +1,5 @@
 #include "include/mainwindow.h"
+#include "include/ExternalActionDispatcher.h"
 #include "ui/ui_mainwindow.h"
 #include "../manager/include/dbService.h"
 #include "../Setting/include/ThemeManager.h"
@@ -8,6 +9,9 @@
 #include <QGuiApplication>
 #include <QScreen>
 #include <QTimer>
+
+// 文件系统面板（combinedWidget）最宽占可用宽度的比例
+static constexpr double kMaxPanelWidthRatio = 0.30;
 
 void MainWindow::initCoreWidgets() {
     loginButton = new QPushButton(this);
@@ -194,16 +198,8 @@ void MainWindow::initConnect() {
     connect(file_system, &FileSystem::folderNavigated, recentFilesManager, &RecentFilesManager::addFolder);
     connect(file_system, &FileSystem::deleteFileRequested, tabManager, &TabManager::deleteFile);
     connect(file_system, &FileSystem::uploadToDriveRequested, this, [this](const QString &filePath) {
-        const QFileInfo fileInfo(filePath);
-        if (!fileInfo.exists() || !fileInfo.isFile()) {
-            QMessageBox::information(this, tr("提示"), tr("请选择一个本地文件上传到网盘。"));
-            return;
-        }
-
-        QString uploadError;
-        if (!DriveUploadHelper::uploadToCurrentDirectory(this, filePath, &uploadError) && !uploadError.isEmpty()) {
-            QMessageBox::information(this, tr("提示"), uploadError);
-        }
+        // 与资源管理器右键"上传网盘"共用同一套上传逻辑
+        externalActionDispatcher->dispatch("upload", filePath);
     });
     connect(file_system, &FileSystem::openTerminalRequested, this, [this](const QString &directoryPath) {
         openTerminal(directoryPath);
@@ -265,7 +261,7 @@ void MainWindow::initMemubarLayout() {
     widgetfunc->setFixedWidth(60);
 
     m_mainSplitter->addWidget(ui->combinedWidget);
-    // 面板宽度由 resizeEvent 按比例维持（默认 30%），不再设最大宽度上限
+    // 面板宽度由 resizeEvent 按比例维持（默认 30%），拖动时最宽不超过 30%
 
     // 添加tabManager的容器部件，并隐藏原始tabWidget
     QWidget* containerWidget = tabManager->getContainerWidget();
@@ -291,8 +287,18 @@ void MainWindow::initMemubarLayout() {
         if (currentSizes.size() < 3)
             return;
         const int available = currentSizes[1] + currentSizes[2];
-        if (available > 0)
-            m_panelWidthRatio = qBound(0.10, double(currentSizes[1]) / available, 0.60);
+        if (available <= 0)
+            return;
+        const double ratio = double(currentSizes[1]) / available;
+        if (ratio > kMaxPanelWidthRatio) {
+            // 最宽 30%：拖过头就把面板吸附回上限
+            m_panelWidthRatio = kMaxPanelWidthRatio;
+            applyPanelWidthRatio();
+        } else if (ratio < 0.10) {
+            m_panelWidthRatio = 0.10;
+        } else {
+            m_panelWidthRatio = ratio;
+        }
     });
     applyPanelWidthRatio();
     
@@ -368,16 +374,21 @@ void MainWindow::applyPanelWidthRatio()
     const QList<int> currentSizes = m_mainSplitter->sizes();
     if (currentSizes.size() < 3)
         return;
-    if (currentSizes[1] == 0)
-        return;  // 面板被 togglePanel 隐藏时保持原状，不要强行撑开
     const int railWidth = currentSizes[0];
     const int available = m_mainSplitter->width() - railWidth;
+    // 用 maximumWidth 从物理上限制拖动范围：文件系统面板最宽 30%。
+    // splitterMoved 里 setSizes 会被正在进行的拖拽覆盖，只有这里能真正拦住。
+    if (available > 0) {
+        ui->combinedWidget->setMaximumWidth(int(available * kMaxPanelWidthRatio + 0.5));
+    }
+    if (currentSizes[1] == 0)
+        return;  // 面板被 togglePanel 隐藏时保持原状，不要强行撑开
     if (available <= 0)
         return;
     int panelWidth = int(available * m_panelWidthRatio + 0.5);
-    // 面板过窄会挤压操作栏按钮，窗口放得下时保底 340
+    // 面板过窄会挤压操作栏按钮，窗口放得下时保底 340（以 30% 上限为准）
     if (available >= 340)
-        panelWidth = qMax(panelWidth, 340);
+        panelWidth = qMax(panelWidth, qMin(340, int(available * kMaxPanelWidthRatio + 0.5)));
     panelWidth = qBound(0, panelWidth, available);
     m_mainSplitter->setSizes({railWidth, panelWidth, available - panelWidth});
 }
@@ -388,6 +399,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 {
     ui->setupUi(this);
     this->setWindowTitle("UniFileHub");
+    externalActionDispatcher = new ExternalActionDispatcher(this, this);
     initCoreWidgets();
     initConnect();
     initMemubarLayout();
@@ -484,7 +496,9 @@ void MainWindow::togglePanel(QWidget* target) {
     } else {
         ui->stackedWidget->show();
         ui->stackedWidget->setCurrentWidget(target);
-        QList<int> sizes = {60, 340, 600}; // 恢复
+        // 恢复预设宽度，但不超过面板最宽 30% 的限制
+        const int panelWidth = qMin(340, int((qobject_cast<QSplitter*>(centralWidget())->width() - 60) * kMaxPanelWidthRatio + 0.5));
+        QList<int> sizes = {60, panelWidth, 600}; // 恢复
         qobject_cast<QSplitter*>(centralWidget())->setSizes(sizes);
     }
 }
@@ -502,7 +516,9 @@ void MainWindow::openFolderInFileSystem(const QString &folderPath, bool addToHis
     ui->stackedWidget->setCurrentWidget(file_system);
 
     if (auto *splitter = qobject_cast<QSplitter*>(centralWidget())) {
-        splitter->setSizes({60, 340, 600});
+        // 预设宽度，但不超过面板最宽 30% 的限制
+        const int panelWidth = qMin(340, int((splitter->width() - 60) * kMaxPanelWidthRatio + 0.5));
+        splitter->setSizes({60, panelWidth, 600});
     }
 
     file_system->changePath(absolutePath);
@@ -644,6 +660,13 @@ void MainWindow::openFileFromCommandLine(const QString& filePath)
 {
     if (tabManager && QFile::exists(filePath)) {
         tabManager->openFile(filePath);
+    }
+}
+
+void MainWindow::handleExternalAction(const QString &action, const QString &filePath)
+{
+    if (externalActionDispatcher) {
+        externalActionDispatcher->dispatch(action, filePath);
     }
 }
 

@@ -1,6 +1,7 @@
 set(SETTING_SOURCES
     Setting.cpp
     SettingManager.cpp
+    ShellContextMenu.cpp
     AppHelp.cpp
     IconManager.cpp
     ThemeManager.cpp
@@ -9,6 +10,7 @@ set(SETTING_SOURCES
 set(SETTING_HEADERS
     include/Setting.h
     include/SettingManager.h
+    include/ShellContextMenu.h
     include/AppHelp.h
     include/IconManager.h
     include/ThemeManager.h

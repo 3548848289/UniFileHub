@@ -19,8 +19,14 @@
 #include <QSettings>
 #include <QDebug>
 #include "mainwindow.h"
+#ifdef Q_OS_WIN
+// 必须在 mainwindow.h 之后包含：mainwindow.h 经 KodoTerm 拉入的 vterm.h 里有
+// 名为 small 的位域成员，而 windows.h 链上的 rpcndr.h 定义了 #define small char
+#include <qt_windows.h>
+#endif
 #include "../Setting/include/SettingManager.h"
 #include "../Setting/include/IconManager.h"
+#include "../Setting/include/ShellContextMenu.h"
 #include "../manager/include/ServerDiscovery.h"
 #include "../../PersonalDrive/include/DriveView.h"
 
@@ -80,51 +86,72 @@ void installTranslators(QApplication &app)
 
 }
 
-#ifdef Q_OS_WIN
-void registerWindowsContextMenu()
-{
-    const QString appPath = QDir::toNativeSeparators(QCoreApplication::applicationFilePath());
-
-    qDebug() << "========== Register Windows Context Menu ==========";
-    qDebug() << "Application path:" << appPath;
-
-    QSettings reg(
-        "HKEY_CURRENT_USER\\Software\\Classes\\*\\shell\\UniFileHub",
-        QSettings::NativeFormat
-        );
-
-    reg.setValue(".", "用 UniFileHub 打开");
-    reg.setValue("Icon", "\"" + appPath + "\",0");
-    reg.setValue("command/.", "\"" + appPath + "\" \"%1\"");
-    reg.sync();
-
-    qDebug() << "Registry status:" << reg.status();
-    qDebug() << "Context menu command:" << "\"" + appPath + "\" \"%1\"";
-    qDebug() << "===================================================";
+// 解析命令行动作与文件路径：
+//   <exe> "%1"              → open（兼容旧版右键命令/拖拽启动）
+//   <exe> "backup" "%1" 等  → 对应动作（backup/tag/upload）
+static void parseCommandLineAction(QString &action, QString &filePath) {
+    const QStringList args = QCoreApplication::arguments();
+    action = QStringLiteral("open");
+    if (args.count() < 2) {
+        return;
+    }
+    int pathIndex = 1;
+    if (args.count() > 2) {
+        action = args.at(1);
+        pathIndex = 2;
+    }
+    filePath = args.at(pathIndex);
+    QFileInfo fileInfo(filePath);
+    if (fileInfo.isRelative()) {
+        filePath = fileInfo.absoluteFilePath();
+    }
 }
-#endif
 
 bool connectToRunningInstance() {
     QLocalSocket socket;
     socket.connectToServer(SERVER_NAME);
     if (socket.waitForConnected(100)) {
-        QStringList args = QCoreApplication::arguments();
-        if (args.count() > 1) {
-            QString filePath = args.at(1);
-            // 转换为绝对路径
-            QFileInfo fileInfo(filePath);
-            if (fileInfo.isRelative()) {
-                filePath = fileInfo.absoluteFilePath();
-            }
-            socket.write("open:" + filePath.toUtf8());
-        } else {
+        QString action;
+        QString filePath;
+        parseCommandLineAction(action, filePath);
+        if (filePath.isEmpty()) {
             socket.write("show");
+        } else {
+            // 单实例协议："动作:文件路径"，动作 ∈ open/backup/tag/upload
+            socket.write(action.toUtf8() + ":" + filePath.toUtf8());
         }
         socket.flush();
         socket.waitForBytesWritten(100);
         return true;
     }
     return false;
+}
+
+// 把主窗口强制带到前台显示。
+// 由资源管理器右键唤起的单实例属于后台进程激活，Windows 前台锁会拦截
+// activateWindow，表现为只闪任务栏不显示窗口；先最小化再还原可以绕过限制。
+static void forceShowMainWindow(MainWindow *w) {
+    const bool wasMaximized = SettingManager::Instance().getWindowMaximized();
+    // 窗口已在前台时不必折腾，只补一次激活
+    if (w->isVisible() && !w->isMinimized() && w->isActiveWindow()) {
+        w->raise();
+        w->activateWindow();
+        return;
+    }
+
+    // 先从托盘/最小化状态恢复可见，保持最大化状态
+    w->showNormal();
+    if (wasMaximized) {
+        w->showMaximized();
+    }
+    w->raise();
+    w->activateWindow();
+#ifdef Q_OS_WIN
+    HWND hwnd = reinterpret_cast<HWND>(w->winId());
+    ShowWindow(hwnd, SW_MINIMIZE);
+    ShowWindow(hwnd, wasMaximized ? SW_MAXIMIZE : SW_RESTORE);
+    SetForegroundWindow(hwnd);
+#endif
 }
 
 QLocalServer* createLocalServer(MainWindow *w) {
@@ -134,30 +161,18 @@ QLocalServer* createLocalServer(MainWindow *w) {
         QObject::connect(server, &QLocalServer::newConnection, [server, w]() {
             QLocalSocket *clientConnection = server->nextPendingConnection();
             if (clientConnection) {
-                clientConnection->waitForReadyRead(100);
+                clientConnection->waitForReadyRead(300);
                 QByteArray msg = clientConnection->readAll();
-                if (msg.startsWith("open:")) {
-                    QString filePath = QString(msg.mid(5)); // 移除"open:"前缀
-                    // 显示窗口时保持之前的状态
-                    bool wasMaximized = SettingManager::Instance().getWindowMaximized();
-                    if (wasMaximized) {
-                        w->showMaximized();
-                    } else {
-                        w->showNormal();
+                // "show"、空消息（数据未及时到达时的兜底）或 "动作:文件路径"
+                const int sep = msg.indexOf(':');
+                const bool showOnly = (msg == "show" || msg.isEmpty());
+                if (showOnly || sep > 0) {
+                    forceShowMainWindow(w);
+                    if (sep > 0) {
+                        const QString action = QString::fromUtf8(msg.left(sep));
+                        const QString filePath = QString::fromUtf8(msg.mid(sep + 1));
+                        w->handleExternalAction(action, filePath);
                     }
-                    w->raise();
-                    w->activateWindow();
-                    w->openFileFromCommandLine(filePath);
-                } else if (msg == "show") {
-                    // 显示窗口时保持之前的状态
-                    bool wasMaximized = SettingManager::Instance().getWindowMaximized();
-                    if (wasMaximized) {
-                        w->showMaximized();
-                    } else {
-                        w->showNormal();
-                    }
-                    w->raise();
-                    w->activateWindow();
                 }
                 clientConnection->disconnectFromServer();
             }
@@ -245,11 +260,14 @@ QSystemTrayIcon* createTray(MainWindow *w, QApplication &app) {
 
 
 
+
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
-#ifdef Q_OS_WIN
-    registerWindowsContextMenu();
-#endif
+    // 从资源管理器启动时工作目录不确定，固定到 exe 目录，
+    // 保证 ./SmartDesk.db 等相对路径的落点与正常启动一致
+    QDir::setCurrent(QCoreApplication::applicationDirPath());
+    // 按设置同步资源管理器右键菜单（勾选的注册，未勾选的清理残留）
+    ShellContextMenu::applySettings();
 
     installTranslators(app);
     DriveView::clearExternalDragTempFiles();
@@ -283,26 +301,16 @@ int main(int argc, char *argv[]) {
 
     MainWindow w;
 
-    QStringList args = QCoreApplication::arguments();
+    QString action;
     QString filePath;
-    if (args.count() > 1) {
-        filePath = args.at(1);
+    parseCommandLineAction(action, filePath);
+    if (!filePath.isEmpty()) {
+        qDebug() << "Command line action:" << action << "path:" << filePath;
 
-        QFileInfo fileInfo(filePath);
-        if (fileInfo.isRelative()) {
-            filePath = fileInfo.absoluteFilePath();
-        }
-
-        qDebug() << "Command line file path:" << filePath;
-        qDebug() << "File exists:" << QFile::exists(filePath);
-
-        if (QFile::exists(filePath)) {
-            QTimer::singleShot(100, [&w, filePath]() {
-                qDebug() << "Opening file:" << filePath;
-                w.openFileFromCommandLine(filePath);
-            });
-        }
-
+        QTimer::singleShot(100, [&w, action, filePath]() {
+            qDebug() << "Handling external action:" << action << filePath;
+            w.handleExternalAction(action, filePath);
+        });
     }
 
     w.show();
