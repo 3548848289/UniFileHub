@@ -2272,27 +2272,27 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/Setting.cpp" line="41"/>
+        <location filename="../Setting/Setting.cpp" line="48"/>
         <source>默认覆盖</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/Setting.cpp" line="44"/>
+        <location filename="../Setting/Setting.cpp" line="51"/>
         <source>默认自动重命名</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/Setting.cpp" line="47"/>
+        <location filename="../Setting/Setting.cpp" line="54"/>
         <source>默认弹出提示框</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/Setting.cpp" line="94"/>
+        <location filename="../Setting/Setting.cpp" line="101"/>
         <source>配置已保存</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/Setting.cpp" line="95"/>
+        <location filename="../Setting/Setting.cpp" line="102"/>
         <source>是否需要重启程序以应用配置？</source>
         <translation type="unfinished"></translation>
     </message>

@@ -3,11 +3,13 @@
 
 #include <QString>
 
-// Windows 资源管理器右键菜单的统一注册与注销。
-// 全部菜单项（打开/文件备份/备忘标签/上传网盘/打开文件夹）在
-// ShellContextMenu.cpp 的 kVerbs 表中描述：注册表父键、子键名、菜单文字、
-// settings.ini 开关键、命令行动作标识。文件项注册在 HKCU\Software\Classes\*\shell，
-// 文件夹项注册在 HKCU\Software\Classes\Directory\shell，均无需管理员权限。
+// 系统右键菜单的统一注册与注销。
+// Windows：全部菜单项（打开/文件备份/备忘标签/上传网盘/打开文件夹）注册到注册表，
+//   文件项在 HKCU\Software\Classes\*\shell，文件夹项在 ...\Directory\shell，
+//   每个 Menu 项的 command 带动作标识（open/backup/tag/upload/openfolder）。
+// Linux：在 ~/.local/share/applications 生成/删除带 MimeType 的 .desktop 条目
+//   （仅"打开/打开文件夹"两个标准动作），进入文件管理器的"用其他应用打开"列表。
+// 均无需管理员权限，开关状态与设置面板共用同一批 settings.ini 键。
 namespace ShellContextMenu {
 
 enum class Verb {

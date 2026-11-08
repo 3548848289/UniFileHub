@@ -2,10 +2,16 @@
 #include "include/SettingManager.h"
 #include <QCoreApplication>
 #include <QDir>
+#include <QFile>
+#include <QFileInfo>
+#include <QProcess>
 #include <QSettings>
+#include <QStandardPaths>
 #include <QDebug>
 
 #ifdef Q_OS_WIN
+
+// ============ Windows：注册表右键菜单 ============
 
 namespace {
 
@@ -114,7 +120,189 @@ void setVerbEnabled(Verb verb, bool enabled)
 
 } // namespace ShellContextMenu
 
-#else // !Q_OS_WIN
+#elif defined(Q_OS_LINUX)
+
+// ============ Linux：用户级 .desktop 桌面条目 ============
+//
+// 文件管理器（GNOME Files/KDE Dolphin 等）"用其他应用打开"列表来自
+// ~/.local/share/applications 下的 .desktop 条目（freedesktop 标准）。
+// 每个 .desktop 的 Exec 带上动作标识（open/openfolder），
+// 与 Windows 共用同一套命令行解析和动作分发。
+// 备份/标签/上传是 Windows 右键菜单专有，Linux 下不注册。
+
+namespace {
+
+struct LinuxVerbDesc {
+    ShellContextMenu::Verb verb;
+    const char *desktopBaseName; // ~/.local/share/applications/<base>.desktop
+    const char *menuText;
+    const char *settingKey;
+    const char *cliToken;
+    const char *mimeType;
+};
+
+const LinuxVerbDesc kLinuxVerbs[] = {
+    { ShellContextMenu::Verb::Open,
+      "unifilehub-open",
+      "UniFileHub 打开",
+      "all_setting/context_menu",
+      "open",
+      "text/plain;text/csv;text/markdown;application/json;application/pdf;application/zip;"
+      "application/octet-stream;image/png;image/jpeg;image/gif;image/bmp;image/webp;image/svg+xml;"
+      "video/mp4;audio/mpeg;application/msword;application/vnd.ms-excel;"
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;"
+      "application/vnd.ms-powerpoint;"
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document" },
+    { ShellContextMenu::Verb::Folder,
+      "unifilehub-openfolder",
+      "UniFileHub 打开文件夹",
+      "all_setting/context_menu_folder",
+      "openfolder",
+      "inode/directory" },
+};
+
+const LinuxVerbDesc *linuxVerbDesc(ShellContextMenu::Verb verb)
+{
+    for (const LinuxVerbDesc &desc : kLinuxVerbs) {
+        if (desc.verb == verb) {
+            return &desc;
+        }
+    }
+    return nullptr;
+}
+
+QString applicationsDir()
+{
+    return QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation);
+}
+
+// .desktop 的 Icon 需要真实文件路径，从内嵌资源导出一份到用户数据目录
+QString iconFilePath()
+{
+    return QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation)
+           + QStringLiteral("/unifilehub/icon.png");
+}
+
+bool ensureIconFile()
+{
+    const QString path = iconFilePath();
+    if (QFileInfo::exists(path)) {
+        return true;
+    }
+    QFile resource(QStringLiteral(":/conf/UniFileHub.png"));
+    if (!resource.open(QIODevice::ReadOnly)) {
+        return false;
+    }
+    QDir().mkpath(QFileInfo(path).absolutePath());
+    QFile target(path);
+    if (!target.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+        return false;
+    }
+    target.write(resource.readAll());
+    return true;
+}
+
+bool writeDesktopEntry(const LinuxVerbDesc &desc)
+{
+    if (!ensureIconFile()) {
+        qDebug() << "Write desktop entry failed: cannot export icon";
+        return false;
+    }
+
+    const QString content = QStringLiteral(
+                                "[Desktop Entry]\n"
+                                "Type=Application\n"
+                                "Version=1.0\n"
+                                "Name=%1\n"
+                                "Exec=\"%2\" %3 %f\n"
+                                "Icon=%4\n"
+                                "Terminal=false\n"
+                                "StartupNotify=true\n"
+                                "MimeType=%5\n")
+                                .arg(QString::fromUtf8(desc.menuText),
+                                     QCoreApplication::applicationFilePath(),
+                                     QLatin1String(desc.cliToken),
+                                     iconFilePath(),
+                                     QLatin1String(desc.mimeType));
+
+    QDir().mkpath(applicationsDir());
+    QFile file(applicationsDir() + QLatin1Char('/') + QLatin1String(desc.desktopBaseName)
+               + QStringLiteral(".desktop"));
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+        qDebug() << "Write desktop entry failed:" << file.fileName() << file.errorString();
+        return false;
+    }
+    file.write(content.toUtf8());
+    file.close();
+
+    qDebug() << "Register context menu (Linux):" << file.fileName();
+    return file.error() == QFileDevice::NoError;
+}
+
+void removeDesktopEntry(const LinuxVerbDesc &desc)
+{
+    const QString path = applicationsDir() + QLatin1Char('/')
+                         + QLatin1String(desc.desktopBaseName) + QStringLiteral(".desktop");
+    if (QFile::remove(path)) {
+        qDebug() << "Unregister context menu (Linux):" << path;
+    }
+}
+
+// 让文件管理器刷新"打开方式"列表；工具不存在时静默忽略
+void refreshDesktopDatabase()
+{
+    QProcess::execute(QStringLiteral("update-desktop-database"), { applicationsDir() });
+}
+
+} // namespace
+
+namespace ShellContextMenu {
+
+QString settingKey(Verb verb)
+{
+    const LinuxVerbDesc *desc = linuxVerbDesc(verb);
+    return desc ? QLatin1String(desc->settingKey) : QString();
+}
+
+QString cliToken(Verb verb)
+{
+    const LinuxVerbDesc *desc = linuxVerbDesc(verb);
+    return desc ? QLatin1String(desc->cliToken) : QString();
+}
+
+void applySettings()
+{
+    for (const LinuxVerbDesc &desc : kLinuxVerbs) {
+        const bool enabled = SettingManager::Instance()
+                                 .value(QLatin1String(desc.settingKey), true).toBool();
+        if (enabled) {
+            writeDesktopEntry(desc);
+        } else {
+            removeDesktopEntry(desc);
+        }
+    }
+    refreshDesktopDatabase();
+}
+
+void setVerbEnabled(Verb verb, bool enabled)
+{
+    const LinuxVerbDesc *desc = linuxVerbDesc(verb);
+    if (!desc) {
+        return;
+    }
+    if (enabled) {
+        writeDesktopEntry(*desc);
+    } else {
+        removeDesktopEntry(*desc);
+    }
+    refreshDesktopDatabase();
+}
+
+} // namespace ShellContextMenu
+
+#else
+
+// ============ 其他平台：不支持 ============
 
 namespace ShellContextMenu {
 
@@ -134,4 +322,4 @@ void setVerbEnabled(Verb, bool) {}
 
 } // namespace ShellContextMenu
 
-#endif // Q_OS_WIN
+#endif // 平台分支

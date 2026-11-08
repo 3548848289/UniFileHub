@@ -26,8 +26,15 @@ Setting::Setting(QWidget *parent) : QWidget(parent), ui(new Ui::Setting)
     ui->stackedWidget->setCurrentIndex(0);
     ui->treeWidget->setHeaderHidden(true);
 
-#ifndef Q_OS_WIN
-    // 右键菜单只在 Windows 上有意义
+#ifdef Q_OS_WIN
+    // Windows：五个右键菜单项全部可用
+#elif defined(Q_OS_LINUX)
+    // Linux：通过"用其他应用打开"只支持打开文件/文件夹两个标准动作
+    ui->all_setting_contextMenuBackupCheckBox->hide();
+    ui->all_setting_contextMenuTagCheckBox->hide();
+    ui->all_setting_contextMenuUploadCheckBox->hide();
+#else
+    // 其他平台不支持右键菜单
     ui->all_setting_label6->hide();
     ui->all_setting_contextMenuCheckBox->hide();
     ui->all_setting_contextMenuBackupCheckBox->hide();
