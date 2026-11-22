@@ -1,18 +1,29 @@
 #include "TabHandleArchive.h"
 #include <functional>
 #include <QDrag>
+#include <QElapsedTimer>
 #include <QFileInfo>
 #include <QDir>
+#include <QFutureWatcher>
 #include <QHeaderView>
 #include <QMimeData>
 #include <QSplitter>
 #include <QStyle>
 #include <QUrl>
+#include <QtConcurrent>
 #include <QApplication>
 #include "../../Setting/include/SettingManager.h"
 
 namespace {
 constexpr int kUserRoleEntryIndex = Qt::UserRole; // 文件节点存条目下标，目录节点存 -1
+
+// 一次后台解压任务的结果
+struct ExtractOutcome
+{
+    bool ok = false;
+    bool cancelled = false;
+    QString error;
+};
 }
 
 // 树控件子类：启用拖拽出条目（按住已选中项拖动 = 解压到临时目录并以
@@ -102,6 +113,8 @@ void TabHandleArchive::buildUi()
     m_tree->setDragEnabled(true);
     m_tree->setDefaultDropAction(Qt::CopyAction);
     m_tree->extractToTempFiles = [this](const QList<int> &indexes) {
+        if (m_extracting)
+            return QStringList(); // 有解压任务进行中，暂不允许拖拽
         QStringList paths;
         for (int idx : indexes) {
             const QString p = m_reader.extractToTemp(idx);
@@ -127,6 +140,10 @@ void TabHandleArchive::buildUi()
     connect(m_controlBar, &ControlWidArchive::extractAllHereRequested, this, &TabHandleArchive::extractAllHere);
     connect(m_controlBar, &ControlWidArchive::extractAllToRequested, this, &TabHandleArchive::extractAllTo);
     connect(m_controlBar, &ControlWidArchive::extractSelectedToRequested, this, &TabHandleArchive::extractSelectedTo);
+    connect(m_controlBar, &ControlWidArchive::cancelRequested, this, [this]() {
+        if (m_activeReader)
+            m_activeReader->requestCancel();
+    });
     connect(m_tree, &QTreeWidget::itemDoubleClicked, this, [this](QTreeWidgetItem *item, int) {
         previewEntry(item);
     });
@@ -291,41 +308,123 @@ void TabHandleArchive::previewEntry(QTreeWidgetItem *item)
     const int index = item->data(0, kUserRoleEntryIndex).toInt();
     if (index < 0)
         return; // 目录节点，交给默认展开/折叠
-
-    const QString tempPath = m_reader.extractToTemp(index);
-    if (tempPath.isEmpty()) {
-        QMessageBox::warning(this, tr("预览失败"),
-                             tr("%1\n\n%2").arg(item->text(0), m_reader.lastError()));
+    if (m_extracting) {
+        // 解压进行中：底部状态条提示即可，不弹窗打断交互
+        m_controlBar->flashStatus(tr("正在解压，请等待完成后再试"));
         return;
     }
-    emit openFileRequested(tempPath);
+
+    const QString name = item->text(0);
+    auto outPath = std::make_shared<QString>();
+    startExtractTask(tr("正在解压 %1").arg(name),
+        [index, outPath](ArchiveReader &r) {
+            *outPath = r.extractToTemp(index);
+            return !outPath->isEmpty();
+        },
+        [this, outPath, name](bool ok, bool cancelled, const QString &error) {
+            if (ok)
+                emit openFileRequested(*outPath);
+            else if (cancelled)
+                m_controlBar->flashStatus(tr("已取消"));
+            else
+                QMessageBox::warning(this, tr("预览失败"),
+                                     tr("%1\n\n%2").arg(name, error));
+        });
+}
+
+// 后台解压编排：worker 里用独立 reader 实例执行 task（UI 的 m_reader 不参与），
+// 进度经 invokeMethod 排队回 UI（bar 为上下文，销毁后排队调用自动丢弃），
+// 完成后 onDone 在 UI 线程回调。任务进行中重复调用直接忽略。
+void TabHandleArchive::startExtractTask(const QString &busyText,
+        const std::function<bool(ArchiveReader &)> &task,
+        const std::function<void(bool ok, bool cancelled, const QString &error)> &onDone)
+{
+    if (m_extracting)
+        return;
+    m_extracting = true;
+    m_controlBar->setBusy(true, busyText);
+
+    m_activeReader = std::make_shared<ArchiveReader>();
+    auto reader = m_activeReader;
+    const QString srcPath = currentFilePath; // 文件模式来源
+    const QByteArray srcData = m_rawData;    // 云端模式数据（QByteArray 浅拷贝）
+    auto bar = m_controlBar;                 // 进度回调的排队上下文
+
+    QElapsedTimer throttle;
+    throttle.start();
+    reader->setProgressCallback([bar, throttle](quint64 done, quint64 total,
+                                                const QString &name) mutable {
+        // UI 刷新节流：100ms 一次，收尾必发
+        if (total > 0 && done < total && throttle.elapsed() < 100)
+            return;
+        throttle.restart();
+        QMetaObject::invokeMethod(bar, [bar, done, total, name] {
+            bar->showProgress(done, total, name);
+        }, Qt::QueuedConnection);
+    });
+
+    auto *watcher = new QFutureWatcher<ExtractOutcome>(this);
+    connect(watcher, &QFutureWatcher<ExtractOutcome>::finished, this,
+            [this, watcher, onDone]() {
+        const ExtractOutcome outcome = watcher->result();
+        watcher->deleteLater();
+        m_extracting = false;
+        m_activeReader.reset();
+        m_controlBar->setBusy(false);
+        if (onDone)
+            onDone(outcome.ok, outcome.cancelled, outcome.error);
+    });
+    watcher->setFuture(QtConcurrent::run([reader, task, srcPath, srcData]() -> ExtractOutcome {
+        if (!reader->openFrom(srcPath, srcData))
+            return { false, false, reader->lastError() };
+        const bool ok = task(*reader);
+        return { ok, reader->cancelled(), reader->lastError() };
+    }));
 }
 
 void TabHandleArchive::extractAllHere()
 {
+    if (m_extracting)
+        return;
     const QFileInfo info(currentFilePath);
     const QString destDir = info.absolutePath() + QLatin1Char('/') + info.completeBaseName();
     if (!QDir().mkpath(destDir))
         return;
-    if (m_reader.extractAll(destDir))
-        QMessageBox::information(this, tr("解压完成"), tr("已解压到：%1").arg(destDir));
-    else
-        QMessageBox::warning(this, tr("解压失败"), m_reader.lastError());
+    startExtractTask(tr("正在解压全部条目…"),
+        [destDir](ArchiveReader &r) { return r.extractAll(destDir); },
+        [this, destDir](bool ok, bool cancelled, const QString &error) {
+            if (ok)
+                m_controlBar->flashStatus(tr("解压成功"));
+            else if (cancelled)
+                m_controlBar->flashStatus(tr("已取消"));
+            else
+                QMessageBox::warning(this, tr("解压失败"), error);
+        });
 }
 
 void TabHandleArchive::extractAllTo()
 {
+    if (m_extracting)
+        return;
     const QString destDir = QFileDialog::getExistingDirectory(this, tr("选择解压目录"));
     if (destDir.isEmpty())
         return;
-    if (m_reader.extractAll(destDir))
-        QMessageBox::information(this, tr("解压完成"), tr("已解压到：%1").arg(destDir));
-    else
-        QMessageBox::warning(this, tr("解压失败"), m_reader.lastError());
+    startExtractTask(tr("正在解压全部条目…"),
+        [destDir](ArchiveReader &r) { return r.extractAll(destDir); },
+        [this, destDir](bool ok, bool cancelled, const QString &error) {
+            if (ok)
+                m_controlBar->flashStatus(tr("解压成功"));
+            else if (cancelled)
+                m_controlBar->flashStatus(tr("已取消"));
+            else
+                QMessageBox::warning(this, tr("解压失败"), error);
+        });
 }
 
 void TabHandleArchive::extractSelectedTo()
 {
+    if (m_extracting)
+        return;
     QList<int> indexes;
     const auto selected = m_tree->selectedItems();
     for (QTreeWidgetItem *item : selected)
@@ -337,16 +436,24 @@ void TabHandleArchive::extractSelectedTo()
     if (destDir.isEmpty())
         return;
 
-    QStringList failed;
-    for (int index : indexes) {
-        if (m_reader.extractEntry(index, destDir).isEmpty())
-            failed.append(m_reader.entries().at(index).path);
-    }
-    if (failed.isEmpty())
-        QMessageBox::information(this, tr("解压完成"), tr("已解压 %1 个文件到：%2").arg(indexes.size()).arg(destDir));
-    else
-        QMessageBox::warning(this, tr("解压失败"),
-                             tr("以下条目失败：\n%1\n\n%2").arg(failed.join(QStringLiteral("\n")), m_reader.lastError()));
+    auto failed = std::make_shared<QStringList>();
+    startExtractTask(tr("正在解压选中的 %1 个条目…").arg(indexes.size()),
+        [indexes, destDir, failed](ArchiveReader &r) {
+            for (int idx : indexes) {
+                if (r.extractEntry(idx, destDir).isEmpty())
+                    failed->append(r.entries().at(idx).path);
+            }
+            return failed->isEmpty();
+        },
+        [this, indexes, destDir, failed](bool ok, bool cancelled, const QString &error) {
+            if (ok)
+                m_controlBar->flashStatus(tr("解压成功"));
+            else if (cancelled)
+                m_controlBar->flashStatus(tr("已取消"));
+            else
+                QMessageBox::warning(this, tr("解压失败"),
+                                     tr("以下条目失败：\n%1\n\n%2").arg(failed->join(QStringLiteral("\n")), error));
+        });
 }
 
 void TabHandleArchive::setContent(const QString &text)

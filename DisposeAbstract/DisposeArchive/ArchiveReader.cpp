@@ -190,6 +190,7 @@ ArchiveEntry ArchiveReader::entryFrom(struct archive_entry *entry) const
 bool ArchiveReader::open(const QString &filePath)
 {
     close();
+    m_cancel = false;
     if (!QFileInfo::exists(filePath)) {
         m_lastError = QObject::tr("文件不存在：%1").arg(filePath);
         return false;
@@ -235,6 +236,7 @@ bool ArchiveReader::open(const QString &filePath)
 bool ArchiveReader::open(const QByteArray &data)
 {
     close();
+    m_cancel = false;
     m_data = data;
 
     struct archive *a = newReader();
@@ -268,6 +270,11 @@ bool ArchiveReader::open(const QByteArray &data)
     archive_read_free(a);
     m_open = true;
     return true;
+}
+
+bool ArchiveReader::openFrom(const QString &path, const QByteArray &data)
+{
+    return path.isEmpty() ? open(data) : open(path);
 }
 
 quint64 ArchiveReader::totalSize() const
@@ -316,7 +323,17 @@ QString ArchiveReader::safeDestPath(const QString &destDir, const QString &entry
     return destDir + QLatin1Char('/') + cleaned.join(QLatin1Char('/'));
 }
 
-bool ArchiveReader::writeCurrentData(struct archive *a, const QString &destPath)
+bool ArchiveReader::reportProgress(quint64 done, quint64 total, const QString &name)
+{
+    if (m_cancel)
+        return false;
+    if (m_progress)
+        m_progress(done, total, name);
+    return !m_cancel;
+}
+
+bool ArchiveReader::writeCurrentData(struct archive *a, const QString &destPath,
+                                     quint64 baseDone, const QString &entryName)
 {
     QFile out(destPath);
     if (!out.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
@@ -324,7 +341,14 @@ bool ArchiveReader::writeCurrentData(struct archive *a, const QString &destPath)
         return false;
     }
     char buf[65536];
+    quint64 written = 0;
     for (;;) {
+        if (m_cancel) {
+            m_lastError = QObject::tr("已取消。");
+            out.close();
+            out.remove();
+            return false;
+        }
         const la_ssize_t n = archive_read_data(a, buf, sizeof(buf));
         if (n == 0)
             break;
@@ -342,6 +366,8 @@ bool ArchiveReader::writeCurrentData(struct archive *a, const QString &destPath)
             out.remove();
             return false;
         }
+        written += static_cast<quint64>(n);
+        reportProgress(baseDone + written, m_progressTotalBytes, entryName);
     }
     out.close();
     return true;
@@ -352,15 +378,19 @@ QString ArchiveReader::extractEntry(int index, const QString &destDir)
     if (!m_open || index < 0 || index >= m_entries.size())
         return QString();
 
-    const QString dest = safeDestPath(destDir, m_entries.at(index).path);
+    const ArchiveEntry info = m_entries.at(index);
+    const QString dest = safeDestPath(destDir, info.path);
     if (dest.isEmpty())
         return QString();
+
+    // 单条目进度：总量即该条目大小
+    m_progressTotalBytes = info.size;
 
     struct archive *a = newReader();
     bool ok = openSource(a) && seekTo(a, index);
     if (ok) {
         QDir().mkpath(QFileInfo(dest).absolutePath());
-        ok = writeCurrentData(a, dest);
+        ok = writeCurrentData(a, dest, 0, info.path);
     }
     archive_read_free(a);
     return ok ? dest : QString();
@@ -371,6 +401,12 @@ bool ArchiveReader::extractAll(const QString &destDir)
     if (!m_open)
         return false;
 
+    // 整体进度：总字节 = 全部文件条目大小之和
+    quint64 totalBytes = 0;
+    for (const ArchiveEntry &e : m_entries)
+        totalBytes += e.size;
+    m_progressTotalBytes = totalBytes;
+
     struct archive *a = newReader();
     if (!openSource(a)) {
         archive_read_free(a);
@@ -379,10 +415,16 @@ bool ArchiveReader::extractAll(const QString &destDir)
 
     struct archive_entry *entry = nullptr;
     QStringList failed;
+    quint64 doneBase = 0; // 已完成条目的累计字节
     int r;
     while ((r = archive_read_next_header(a, &entry)) != ARCHIVE_EOF) {
         if (r == ARCHIVE_FATAL)
             break;
+        if (m_cancel) {
+            m_lastError = QObject::tr("已取消。");
+            archive_read_free(a);
+            return false;
+        }
         if (r < ARCHIVE_WARN)
             continue;
 
@@ -396,11 +438,16 @@ bool ArchiveReader::extractAll(const QString &destDir)
             continue;
         }
         QDir().mkpath(QFileInfo(dest).absolutePath());
-        if (!writeCurrentData(a, dest))
+        if (!writeCurrentData(a, dest, doneBase, e.path))
             failed.append(e.path);
+        doneBase += e.size;
     }
     archive_read_free(a);
 
+    if (m_cancel) {
+        m_lastError = QObject::tr("已取消。");
+        return false;
+    }
     if (!failed.isEmpty()) {
         m_lastError = QObject::tr("以下条目解压失败（可能加密或损坏）：%1")
                           .arg(failed.join(QStringLiteral("、")));

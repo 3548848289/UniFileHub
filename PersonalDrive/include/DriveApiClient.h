@@ -20,6 +20,9 @@ public:
     // 文件列表获取
     void getFileList(int parentId = 0);
 
+    // 文件列表获取（独立信号，供文件夹遍历等后台流程使用，不干扰界面当前列表）
+    void listDirectory(int parentId);
+
     // 文件上传
     void uploadFile(const QString &filePath, int parentId = 0, const QString &targetName = QString(), bool overwrite = false);
     
@@ -31,7 +34,8 @@ public:
     
     // 删除文件/文件夹
     void deleteItem(int itemId);
-    void clearDrive();
+    // 清空指定目录（目录本身保留；0 表示网盘根目录）
+    void clearDrive(int dirId = 0);
     
     // 重命名文件/文件夹
     void renameItem(int itemId, const QString &newName);
@@ -49,24 +53,30 @@ signals:
     // 信号：文件列表获取成功
     void fileListReceived(const QJsonArray &fileList);
 
+    // 信号：目录内容获取成功（listDirectory 专用，携带目录ID）
+    void directoryListReceived(int dirId, const QJsonArray &items);
+
+    // 信号：目录内容获取失败
+    void directoryListError(int dirId, const QString &errorMessage);
+
 
     // 信号：目录路径获取成功
     void pathReceived(const QJsonArray &path);
 
     // 信号：文件列表获取失败
     void fileListError(const QString &errorMessage);
-    
-    // 信号：文件上传成功
-    void fileUploaded(const QJsonObject &fileInfo);
-    
-    // 信号：文件上传失败
-    void fileUploadError(const QString &errorMessage);
-    
+
+    // 信号：文件上传成功（filePath 用于定位是哪个文件传完了）
+    void fileUploaded(const QString &filePath, const QJsonObject &fileInfo);
+
+    // 信号：文件上传失败（filePath 用于定位是哪个文件出错）
+    void fileUploadError(const QString &filePath, const QString &errorMessage);
+
     // 信号：文件下载成功
     void fileDownloaded(const QString &filePath);
-    
-    // 信号：文件下载失败
-    void fileDownloadError(const QString &errorMessage);
+
+    // 信号：文件下载失败（savePath 用于定位是哪个文件出错）
+    void fileDownloadError(const QString &savePath, const QString &errorMessage);
     void downloadProgress(int fileId, int progress);
 
     // 信号：文件上传进度

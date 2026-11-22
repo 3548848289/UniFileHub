@@ -36,6 +36,7 @@ public:
 
 private slots:
     void on_PushFileBtn_clicked();
+    void on_PushFolderBtn_clicked();
 
     void onItemDoubleClicked(const QModelIndex &index);
 
@@ -108,6 +109,8 @@ private:
     void applyDriveTableLayout();
     void applyHistoryTableLayout(QTableView *tableView);
     void uploadFileWithConflictCheck(const QString &filePath);
+    void uploadFolderWithConflictCheck(const QString &folderPath);
+    void downloadFolderWithConflictCheck(int folderId, const QString &folderName);
     void downloadFileWithConflictCheck(int fileId, const QString &fileName);
     void downloadFileWithConflictCheck(int fileId, const QString &fileName, const QString &targetDirectory);
     bool hasUploadableLocalFiles(const QMimeData *mimeData) const;

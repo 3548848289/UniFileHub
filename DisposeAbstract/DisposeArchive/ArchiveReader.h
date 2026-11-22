@@ -5,6 +5,8 @@
 #include <QByteArray>
 #include <QDateTime>
 #include <QVector>
+#include <atomic>
+#include <functional>
 
 // 单条归档条目信息
 struct ArchiveEntry
@@ -18,15 +20,25 @@ struct ArchiveEntry
 // libarchive 封装：归档读取/解压（UI 无关）
 // 支持 zip/tar/tar.gz/tar.bz2/tar.xz/tar.zst/7z/cab/iso/cpio 等
 // libarchive 能识别的格式；加密条目可在列表中展示，解压时报错。
+//
+// 进度与取消（供后台线程解压用）：
+//  - setProgressCallback 注入进度回调（done/total 字节 + 当前条目名），
+//    回调在工作线程被调用，UI 更新需自行排队到主线程
+//  - requestCancel() 置取消标志，解压循环逐块检查并清理半成品
 class ArchiveReader
 {
 public:
+    // done/total：字节进度；currentName：当前条目路径
+    using ProgressCallback = std::function<void(quint64, quint64, const QString &)>;
+
     ArchiveReader() = default;
     ~ArchiveReader();
 
     // 打开成功返回 true；失败原因见 lastError()
     bool open(const QString &filePath);
     bool open(const QByteArray &data);   // 云端/内存路径
+    // 按优先级打开：path 非空走文件模式，否则走内存数据
+    bool openFrom(const QString &path, const QByteArray &data);
     void close();
     bool isOpen() const { return m_open; }
 
@@ -48,6 +60,11 @@ public:
     // 归档预览临时目录根；首次调用时清空上次运行残留
     static QString tempRoot();
 
+    // 进度回调与取消（解压期间调用）
+    void setProgressCallback(ProgressCallback cb) { m_progress = std::move(cb); }
+    void requestCancel() { m_cancel = true; }
+    bool cancelled() const { return m_cancel; }
+
 private:
     QString decodeName(const char *raw) const;
     // 打开一个新的读取实例（供解压用），调用方负责 archive_read_free
@@ -58,8 +75,11 @@ private:
     ArchiveEntry entryFrom(struct archive_entry *entry) const;
     // 在新实例中跳到第 index 个条目
     bool seekTo(struct archive *a, int index);
-    // 把当前条目数据写入 destPath
-    bool writeCurrentData(struct archive *a, const QString &destPath);
+    // 把当前条目数据写入 destPath；baseDone/totalBytes 用于整体进度上报
+    bool writeCurrentData(struct archive *a, const QString &destPath,
+                          quint64 baseDone, const QString &entryName);
+    // 上报进度；返回 false 表示已请求取消
+    bool reportProgress(quint64 done, quint64 total, const QString &name);
     // 目标路径净化：防 zip-slip，处理 Windows 非法字符
     QString safeDestPath(const QString &destDir, const QString &entryPath) const;
 
@@ -70,6 +90,9 @@ private:
     QVector<ArchiveEntry> m_entries;
     QString m_tempSessionDir;      // 本实例的临时子目录（懒创建）
     bool m_open = false;
+    std::atomic_bool m_cancel{false};
+    quint64 m_progressTotalBytes = 0; // 当前解压任务的字节总量
+    ProgressCallback m_progress;
 };
 
 #endif // ARCHIVEREADER_H

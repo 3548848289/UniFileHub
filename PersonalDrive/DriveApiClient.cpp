@@ -73,7 +73,7 @@ void DriveApiClient::uploadFile(const QString &filePath, int parentId, const QSt
 {
     QFile *file = new QFile(filePath);
     if (!file->open(QIODevice::ReadOnly)) {
-        emit fileUploadError("无法打开文件");
+        emit fileUploadError(filePath, QStringLiteral("无法打开文件"));
         delete file;
         return;
     }
@@ -129,17 +129,42 @@ void DriveApiClient::uploadFile(const QString &filePath, int parentId, const QSt
         reply->deleteLater();
 
         if (reply->error() != QNetworkReply::NoError) {
-            emit fileUploadError(reply->errorString());
+            emit fileUploadError(filePath, reply->errorString());
             return;
         }
 
         QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
         if (!doc.isObject()) {
-            emit fileUploadError("Invalid response format");
+            emit fileUploadError(filePath, QStringLiteral("Invalid response format"));
             return;
         }
 
-        emit fileUploaded(doc.object());
+        emit fileUploaded(filePath, doc.object());
+    });
+}
+
+void DriveApiClient::listDirectory(int parentId)
+{
+    QUrl url(QString("%1/api/drive/list?parent_id=%2").arg(m_serverIp).arg(parentId));
+    QNetworkRequest request = createRequest(url);
+
+    QNetworkReply *reply = m_networkManager->get(request);
+
+    connect(reply, &QNetworkReply::finished, this, [=]() {
+        reply->deleteLater();
+
+        if (reply->error() != QNetworkReply::NoError) {
+            emit directoryListError(parentId, reply->errorString());
+            return;
+        }
+
+        QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
+        if (!doc.isArray()) {
+            emit directoryListError(parentId, QStringLiteral("Invalid response format"));
+            return;
+        }
+
+        emit directoryListReceived(parentId, doc.array());
     });
 }
 
@@ -166,7 +191,7 @@ void DriveApiClient::downloadFile(int fileId, const QString &savePath, bool over
         reply->deleteLater();
 
         if (reply->error() != QNetworkReply::NoError) {
-            emit fileDownloadError(reply->errorString());
+            emit fileDownloadError(savePath, reply->errorString());
             return;
         }
 
@@ -192,7 +217,7 @@ void DriveApiClient::downloadFile(int fileId, const QString &savePath, bool over
 
         QFile file(finalPath);
         if (!file.open(QIODevice::WriteOnly)) {
-            emit fileDownloadError("无法保存文件");
+            emit fileDownloadError(savePath, QStringLiteral("无法保存文件"));
             return;
         }
 
@@ -254,9 +279,10 @@ void DriveApiClient::deleteItem(int itemId)
     });
 }
 
-void DriveApiClient::clearDrive()
+void DriveApiClient::clearDrive(int dirId)
 {
-    QUrl url(QString("%1/api/drive/clear").arg(m_serverIp));
+    // 清空指定目录（目录本身保留）；0 表示网盘根目录
+    QUrl url(QString("%1/api/drive/clear_dir/%2").arg(m_serverIp).arg(dirId));
     QNetworkRequest request = createRequest(url);
 
     QNetworkReply *reply = m_networkManager->deleteResource(request);

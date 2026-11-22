@@ -26,6 +26,7 @@ public:
     bool clearDownloadHistory();
     bool deleteDownloadRecord(int id);
     bool updateDownloadStatus(int id, const QString &status);
+    bool updateDownloadFileSize(int id, qint64 fileSize);
     int getRecordIdBySavePath(const QString &savePath);
 };
 

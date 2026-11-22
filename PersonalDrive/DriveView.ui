@@ -28,6 +28,13 @@
           </widget>
          </item>
          <item>
+          <widget class="QPushButton" name="PushFolderBtn">
+           <property name="text">
+            <string>上传文件夹</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QPushButton" name="NewFloderBtn">
            <property name="text">
             <string>新建文件夹</string>
@@ -44,7 +51,7 @@
          <item>
           <widget class="QPushButton" name="ClearDriveBtn">
            <property name="text">
-            <string>清空网盘</string>
+            <string>清空文件</string>
            </property>
           </widget>
          </item>

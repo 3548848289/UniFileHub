@@ -150,16 +150,31 @@ bool dbDriveDownload::deleteDownloadRecord(int id) {
 
 bool dbDriveDownload::updateDownloadStatus(int id, const QString &status) {
     QSqlQuery query(dbsqlite);
-    
+
     query.prepare(QString("UPDATE %1 SET download_status = :status WHERE id = :id").arg(TABLE_NAME));
     query.bindValue(":status", status);
     query.bindValue(":id", id);
-    
+
     if (!query.exec()) {
         qDebug() << "更新下载状态失败:" << query.lastError().text();
         return false;
     }
-    
+
+    return true;
+}
+
+bool dbDriveDownload::updateDownloadFileSize(int id, qint64 fileSize) {
+    QSqlQuery query(dbsqlite);
+
+    query.prepare(QString("UPDATE %1 SET file_size = :fileSize WHERE id = :id").arg(TABLE_NAME));
+    query.bindValue(":fileSize", fileSize);
+    query.bindValue(":id", id);
+
+    if (!query.exec()) {
+        qDebug() << "更新下载记录大小失败:" << query.lastError().text();
+        return false;
+    }
+
     return true;
 }
 

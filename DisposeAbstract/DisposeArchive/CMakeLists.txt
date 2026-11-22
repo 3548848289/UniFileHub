@@ -15,8 +15,12 @@ qt_add_library(mytxt_archive STATIC
     ${ARCHIVE_HEADERS}
 )
 
+# 后台解压任务需要 QtConcurrent
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Concurrent)
+
 target_link_libraries(mytxt_archive PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
+    Qt${QT_VERSION_MAJOR}::Concurrent
     archive_static
 )
 

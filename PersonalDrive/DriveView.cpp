@@ -639,7 +639,7 @@ bool DriveView::hasUploadableLocalFiles(const QMimeData *mimeData) const
     const QList<QUrl> urls = mimeData->urls();
     for (const QUrl &url : urls) {
         const QString filePath = url.toLocalFile();
-        if (!filePath.isEmpty() && QFileInfo(filePath).isFile()) {
+        if (!filePath.isEmpty() && (QFileInfo(filePath).isFile() || QFileInfo(filePath).isDir())) {
             return true;
         }
     }
@@ -658,7 +658,10 @@ void DriveView::uploadLocalFilesFromMimeData(const QMimeData *mimeData)
         const QString filePath = url.toLocalFile();
         QFileInfo fileInfo(filePath);
 
-        if (fileInfo.isFile()) {
+        if (fileInfo.isDir()) {
+            // 文件夹：整个文件夹递归上传，只记一条文件夹记录
+            uploadFolderWithConflictCheck(filePath);
+        } else if (fileInfo.isFile()) {
             uploadFileWithConflictCheck(filePath);
         }
     }
@@ -778,6 +781,98 @@ void DriveView::uploadFileWithConflictCheck(const QString &filePath)
     }
 }
 
+void DriveView::uploadFolderWithConflictCheck(const QString &folderPath)
+{
+    if (m_driveManager->isFolderTaskActive()) {
+        showInlineMessage(tr("已有文件夹上传/下载任务进行中，请等待其完成"), true);
+        return;
+    }
+
+    if (!m_driveManager->uploadFolder(folderPath, m_currentDirId)) {
+        showInlineMessage(tr("文件夹上传失败，请确认所选路径是文件夹"), true);
+        return;
+    }
+
+    // 让文件夹记录立即出现在历史列表里
+    loadHistory();
+}
+
+void DriveView::downloadFolderWithConflictCheck(int folderId, const QString &folderName)
+{
+    if (folderName.isEmpty()) {
+        return;
+    }
+
+    if (m_driveManager->isFolderTaskActive()) {
+        showInlineMessage(tr("已有文件夹上传/下载任务进行中，请等待其完成"), true);
+        return;
+    }
+
+    const QString downloadPath = ensureDownloadDirectory();
+    if (downloadPath.isEmpty()) {
+        return;
+    }
+
+    QDir dir(downloadPath);
+    const QString targetPath = dir.absoluteFilePath(folderName);
+
+    auto startDownload = [this, folderId](const QString &target) {
+        // 本地已有同名文件夹时的"覆盖"= 合并进该文件夹并覆盖同名文件
+        const bool overwrite = QFile::exists(target);
+        if (!m_driveManager->downloadFolder(folderId, target, overwrite)) {
+            showInlineMessage(tr("文件夹下载失败"), true);
+            return;
+        }
+        loadHistory();
+    };
+
+    if (!QFile::exists(targetPath)) {
+        startDownload(targetPath);
+        return;
+    }
+
+    switch (SettingManager::Instance().personal_drive_name_conflict_policy()) {
+    case SettingManager::PersonalDriveNameConflictPolicy::Overwrite:
+        startDownload(targetPath);
+        return;
+    case SettingManager::PersonalDriveNameConflictPolicy::AutoRename:
+        startDownload(uniqueLocalPath(targetPath));
+        return;
+    case SettingManager::PersonalDriveNameConflictPolicy::Ask:
+        break;
+    }
+
+    const NameConflictChoice choice = NameConflictDialog::getChoice(
+        this,
+        folderName,
+        QStringLiteral("本地已存在同名文件夹，请选择处理方式。"),
+        QStringLiteral("合并并覆盖同名文件"),
+        QStringLiteral("自动重命名下载"),
+        QStringLiteral("以该命名下载")
+    );
+
+    switch (choice.action) {
+    case NameConflictAction::Overwrite:
+        startDownload(targetPath);
+        break;
+    case NameConflictAction::AutoRename:
+        startDownload(uniqueLocalPath(targetPath));
+        break;
+    case NameConflictAction::CustomName:
+        {
+            const QString customPath = dir.absoluteFilePath(choice.customName);
+            if (QFile::exists(customPath)) {
+                showInlineMessage(QStringLiteral("自定义名称仍与本地文件夹重复，请换一个名称"), true);
+                return;
+            }
+            startDownload(customPath);
+        }
+        break;
+    case NameConflictAction::Cancel:
+        break;
+    }
+}
+
 void DriveView::downloadFileWithConflictCheck(int fileId, const QString &fileName)
 {
     const QString downloadPath = ensureDownloadDirectory();
@@ -855,7 +950,7 @@ void DriveView::on_PushFileBtn_clicked()
     if (downloadDir.isEmpty()) {
         downloadDir = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
     }
-    
+
     QStringList filePaths = QFileDialog::getOpenFileNames(this, tr("选择文件"), downloadDir, tr("所有文件 (*)"));
     if (filePaths.isEmpty()) {
         return;
@@ -866,6 +961,21 @@ void DriveView::on_PushFileBtn_clicked()
             uploadFileWithConflictCheck(filePath);
         }
     }
+}
+
+void DriveView::on_PushFolderBtn_clicked()
+{
+    QString downloadDir = SettingManager::Instance().personal_drive_download_dir();
+    if (downloadDir.isEmpty()) {
+        downloadDir = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
+    }
+
+    const QString folderPath = QFileDialog::getExistingDirectory(this, tr("选择文件夹"), downloadDir);
+    if (folderPath.isEmpty()) {
+        return;
+    }
+
+    uploadFolderWithConflictCheck(folderPath);
 }
 
 void DriveView::loadFileList(int parentId)
@@ -918,7 +1028,9 @@ void DriveView::onActionClicked(int row, int action)
             // 开始下载（下载记录由DriveManager在downloadFile中自动添加）
             downloadFileWithConflictCheck(id, fileName);
         } else {
-            qDebug() << "不能下载文件夹，行：" << row;
+            // 文件夹下载：递归遍历逐个下载，只记录一条文件夹记录
+            QString folderName = item->text();
+            downloadFolderWithConflictCheck(id, folderName);
         }
         break;
     case 1: // 删除
@@ -1279,14 +1391,14 @@ void DriveView::on_ClearDriveBtn_clicked()
 
     if (QMessageBox::question(this,
                               tr("确认清空"),
-                              tr("确定要清空整个网盘吗？此操作会删除网盘中的所有文件和文件夹。"))
+                              tr("确定要清空当前目录吗？该目录下的所有文件和子文件夹都会被删除，当前目录本身保留。"))
         != QMessageBox::Yes) {
         return;
     }
 
     m_isClearDriveRequesting = true;
     ui->ClearDriveBtn->setEnabled(false);
-    m_driveManager->clearDrive();
+    m_driveManager->clearDrive(m_currentDirId);
 }
 
 void DriveView::on_NewFloderBtn_clicked()

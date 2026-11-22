@@ -206,33 +206,48 @@
 <context>
     <name>ControlWidArchive</name>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/ControlWidArchive.cpp" line="11"/>
+        <location filename="../DisposeAbstract/DisposeArchive/ControlWidArchive.cpp" line="12"/>
         <source>解压全部</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/ControlWidArchive.cpp" line="12"/>
+        <location filename="../DisposeAbstract/DisposeArchive/ControlWidArchive.cpp" line="13"/>
         <source>将全部条目解压到压缩包所在目录</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/ControlWidArchive.cpp" line="13"/>
+        <location filename="../DisposeAbstract/DisposeArchive/ControlWidArchive.cpp" line="14"/>
         <source>解压到…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/ControlWidArchive.cpp" line="14"/>
+        <location filename="../DisposeAbstract/DisposeArchive/ControlWidArchive.cpp" line="15"/>
         <source>选择目标目录，解压全部条目</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/ControlWidArchive.cpp" line="15"/>
+        <location filename="../DisposeAbstract/DisposeArchive/ControlWidArchive.cpp" line="16"/>
         <source>解压选中</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/ControlWidArchive.cpp" line="16"/>
+        <location filename="../DisposeAbstract/DisposeArchive/ControlWidArchive.cpp" line="17"/>
         <source>将选中的条目解压到指定目录</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/ControlWidArchive.cpp" line="38"/>
+        <source>取消</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/ControlWidArchive.cpp" line="111"/>
+        <source>正在解压…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/ControlWidArchive.cpp" line="125"/>
+        <source>正在解压 %1（%p%）</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -711,39 +726,44 @@
     </message>
     <message>
         <location filename="../PersonalDrive/DriveView.ui" line="33"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1296"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1298"/>
-        <source>新建文件夹</source>
+        <source>上传文件夹</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../PersonalDrive/DriveView.ui" line="40"/>
-        <source>刷新</source>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1408"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1410"/>
+        <source>新建文件夹</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../PersonalDrive/DriveView.ui" line="47"/>
-        <source>清空网盘</source>
+        <source>刷新</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.ui" line="68"/>
+        <location filename="../PersonalDrive/DriveView.ui" line="54"/>
+        <source>清空文件</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../PersonalDrive/DriveView.ui" line="75"/>
         <source>历史记录</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.ui" line="81"/>
+        <location filename="../PersonalDrive/DriveView.ui" line="88"/>
         <source>清空历史</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.ui" line="107"/>
+        <location filename="../PersonalDrive/DriveView.ui" line="114"/>
         <location filename="../PersonalDrive/DriveView.cpp" line="296"/>
         <source>下载历史</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.ui" line="117"/>
+        <location filename="../PersonalDrive/DriveView.ui" line="124"/>
         <location filename="../PersonalDrive/DriveView.cpp" line="295"/>
         <source>上传历史</source>
         <translation type="unfinished"></translation>
@@ -757,7 +777,7 @@
         <location filename="../PersonalDrive/DriveView.cpp" line="211"/>
         <location filename="../PersonalDrive/DriveView.cpp" line="285"/>
         <location filename="../PersonalDrive/DriveView.cpp" line="290"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1007"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1119"/>
         <source>大小</source>
         <translation type="unfinished"></translation>
     </message>
@@ -771,14 +791,14 @@
         <location filename="../PersonalDrive/DriveView.cpp" line="211"/>
         <location filename="../PersonalDrive/DriveView.cpp" line="285"/>
         <location filename="../PersonalDrive/DriveView.cpp" line="290"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1007"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1119"/>
         <source>操作</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../PersonalDrive/DriveView.cpp" line="285"/>
         <location filename="../PersonalDrive/DriveView.cpp" line="290"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1007"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1119"/>
         <source>序号</source>
         <translation type="unfinished"></translation>
     </message>
@@ -790,31 +810,31 @@
     <message>
         <location filename="../PersonalDrive/DriveView.cpp" line="285"/>
         <location filename="../PersonalDrive/DriveView.cpp" line="290"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1007"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1119"/>
         <source>状态</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../PersonalDrive/DriveView.cpp" line="285"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1007"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1119"/>
         <source>类型</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../PersonalDrive/DriveView.cpp" line="285"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1007"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1119"/>
         <source>时间</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../PersonalDrive/DriveView.cpp" line="285"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1007"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1119"/>
         <source>本地文件名称</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../PersonalDrive/DriveView.cpp" line="285"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1007"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1119"/>
         <source>云端文件名称</source>
         <translation type="unfinished"></translation>
     </message>
@@ -849,206 +869,227 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="692"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="695"/>
         <source>正在准备拖拽文件：%1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="696"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="699"/>
         <source>准备拖拽文件失败：%1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="744"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="747"/>
         <source>已取消拖拽下载保存</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="750"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="753"/>
         <source>保存拖拽下载文件失败</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="755"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="758"/>
         <source>已保存拖拽下载：%1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="859"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="787"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="807"/>
+        <source>已有文件夹上传/下载任务进行中，请等待其完成</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../PersonalDrive/DriveView.cpp" line="792"/>
+        <source>文件夹上传失败，请确认所选路径是文件夹</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../PersonalDrive/DriveView.cpp" line="823"/>
+        <source>文件夹下载失败</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../PersonalDrive/DriveView.cpp" line="954"/>
         <source>选择文件</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="859"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="954"/>
         <source>所有文件 (*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="931"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="973"/>
+        <source>选择文件夹</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1043"/>
         <source>重命名</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="931"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1043"/>
         <source>请输入新名称:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="945"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1057"/>
         <source>当前目录下已存在同名文件或文件夹</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="956"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1068"/>
         <source>网盘服务器地址为空，请先在设置中配置</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="986"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1098"/>
         <source>文件下载成功</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1047"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1159"/>
         <source>上传中</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1049"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1161"/>
         <source>上传成功</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1051"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1163"/>
         <source>上传失败</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1075"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1187"/>
         <source>未知路径</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1077"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1189"/>
         <source>本次下载为拖拽下载，下载的路径未知</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1083"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1195"/>
         <source>下载中</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1085"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1197"/>
         <source>下载成功</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1087"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1199"/>
         <source>下载失败</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1106"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1218"/>
         <source>上传</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1106"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1218"/>
         <source>下载</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1166"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1177"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1186"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1281"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1278"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1289"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1298"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1393"/>
         <source>确认清空</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1166"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1278"/>
         <source>确定要清空全部历史记录吗？</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1171"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1283"/>
         <source>全部历史已清空</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1173"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1285"/>
         <source>清空全部历史失败</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1177"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1289"/>
         <source>确定要清空所有下载历史记录吗？</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1180"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1292"/>
         <source>下载历史已清空</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1182"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1294"/>
         <source>清空下载历史失败</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1186"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1298"/>
         <source>确定要清空所有上传历史记录吗？</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1189"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1301"/>
         <source>上传历史已清空</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1191"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1303"/>
         <source>清空上传历史失败</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1282"/>
-        <source>确定要清空整个网盘吗？此操作会删除网盘中的所有文件和文件夹。</source>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1394"/>
+        <source>确定要清空当前目录吗？该目录下的所有文件和子文件夹都会被删除，当前目录本身保留。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1297"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1409"/>
         <source>文件夹名称:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1320"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1432"/>
         <source>该文件可能已被删除或移动，已刷新文件列表。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1328"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1440"/>
         <source>文件下载中</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1472"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1497"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1543"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1568"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1584"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1609"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1655"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1680"/>
         <source>文件路径为空</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1478"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1503"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1549"/>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1574"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1590"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1615"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1661"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1686"/>
         <source>文件不存在: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PersonalDrive/DriveView.cpp" line="1592"/>
+        <location filename="../PersonalDrive/DriveView.cpp" line="1704"/>
         <source> (预览)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1751,38 +1792,45 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/ArchiveReader.cpp" line="194"/>
+        <location filename="../DisposeAbstract/DisposeArchive/ArchiveReader.cpp" line="195"/>
         <source>文件不存在：%1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/ArchiveReader.cpp" line="211"/>
-        <location filename="../DisposeAbstract/DisposeArchive/ArchiveReader.cpp" line="252"/>
+        <location filename="../DisposeAbstract/DisposeArchive/ArchiveReader.cpp" line="212"/>
+        <location filename="../DisposeAbstract/DisposeArchive/ArchiveReader.cpp" line="254"/>
         <source>归档文件已损坏或格式不受支持。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/ArchiveReader.cpp" line="295"/>
+        <location filename="../DisposeAbstract/DisposeArchive/ArchiveReader.cpp" line="302"/>
         <source>条目不存在或已被移除。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/ArchiveReader.cpp" line="323"/>
+        <location filename="../DisposeAbstract/DisposeArchive/ArchiveReader.cpp" line="340"/>
         <source>无法创建文件：%1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/ArchiveReader.cpp" line="334"/>
+        <location filename="../DisposeAbstract/DisposeArchive/ArchiveReader.cpp" line="347"/>
+        <location filename="../DisposeAbstract/DisposeArchive/ArchiveReader.cpp" line="424"/>
+        <location filename="../DisposeAbstract/DisposeArchive/ArchiveReader.cpp" line="448"/>
+        <source>已取消。</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/ArchiveReader.cpp" line="358"/>
         <source>解压数据失败（条目可能被加密或已损坏）。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/ArchiveReader.cpp" line="340"/>
+        <location filename="../DisposeAbstract/DisposeArchive/ArchiveReader.cpp" line="364"/>
         <source>写入文件失败：%1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/ArchiveReader.cpp" line="405"/>
+        <location filename="../DisposeAbstract/DisposeArchive/ArchiveReader.cpp" line="452"/>
         <source>以下条目解压失败（可能加密或损坏）：%1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2557,85 +2605,103 @@ li.checked::marker { content: &quot;\2612&quot;; }
 <context>
     <name>TabHandleArchive</name>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="97"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="108"/>
         <source>名称</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="97"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="108"/>
         <source>大小</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="97"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="108"/>
         <source>修改时间</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="228"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="245"/>
         <source>格式：%1    条目：%2    总大小：%3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="269"/>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="280"/>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="374"/>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="379"/>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="386"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="286"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="297"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="481"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="486"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="493"/>
         <source>错误</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="270"/>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="281"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="287"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="298"/>
         <source>无法打开归档文件：%1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="297"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="319"/>
+        <source>正在解压 %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="330"/>
         <source>预览失败</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="298"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="331"/>
         <source>%1
 
 %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="311"/>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="322"/>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="346"/>
-        <source>解压完成</source>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="393"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="412"/>
+        <source>正在解压全部条目…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="311"/>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="322"/>
-        <source>已解压到：%1</source>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="397"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="416"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="450"/>
+        <source>解压成功</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="328"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="399"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="418"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="452"/>
+        <source>已取消</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="313"/>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="324"/>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="348"/>
+        <source>正在解压，请等待完成后再试</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="401"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="420"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="454"/>
         <source>解压失败</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="318"/>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="336"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="409"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="435"/>
         <source>选择解压目录</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="346"/>
-        <source>已解压 %1 个文件到：%2</source>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="440"/>
+        <source>正在解压选中的 %1 个条目…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="349"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="455"/>
         <source>以下条目失败：
 %1
 
@@ -2643,23 +2709,23 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="355"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="462"/>
         <source>不支持</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="355"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="462"/>
         <source>压缩包为预览视图，不支持直接文本编辑。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="374"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="481"/>
         <source>没有可保存的内容。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="379"/>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="386"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="486"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="493"/>
         <source>无法保存文件：%1</source>
         <translation type="unfinished"></translation>
     </message>
