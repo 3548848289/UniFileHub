@@ -2719,85 +2719,85 @@ Message</translation>
 <context>
     <name>TabHandleArchive</name>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="40"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="97"/>
         <source>名称</source>
         <translation type="unfinished">Name</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="40"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="97"/>
         <source>大小</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="40"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="97"/>
         <source>修改时间</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="159"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="228"/>
         <source>格式：%1    条目：%2    总大小：%3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="200"/>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="211"/>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="305"/>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="310"/>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="317"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="269"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="280"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="374"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="379"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="386"/>
         <source>错误</source>
         <translation type="unfinished">Error</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="201"/>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="212"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="270"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="281"/>
         <source>无法打开归档文件：%1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="228"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="297"/>
         <source>预览失败</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="229"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="298"/>
         <source>%1
 
 %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="242"/>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="253"/>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="277"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="311"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="322"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="346"/>
         <source>解压完成</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="242"/>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="253"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="311"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="322"/>
         <source>已解压到：%1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="244"/>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="255"/>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="279"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="313"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="324"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="348"/>
         <source>解压失败</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="249"/>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="267"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="318"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="336"/>
         <source>选择解压目录</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="277"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="346"/>
         <source>已解压 %1 个文件到：%2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="280"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="349"/>
         <source>以下条目失败：
 %1
 
@@ -2805,23 +2805,23 @@ Message</translation>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="286"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="355"/>
         <source>不支持</source>
         <translation type="unfinished">Not Supported</translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="286"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="355"/>
         <source>压缩包为预览视图，不支持直接文本编辑。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="305"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="374"/>
         <source>没有可保存的内容。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="310"/>
-        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="317"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="379"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="386"/>
         <source>无法保存文件：%1</source>
         <translation type="unfinished"></translation>
     </message>

@@ -10,6 +10,8 @@
 #include "ArchiveReader.h"
 #include "ControlWidArchive.h"
 
+class ArchiveTreeWidget;
+
 // 归档文件预览标签页（zip/tar/tgz/tbz/txz/7z/cab/iso/cpio 等）
 class TabHandleArchive : public TabAbstract
 {
@@ -39,7 +41,7 @@ private:
     void extractSelectedTo();
     void previewEntry(QTreeWidgetItem *item);
 
-    QTreeWidget *m_tree = nullptr;
+    ArchiveTreeWidget *m_tree = nullptr;
     ControlWidArchive *m_controlBar = nullptr;
     ArchiveReader m_reader;
     QByteArray m_rawData;

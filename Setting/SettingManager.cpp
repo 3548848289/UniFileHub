@@ -231,7 +231,7 @@ QString SettingManager::file_system_file_system_dir()
 
 bool SettingManager::file_system_use_default_start_dir()
 {
-    return settings.value("file_system/use_default_start_dir", true).toBool();
+    return settings.value("file_system/use_default_start_dir", false).toBool();
 }
 
 QString SettingManager::file_system_last_dir()

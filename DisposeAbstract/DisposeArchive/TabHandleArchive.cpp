@@ -1,16 +1,73 @@
 #include "TabHandleArchive.h"
 #include <functional>
+#include <QDrag>
 #include <QFileInfo>
 #include <QDir>
 #include <QHeaderView>
+#include <QMimeData>
 #include <QSplitter>
 #include <QStyle>
+#include <QUrl>
 #include <QApplication>
 #include "../../Setting/include/SettingManager.h"
 
 namespace {
 constexpr int kUserRoleEntryIndex = Qt::UserRole; // 文件节点存条目下标，目录节点存 -1
 }
+
+// 树控件子类：启用拖拽出条目（按住已选中项拖动 = 解压到临时目录并以
+// file:// URL 交给系统）。拖拽启用后视图自带的"长按滑动多选"不再触发，
+// Ctrl+点选 / Shift+范围选不受影响。
+class ArchiveTreeWidget : public QTreeWidget
+{
+public:
+    using QTreeWidget::QTreeWidget;
+
+    // 由 TabHandleArchive 注入：把条目下标解压到临时目录，返回落盘路径
+    std::function<QStringList(const QList<int> &)> extractToTempFiles;
+
+protected:
+    void startDrag(Qt::DropActions supportedActions) override
+    {
+        QList<int> indexes;
+        for (QTreeWidgetItem *item : selectedItems())
+            collectFileIndexes(item, indexes);
+        if (indexes.isEmpty())
+            return;
+
+        const QStringList paths = extractToTempFiles ? extractToTempFiles(indexes)
+                                                     : QStringList();
+        if (paths.isEmpty())
+            return;
+
+        auto *mimeData = new QMimeData;
+        QList<QUrl> urls;
+        for (const QString &p : paths)
+            urls.append(QUrl::fromLocalFile(p));
+        mimeData->setUrls(urls);
+
+        QDrag drag(this);
+        drag.setMimeData(mimeData);
+        for (QTreeWidgetItem *item : selectedItems()) {
+            if (item->data(0, kUserRoleEntryIndex).toInt() >= 0) {
+                drag.setPixmap(item->icon(0).pixmap(32, 32));
+                break;
+            }
+        }
+        drag.exec(supportedActions & Qt::CopyAction ? Qt::CopyAction
+                                                    : supportedActions);
+    }
+
+private:
+    static void collectFileIndexes(QTreeWidgetItem *item, QList<int> &out)
+    {
+        const int index = item->data(0, kUserRoleEntryIndex).toInt();
+        if (index >= 0)
+            out.append(index);
+        for (int i = 0; i < item->childCount(); ++i)
+            collectFileIndexes(item->child(i), out);
+    }
+};
 
 TabHandleArchive::TabHandleArchive(const QString &filePath, QWidget *parent)
     : TabAbstract(filePath, parent)
@@ -35,12 +92,24 @@ void TabHandleArchive::buildUi()
                 }
             });
 
-    m_tree = new QTreeWidget(this);
+    m_tree = new ArchiveTreeWidget(this);
     m_tree->setColumnCount(3);
     m_tree->setHeaderLabels({tr("名称"), tr("大小"), tr("修改时间")});
     m_tree->setSelectionMode(QAbstractItemView::ExtendedSelection);
     m_tree->setUniformRowHeights(true);
     m_tree->header()->setStretchLastSection(false); // 列宽由 redistributeColumns 按 3:1:1 分配
+    // 拖拽出条目：按住已选中项拖动即拖出（拖拽启用后长按滑动多选自动失效）
+    m_tree->setDragEnabled(true);
+    m_tree->setDefaultDropAction(Qt::CopyAction);
+    m_tree->extractToTempFiles = [this](const QList<int> &indexes) {
+        QStringList paths;
+        for (int idx : indexes) {
+            const QString p = m_reader.extractToTemp(idx);
+            if (!p.isEmpty())
+                paths.append(p);
+        }
+        return paths;
+    };
     // 视口尺寸变化（首次显示/窗口拖动/布局变化）时重算列宽；
     // 不用页面 resizeEvent —— 那里拿到的 viewport 宽度是滞后一拍的旧值
     m_tree->viewport()->installEventFilter(this);
