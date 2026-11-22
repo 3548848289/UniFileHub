@@ -3,3 +3,10 @@
 CMakeLists.txt.user
 CMakeLists.txt.*
 /Resources/ThirdParty/KodoTerm/
+
+
+/Resources/ThirdParty/bzip2/
+/Resources/ThirdParty/libarchive/
+/Resources/ThirdParty/xz/
+/Resources/ThirdParty/zlib/
+/Resources/ThirdParty/zstd/
