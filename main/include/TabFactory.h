@@ -18,6 +18,7 @@
 #endif
 #include "../../DisposeAbstract/DisposeDB/TabHandleDB.h"
 #include "../../DisposeAbstract/DisposePSD/include/TabHandlePSD.h"
+#include "../../DisposeAbstract/DisposeArchive/TabHandleArchive.h"
 
 class TabFactory {
 public:

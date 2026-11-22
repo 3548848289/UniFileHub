@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.5)
 project(UniFileHub VERSION 0.1 LANGUAGES CXX)
 
+# libarchive 等第三方 C 库需要 C 编译器（不能只靠子目录的 project() 启用）
+enable_language(C)
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -85,6 +88,13 @@ if(UNIFILEHUB_ENABLE_TERMINAL)
         ${CMAKE_CURRENT_BINARY_DIR}/Resources/ThirdParty/KodoTerm)
 endif()
 
+# 归档预览依赖：libarchive 及其解压算法后端（需在 DisposeArchive 之前构建）
+add_subdirectory(Resources/ThirdParty/zlib)
+add_subdirectory(Resources/ThirdParty/bzip2)
+add_subdirectory(Resources/ThirdParty/xz)
+add_subdirectory(Resources/ThirdParty/zstd)
+add_subdirectory(Resources/ThirdParty/libarchive)
+
 
 
 # 添加子目录
@@ -109,6 +119,7 @@ add_subdirectory(DisposeAbstract/DisposePSD)
 if(QT_VERSION_MAJOR EQUAL 6)
     add_subdirectory(DisposeAbstract/DisposeXLSX)
 endif()
+add_subdirectory(DisposeAbstract/DisposeArchive)
 add_subdirectory(main)
 
 
@@ -136,6 +147,7 @@ target_link_libraries(UniFileHub PRIVATE
     mytxt_pdf
     mytxt_db
     mytxt_psd
+    mytxt_archive
     mytxt_manager
     mytxt_morefunction
     mytxt_clipboard
@@ -179,6 +191,7 @@ set(APP_TRANSLATION_SOURCE_TARGETS
     mytxt_pdf
     mytxt_db
     mytxt_psd
+    mytxt_archive
     mytxt_manager
     mytxt_morefunction
     mytxt_clipboard

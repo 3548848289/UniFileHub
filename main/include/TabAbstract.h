@@ -78,6 +78,8 @@ public:
 signals:
     void contentModified();
     void contentSaved(const QString &fileName);
+    // 标签页内部请求打开另一个文件（如压缩包内点击文件），由 TabManager 接住
+    void openFileRequested(const QString &filePath);
 
 protected:
     QString currentFilePath;

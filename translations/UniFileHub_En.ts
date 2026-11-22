@@ -216,6 +216,39 @@
     </message>
 </context>
 <context>
+    <name>ControlWidArchive</name>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/ControlWidArchive.cpp" line="11"/>
+        <source>解压全部</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/ControlWidArchive.cpp" line="12"/>
+        <source>将全部条目解压到压缩包所在目录</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/ControlWidArchive.cpp" line="13"/>
+        <source>解压到…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/ControlWidArchive.cpp" line="14"/>
+        <source>选择目标目录，解压全部条目</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/ControlWidArchive.cpp" line="15"/>
+        <source>解压选中</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/ControlWidArchive.cpp" line="16"/>
+        <source>将选中的条目解压到指定目录</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>ControlWidDB</name>
     <message>
         <location filename="../DisposeAbstract/DisposeDB/ControlWidDB.ui" line="14"/>
@@ -1787,54 +1820,95 @@ li.checked::marker { content: &quot;\2612&quot;; }
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../main/TabManager.cpp" line="350"/>
+        <location filename="../main/TabManager.cpp" line="356"/>
         <source>Text Files (*.txt);;All Files (*)</source>
         <translation>Text Files (*.txt);;All Files (*)</translation>
     </message>
     <message>
-        <location filename="../main/TabManager.cpp" line="352"/>
+        <location filename="../main/TabManager.cpp" line="358"/>
         <source>CSV Files (*.csv);;All Files (*)</source>
         <translation>CSV Files (*.csv);;All Files (*)</translation>
     </message>
     <message>
-        <location filename="../main/TabManager.cpp" line="354"/>
+        <location filename="../main/TabManager.cpp" line="360"/>
         <source>All Files (*)</source>
         <translation>All Files (*)</translation>
     </message>
     <message>
-        <location filename="../main/TabManager.cpp" line="356"/>
+        <location filename="../main/TabManager.cpp" line="362"/>
         <source>Save File</source>
         <translation>Save File</translation>
     </message>
     <message>
-        <location filename="../main/TabManager.cpp" line="474"/>
+        <location filename="../main/TabManager.cpp" line="480"/>
         <source>未开放</source>
         <translation>Not Available</translation>
     </message>
     <message>
-        <location filename="../main/TabManager.cpp" line="475"/>
+        <location filename="../main/TabManager.cpp" line="481"/>
         <source>当前仅支持 txt/csv 文件查找</source>
         <translation>Currently only txt/csv file search is supported</translation>
     </message>
     <message>
-        <location filename="../main/TabManager.cpp" line="998"/>
+        <location filename="../main/TabManager.cpp" line="1006"/>
         <source>错误</source>
         <translation>Error</translation>
     </message>
     <message>
-        <location filename="../main/TabManager.cpp" line="998"/>
+        <location filename="../main/TabManager.cpp" line="1006"/>
         <source>当前页签是无效的</source>
         <translation>The current tab is invalid</translation>
     </message>
     <message>
-        <location filename="../main/TabFactory.cpp" line="96"/>
+        <location filename="../main/TabFactory.cpp" line="114"/>
         <source>不受支持的文件类型</source>
         <translation>Unsupported File Type</translation>
     </message>
     <message>
-        <location filename="../main/TabFactory.cpp" line="97"/>
+        <location filename="../main/TabFactory.cpp" line="115"/>
         <source>该文件类型不受支持。是否以文本方式打开？</source>
         <translation>This file type is not supported. Open as text?</translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/ArchiveReader.cpp" line="146"/>
+        <source>无法打开归档文件。</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/ArchiveReader.cpp" line="194"/>
+        <source>文件不存在：%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/ArchiveReader.cpp" line="211"/>
+        <location filename="../DisposeAbstract/DisposeArchive/ArchiveReader.cpp" line="252"/>
+        <source>归档文件已损坏或格式不受支持。</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/ArchiveReader.cpp" line="295"/>
+        <source>条目不存在或已被移除。</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/ArchiveReader.cpp" line="323"/>
+        <source>无法创建文件：%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/ArchiveReader.cpp" line="334"/>
+        <source>解压数据失败（条目可能被加密或已损坏）。</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/ArchiveReader.cpp" line="340"/>
+        <source>写入文件失败：%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/ArchiveReader.cpp" line="405"/>
+        <source>以下条目解压失败（可能加密或损坏）：%1</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2077,7 +2151,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <location filename="../Setting/ui/Setting.ui" line="103"/>
-        <location filename="../Setting/ui/Setting.ui" line="835"/>
+        <location filename="../Setting/ui/Setting.ui" line="842"/>
         <source>个人网盘</source>
         <translation>Personal Drive</translation>
     </message>
@@ -2119,7 +2193,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <message>
         <location filename="../Setting/ui/Setting.ui" line="132"/>
         <location filename="../Setting/ui/Setting.ui" line="188"/>
-        <location filename="../Setting/ui/Setting.ui" line="719"/>
+        <location filename="../Setting/ui/Setting.ui" line="726"/>
         <source>主题</source>
         <translation>Theme</translation>
     </message>
@@ -2130,7 +2204,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <location filename="../Setting/ui/Setting.ui" line="127"/>
-        <location filename="../Setting/ui/Setting.ui" line="696"/>
+        <location filename="../Setting/ui/Setting.ui" line="703"/>
         <source>字体</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2206,8 +2280,8 @@ Directory</translation>
     </message>
     <message>
         <location filename="../Setting/ui/Setting.ui" line="303"/>
-        <location filename="../Setting/ui/Setting.ui" line="506"/>
-        <location filename="../Setting/ui/Setting.ui" line="570"/>
+        <location filename="../Setting/ui/Setting.ui" line="513"/>
+        <location filename="../Setting/ui/Setting.ui" line="577"/>
         <source>选取
 路径</source>
         <translation>Select
@@ -2235,51 +2309,56 @@ Path</translation>
     </message>
     <message>
         <location filename="../Setting/ui/Setting.ui" line="380"/>
+        <source>压缩包文件</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Setting/ui/Setting.ui" line="387"/>
         <source>xlsx文件</source>
         <translation>XLSX Files</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="387"/>
+        <location filename="../Setting/ui/Setting.ui" line="394"/>
         <source>txt文件</source>
         <translation>TXT Files</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="400"/>
+        <location filename="../Setting/ui/Setting.ui" line="407"/>
         <source>文件操作窗口可见性</source>
         <translation>File Control Panel Visibility</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="427"/>
+        <location filename="../Setting/ui/Setting.ui" line="434"/>
         <source>服务器</source>
         <translation>Server</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="437"/>
+        <location filename="../Setting/ui/Setting.ui" line="444"/>
         <source>用户名</source>
         <translation>Username</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="447"/>
+        <location filename="../Setting/ui/Setting.ui" line="454"/>
         <source>密码</source>
         <translation>Password</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="457"/>
+        <location filename="../Setting/ui/Setting.ui" line="464"/>
         <source>端口</source>
         <translation>Port</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="467"/>
+        <location filename="../Setting/ui/Setting.ui" line="474"/>
         <source>发件人</source>
         <translation>Sender</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="477"/>
+        <location filename="../Setting/ui/Setting.ui" line="484"/>
         <source>收件人</source>
         <translation>Recipient</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="494"/>
+        <location filename="../Setting/ui/Setting.ui" line="501"/>
         <source>程序
 备份
 目录</source>
@@ -2288,22 +2367,22 @@ Backup
 Directory</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="514"/>
+        <location filename="../Setting/ui/Setting.ui" line="521"/>
         <source>云端IP地址</source>
         <translation>Cloud IP Address</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="537"/>
+        <location filename="../Setting/ui/Setting.ui" line="544"/>
         <source>单位均为（时:分）</source>
         <translation>Unit: (hours:minutes)</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="544"/>
+        <location filename="../Setting/ui/Setting.ui" line="551"/>
         <source>通知消息显示时间</source>
         <translation>Notification Display Time</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="555"/>
+        <location filename="../Setting/ui/Setting.ui" line="562"/>
         <source>文件
 下载
 目录</source>
@@ -2312,23 +2391,23 @@ Download
 Directory</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="578"/>
+        <location filename="../Setting/ui/Setting.ui" line="585"/>
         <source>上传/下载
 同名处理</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="607"/>
+        <location filename="../Setting/ui/Setting.ui" line="614"/>
         <source>初始加载记录</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="624"/>
+        <location filename="../Setting/ui/Setting.ui" line="631"/>
         <source>小时</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="646"/>
+        <location filename="../Setting/ui/Setting.ui" line="653"/>
         <source>复制后窗口行为</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2341,77 +2420,77 @@ Directory</translation>
         <translation type="vanished">Unit: Hours</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="655"/>
+        <location filename="../Setting/ui/Setting.ui" line="662"/>
         <source>双击复制时是否最小化。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="662"/>
+        <location filename="../Setting/ui/Setting.ui" line="669"/>
         <source>CTRL+C 复制时是否最小化。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="669"/>
+        <location filename="../Setting/ui/Setting.ui" line="676"/>
         <source>右键复制时是否最小化。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="729"/>
+        <location filename="../Setting/ui/Setting.ui" line="736"/>
         <source>终端类型</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="736"/>
+        <location filename="../Setting/ui/Setting.ui" line="743"/>
         <source>PowerShell</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="743"/>
+        <location filename="../Setting/ui/Setting.ui" line="750"/>
         <source>CMD</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="754"/>
+        <location filename="../Setting/ui/Setting.ui" line="761"/>
         <source>共享文档</source>
         <translation>Shared Documents</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="761"/>
+        <location filename="../Setting/ui/Setting.ui" line="768"/>
         <source>IP端口</source>
         <translation>IP Port</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="768"/>
+        <location filename="../Setting/ui/Setting.ui" line="775"/>
         <source>用户信息</source>
         <translation>User Info</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="778"/>
+        <location filename="../Setting/ui/Setting.ui" line="785"/>
         <source>提交文件</source>
         <translation>Submit File</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="788"/>
+        <location filename="../Setting/ui/Setting.ui" line="795"/>
         <source>云端备份</source>
         <translation>Cloud Backup</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="801"/>
+        <location filename="../Setting/ui/Setting.ui" line="808"/>
         <source>例如：127.0.0.1:5000</source>
         <translation>e.g.: 127.0.0.1:5000</translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="808"/>
+        <location filename="../Setting/ui/Setting.ui" line="815"/>
         <source>一键改IP</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="820"/>
+        <location filename="../Setting/ui/Setting.ui" line="827"/>
         <source>确定</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Setting/ui/Setting.ui" line="845"/>
+        <location filename="../Setting/ui/Setting.ui" line="852"/>
         <source>云端剪切板</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2635,6 +2714,116 @@ Message</translation>
         <location filename="../main/include/TabAbstract.h" line="62"/>
         <source>文档已被修改，是否保存更改？</source>
         <translation>The document has been modified. Save changes?</translation>
+    </message>
+</context>
+<context>
+    <name>TabHandleArchive</name>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="40"/>
+        <source>名称</source>
+        <translation type="unfinished">Name</translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="40"/>
+        <source>大小</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="40"/>
+        <source>修改时间</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="159"/>
+        <source>格式：%1    条目：%2    总大小：%3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="200"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="211"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="305"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="310"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="317"/>
+        <source>错误</source>
+        <translation type="unfinished">Error</translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="201"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="212"/>
+        <source>无法打开归档文件：%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="228"/>
+        <source>预览失败</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="229"/>
+        <source>%1
+
+%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="242"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="253"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="277"/>
+        <source>解压完成</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="242"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="253"/>
+        <source>已解压到：%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="244"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="255"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="279"/>
+        <source>解压失败</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="249"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="267"/>
+        <source>选择解压目录</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="277"/>
+        <source>已解压 %1 个文件到：%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="280"/>
+        <source>以下条目失败：
+%1
+
+%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="286"/>
+        <source>不支持</source>
+        <translation type="unfinished">Not Supported</translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="286"/>
+        <source>压缩包为预览视图，不支持直接文本编辑。</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="305"/>
+        <source>没有可保存的内容。</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="310"/>
+        <location filename="../DisposeAbstract/DisposeArchive/TabHandleArchive.cpp" line="317"/>
+        <source>无法保存文件：%1</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -3098,25 +3287,25 @@ Message</translation>
 <context>
     <name>TabManager</name>
     <message>
-        <location filename="../main/TabManager.cpp" line="644"/>
         <location filename="../main/TabManager.cpp" line="650"/>
         <location filename="../main/TabManager.cpp" line="656"/>
         <location filename="../main/TabManager.cpp" line="662"/>
+        <location filename="../main/TabManager.cpp" line="668"/>
         <source>提示</source>
         <translation type="unfinished">Info</translation>
     </message>
     <message>
-        <location filename="../main/TabManager.cpp" line="644"/>
+        <location filename="../main/TabManager.cpp" line="650"/>
         <source>当前页签不是本地文件，无法上传到网盘。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/TabManager.cpp" line="650"/>
+        <location filename="../main/TabManager.cpp" line="656"/>
         <source>当前页签还没有保存成文件，请先保存后再上传到网盘。</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../main/TabManager.cpp" line="656"/>
+        <location filename="../main/TabManager.cpp" line="662"/>
         <source>当前页签对应的本地文件不存在，无法上传到网盘。</source>
         <translation type="unfinished"></translation>
     </message>

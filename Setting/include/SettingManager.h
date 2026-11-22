@@ -41,6 +41,7 @@ public:
     bool file_see_csv();
     bool file_see_xlsx();
     bool file_see_img();
+    bool file_see_archive();
 
 
 

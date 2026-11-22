@@ -374,6 +374,13 @@
          </property>
         </widget>
        </item>
+       <item row="5" column="0">
+        <widget class="QCheckBox" name="file_see_checkBox5">
+         <property name="text">
+          <string>压缩包文件</string>
+         </property>
+        </widget>
+       </item>
        <item row="4" column="0">
         <widget class="QCheckBox" name="file_see_checkBox3">
          <property name="text">

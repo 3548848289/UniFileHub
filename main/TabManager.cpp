@@ -57,6 +57,8 @@ int TabManager::addTab(TabAbstract* tab, const QString& displayName, const QStri
         int index = currentTabWidget->addTab(tab, displayName);
         currentTabWidget->setCurrentIndex(index);
 
+        connect(tab, &TabAbstract::openFileRequested, this, &TabManager::openFile);
+
         connect(tab, &TabAbstract::contentModified, this, [currentTabWidget, tab]() {
             int i = currentTabWidget->indexOf(tab);
             if (i >= 0 && !currentTabWidget->tabText(i).endsWith("*")) {
@@ -81,7 +83,9 @@ int TabManager::addTab(TabAbstract* tab, const QString& displayName, const QStri
     // 如果活动位置无效，回退到原始行为
     int index = tabWidget->addTab(tab, displayName);
     tabWidget->setCurrentIndex(index);
-    
+
+    connect(tab, &TabAbstract::openFileRequested, this, &TabManager::openFile);
+
     connect(tab, &TabAbstract::contentModified, this, [this, tab]() {
         int i = tabWidget->indexOf(tab);
         if (i >= 0 && !tabWidget->tabText(i).endsWith("*")) {
@@ -291,9 +295,11 @@ void TabManager::removePreviewTab() {
 void TabManager::setPreviewTab(TabAbstract* tab) {
     // 删除旧的预览标签页
     removePreviewTab();
-    
+
     // 设置新的预览标签页
     currentPreviewTab = tab;
+
+    connect(currentPreviewTab, &TabAbstract::openFileRequested, this, &TabManager::openFile);
     
     // 将预览标签页添加到活动的QTabWidget中
     if (currentPreviewTab) {
@@ -835,7 +841,9 @@ void TabManager::openFileInPosition(const QString& filePath, int row, int col) {
         // 用户已在TabFactory::create中取消，不需要再显示警告
         return;
     }
-    
+
+    connect(newTab, &TabAbstract::openFileRequested, this, &TabManager::openFile);
+
     newTab->loadFromFile(filePath);
     QString baseName = QFileInfo(filePath).fileName();
     

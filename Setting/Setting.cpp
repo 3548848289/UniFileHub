@@ -164,6 +164,7 @@ void Setting::loadSettings() {
     ui->file_see_checkBox2->setChecked(settings.value("file_see/csv", true).toBool());
     ui->file_see_checkBox3->setChecked(settings.value("file_see/xlsx", true).toBool());
     ui->file_see_checkBox4->setChecked(settings.value("file_see/img", true).toBool());
+    ui->file_see_checkBox5->setChecked(settings.value("file_see/archive", true).toBool());
 
 
     ui->file_backup_lineEdit1->setText(settings.value("file_backup/backup_dir").toString());
@@ -264,6 +265,7 @@ void Setting::saveSettings() {
     setRealtimeValue("file_see/csv", ui->file_see_checkBox2->isChecked());
     setRealtimeValue("file_see/xlsx", ui->file_see_checkBox3->isChecked());
     setRealtimeValue("file_see/img", ui->file_see_checkBox4->isChecked());
+    setRealtimeValue("file_see/archive", ui->file_see_checkBox5->isChecked());
 
     QString backupDir = ui->file_backup_lineEdit1->text();
     if (backupDir.isEmpty())
@@ -361,6 +363,9 @@ void Setting::setupRealtimeBindings()
     });
     connect(ui->file_see_checkBox4, &QCheckBox::toggled, this, [this](bool checked) {
         setRealtimeValue("file_see/img", checked);
+    });
+    connect(ui->file_see_checkBox5, &QCheckBox::toggled, this, [this](bool checked) {
+        setRealtimeValue("file_see/archive", checked);
     });
 
     connect(ui->tag_schedule_timeEdit3, &QTimeEdit::timeChanged, this, [this](const QTime &time) {

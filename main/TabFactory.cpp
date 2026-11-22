@@ -77,6 +77,24 @@ const QMap<QString, std::function<TabAbstract*(const QString&)>> TabFactory::fac
 
     { "psd", [](const QString& f){ return new TabHandlePSD(f); } },
 
+    // --- 归档类 ---
+    { "zip",  [](const QString& f){ return new TabHandleArchive(f); } },
+    { "jar",  [](const QString& f){ return new TabHandleArchive(f); } },
+    { "tar",  [](const QString& f){ return new TabHandleArchive(f); } },
+    { "tgz",  [](const QString& f){ return new TabHandleArchive(f); } },
+    { "tbz",  [](const QString& f){ return new TabHandleArchive(f); } },
+    { "tbz2", [](const QString& f){ return new TabHandleArchive(f); } },
+    { "txz",  [](const QString& f){ return new TabHandleArchive(f); } },
+    { "tzst", [](const QString& f){ return new TabHandleArchive(f); } },
+    { "gz",   [](const QString& f){ return new TabHandleArchive(f); } },
+    { "bz2",  [](const QString& f){ return new TabHandleArchive(f); } },
+    { "xz",   [](const QString& f){ return new TabHandleArchive(f); } },
+    { "zst",  [](const QString& f){ return new TabHandleArchive(f); } },
+    { "7z",   [](const QString& f){ return new TabHandleArchive(f); } },
+    { "cab",  [](const QString& f){ return new TabHandleArchive(f); } },
+    { "iso",  [](const QString& f){ return new TabHandleArchive(f); } },
+    { "cpio", [](const QString& f){ return new TabHandleArchive(f); } },
+
 };
 
 TabAbstract* TabFactory::create(const QString& fileName) {

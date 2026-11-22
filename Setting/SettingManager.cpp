@@ -211,6 +211,11 @@ bool SettingManager::file_see_img()
     return settings.value("file_see/img", true).toBool();
 }
 
+bool SettingManager::file_see_archive()
+{
+    return settings.value("file_see/archive", true).toBool();
+}
+
 QString SettingManager::file_backup_IP()
 {
     return settings.value("file_backup/IP", "127.0.0.1").toString();

@@ -45,7 +45,7 @@ void TabHandleArchive::buildUi()
     // 不用页面 resizeEvent —— 那里拿到的 viewport 宽度是滞后一拍的旧值
     m_tree->viewport()->installEventFilter(this);
 
-    // 底部操作栏 + 可拖动分隔条（参考 TabHandleTXT：内容 700 / 操作栏 100）
+    // 中间文件树 + 底部操作栏（属性在上/按钮在下），可拖动分隔条（参考 TabHandleTXT：内容 700 / 操作栏 100）
     auto *splitter = new QSplitter(Qt::Vertical, this);
     splitter->addWidget(m_tree);
     splitter->addWidget(m_controlBar);
@@ -157,9 +157,9 @@ void TabHandleArchive::buildTree()
 
     quint64 total = m_reader.totalSize();
     m_controlBar->setStatusText(tr("格式：%1    条目：%2    总大小：%3")
-                               .arg(m_reader.formatName())
-                               .arg(entries.size())
-                               .arg(humanSize(total)));
+                                .arg(m_reader.formatName())
+                                .arg(entries.size())
+                                .arg(humanSize(total)));
 }
 
 // 列宽按 3:1:1 分配（名称:大小:修改时间），占满窗口宽度
