@@ -28,7 +28,9 @@ qt_add_library(mytxt_filetag
 
 target_link_libraries(mytxt_filetag PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
+    Qt${QT_VERSION_MAJOR}::Concurrent
     QFileSystemBreadcrumbBar::QFileSystemBreadcrumbBar
+    mytxt_archive
 )
 
 target_include_directories(mytxt_filetag PRIVATE

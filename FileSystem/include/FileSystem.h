@@ -57,6 +57,8 @@ private:
     void loadFileMetadata(const QString &filePath);
     void saveExpirationDate(const QString &filePath, const QDate &expirationDate);
     bool eventFilter(QObject *watched, QEvent *event);
+    // 把文件夹/文件压缩为同名 .zip（后台线程执行，带进度与取消）
+    void compressPathToZip(const QString &path);
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event) override;

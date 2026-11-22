@@ -1,7 +1,16 @@
 #include "include/FileSystem.h"
 #include "ui/ui_FileSystem.h"
 #include "../manager/include/DataChangeNotifier.h"
+#include "../DisposeAbstract/DisposeArchive/ArchiveWriter.h"
 #include <QTimer>
+#include <QElapsedTimer>
+#include <QFontMetrics>
+#include <QMessageBox>
+#include <QProgressDialog>
+#include <QFutureWatcher>
+#include <QtConcurrent>
+#include <atomic>
+#include <memory>
 
 namespace {
 constexpr const char *kDriveDownloadMimeType = "application/x-unifilehub-drive-file-id";
@@ -124,6 +133,8 @@ FileSystem::FileSystem(QWidget *parent)
     connect(tagItemdelegate, &TagItemDelegate::uploadToDriveRequested, this, [this](const QString &filePath) {
         emit uploadToDriveRequested(filePath);
     });
+    connect(tagItemdelegate, &TagItemDelegate::compressToZipRequested,
+            this, &FileSystem::compressPathToZip);
 
     connect(tagItemdelegate, &TagItemDelegate::openTerminalRequested, this, [this](const QString &directoryPath) {
         emit openTerminalRequested(directoryPath);
@@ -265,6 +276,68 @@ void FileSystem::changePath(const QString& path){
         QMessageBox::warning(this, "", "该路径不是有效路径，请重新输入");
         breadcrumb->setPath(currentDir);
     }
+}
+
+// 把文件夹/文件压缩为同名 .zip（重名自动 (2)/(3) 递增）；
+// 压缩在后台线程执行，进度与取消走 QProgressDialog；完成后无弹窗，
+// 新 zip 由 QFileSystemModel 自动发现并显示在树里
+void FileSystem::compressPathToZip(const QString &path)
+{
+    const QFileInfo info(path);
+    const QString base = info.absolutePath() + QLatin1Char('/') + info.fileName();
+    QString dest = base + QStringLiteral(".zip");
+    int n = 2;
+    while (QFileInfo::exists(dest))
+        dest = base + QStringLiteral(" (%1).zip").arg(n++);
+
+    auto *dialog = new QProgressDialog(tr("正在压缩 %1").arg(info.fileName()),
+                                       tr("取消"), 0, 100, this);
+    dialog->setWindowModality(Qt::WindowModal);
+    dialog->setMinimumDuration(300);
+    dialog->setValue(0);
+
+    auto cancelled = std::make_shared<std::atomic_bool>(false);
+    connect(dialog, &QProgressDialog::canceled, this, [cancelled]() {
+        cancelled->store(true);
+    });
+
+    auto error = std::make_shared<QString>();
+    auto watcher = new QFutureWatcher<bool>(this);
+    connect(watcher, &QFutureWatcher<bool>::finished, this,
+            [this, dialog, watcher, error, dest, cancelled]() {
+        const bool ok = watcher->result();
+        dialog->deleteLater();
+        watcher->deleteLater();
+        if (!ok && !cancelled->load())
+            QMessageBox::warning(this, tr("压缩失败"), *error);
+        // 成功无弹窗：新 zip 会被 QFileSystemModel 自动发现
+    });
+    watcher->setFuture(QtConcurrent::run([path, dest, error, cancelled, dialog]() -> bool {
+        // 进度按字节上报，100ms 节流刷 UI（与解压进度同一套节奏）。
+        // 标签只显示文件名末段并做省略号截断：深层嵌套路径可达上万字符，
+        // 直接放进 QProgressDialog 会把对话框撑到几万像素宽
+        QElapsedTimer throttle;
+        throttle.start();
+        auto progress = [dialog, cancelled, throttle](quint64 done, quint64 total,
+                                                      const QString &name) mutable -> bool {
+            if (cancelled->load())
+                return false;
+            if (total > 0 && done < total && throttle.elapsed() < 100)
+                return true;
+            throttle.restart();
+            const QString shortName = QFileInfo(name).fileName();
+            QMetaObject::invokeMethod(dialog, [dialog, done, total, shortName] {
+                const QString elided = QFontMetrics(dialog->font())
+                                          .elidedText(shortName, Qt::ElideMiddle,
+                                                      dialog->width() * 2 / 3);
+                dialog->setRange(0, 100);
+                dialog->setValue(total > 0 ? static_cast<int>(done * 100 / total) : 0);
+                dialog->setLabelText(tr("正在压缩 %1").arg(elided));
+            }, Qt::QueuedConnection);
+            return !cancelled->load();
+        };
+        return ArchiveWriter::zipPaths({ path }, dest, progress, error.get());
+    }));
 }
 
 bool FileSystem::eventFilter(QObject *watched, QEvent *event) {

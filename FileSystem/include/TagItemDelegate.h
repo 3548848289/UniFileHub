@@ -35,6 +35,7 @@ signals:
     void deleteFileRequested(const QString &filePath);
     void uploadToDriveRequested(const QString &filePath);
     void openTerminalRequested(const QString &directoryPath);
+    void compressToZipRequested(const QString &filePath);
     void onFilesListUpdated(const QStringList& files);
     void TagUpdated();
 
@@ -61,6 +62,7 @@ private slots:
     void onCopyPathTriggered(QAbstractItemModel *model, const QModelIndex &index);
     void onOpenInExplorer(QAbstractItemModel *model, const QModelIndex &index);
     void onOpenInTerminal(QAbstractItemModel *model, const QModelIndex &index);
+    void onCompressToZipTriggered(QAbstractItemModel *model, const QModelIndex &index);
 private:
     struct TagChip
     {

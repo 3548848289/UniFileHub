@@ -1,11 +1,13 @@
 set(ARCHIVE_SOURCES
     ArchiveReader.cpp
+    ArchiveWriter.cpp
     TabHandleArchive.cpp
     ControlWidArchive.cpp
 )
 
 set(ARCHIVE_HEADERS
     ArchiveReader.h
+    ArchiveWriter.h
     TabHandleArchive.h
     ControlWidArchive.h
 )

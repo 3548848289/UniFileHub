@@ -1315,6 +1315,22 @@
         <source>Form</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <location filename="../FileSystem/FileSystem.cpp" line="293"/>
+        <location filename="../FileSystem/FileSystem.cpp" line="335"/>
+        <source>正在压缩 %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../FileSystem/FileSystem.cpp" line="294"/>
+        <source>取消</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../FileSystem/FileSystem.cpp" line="312"/>
+        <source>压缩失败</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>FindDialog</name>
@@ -1816,6 +1832,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <location filename="../DisposeAbstract/DisposeArchive/ArchiveReader.cpp" line="347"/>
         <location filename="../DisposeAbstract/DisposeArchive/ArchiveReader.cpp" line="424"/>
         <location filename="../DisposeAbstract/DisposeArchive/ArchiveReader.cpp" line="448"/>
+        <location filename="../DisposeAbstract/DisposeArchive/ArchiveWriter.cpp" line="117"/>
+        <location filename="../DisposeAbstract/DisposeArchive/ArchiveWriter.cpp" line="156"/>
         <source>已取消。</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1832,6 +1850,31 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <message>
         <location filename="../DisposeAbstract/DisposeArchive/ArchiveReader.cpp" line="452"/>
         <source>以下条目解压失败（可能加密或损坏）：%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/ArchiveWriter.cpp" line="67"/>
+        <source>没有可压缩的内容。</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/ArchiveWriter.cpp" line="81"/>
+        <source>无法创建归档写入器。</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/ArchiveWriter.cpp" line="146"/>
+        <source>无法读取文件：%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/ArchiveWriter.cpp" line="165"/>
+        <source>写入归档数据失败：%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DisposeAbstract/DisposeArchive/ArchiveWriter.cpp" line="196"/>
+        <source>压缩失败。</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

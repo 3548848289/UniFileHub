@@ -331,8 +331,8 @@ void DriveManager::onFolderUploadProgress(const QString &filePath, int fileProgr
             const DriveFolderUploadFile &entry = m_folderUploadFiles.at(m_folderUploadFileIndex);
             const qint64 sentBytes = m_folderUploadDoneBytes
                 + entry.size * qBound(0, fileProgress, 100) / 100;
-            const int total = static_cast<int>(qBound<qint64>(
-                qint64(0), sentBytes * 100 / m_folderUploadTotalSize, qint64(100)));
+            const int total = static_cast<int>(std::clamp<qint64>(
+                sentBytes * 100 / m_folderUploadTotalSize, qint64(0), qint64(100)));
             emit uploadProgress(m_folderUploadRecordId, total);
         }
         return;
@@ -652,8 +652,8 @@ void DriveManager::onFolderDownloadProgress(int fileId, int fileProgress)
         if (m_folderDownloadRecordId > 0 && m_folderDownloadTotalSize > 0) {
             const qint64 receivedBytes = m_folderDownloadDoneBytes
                 + m_folderDownloadCurrentSize * qBound(0, fileProgress, 100) / 100;
-            const int total = static_cast<int>(qBound<qint64>(
-                qint64(0), receivedBytes * 100 / m_folderDownloadTotalSize, qint64(100)));
+            const int total = static_cast<int>(std::clamp<qint64>(
+                receivedBytes * 100 / m_folderDownloadTotalSize, qint64(0), qint64(100)));
             emit downloadProgress(m_folderDownloadRecordId, total);
         }
         return;
@@ -751,8 +751,8 @@ void DriveManager::onFileUploaded(const QString &filePath, const QJsonObject &fi
         ++m_folderUploadFileIndex;
 
         if (m_folderUploadRecordId > 0 && m_folderUploadTotalSize > 0) {
-            const int total = static_cast<int>(qBound<qint64>(
-                qint64(0), m_folderUploadDoneBytes * 100 / m_folderUploadTotalSize, qint64(100)));
+            const int total = static_cast<int>(std::clamp<qint64>(
+                m_folderUploadDoneBytes * 100 / m_folderUploadTotalSize, qint64(0), qint64(100)));
             emit uploadProgress(m_folderUploadRecordId, total);
         }
 
@@ -804,8 +804,8 @@ void DriveManager::onFileDownloaded(const QString &filePath)
         ++m_folderDownloadFileIndex;
 
         if (m_folderDownloadRecordId > 0 && m_folderDownloadTotalSize > 0) {
-            const int total = static_cast<int>(qBound<qint64>(
-                qint64(0), m_folderDownloadDoneBytes * 100 / m_folderDownloadTotalSize, qint64(100)));
+            const int total = static_cast<int>(std::clamp<qint64>(
+                m_folderDownloadDoneBytes * 100 / m_folderDownloadTotalSize, qint64(0), qint64(100)));
             emit downloadProgress(m_folderDownloadRecordId, total);
         }
 

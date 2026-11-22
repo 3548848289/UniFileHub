@@ -227,6 +227,7 @@ void TagItemDelegate::showContextMenu(const QPoint &pos,
     auto *newTagAction = new QAction(QStringLiteral("新建标签"), &contextMenu);
     auto *commitAction = new QAction(QStringLiteral("文件备份"), &contextMenu);
     auto *uploadToDriveAction = new QAction(QStringLiteral("上传到网盘"), &contextMenu);
+    auto *compressAction = new QAction(QStringLiteral("压缩为 ZIP"), &contextMenu);
     auto *copyPathAction = new QAction(QStringLiteral("复制路径"), &contextMenu);
     auto *openInExplorerAction = new QAction(QStringLiteral("在文件夹中打开"), &contextMenu);
 #if UNIFILEHUB_ENABLE_TERMINAL
@@ -239,6 +240,7 @@ void TagItemDelegate::showContextMenu(const QPoint &pos,
     connect(newTagAction, &QAction::triggered, [this, model, index]() { onNewTagTriggered(model, index); });
     connect(commitAction, &QAction::triggered, [this, model, index]() { onCommitTriggered(model, index); });
     connect(uploadToDriveAction, &QAction::triggered, [this, model, index]() { onUploadToDriveTriggered(model, index); });
+    connect(compressAction, &QAction::triggered, [this, model, index]() { onCompressToZipTriggered(model, index); });
     connect(copyPathAction, &QAction::triggered, [this, model, index]() { onCopyPathTriggered(model, index); });
     connect(openInExplorerAction, &QAction::triggered, [this, model, index]() { onOpenInExplorer(model, index); });
 #if UNIFILEHUB_ENABLE_TERMINAL
@@ -253,6 +255,7 @@ void TagItemDelegate::showContextMenu(const QPoint &pos,
     contextMenu.addAction(newTagAction);
     contextMenu.addAction(commitAction);
     contextMenu.addAction(uploadToDriveAction);
+    contextMenu.addAction(compressAction);
 #if UNIFILEHUB_ENABLE_TERMINAL
     contextMenu.addAction(openInTerminalAction);
 #endif
@@ -480,6 +483,18 @@ void TagItemDelegate::onOpenInExplorer(QAbstractItemModel *model, const QModelIn
 
     const QString filePath = fileSystemModel->filePath(index);
     FileLocationHelper::openFileLocationWithSelection(filePath);
+}
+
+void TagItemDelegate::onCompressToZipTriggered(QAbstractItemModel *model, const QModelIndex &index)
+{
+    if (!index.isValid()) {
+        return;
+    }
+
+    const QString filePath = index.data(QFileSystemModel::FilePathRole).toString();
+    if (!filePath.isEmpty()) {
+        emit compressToZipRequested(filePath);
+    }
 }
 
 void TagItemDelegate::onOpenInTerminal(QAbstractItemModel *model, const QModelIndex &index)
